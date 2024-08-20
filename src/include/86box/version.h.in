@@ -19,7 +19,7 @@
 #define LSTR(s) _LSTR(s)
 
 /* Version info. */
-#define EMU_NAME    "@CMAKE_PROJECT_NAME@"
+#define EMU_NAME    "@CMAKE_PROJECT_NAME@ Jensen Edition"
 #define EMU_NAME_W  LSTR(EMU_NAME)
 
 #define EMU_VERSION       "@CMAKE_PROJECT_VERSION@"
