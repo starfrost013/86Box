@@ -247,6 +247,8 @@ video_cards[] = {
     { &compaq_voodoo_3_3500_agp_device                 },
     { &voodoo_3_3500_se_agp_device                     },
     { &voodoo_3_3500_si_agp_device                     },
+
+    // Nvidia
     { &nv3_device_pci                                  },
     { &nv3_device_agp                                  },
     { NULL                                             }
