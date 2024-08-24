@@ -19,11 +19,16 @@
 #include <stdio.h>
 #include <86Box/86box.h>
 #include <86Box/device.h>
+#include <86Box/mem.h>
+#include <86Box/rom.h> // DEPENDENT!!!
 #include <86Box/video.h>
 
 void* nv3_init(const device_t *info)
 {
+    int ret;
 
+    // ELSA VICTORY Erazor Ver. 1.55.00    [WD/VBE30/DDC2B/DPMS]
+    ret = bios_load_linear("roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0); // TODO: HASH BASED!
 }
 
 void nv3_close(void* priv)

@@ -14,11 +14,10 @@
 #
 
 add_library(mch OBJECT machine.c machine_table.c m_xt.c m_xt_compaq.c
-    m_xt_philips.c
-    m_xt_t1000.c m_xt_t1000_vid.c m_xt_xi8088.c m_xt_zenith.c m_pcjr.c
-    m_amstrad.c m_europc.c m_elt.c m_xt_olivetti.c m_tandy.c m_v86p.c
+    m_xt_t1000.c m_xt_t1000_vid.c m_pcjr.c
+    m_elt.c m_xt_olivetti.c m_tandy.c m_v86p.c
     m_at.c m_at_commodore.c
-    m_at_t3100e.c m_at_t3100e_vid.c m_ps1.c m_ps1_hdc.c m_ps2_isa.c
+    m_ps1.c m_ps1_hdc.c m_ps2_isa.c
     m_ps2_mca.c m_at_compaq.c m_at_286_386sx.c m_at_386dx_486.c
     m_at_socket4.c m_at_socket5.c m_at_socket7_3v.c m_at_socket7.c
     m_at_sockets7.c m_at_socket8.c m_at_slot1.c m_at_slot2.c m_at_socket370.c
@@ -39,8 +38,4 @@ endif()
 
 if(OLIVETTI)
     target_compile_definitions(mch PRIVATE USE_OLIVETTI)
-endif()
-
-if(OPEN_AT)
-    target_compile_definitions(mch PRIVATE USE_OPEN_AT)
 endif()

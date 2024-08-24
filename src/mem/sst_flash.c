@@ -28,7 +28,6 @@
 #include <86box/timer.h>
 #include <86box/nvr.h>
 #include <86box/plat.h>
-#include <86box/m_xt_xi8088.h>
 
 typedef struct sst_t {
     uint8_t manufacturer;
@@ -524,8 +523,6 @@ sst_init(const device_t *info)
         dev->is_39    = 1;
 
     dev->size = info->local & 0xffff0000;
-    if ((dev->size == 0x20000) && (strstr(machine_get_internal_name_ex(machine), "xi8088")) && !xi8088_bios_128kb())
-        dev->size = 0x10000;
 
     dev->mask         = dev->size - 1;
     dev->page_mask    = dev->mask & 0xffffff80; /* Filter out A0-A6. */

@@ -44,27 +44,6 @@
 #include <86box/flash.h>
 #include <86box/machine.h>
 
-int
-machine_at_mr286_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/mr286/V000B200-1",
-                                "roms/machines/mr286/V000B200-2",
-                                0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_ide_init(model);
-    device_add(&keyboard_at_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    return ret;
-}
-
 static void
 machine_at_headland_common_init(int type)
 {
@@ -79,24 +58,6 @@ machine_at_headland_common_init(int type)
         device_add(&headland_gc113_device);
     else
         device_add(&headland_gc10x_device);
-}
-
-int
-machine_at_tg286m_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/tg286m/ami.bin",
-                           0x000f0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_ide_init(model);
-
-    machine_at_headland_common_init(1);
-
-    return ret;
 }
 
 int
@@ -118,29 +79,6 @@ machine_at_ama932j_init(const machine_t *model)
     machine_at_headland_common_init(2);
 
     device_add(&ali5105_device);
-
-    return ret;
-}
-
-int
-machine_at_quadt286_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/quadt286/QUADT89L.ROM",
-                                "roms/machines/quadt286/QUADT89H.ROM",
-                                0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-    device_add(&keyboard_at_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&headland_gc10x_device);
 
     return ret;
 }
@@ -208,48 +146,6 @@ machine_at_neat_ami_init(const machine_t *model)
         device_add(&fdc_at_device);
 
     device_add(&keyboard_at_ami_device);
-
-    return ret;
-}
-
-int
-machine_at_px286_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/px286/KENITEC.BIN",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-    device_add(&keyboard_at_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&neat_device);
-
-    return ret;
-}
-
-int
-machine_at_micronics386_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/micronics386/386-Micronics-09-00021-EVEN.BIN",
-                                "roms/machines/micronics386/386-Micronics-09-00021-ODD.BIN",
-                                0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_init(model);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
 
     return ret;
 }
@@ -328,213 +224,6 @@ machine_at_gdc212m_init(const machine_t *model)
         device_add(&fdc_at_device);
 
     device_add(&ide_isa_device);
-
-    return ret;
-}
-
-int
-machine_at_gw286ct_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/gw286ct/2ctc001.bin",
-                           0x000f0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    device_add(&f82c710_device);
-
-    machine_at_scat_init(model, 1, 0);
-
-    device_add(&ide_isa_device);
-
-    return ret;
-}
-
-int
-machine_at_senor_scat286_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/senor286/AMI-DSC2-1115-061390-K8.rom",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_scat_init(model, 0, 1);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    return ret;
-}
-
-int
-machine_at_super286c_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/super286c/hyundai_award286.bin",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    device_add(&keyboard_at_ami_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&neat_device);
-
-    return ret;
-}
-
-int
-machine_at_super286tr_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/super286tr/hyundai_award286.bin",
-                           0x000f0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_scat_init(model, 0, 1);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    return ret;
-}
-
-int
-machine_at_spc4200p_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/spc4200p/u8.01",
-                           0x000f0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_scat_init(model, 0, 1);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&ide_isa_device);
-
-    return ret;
-}
-
-int
-machine_at_spc4216p_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/spc4216p/7101.U8",
-                                "roms/machines/spc4216p/AC64.U10",
-                                0x000f0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_scat_init(model, 1, 1);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    return ret;
-}
-
-int
-machine_at_spc4620p_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/spc4620p/31005h.u8",
-                                "roms/machines/spc4620p/31005h.u10",
-                                0x000f0000, 131072, 0x8000);
-
-    if (bios_only || !ret)
-        return ret;
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&ati28800k_spc4620p_device);
-
-    machine_at_scat_init(model, 1, 1);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&ide_isa_device);
-
-    return ret;
-}
-
-int
-machine_at_kmxc02_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/kmxc02/3ctm005.bin",
-                           0x000f0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_scatsx_init(model);
-
-    return ret;
-}
-
-int
-machine_at_deskmaster286_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/deskmaster286/SAMSUNG-DESKMASTER-28612-ROM.BIN",
-                           0x000f0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_scat_init(model, 0, 1);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-        
-    device_add(&ide_isa_device);
-
-    return ret;
-}
-
-int
-machine_at_shuttle386sx_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/shuttle386sx/386-Shuttle386SX-Even.BIN",
-                                "roms/machines/shuttle386sx/386-Shuttle386SX-Odd.BIN",
-                                0x000f0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    device_add(&intel_82335_device);
-    device_add(&keyboard_at_ami_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
 
     return ret;
 }

@@ -36,7 +36,6 @@
 #include <86box/path.h>
 #include <86box/plat.h>
 #include <86box/machine.h>
-#include <86box/m_xt_xi8088.h>
 
 #ifdef ENABLE_ROM_LOG
 int rom_do_log = ENABLE_ROM_LOG;

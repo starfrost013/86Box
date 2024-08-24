@@ -407,14 +407,6 @@ extern uint32_t machine_handle_gpio_acpi(uint8_t write, uint32_t val);
 /* Initialization functions for boards and systems. */
 extern void machine_common_init(const machine_t *);
 
-/* m_amstrad.c */
-extern int machine_pc1512_init(const machine_t *);
-extern int machine_pc1640_init(const machine_t *);
-extern int machine_pc200_init(const machine_t *);
-extern int machine_ppc512_init(const machine_t *);
-extern int machine_pc2086_init(const machine_t *);
-extern int machine_pc3086_init(const machine_t *);
-
 /* m_at.c */
 extern void machine_at_common_init_ex(const machine_t *, int type);
 extern void machine_at_common_init(const machine_t *);
@@ -437,16 +429,11 @@ extern int machine_at_ibmxt286_init(const machine_t *);
 extern int machine_at_siemens_init(const machine_t *); // Siemens PCD-2L. N82330 discrete machine. It segfaults in some places
 
 extern int machine_at_wellamerastar_init(const machine_t *); // Wells American A*Star with custom award BIOS 
-#ifdef USE_OPEN_AT
-extern int machine_at_openat_init(const machine_t *);
-#endif /* USE_OPEN_AT */
 
 /* m_at_286_386sx.c */
 extern int machine_at_tg286m_init(const machine_t *);
 extern int machine_at_ama932j_init(const machine_t *);
-extern int machine_at_px286_init(const machine_t *);
 extern int machine_at_quadt286_init(const machine_t *);
-extern int machine_at_mr286_init(const machine_t *);
 
 extern int machine_at_neat_init(const machine_t *);
 extern int machine_at_neat_ami_init(const machine_t *);
@@ -957,8 +944,5 @@ extern int machine_xt_t1200_init(const machine_t *);
 extern int machine_xt_z184_init(const machine_t *);
 extern int machine_xt_z151_init(const machine_t *);
 extern int machine_xt_z159_init(const machine_t *);
-
-/* m_xt_xi8088.c */
-extern int machine_xt_xi8088_init(const machine_t *);
 
 #endif /*EMU_MACHINE_H*/

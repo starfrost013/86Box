@@ -240,7 +240,6 @@ extern const device_t keyboard_at_compaq_device;
 extern const device_t keyboard_ps2_device;
 extern const device_t keyboard_ps2_ps1_device;
 extern const device_t keyboard_ps2_ps1_pci_device;
-extern const device_t keyboard_ps2_xi8088_device;
 extern const device_t keyboard_ps2_ami_device;
 extern const device_t keyboard_ps2_holtek_device;
 extern const device_t keyboard_ps2_tg_ami_device;

@@ -43,7 +43,6 @@ extern const device_t m19_vid_device;
 extern const device_t vid_device;
 extern const device_t vid_device_hx;
 extern const device_t t1000_video_device;
-extern const device_t xi8088_device;
 extern const device_t cga_device;
 extern const device_t vid_1512_device;
 extern const device_t vid_1640_device;

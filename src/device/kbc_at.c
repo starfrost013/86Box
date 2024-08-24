@@ -36,7 +36,6 @@
 #include <86box/mem.h>
 #include <86box/device.h>
 #include <86box/machine.h>
-#include <86box/m_at_t3100e.h>
 #include <86box/fdd.h>
 #include <86box/fdc.h>
 #include <86box/sound.h>
@@ -77,7 +76,6 @@
 
 #define KBC_VEN_GENERIC    0x00
 #define KBC_VEN_IBM_PS1    0x04
-#define KBC_VEN_TOSHIBA    0x08
 #define KBC_VEN_OLIVETTI   0x0c
 #define KBC_VEN_AMI        0x10
 #define KBC_VEN_TRIGEM_AMI 0x14
@@ -275,58 +273,6 @@ kbc_translate(atkbc_t *dev, uint8_t val)
         kbc_at_log("ATkbc: translate is on, skipping scan code: %02X (original: F0 %02X)\n", nont_to_t[val], val);
         dev->sc_or = 0;
         return ret;
-    }
-
-    /* Test for T3100E 'Fn' key (Right Alt / Right Ctrl) */
-    if ((dev != NULL) && (kbc_ven == KBC_VEN_TOSHIBA) &&
-        (keyboard_recv(0x138) || keyboard_recv(0x11d)))  switch (val) {
-        case 0x4f:
-            t3100e_notify_set(0x01);
-            break; /* End */
-        case 0x50:
-            t3100e_notify_set(0x02);
-            break; /* Down */
-        case 0x51:
-            t3100e_notify_set(0x03);
-            break; /* PgDn */
-        case 0x52:
-            t3100e_notify_set(0x04);
-            break; /* Ins */
-        case 0x53:
-            t3100e_notify_set(0x05);
-            break; /* Del */
-        case 0x54:
-            t3100e_notify_set(0x06);
-            break; /* SysRQ */
-        case 0x45:
-            t3100e_notify_set(0x07);
-            break; /* NumLock */
-        case 0x46:
-            t3100e_notify_set(0x08);
-            break; /* ScrLock */
-        case 0x47:
-            t3100e_notify_set(0x09);
-            break; /* Home */
-        case 0x48:
-            t3100e_notify_set(0x0a);
-            break; /* Up */
-        case 0x49:
-            t3100e_notify_set(0x0b);
-            break; /* PgUp */
-        case 0x4a:
-            t3100e_notify_set(0x0c);
-            break; /* Keypad - */
-        case 0x4b:
-            t3100e_notify_set(0x0d);
-            break; /* Left */
-        case 0x4c:
-            t3100e_notify_set(0x0e);
-            break; /* KP 5 */
-        case 0x4d:
-            t3100e_notify_set(0x0f);
-            break; /* Right */
-        default:
-            break;
     }
 
     kbc_at_log("ATkbc: translate is %s, ", translate ? "on" : "off");
@@ -1708,117 +1654,6 @@ write64_quadtel(void *priv, uint8_t val)
     return write64_generic(dev, val);
 }
 
-static uint8_t
-write60_toshiba(void *priv, uint8_t val)
-{
-    const atkbc_t *dev = (atkbc_t *) priv;
-
-    switch (dev->command) {
-        case 0xb6: /* T3100e - set color/mono switch */
-            kbc_at_log("ATkbc: T3100e - set color/mono switch\n");
-            t3100e_mono_set(val);
-            return 0;
-
-        default:
-            break;
-    }
-
-    return 1;
-}
-
-static uint8_t
-write64_toshiba(void *priv, uint8_t val)
-{
-    atkbc_t *dev = (atkbc_t *) priv;
-
-    switch (val) {
-        case 0xaf:
-            kbc_at_log("ATkbc: bad KBC command AF\n");
-            return 1;
-
-        case 0xb0: /* T3100e: Turbo on */
-            kbc_at_log("ATkbc: T3100e: Turbo on\n");
-            t3100e_turbo_set(1);
-            return 0;
-
-        case 0xb1: /* T3100e: Turbo off */
-            kbc_at_log("ATkbc: T3100e: Turbo off\n");
-            t3100e_turbo_set(0);
-            return 0;
-
-        case 0xb2: /* T3100e: Select external display */
-            kbc_at_log("ATkbc: T3100e: Select external display\n");
-            t3100e_display_set(0x00);
-            return 0;
-
-        case 0xb3: /* T3100e: Select internal display */
-            kbc_at_log("ATkbc: T3100e: Select internal display\n");
-            t3100e_display_set(0x01);
-            return 0;
-
-        case 0xb4: /* T3100e: Get configuration / status */
-            kbc_at_log("ATkbc: T3100e: Get configuration / status\n");
-            kbc_delay_to_ob(dev, t3100e_config_get(), 0, 0x00);
-            return 0;
-
-        case 0xb5: /* T3100e: Get colour / mono byte */
-            kbc_at_log("ATkbc: T3100e: Get colour / mono byte\n");
-            kbc_delay_to_ob(dev, t3100e_mono_get(), 0, 0x00);
-            return 0;
-
-        case 0xb6: /* T3100e: Set colour / mono byte */
-            kbc_at_log("ATkbc: T3100e: Set colour / mono byte\n");
-            dev->wantdata  = 1;
-            dev->state     = STATE_KBC_PARAM;
-            return 0;
-
-        /* TODO: Toshiba KBC mode switching. */
-        case 0xb7: /* T3100e: Emulate PS/2 keyboard */
-        case 0xb8: /* T3100e: Emulate AT keyboard */
-            dev->misc_flags &= ~FLAG_PS2;
-            if (val == 0xb7) {
-                kbc_at_log("ATkbc: T3100e: Emulate PS/2 keyboard\n");
-                dev->misc_flags |= FLAG_PS2;
-                kbc_at_do_poll = kbc_at_poll_ps2;
-            } else {
-                kbc_at_log("ATkbc: T3100e: Emulate AT keyboard\n");
-                kbc_at_do_poll = kbc_at_poll_at;
-            }
-            return 0;
-
-        case 0xbb: /* T3100e: Read 'Fn' key.
-                      Return it for right Ctrl and right Alt; on the real
-                      T3100e, these keystrokes could only be generated
-                      using 'Fn'. */
-            kbc_at_log("ATkbc: T3100e: Read 'Fn' key\n");
-            if (keyboard_recv(0xb8) || /* Right Alt */
-                keyboard_recv(0x9d))   /* Right Ctrl */
-                kbc_delay_to_ob(dev, 0x04, 0, 0x00);
-            else
-                kbc_delay_to_ob(dev, 0x00, 0, 0x00);
-            return 0;
-
-        case 0xbc: /* T3100e: Reset Fn+Key notification */
-            kbc_at_log("ATkbc: T3100e: Reset Fn+Key notification\n");
-            t3100e_notify_set(0x00);
-            return 0;
-
-        case 0xc0: /* Read P1 */
-            kbc_at_log("ATkbc: read P1\n");
-
-            /* The T3100e returns all bits set except bit 6 which
-             * is set by t3100e_mono_set() */
-            dev->p1 = (t3100e_mono_get() & 1) ? 0xff : 0xbf;
-            kbc_delay_to_ob(dev, dev->p1, 0, 0x00);
-            return 0;
-
-        default:
-            break;
-    }
-
-    return write64_generic(dev, val);
-}
-
 static void
 kbc_at_process_cmd(void *priv)
 {
@@ -2369,12 +2204,7 @@ kbc_at_init(const device_t *info)
             dev->write60_ven = write60_quadtel;
             dev->write64_ven = write64_quadtel;
             break;
-
-        case KBC_VEN_TOSHIBA:
-            dev->write60_ven = write60_toshiba;
-            dev->write64_ven = write64_toshiba;
-            break;
-
+            
         default:
             break;
     }
@@ -2458,19 +2288,6 @@ const device_t keyboard_at_tg_ami_device = {
     .config        = NULL
 };
 
-const device_t keyboard_at_toshiba_device = {
-    .name          = "PC/AT Keyboard (Toshiba)",
-    .internal_name = "keyboard_at_toshiba",
-    .flags         = DEVICE_KBC,
-    .local         = KBC_TYPE_ISA | KBC_VEN_TOSHIBA,
-    .init          = kbc_at_init,
-    .close         = kbc_at_close,
-    .reset         = kbc_at_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
 
 const device_t keyboard_at_olivetti_device = {
     .name          = "PC/AT Keyboard (Olivetti)",
@@ -2547,20 +2364,6 @@ const device_t keyboard_ps2_ps1_pci_device = {
     .internal_name = "keyboard_ps2_ps1_pci",
     .flags         = DEVICE_KBC | DEVICE_PCI,
     .local         = KBC_TYPE_PS2_1 | KBC_VEN_IBM_PS1,
-    .init          = kbc_at_init,
-    .close         = kbc_at_close,
-    .reset         = kbc_at_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t keyboard_ps2_xi8088_device = {
-    .name          = "PS/2 Keyboard (Xi8088)",
-    .internal_name = "keyboard_ps2_xi8088",
-    .flags         = DEVICE_KBC,
-    .local         = KBC_TYPE_PS2_1 | KBC_VEN_GENERIC,
     .init          = kbc_at_init,
     .close         = kbc_at_close,
     .reset         = kbc_at_reset,
