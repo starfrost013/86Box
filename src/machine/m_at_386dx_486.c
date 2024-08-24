@@ -417,3 +417,26 @@ machine_at_ga486l_init(const machine_t *model)
 
     return ret;
 }
+
+int
+machine_at_acerv10_init(const machine_t *model)
+{
+    int ret;
+
+    ret = bios_load_linear("roms/machines/acerv10/ALL.BIN",
+                           0x000e0000, 131072, 0);
+
+    if (bios_only || !ret)
+        return ret;
+
+    machine_at_common_init(model);
+
+    device_add(&sis_85c461_device);
+    device_add(&keyboard_ps2_acer_pci_device);
+    device_add(&ide_isa_device);
+
+    if (fdc_current[0] == FDC_INTERNAL)
+        device_add(&fdc_at_device);
+
+    return ret;
+}
