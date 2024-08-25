@@ -361,28 +361,6 @@ ps1_setup(int model)
 
         /* Enable the PS/1 VGA controller. */
         device_add(&ps1vga_device);
-    } else if (model == 2121) {
-        io_sethandler(0x00e0, 2,
-                      ps1_read, NULL, NULL, ps1_write, NULL, NULL, ps);
-
-        if (rom_present("roms/machines/ibmps1_2121/F80000.BIN")) {
-            rom_init(&ps->mid_rom,
-                     "roms/machines/ibmps1_2121/F80000.BIN",
-                     0xf80000, 0x40000, 0x3ffff, 0, MEM_MAPPING_EXTERNAL);
-        }
-        rom_init(&ps->high_rom,
-                 "roms/machines/ibmps1_2121/FC0000.BIN",
-                 0xfc0000, 0x40000, 0x3ffff, 0, MEM_MAPPING_EXTERNAL);
-
-        /* Initialize the video controller. */
-        if (gfxcard[0] == VID_INTERNAL)
-            device_add(&ibm_ps1_2121_device);
-
-        device_add(&fdc_at_ps1_2121_device);
-
-        device_add(&ide_isa_device);
-
-        device_add(&ps1snd_device);
     }
 }
 

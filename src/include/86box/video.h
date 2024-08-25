@@ -337,10 +337,6 @@ extern const device_t ati28800_wonderxl24_device;
 /* Bochs */
 extern const device_t bochs_svga_device;
 
-/* Chips & Technologies */
-extern const device_t chips_69000_device;
-extern const device_t chips_69000_onboard_device;
-
 /* Cirrus Logic GD54xx */
 extern const device_t gd5401_isa_device;
 extern const device_t gd5402_isa_device;
@@ -414,22 +410,10 @@ extern const device_t et4000w32p_noncardex_pci_device;
 extern const device_t et4000w32p_cardex_vlb_device;
 extern const device_t et4000w32p_cardex_pci_device;
 
-/* MDSI Genius VHR */
-extern const device_t genius_device;
-
 /* Hercules */
 extern const device_t hercules_device;
 extern const device_t herculesplus_device;
 extern const device_t incolor_device;
-
-/* Headland GC-2xx/HT-2xx */
-extern const device_t g2_gc205_device;
-extern const device_t radius_svga_multiview_isa_device;
-extern const device_t radius_svga_multiview_mca_device;
-
-/* Professional Graphics Controller */
-extern const device_t im1024_device;
-extern const device_t pgc_device;
 
 /* Matrox MGA */
 extern const device_t millennium_device;
@@ -445,10 +429,6 @@ extern const device_t paradise_pvga1a_device;
 extern const device_t paradise_wd90c11_megapc_device;
 extern const device_t paradise_wd90c11_device;
 extern const device_t paradise_wd90c30_device;
-
-/* Realtek (S)VGA */
-extern const device_t realtek_rtg3105_device;
-extern const device_t realtek_rtg3106_device;
 
 /* S3 9XX/8XX/Vision/Trio */
 extern const device_t s3_orchid_86c911_isa_device;
@@ -519,9 +499,6 @@ extern const device_t s3_diamond_stealth_4000_pci_device;
 extern const device_t s3_diamond_stealth_4000_agp_device;
 extern const device_t s3_trio3d2x_pci_device;
 extern const device_t s3_trio3d2x_agp_device;
-
-/* IBM PS/1 (S)VGA */
-extern const device_t ibm_ps1_2121_device;
 
 /* IBM VGA */
 extern const device_t vga_device;
