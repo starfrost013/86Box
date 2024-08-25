@@ -15,6 +15,21 @@
  *          Copyright 2024 Connor Hyde
  */
 #ifdef EMU_DEVICE_H // what
+
+// NV Base
+typedef struct nv_base_s
+{
+    rom_t vbios;        // NVIDIA VBIOS
+} nv_base_t;
+
+typedef struct nv_device_nv3_s
+{
+    nv_base_t nvbase;   // Base Nvidia structure
+} nv_device_nv3_t;
+
+// device objects
+extern nv_device_nv3_t* nv3;
+
 // NV3
 void*   nv3_init(const device_t *info);
 

@@ -789,9 +789,6 @@ extern int machine_tandy1000sx_init(const machine_t *);
 extern int machine_tandy1000hx_init(const machine_t *);
 extern int machine_tandy1000sl2_init(const machine_t *);
 
-/* m_v86p.c */
-extern int machine_v86p_init(const machine_t *);
-
 /* m_xt.c */
 extern int machine_pc_init(const machine_t *);
 extern int machine_pc82_init(const machine_t *);

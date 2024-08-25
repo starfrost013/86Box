@@ -15,7 +15,7 @@
 
 add_library(mch OBJECT machine.c machine_table.c m_xt.c m_xt_compaq.c
     m_xt_t1000.c m_xt_t1000_vid.c m_pcjr.c
-    m_elt.c m_xt_olivetti.c m_tandy.c m_v86p.c
+    m_elt.c m_tandy.c
     m_at.c
     m_ps1.c m_ps1_hdc.c m_ps2_isa.c
     m_ps2_mca.c m_at_compaq.c m_at_286_386sx.c m_at_386dx_486.c

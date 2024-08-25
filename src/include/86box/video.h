@@ -384,15 +384,8 @@ extern const device_t gd5480_pci_device;
 extern const device_t compaq_cga_device;
 extern const device_t compaq_cga_2_device;
 
-/* Olivetti OGC */
-extern const device_t ogc_device;
-extern const device_t ogc_m24_device;
-
 /* Chips & Technologies 82C425 */
 extern const device_t f82c425_video_device;
-
-/* NCR NGA */
-extern const device_t nga_device;
 
 /* Tseng ET3000AX */
 extern const device_t et3000_isa_device;
@@ -431,11 +424,8 @@ extern const device_t incolor_device;
 
 /* Headland GC-2xx/HT-2xx */
 extern const device_t g2_gc205_device;
-extern const device_t v7_vga_1024i_device;
 extern const device_t radius_svga_multiview_isa_device;
 extern const device_t radius_svga_multiview_mca_device;
-extern const device_t ht216_32_pb410a_device;
-extern const device_t ht216_32_standalone_device;
 
 /* Professional Graphics Controller */
 extern const device_t im1024_device;
@@ -446,17 +436,6 @@ extern const device_t millennium_device;
 extern const device_t mystique_device;
 extern const device_t mystique_220_device;
 extern const device_t millennium_ii_device;
-#ifdef USE_G100
-extern const device_t productiva_g100_device;
-#endif /* USE_G100 */
-
-/* Oak OTI-0x7 */
-extern const device_t oti037c_device;
-extern const device_t oti067_device;
-extern const device_t oti067_acer386_device;
-extern const device_t oti067_ama932j_device;
-extern const device_t oti077_acer100t_device;
-extern const device_t oti077_device;
 
 /* Paradise/WD (S)VGA */
 extern const device_t paradise_pvga1a_ncr3302_device;
@@ -541,27 +520,8 @@ extern const device_t s3_diamond_stealth_4000_agp_device;
 extern const device_t s3_trio3d2x_pci_device;
 extern const device_t s3_trio3d2x_agp_device;
 
-/* Sigma Color 400 */
-extern const device_t sigma_device;
-
-/* Trident TGUI 94x0 */
-extern const device_t tgui9400cxi_device;
-extern const device_t tgui9440_vlb_device;
-extern const device_t tgui9440_pci_device;
-extern const device_t tgui9440_onboard_pci_device;
-extern const device_t tgui9660_pci_device;
-extern const device_t tgui9660_onboard_pci_device;
-extern const device_t tgui9680_pci_device;
-
 /* IBM PS/1 (S)VGA */
 extern const device_t ibm_ps1_2121_device;
-
-/* Trident TVGA 8900 */
-extern const device_t tvga8900b_device;
-extern const device_t tvga8900d_device;
-extern const device_t tvga8900dr_device;
-extern const device_t tvga9000b_device;
-extern const device_t nec_sv9000_device;
 
 /* IBM VGA */
 extern const device_t vga_device;
@@ -590,9 +550,6 @@ extern const device_t velocity_200_agp_device;
 /* NVidia */
 extern const device_t nv3_device_pci;
 extern const device_t nv3_device_agp;
-
-/* Wyse 700 */
-extern const device_t wy700_device;
 
 #endif
 

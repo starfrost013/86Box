@@ -34,7 +34,6 @@
 
 #include <86box/vid_cga.h>
 #include <86box/vid_ega.h>
-#include <86box/vid_colorplus.h>
 #include <86box/vid_mda.h>
 #include <86box/vid_xga_device.h>
 
@@ -92,15 +91,9 @@ video_cards[] = {
     { &et4000_kasan_isa_device                         },
     { &mda_device,                 VIDEO_FLAG_TYPE_MDA },
     { &genius_device                                   },
-    { &nga_device                                      },
-    { &ogc_device                                      },
-    { &oti037c_device                                  },
-    { &oti067_device                                   },
-    { &oti077_device                                   },
     { &paradise_pvga1a_device                          },
     { &paradise_wd90c11_device                         },
     { &paradise_wd90c30_device                         },
-    { &colorplus_device                                },
     { &pgc_device                                      },
     { &cga_pravetz_device                              },
     { &radius_svga_multiview_isa_device                },
@@ -112,12 +105,6 @@ video_cards[] = {
     { &s3_metheus_86c928_isa_device                    },
     { &s3_phoenix_86c801_isa_device                    },
     { &s3_spea_mirage_86c801_isa_device                },
-    { &sigma_device                                    },
-    { &tvga8900b_device                                },
-    { &tvga8900d_device                                },
-    { &tvga8900dr_device                               },
-    { &tvga9000b_device                                },
-    { &nec_sv9000_device                               },
     { &et4000k_isa_device                              },
     { &et2000_device                                   },
     { &et3000_isa_device                               },
@@ -126,8 +113,6 @@ video_cards[] = {
     { &et4000w32_device                                },
     { &et4000w32i_isa_device                           },
     { &vga_device                                      },
-    { &v7_vga_1024i_device                             },
-    { &wy700_device                                    },
     { &mach32_mca_device,         VIDEO_FLAG_TYPE_8514 },
     { &gd5426_mca_device                               },
     { &gd5428_mca_device                               },
@@ -186,9 +171,6 @@ video_cards[] = {
     { &millennium_ii_device                            },
     { &mystique_device                                 },
     { &mystique_220_device                             },
-    { &tgui9440_pci_device                             },
-    { &tgui9660_pci_device                             },
-    { &tgui9680_pci_device                             },
     { &voodoo_banshee_device                           },
     { &creative_voodoo_banshee_device                  },
     { &voodoo_3_1000_device                            },
@@ -228,15 +210,9 @@ video_cards[] = {
     { &s3_spea_mirage_p64_vlb_device                   },
     { &s3_diamond_stealth64_968_vlb_device             },
     { &s3_stb_powergraph_64_video_vlb_device           },
-    { &ht216_32_standalone_device                      },
-    { &tgui9400cxi_device                              },
-    { &tgui9440_vlb_device                             },
     { &s3_virge_357_agp_device                         },
     { &s3_diamond_stealth_4000_agp_device              },
     { &s3_trio3d2x_agp_device                          },
-#ifdef USE_G100
-    { &productiva_g100_device, VIDEO_FLAG_TYPE_SPECIAL },
-#endif /*USE_G100 */
     { &velocity_100_agp_device                         },
     { &velocity_200_agp_device                         },
     { &voodoo_3_1000_agp_device                        },

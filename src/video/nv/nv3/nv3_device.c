@@ -14,6 +14,7 @@
  *
  *          Copyright 2024 starfrost
  */
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -22,18 +23,23 @@
 #include <86Box/mem.h>
 #include <86Box/rom.h> // DEPENDENT!!!
 #include <86Box/video.h>
+#include <86Box/nv/vid_nv.h>
+
+nv_device_nv3_t* nv3;
 
 void* nv3_init(const device_t *info)
 {
-    int ret;
+    nv3 = (nv_device_nv3_t*)calloc(1, sizeof(nv_device_nv3_t));
+    //int ret;
 
     // ELSA VICTORY Erazor Ver. 1.55.00    [WD/VBE30/DDC2B/DPMS]
-    ret = bios_load_linear("roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0); // TODO: HASH BASED!
+    //ret = bios_load_linear("roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0); // TODO: HASH BASED!
+    rom_init(&nv3->nvbase.vbios, "roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0x7fff, 0, MEM_MAPPING_EXTERNAL);
 }
 
 void nv3_close(void* priv)
 {
-
+    free(nv3);
 }
 
 void nv3_speed_changed(void *priv)
