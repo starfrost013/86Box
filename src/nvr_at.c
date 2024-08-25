@@ -293,7 +293,6 @@
 #define FLAG_AMI_1992_HACK 0x02
 #define FLAG_AMI_1994_HACK 0x04
 #define FLAG_AMI_1995_HACK 0x08
-#define FLAG_P6RP4_HACK    0x10
 #define FLAG_PIIX4         0x20
 #define FLAG_MULTI_BANK    0x40
 
@@ -791,29 +790,12 @@ nvr_read(uint16_t addr, void *priv)
                         ret = checksum >> 8;
                     else
                         ret = checksum & 0xff;
-                } else if (!nvr->is_new && (local->flags & FLAG_P6RP4_HACK)) {
-                    /* The checksum at 3E-3F is for 37-3D and 40-51. */
-                    for (i = 0x37; i <= 0x3d; i++)
-                        checksum += nvr->regs[i];
-                    for (i = 0x40; i <= 0x51; i++) {
-                        if (i == 0x43)
-                            checksum += (nvr->regs[i] | 0x02);
-                        else
-                            checksum += nvr->regs[i];
-                    }
-                    if (local->addr[addr_id] == 0x3e)
-                        ret = checksum >> 8;
-                    else
-                        ret = checksum & 0xff;
-                } else
+                } else {
                     ret = nvr->regs[local->addr[addr_id]];
                 break;
 
             case 0x43:
-                if (!nvr->is_new && (local->flags & FLAG_P6RP4_HACK))
-                    ret = nvr->regs[local->addr[addr_id]] | 0x02;
-                else
-                    ret = nvr->regs[local->addr[addr_id]];
+                ret = nvr->regs[local->addr[addr_id]];
                 break;
 
             case 0x52:
@@ -828,6 +810,7 @@ nvr_read(uint16_t addr, void *priv)
                     ret = nvr->regs[local->addr[addr_id]];
                 break;
         }
+    }
     else {
         ret = local->addr[addr_id];
         if (!local->read_addr)
@@ -1075,8 +1058,8 @@ nvr_at_init(const device_t *info)
     local->flags = 0x00;
     switch (info->local & 0x0f) {
         case 0: /* standard AT, no century register */
-            if (info->local == 32) {
-                local->flags |= FLAG_P6RP4_HACK;
+            if (info->local == 32)
+            {
                 nvr->irq    = 8;
                 local->cent = RTC_CENTURY_AT;
             } else {
@@ -1389,20 +1372,6 @@ const device_t via_nvr_device = {
     .internal_name = "via_nvr",
     .flags         = DEVICE_ISA | DEVICE_AT,
     .local         = 0x10 | 7,
-    .init          = nvr_at_init,
-    .close         = nvr_at_close,
-    .reset         = nvr_at_reset,
-    { .available = NULL },
-    .speed_changed = nvr_at_speed_changed,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t p6rp4_nvr_device = {
-    .name          = "ASUS P/I-P6RP4 PC/AT NVRAM",
-    .internal_name = "p6rp4_nvr",
-    .flags         = DEVICE_ISA | DEVICE_AT,
-    .local         = 32,
     .init          = nvr_at_init,
     .close         = nvr_at_close,
     .reset         = nvr_at_reset,

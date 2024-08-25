@@ -383,51 +383,6 @@ ps1_common_init(const machine_t *model)
 }
 
 int
-machine_ps1_m2011_init(const machine_t *model)
-{
-    int ret;
-    const char* fn;
-    uint32_t offset;
-
-    if (!device_available(model->device)) {
-        /* No ROMs available. */
-        return 0;
-    }
-
-    device_context(model->device);
-    if ((fn = device_get_bios_file(model->device, device_get_config_bios("bios_language"), 1)) == NULL) {
-        /* Combined ROM or US English. */
-        fn = device_get_bios_file(model->device, device_get_config_bios("bios_language"), 0);
-        offset = (!strcmp("english_us", device_get_config_bios("bios_language"))) ? 0x20000 : 0x60000;
-    } else {
-        /* Separated ROM. */
-        offset = 0x20000;
-    }
-
-    if (!fn) {
-        fn = device_get_bios_file(model->device, "us_english", 0);
-        offset = 0x20000;
-    }
-
-    ret = bios_load_linear(fn, 0x000e0000, 131072, offset);
-    device_context_restore();
-
-    if (bios_only || !ret) {
-        return ret;
-    }
-
-    ps1_common_init(model);
-
-    device_context(model->device);
-
-    ps1_setup(2011);    
-
-    device_context_restore();
-
-    return ret;
-}
-
-int
 machine_ps1_m2121_init(const machine_t *model)
 {
     int ret;

@@ -2228,6 +2228,46 @@ const machine_t machines[] = {
         .snd_device = NULL,
         .net_device = NULL
     },
+    /* internal_name null in last entry required to not crash wtf?? */
+    {
+        .name = NULL,
+        .internal_name = NULL,
+        .type = MACHINE_TYPE_NONE,
+        .chipset = MACHINE_CHIPSET_NONE,
+        .init = NULL,
+        .p1_handler = NULL,
+        .gpio_handler = NULL,
+        .available_flag = 0,
+        .gpio_acpi_handler = NULL,
+        .cpu = { // bogus
+            .package = CPU_PKG_SOCKET370,
+            .block = CPU_BLOCK_NONE,
+            .min_bus = 66666667,
+            .max_bus = 150000000,
+            .min_voltage = 1300,
+            .max_voltage = 3500,
+            .min_multi = 1.5,
+            .max_multi = 8.0
+        },
+        .bus_flags = MACHINE_PS2_AGP | MACHINE_BUS_USB,
+        .flags = MACHINE_IDE_DUAL | MACHINE_APM | MACHINE_ACPI | MACHINE_USB, /* Machine has quad channel IDE with internal controller: CMD PCI-0648 */
+        .ram = {
+            .min = 8192,
+            .max = 1048576,
+            .step = 8192
+        },
+        .nvrmask = 255,
+        .kbc_device = NULL,
+        .kbc_p1 = 0xff,
+        .gpio = 0xffffffff,
+        .gpio_acpi = 0xffffffff,
+        .device = NULL,
+        .fdc_device = NULL,
+        .sio_device = NULL,
+        .vid_device = NULL,
+        .snd_device = NULL,
+        .net_device = NULL
+    },
   // clang-format on
 };
 
@@ -2566,10 +2606,4 @@ int
 machine_has_mouse(void)
 {
     return (machines[machine].flags & MACHINE_MOUSE);
-}
-
-int
-machine_is_sony(void)
-{
-    return (!strcmp(machines[machine].internal_name, "pcv90"));
 }

@@ -1733,9 +1733,6 @@ acpi_reg_write_sis_5595(int size, uint16_t addr, uint8_t val, void *priv)
             break;
         case 0x1c:
             dev->regs.gpe_pin = ((dev->regs.gpe_pin & ~(0xff << shift32)) | ((val & 0xff) << shift32));
-            if (!strcmp(machine_get_internal_name(), "m747") && (val & 0x10) &&
-                !(dev->regs.gpe_io & 0x00000010))
-                resetx86();
             break;
         case 0x1d:
             dev->regs.gpe_pin = ((dev->regs.gpe_pin & ~(0x0f << shift32)) | ((val & 0x0f) << shift32));
@@ -2346,10 +2343,8 @@ acpi_reset(void *priv)
     acpi_t *dev = (acpi_t *) priv;
 
     memset(&dev->regs, 0x00, sizeof(acpi_regs_t));
-    /* PC Chips M773:
-       - Bit 3: 80-conductor cable on unknown IDE channel (active low)
-       - Bit 1: 80-conductor cable on unknown IDE channel (active low) */
-    dev->regs.gpireg[0] = !strcmp(machine_get_internal_name(), "m773") ? 0xf5 : 0xff;
+
+    dev->regs.gpireg[0] = 0xff;
     dev->regs.gpireg[1] = 0xff;
     /* A-Trend ATC7020BXII:
        - Bit 3: 80-conductor cable on secondary IDE channel (active low)
@@ -2375,12 +2370,8 @@ acpi_reset(void *priv)
            ASUS CUV4X-LS:
            - Bit  2: 80-conductor cable on secondary IDE channel (active low)
            - Bit  1: 80-conductor cable on primary IDE channel (active low)
-           Acorp 6VIA90AP:
-           - Bit  3: 80-conductor cable on secondary IDE channel (active low)
-           - Bit  1: 80-conductor cable on primary IDE channel (active low) */
+        */
         dev->regs.gpi_val = 0xfff57fc1;
-        if (!strcmp(machine_get_internal_name(), "ficva503a") || !strcmp(machine_get_internal_name(), "6via90ap"))
-            dev->regs.gpi_val |= 0x00000004;
     }
 
     if (acpi_power_on) {

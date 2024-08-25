@@ -20,8 +20,6 @@
 #include <86box/chipset.h>
 #include <86box/port_6x.h>
 
-extern const device_t vendex_xt_rtc_onboard_device;
-
 static void
 machine_xt_common_init(const machine_t *model, int fixed_floppy)
 {
@@ -185,22 +183,6 @@ machine_xt_amixt_init(const machine_t *model)
     int ret;
 
     ret = bios_load_linear("roms/machines/amixt/ami_8088_bios_31jan89.bin",
-                           0x000fe000, 8192, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_xt_clone_init(model, 0);
-
-    return ret;
-}
-
-int
-machine_xt_znic_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/znic/ibmzen.rom",
                            0x000fe000, 8192, 0);
 
     if (bios_only || !ret)

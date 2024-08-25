@@ -50,27 +50,6 @@
 #include <86box/plat_unused.h>
 
 int
-machine_at_acc386_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/acc386/acc386.BIN",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-    device_add(&acc2168_device);
-    device_add(&keyboard_at_ami_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    return ret;
-}
-
-int
 machine_at_valuepoint433_init(const machine_t *model) // hangs without the PS/2 mouse
 {
     int ret;
@@ -268,29 +247,6 @@ machine_at_sis_85c471_common_init(const machine_t *model)
         device_add(&fdc_at_device);
 
     device_add(&sis_85c471_device);
-}
-
-int
-machine_at_greenb_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/greenb/4gpv31-ami-1993-8273517.bin",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&contaq_82c597_device);
-
-    device_add(&keyboard_at_ami_device);
-
-    return ret;
 }
 
 

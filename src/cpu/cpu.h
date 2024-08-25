@@ -85,7 +85,6 @@ enum {
 
 enum {
     CPU_PKG_8088             = (1 << 0),
-    CPU_PKG_8088_EUROPC      = (1 << 1),
     CPU_PKG_8086             = (1 << 2),
     CPU_PKG_188              = (1 << 3),
     CPU_PKG_186              = (1 << 4),

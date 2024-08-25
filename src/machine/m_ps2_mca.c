@@ -278,33 +278,6 @@ model_50_read(uint16_t port)
 }
 
 static uint8_t
-model_55sx_read(uint16_t port)
-{
-    switch (port) {
-        case 0x100:
-            return ps2.planar_id & 0xff;
-        case 0x101:
-            return ps2.planar_id >> 8;
-        case 0x102:
-            return ps2.option[0];
-        case 0x103:
-            return ps2.option[1];
-        case 0x104:
-            return ps2.memory_bank[ps2.option[3] & 7];
-        case 0x105:
-            return ps2.option[3];
-        case 0x106:
-            return ps2.subaddr_lo;
-        case 0x107:
-            return ps2.subaddr_hi;
-
-        default:
-            break;
-    }
-    return 0xff;
-}
-
-static uint8_t
 model_70_type3_read(uint16_t port)
 {
     switch (port) {
@@ -397,145 +370,6 @@ model_50_write(uint16_t port, uint8_t val)
             break;
         case 0x105:
             ps2.option[3] = val;
-            break;
-        case 0x106:
-            ps2.subaddr_lo = val;
-            break;
-        case 0x107:
-            ps2.subaddr_hi = val;
-            break;
-
-        default:
-            break;
-    }
-}
-
-static void
-model_55sx_mem_recalc(void)
-{
-    int state;
-#ifdef ENABLE_PS2_MCA_LOG
-    int enabled_mem = 0;
-#endif
-    int base = 0;
-    int remap_size = (ps2.option[3] & 0x10) ? 384 : 256;
-    int bit_mask = 0x00;
-    int max_rows = 4;
-    int bank_to_rows[16] = { 4, 2, 1, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 1, 0 };
-
-    ps2_mca_log("%02X %02X\n", ps2.option[1], ps2.option[3]);
-
-    mem_remap_top(remap_size);
-    mem_set_mem_state(0x00000000, (mem_size + 384) * 1024, MEM_READ_EXTERNAL | MEM_WRITE_EXTERNAL);
-    mem_set_mem_state(0x000e0000, 0x00020000, MEM_READ_EXTANY | MEM_WRITE_DISABLED);
-
-    for (uint8_t i = 0; i < 2; i++) {
-        max_rows = bank_to_rows[(ps2.memory_bank[i] >> 4) & 0x0f];
-
-        if (max_rows == 0)
-            continue;
-
-        for (int j = 0; j < max_rows; j++) {
-            if (ps2.memory_bank[i] & (1 << j)) {
-                ps2_mca_log("Set memory at %06X-%06X to internal\n", (base * 1024), (base * 1024) + (((base > 0) ? 1024 : 640) * 1024) - 1);
-                mem_set_mem_state(base * 1024, ((base > 0) ? 1024 : 640) * 1024, MEM_READ_INTERNAL | MEM_WRITE_INTERNAL);
-#ifdef ENABLE_PS2_MCA_LOG
-                enabled_mem += 1024;
-#endif
-                bit_mask |= (1 << (j + (i << 2)));
-            }
-            base += 1024;
-        }
-    }
-
-#ifdef ENABLE_PS2_MCA_LOG
-    ps2_mca_log("Enabled memory: %i kB (%02X)\n", enabled_mem, bit_mask);
-#endif
-
-    if (ps2.option[3] & 0x10) {
-        /* Enable ROM. */
-        ps2_mca_log("Enable ROM\n");
-        state = MEM_READ_EXTANY;
-    } else {
-        /* Disable ROM. */
-        if ((ps2.option[1] & 1) && !(ps2.option[3] & 0x20) && (bit_mask & 0x01)) {
-            /* Disable RAM between 640 kB and 1 MB. */
-            ps2_mca_log("Disable ROM, enable RAM\n");
-            state = MEM_READ_INTERNAL;
-        } else {
-            ps2_mca_log("Disable ROM, disable RAM\n");
-            state = MEM_READ_DISABLED;
-        }
-    }
-
-    /* Write always disabled. */
-    state |= MEM_WRITE_DISABLED;
-
-    mem_set_mem_state(0xe0000, 0x20000, state);
-
-#if 0
-    if (!(ps2.option[3] & 0x08)) {
-            ps2_mca_log("Memory not yet configured\n");
-            return;
-    }
-#endif
-
-    ps2_mca_log("Enable shadow mapping at %06X-%06X\n", (mem_size * 1024), (mem_size * 1024) + (remap_size * 1024) - 1);
-
-    if ((ps2.option[1] & 1) && !(ps2.option[3] & 0x20) && (bit_mask & 0x01)) {
-        ps2_mca_log("Set memory at %06X-%06X to internal\n", (mem_size * 1024), (mem_size * 1024) + (remap_size * 1024) - 1);
-        mem_set_mem_state(mem_size * 1024, remap_size * 1024, MEM_READ_INTERNAL | MEM_WRITE_INTERNAL);
-    }
-
-    flushmmucache_nopc();
-}
-
-static void
-model_55sx_write(uint16_t port, uint8_t val)
-{
-    switch (port) {
-        case 0x102:
-            lpt1_remove();
-            serial_remove(ps2.uart);
-            if (val & 0x04) {
-                if (val & 0x08)
-                    serial_setup(ps2.uart, COM1_ADDR, COM1_IRQ);
-                else
-                    serial_setup(ps2.uart, COM2_ADDR, COM2_IRQ);
-            }
-            if (val & 0x10) {
-                switch ((val >> 5) & 3) {
-                    case 0:
-                        lpt1_init(LPT_MDA_ADDR);
-                        break;
-                    case 1:
-                        lpt1_init(LPT1_ADDR);
-                        break;
-                    case 2:
-                        lpt1_init(LPT2_ADDR);
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-            ps2.option[0] = val;
-            break;
-        case 0x103:
-            ps2_mca_log("Write POS1: %02X\n", val);
-            ps2.option[1] = val;
-            model_55sx_mem_recalc();
-            break;
-        case 0x104:
-            ps2.memory_bank[ps2.option[3] & 7] &= ~0xf;
-            ps2.memory_bank[ps2.option[3] & 7] |= (val & 0xf);
-            ps2_mca_log("Write memory bank %i: %02X\n", ps2.option[3] & 7, val);
-            model_55sx_mem_recalc();
-            break;
-        case 0x105:
-            ps2_mca_log("Write POS3: %02X\n", val);
-            ps2.option[3] = val;
-            model_55sx_mem_recalc();
             break;
         case 0x106:
             ps2.subaddr_lo = val;
@@ -1010,63 +844,6 @@ ps2_mca_board_model_60_init(void)
         device_add(&ps1vga_mca_device);
 }
 
-static void
-ps2_mca_board_model_55sx_init(int has_sec_nvram, int slots)
-{
-    ps2_mca_board_common_init();
-
-    ps2.option[1] = 0x00;
-    ps2.option[2] = 0x00;
-    ps2.option[3] = 0x10;
-
-    memset(ps2.memory_bank, 0xf0, 8);
-    switch (mem_size / 1024) {
-        case 1:
-            ps2.memory_bank[0] = 0x61;
-            break;
-        case 2:
-            ps2.memory_bank[0] = 0x51;
-            break;
-        case 3:
-            ps2.memory_bank[0] = 0x51;
-            ps2.memory_bank[1] = 0x61;
-            break;
-        case 4:
-            ps2.memory_bank[0] = 0x51;
-            ps2.memory_bank[1] = 0x51;
-            break;
-        case 5:
-            ps2.memory_bank[0] = 0x01;
-            ps2.memory_bank[1] = 0x61;
-            break;
-        case 6:
-        case 7: /*Not supported*/
-            ps2.memory_bank[0] = 0x01;
-            ps2.memory_bank[1] = 0x51;
-            break;
-        case 8:
-            ps2.memory_bank[0] = 0x01;
-            ps2.memory_bank[1] = 0x01;
-            break;
-
-        default:
-            break;
-    }
-
-    mca_init(slots);
-    device_add(&keyboard_ps2_mca_1_device);
-
-    if (has_sec_nvram)
-        device_add(&ps2_nvr_55ls_device);
-
-    ps2.planar_read  = model_55sx_read;
-    ps2.planar_write = model_55sx_write;
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&ps1vga_mca_device);
-
-    model_55sx_mem_recalc();
-}
 
 static void
 mem_encoding_update(void)
@@ -1411,28 +1188,6 @@ machine_ps2_common_init(const machine_t *model)
     ps2.uart = device_add_inst(&ns16550_device, 1);
 }
 
-int
-machine_ps2_model_50_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/ibmps2_m50/90x7420.zm13",
-                                "roms/machines/ibmps2_m50/90x7429.zm18",
-                                0x000f0000, 131072, 0);
-    ret &= bios_load_aux_interleaved("roms/machines/ibmps2_m50/90x7423.zm14",
-                                     "roms/machines/ibmps2_m50/90x7426.zm16",
-                                     0x000e0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_ps2_common_init(model);
-
-    ps2.planar_id = 0xfbff;
-    ps2_mca_board_model_50_init();
-
-    return ret;
-}
 
 int
 machine_ps2_model_60_init(const machine_t *model)
@@ -1458,46 +1213,6 @@ machine_ps2_model_60_init(const machine_t *model)
 }
 
 int
-machine_ps2_model_55sx_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/ibmps2_m55sx/33f8146.zm41",
-                                "roms/machines/ibmps2_m55sx/33f8145.zm40",
-                                0x000e0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_ps2_common_init(model);
-
-    ps2.planar_id = 0xfbff;
-    ps2_mca_board_model_55sx_init(0, 4);
-
-    return ret;
-}
-
-int
-machine_ps2_model_65sx_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/ibmps2_m65sx/64F3608.BIN",
-                                "roms/machines/ibmps2_m65sx/64F3611.BIN",
-                                0x000e0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_ps2_common_init(model);
-
-    ps2.planar_id = 0xe3ff;
-    ps2_mca_board_model_55sx_init(1, 8);
-
-    return ret;
-}
-
-int
 machine_ps2_model_70_type3_init(const machine_t *model)
 {
     int ret;
@@ -1513,26 +1228,6 @@ machine_ps2_model_70_type3_init(const machine_t *model)
 
     ps2.planar_id = 0xf9ff;
     ps2_mca_board_model_70_type34_init(0, 4);
-
-    return ret;
-}
-
-int
-machine_ps2_model_80_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/ibmps2_m80/15f6637.bin",
-                                "roms/machines/ibmps2_m80/15f6639.bin",
-                                0x000e0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_ps2_common_init(model);
-
-    ps2.planar_id = 0xfdff;
-    ps2_mca_board_model_80_type2_init();
 
     return ret;
 }

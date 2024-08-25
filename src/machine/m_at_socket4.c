@@ -84,37 +84,6 @@ machine_at_sp4_common_init(const machine_t *model)
 }
 
 int
-machine_at_excaliburpci_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear_inverted("roms/machines/excaliburpci/S701P.ROM",
-                                    0x000e0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    pci_init(PCI_CONFIG_TYPE_2);
-    pci_register_slot(0x00, PCI_CARD_NORTHBRIDGE, 0, 0, 0, 0);
-    pci_register_slot(0x03, PCI_CARD_IDE,         0, 0, 0, 0);
-    pci_register_slot(0x0F, PCI_CARD_NORMAL,      1, 2, 3, 4);
-    pci_register_slot(0x0E, PCI_CARD_NORMAL,      2, 3, 4, 1);
-    pci_register_slot(0x0D, PCI_CARD_NORMAL,      3, 4, 1, 2);
-    pci_register_slot(0x02, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 0);
-    device_add(&fdc37c665_device);
-    device_add(&keyboard_ps2_ami_pci_device);
-    device_add(&ide_cmd640_pci_legacy_only_device);
-
-    device_add(&i430lx_device);
-    device_add(&sio_zb_device);
-    device_add(&intel_flash_bxt_ami_device);
-
-    return ret;
-}
-
-int
 machine_at_p5mp3_init(const machine_t *model)
 {
     int ret;
@@ -140,38 +109,6 @@ machine_at_p5mp3_init(const machine_t *model)
     device_add(&sio_zb_device);
     device_add(&catalyst_flash_device);
     device_add(&i430lx_device);
-
-    return ret;
-}
-
-int
-machine_at_dellxp60_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear_inverted("roms/machines/dellxp60/XP60-A08.ROM",
-                                    0x000e0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-    device_add(&ide_pci_device);
-
-    pci_init(PCI_CONFIG_TYPE_2);
-    pci_register_slot(0x00, PCI_CARD_NORTHBRIDGE, 0, 0, 0, 0);
-    /* Not: 00, 02, 03, 04, 05, 06, 07, 08, 09, 0A, 0B, 0C, 0D, 0E, 0F. */
-    /* Yes: 01, 10, 11, 12, 13, 14. */
-    pci_register_slot(0x01, PCI_CARD_NORMAL,      1, 3, 2, 4);
-    pci_register_slot(0x04, PCI_CARD_NORMAL,      4, 4, 3, 3);
-    pci_register_slot(0x05, PCI_CARD_NORMAL,      1, 4, 3, 2);
-    pci_register_slot(0x06, PCI_CARD_NORMAL,      2, 1, 3, 4);
-    pci_register_slot(0x02, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 0);
-    device_add(&i430lx_device);
-    device_add(&keyboard_ps2_intel_ami_pci_device);
-    device_add(&sio_zb_device);
-    device_add(&fdc37c665_device);
-    device_add(&intel_flash_bxt_ami_device);
 
     return ret;
 }
@@ -205,25 +142,6 @@ machine_at_opti560l_init(const machine_t *model)
     return ret;
 }
 
-int
-machine_at_ambradp60_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear_combined("roms/machines/ambradp60/1004AF1P.BIO",
-                                    "roms/machines/ambradp60/1004AF1P.BI1",
-                                    0x1c000, 128);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_premiere_common_init(model, 0);
-
-    device_add(&i430lx_device);
-
-    return ret;
-}
-
 void
 machine_at_award_common_init(const machine_t *model)
 {
@@ -244,70 +162,6 @@ machine_at_award_common_init(const machine_t *model)
     device_add(&keyboard_ps2_ami_pci_device);
     device_add(&sio_zb_device);
     device_add(&intel_flash_bxt_device);
-}
-
-int
-machine_at_p5vl_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/p5vl/SM507.ROM",
-                           0x000e0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    pci_init(PCI_CONFIG_TYPE_1);
-    pci_register_slot(0x10, PCI_CARD_NORTHBRIDGE, 0, 0, 0, 0);
-
-    pci_register_slot(0x11, PCI_CARD_NORMAL,       1,  2,  3,  4);
-    pci_register_slot(0x12, PCI_CARD_NORMAL,       5,  6,  7,  8);
-    pci_register_slot(0x13, PCI_CARD_NORMAL,      9,  10, 11, 12);
-    pci_register_slot(0x14, PCI_CARD_NORMAL,      13, 14, 15, 16);
-
-    device_add(&opti5x7_pci_device);
-    device_add(&opti822_device);
-    device_add(&sst_flash_29ee010_device);
-    device_add(&keyboard_at_ami_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    return ret;
-}
-
-int
-machine_at_excaliburpci2_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear_inverted("roms/machines/excaliburpci2/S722P.ROM",
-                                    0x000e0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init_ex(model, 2);
-    device_add(&ami_1994_nvr_device);
-
-    pci_init(PCI_CONFIG_TYPE_1 | FLAG_TRC_CONTROLS_CPURST);
-    pci_register_slot(0x00, PCI_CARD_NORTHBRIDGE, 0, 0, 0, 0);
-    pci_register_slot(0x01, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 0);
-    pci_register_slot(0x08, PCI_CARD_IDE,         0, 0, 0, 0);
-    pci_register_slot(0x0A, PCI_CARD_NORMAL,      1, 2, 3, 4);
-    pci_register_slot(0x0B, PCI_CARD_NORMAL,      2, 3, 4, 1);
-    pci_register_slot(0x0C, PCI_CARD_NORMAL,      3, 4, 1, 2);
-    pci_register_slot(0x0D, PCI_CARD_NORMAL,      4, 1, 2, 3);
-    device_add(&fdc37c665_device);
-    device_add(&keyboard_ps2_ami_pci_device);
-    device_add(&ide_cmd640_pci_legacy_only_device);
-
-    device_add(&sis_85c50x_device);
-    device_add(&intel_flash_bxt_ami_device);
-
-    return ret;
 }
 
 int

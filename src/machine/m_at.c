@@ -166,41 +166,6 @@ machine_at_ibm_init(const machine_t *model)
     return ret;
 }
 
-/* IBM AT machines with custom BIOSes */
-int
-machine_at_ibmatquadtel_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/ibmatquadtel/BIOS_30MAR90_U27_QUADTEL_ENH_286_BIOS_3.05.01_27256.BIN",
-                                "roms/machines/ibmatquadtel/BIOS_30MAR90_U47_QUADTEL_ENH_286_BIOS_3.05.01_27256.BIN",
-                                0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_ibm_common_init(model);
-
-    return ret;
-}
-
-int
-machine_at_ibmatami_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/ibmatami/BIOS_5170_30APR89_U27_AMI_27256.BIN",
-                                "roms/machines/ibmatami/BIOS_5170_30APR89_U47_AMI_27256.BIN",
-                                0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_ibm_common_init(model);
-
-    return ret;
-}
-
 int
 machine_at_ibmatpx_init(const machine_t *model)
 {
@@ -208,23 +173,6 @@ machine_at_ibmatpx_init(const machine_t *model)
 
     ret = bios_load_interleaved("roms/machines/ibmatpx/BIOS ROM - PhoenixBIOS A286 - Version 1.01 - Even.bin",
                                 "roms/machines/ibmatpx/BIOS ROM - PhoenixBIOS A286 - Version 1.01 - Odd.bin",
-                                0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_ibm_common_init(model);
-
-    return ret;
-}
-
-int
-machine_at_ibmxt286_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/ibmxt286/bios_5162_21apr86_u34_78x7460_27256.bin",
-                                "roms/machines/ibmxt286/bios_5162_21apr86_u35_78x7461_27256.bin",
                                 0x000f0000, 65536, 0);
 
     if (bios_only || !ret)
@@ -254,23 +202,6 @@ machine_at_siemens_init(const machine_t *model)
 
     if (fdc_current[0] == FDC_INTERNAL)
         device_add(&fdc_at_device);
-
-    return ret;
-}
-
-int
-machine_at_wellamerastar_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/wellamerastar/W_3.031_L.BIN",
-                                "roms/machines/wellamerastar/W_3.031_H.BIN",
-                                0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_ibm_common_init(model);
 
     return ret;
 }

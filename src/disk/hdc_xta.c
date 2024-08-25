@@ -1007,14 +1007,6 @@ xta_init(const device_t *info)
             fn            = (char *) device_get_bios_file(info, bios_rev, 0);
             max           = 1;
             break;
-
-        case 1: /* EuroPC */
-            dev->name = "HD20";
-            dev->base = 0x0320;
-            dev->irq  = 5;
-            dev->dma  = 3;
-            break;
-
         default:
             break;
     }
@@ -1172,18 +1164,4 @@ const device_t xta_wdxt150_device = {
     .speed_changed = NULL,
     .force_redraw = NULL,
     .config = wdxt150_config
-};
-
-const device_t xta_hd20_device = {
-    .name = "EuroPC HD20 Fixed Disk Controller",
-    .internal_name = "xta_hd20",
-    .flags = DEVICE_ISA,
-    .local = 1,
-    .init = xta_init,
-    .close = xta_close,
-    .reset = NULL,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw = NULL,
-    .config = NULL
 };

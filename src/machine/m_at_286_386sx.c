@@ -164,51 +164,6 @@ machine_at_scatsx_init(const machine_t *model)
 }
 
 int
-machine_at_award286_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/award286/award.bin",
-                           0x000f0000, 131072, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_scat_init(model, 0, 1);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&ide_isa_device);
-
-    return ret;
-}
-
-int
-machine_at_adi386sx_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/adi386sx/3iip001l.bin",
-                                "roms/machines/adi386sx/3iip001h.bin",
-                                0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init_ex(model, 2);
-    device_add(&amstrad_megapc_nvr_device); /* NVR that is initialized to all 0x00's. */
-
-    device_add(&intel_82335_device);
-    device_add(&keyboard_at_ami_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    return ret;
-}
-
-int
 machine_at_wd76c10_init(const machine_t *model)
 {
     int ret;
@@ -232,33 +187,6 @@ machine_at_wd76c10_init(const machine_t *model)
     return ret;
 }
 
-int
-machine_at_cmdsl386sx16_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_interleaved("roms/machines/cmdsl386sx16/cbm-sl386sx-bios-lo-v1.04-390914-04.bin",
-                                "roms/machines/cmdsl386sx16/cbm-sl386sx-bios-hi-v1.04-390915-04.bin",
-                                0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_ide_init(model);
-
-    device_add(&keyboard_at_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&neat_device);
-    /* Two serial ports - on the real hardware SL386SX-16, they are on the single UMC UM82C452. */
-    device_add_inst(&ns16450_device, 1);
-    device_add_inst(&ns16450_device, 2);
-
-    return ret;
-}
-
 static void
 machine_at_scamp_common_init(const machine_t *model, int is_ps2)
 {
@@ -273,84 +201,4 @@ machine_at_scamp_common_init(const machine_t *model, int is_ps2)
         device_add(&fdc_at_device);
 
     device_add(&vlsi_scamp_device);
-}
-
-int
-machine_at_arb1374_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/arb1374/1374s.rom",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    device_add(&ali1217_device);
-    device_add(&w83787f_ide_en_device);
-    device_add(&keyboard_ps2_ami_device);
-
-    return ret;
-}
-
-int
-machine_at_sbc350a_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/sbc350a/350a.rom",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    device_add(&ali1217_device);
-    device_add(&fdc37c665_ide_device);
-    device_add(&keyboard_ps2_ami_device);
-
-    return ret;
-}
-
-int
-machine_at_325ax_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/325ax/M27C512.BIN",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    device_add(&ali1217_device);
-    device_add(&fdc_at_device);
-    device_add(&keyboard_at_ami_device);
-
-    return ret;
-}
-
-int
-machine_at_mr1217_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/mr1217/mrbios.BIN",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    device_add(&ali1217_device);
-    device_add(&fdc_at_device);
-    device_add(&keyboard_at_ami_device);
-
-    return ret;
 }
