@@ -47,7 +47,6 @@ extern const device_t contaq_82c597_device;
 
 /* C&T */
 extern const device_t ct_82c100_device;
-extern const device_t neat_device;
 extern const device_t scat_device;
 extern const device_t scat_4_device;
 extern const device_t scat_sx_device;
@@ -195,7 +194,4 @@ extern const device_t nec_mate_unk_device;
 extern const device_t phoenix_486_jumper_device;
 extern const device_t phoenix_486_jumper_pci_device;
 
-#ifdef USE_OLIVETTI
-extern const device_t olivetti_eva_device;
-#endif /* USE_OLIVETTI */
 #endif /*EMU_CHIPSET_H*/

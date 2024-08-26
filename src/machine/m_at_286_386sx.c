@@ -83,50 +83,6 @@ machine_at_quadt386sx_init(const machine_t *model)
     return ret;
 }
 
-int
-machine_at_neat_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/dtk386/3cto001.bin",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_init(model);
-
-    device_add(&neat_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    return ret;
-}
-
-int
-machine_at_neat_ami_init(const machine_t *model)
-{
-    int ret;
-
-    ret = bios_load_linear("roms/machines/ami286/AMIC206.BIN",
-                           0x000f0000, 65536, 0);
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_at_common_init(model);
-
-    device_add(&neat_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&keyboard_at_ami_device);
-
-    return ret;
-}
-
 static void
 machine_at_scat_init(const machine_t *model, int is_v4, int is_ami)
 {
