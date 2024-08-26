@@ -50,10 +50,6 @@ extern const device_t ct_82c100_device;
 extern const device_t cs8230_device;
 extern const device_t cs4031_device;
 
-/* G2 */
-extern const device_t gc100_device;
-extern const device_t gc100a_device;
-
 /* Headland */
 extern const device_t headland_gc10x_device;
 extern const device_t headland_gc113_device;

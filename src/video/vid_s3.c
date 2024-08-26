@@ -3353,34 +3353,6 @@ s3_recalctimings(svga_t *svga)
         }
     }
 
-#ifdef OLD_CODE_REFERENCE
-    if (s3->card_type == S3_MIROCRYSTAL10SD_805 || s3->card_type == S3_MIROCRYSTAL20SD_864 || s3->card_type == S3_MIROCRYSTAL20SV_964 || s3->card_type == S3_SPEA_MIRAGE_86C801 || s3->card_type == S3_SPEA_MIRAGE_86C805 || s3->card_type == S3_MIROCRYSTAL8S_805 || s3->card_type == S3_NUMBER9_9FX_531 || s3->card_type == S3_SPEA_MERCURY_LITE_PCI) {
-        if (!(svga->crtc[0x5e] & 0x04))
-            svga->vblankstart = svga->dispend;
-        if (svga->bpp != 32) {
-            if (svga->crtc[0x31] & 2)
-                s3->width = 2048;
-            else {
-                if (s3->card_type == S3_MIROCRYSTAL10SD_805) {
-                    if (svga->hdisp == 1280 && s3->width == 1024) {
-                        s3->width = 1280;
-                    }
-                }
-            }
-        } else {
-            if (s3->card_type == S3_NUMBER9_9FX_531) {
-                if ((svga->hdisp == 1600) && (s3->width == 1600))
-                    s3->width = 800;
-            }
-        }
-    } else if (s3->chip == S3_86C928) {
-        if (svga->bpp == 15) {
-            if (s3->width == 800)
-                s3->width = 1024;
-        }
-    }
-#endif
-
     if ((svga->crtc[0x3a] & 0x10) && !svga->lowres) {
         svga->vram_display_mask = s3->vram_mask;
         s3_log("BPP=%d, pitch=%d, width=%02x, double?=%x, 16bit?=%d, highres?=%d, "
@@ -3500,29 +3472,6 @@ s3_recalctimings(svga_t *svga)
                     default:
                         break;
                 }
-#ifdef OLD_CODE_REFERENCE
-                if (s3->chip != S3_VISION868) {
-                    if (s3->chip == S3_86C928) {
-                        if (s3->width == 2048 || s3->width == 1280 || s3->width == 1600) {
-                            if ((s3->width != 1600) && (svga->dispend == 1024) && (svga->hdisp != 1280))
-                                svga->hdisp <<= 2;
-                            else
-                                svga->hdisp <<= 1;
-                        }
-                    } else if ((s3->chip != S3_86C801) && (s3->chip != S3_86C805) && (s3->chip != S3_TRIO32) && (s3->chip != S3_TRIO64) && (s3->chip != S3_VISION964) && (s3->chip != S3_VISION968)) {
-                        if (s3->width == 1280 || s3->width == 1600)
-                            svga->hdisp <<= 1;
-                    } else if ((s3->card_type == S3_ELSAWIN2KPROX_964) || (s3->card_type == S3_ELSAWIN2KPROX)) {
-                        if (s3->width == 1280 || s3->width == 1600)
-                            svga->hdisp <<= 1;
-                    } else if (s3->card_type == S3_SPEA_MERCURY_P64V) {
-                        if (s3->width == 1280 || s3->width == 1600)
-                            svga->hdisp <<= 1;
-                        }
-                    } else if (s3->card_type == S3_NUMBER9_9FX_771)
-                        svga->hdisp <<= 1;
-                }
-#endif
                 break;
             case 15:
                 svga->render = svga_render_15bpp_highres;
@@ -3691,29 +3640,6 @@ s3_recalctimings(svga_t *svga)
                     default:
                         break;
                 }
-#ifdef OLD_CODE_REFERENCE
-                if ((s3->chip != S3_VISION964) && (s3->card_type != S3_SPEA_MIRAGE_86C801) && (s3->card_type != S3_SPEA_MIRAGE_86C805)) {
-                    if (s3->chip == S3_86C928)
-                        svga->hdisp <<= 1;
-                    else if (s3->chip != S3_VISION968)
-                        svga->hdisp >>= 1;
-                }
-                if ((s3->chip != S3_VISION868) && (s3->chip != S3_TRIO32) && (s3->chip != S3_TRIO64) && (s3->chip != S3_VISION964)) {
-                    if (s3->width == 1280 || s3->width == 1600)
-                        svga->hdisp <<= 1;
-                    else if (s3->card_type == S3_NUMBER9_9FX_771)
-                        svga->hdisp <<= 1;
-                }
-                if (s3->card_type == S3_MIROVIDEO40SV_ERGO_968 || s3->card_type == S3_PHOENIX_VISION968 || s3->card_type == S3_SPEA_MERCURY_P64V) {
-                    if (svga->hdisp == (1408 * 2))
-                        svga->hdisp >>= 1;
-                    else
-                        svga->hdisp = s3->width;
-                }
-
-                if (s3->card_type == S3_SPEA_MIRAGE_86C801 || s3->card_type == S3_SPEA_MIRAGE_86C805 || s3->card_type == S3_SPEA_MERCURY_LITE_PCI)
-                    svga->hdisp = s3->width;
-#endif
                 break;
             case 16:
                 svga->render = svga_render_16bpp_highres;
@@ -3879,36 +3805,7 @@ s3_recalctimings(svga_t *svga)
                     default:
                         break;
                 }
-
-#ifdef OLD_CODE_REFERENCE
-                if ((s3->card_type == S3_ELSAWIN2KPROX_964) || (s3->card_type == S3_ELSAWIN2KPROX)) {
-                    if (s3->width == 1280 || s3->width == 1600)
-                        svga->hdisp <<= 1;
-                }
-                if ((s3->chip != S3_VISION964) && (s3->card_type != S3_SPEA_MIRAGE_86C801) && (s3->card_type != S3_SPEA_MIRAGE_86C805)) {
-                    if (s3->chip == S3_86C928)
-                        svga->hdisp <<= 1;
-                    else if (s3->chip != S3_VISION968)
-                        svga->hdisp >>= 1;
-                } else if ((s3->card_type == S3_SPEA_MIRAGE_86C801) || (s3->card_type == S3_SPEA_MIRAGE_86C805))
-                    svga->hdisp >>= 1;
-                if ((s3->chip != S3_VISION868) && (s3->chip != S3_TRIO32) && (s3->chip != S3_TRIO64) && (s3->chip != S3_VISION964)) {
-                    if (s3->width == 1280 || s3->width == 1600)
-                        svga->hdisp <<= 1;
-                    else if (s3->card_type == S3_NUMBER9_9FX_771)
-                        svga->hdisp <<= 1;
-                }
-                if (s3->card_type == S3_MIROVIDEO40SV_ERGO_968 || s3->card_type == S3_PHOENIX_VISION968 || s3->card_type == S3_SPEA_MERCURY_P64V) {
-                    if (svga->hdisp == (1408 << 1))
-                        svga->hdisp >>= 1;
-                    else
-                        svga->hdisp = s3->width;
-                }
-
-                if (s3->card_type == S3_SPEA_MIRAGE_86C801 || s3->card_type == S3_SPEA_MIRAGE_86C805 || s3->card_type == S3_SPEA_MERCURY_LITE_PCI)
-                    svga->hdisp = s3->width;
-#endif
-                break;
+                    break;
             case 24:
                 svga->render = svga_render_24bpp_highres;
                 switch (s3->chip) {
@@ -3985,34 +3882,6 @@ s3_recalctimings(svga_t *svga)
                     default:
                         break;
                 }
-#ifdef OLD_CODE_REFERENCE
-                if (s3->chip != S3_VISION968) {
-                    if (s3->chip != S3_86C928 && s3->chip != S3_86C801 && s3->chip != S3_86C805)
-                        svga->hdisp /= 3;
-                    else
-                        svga->hdisp = (svga->hdisp * 2) / 3;
-
-                    if (s3->card_type == S3_SPEA_MERCURY_LITE_PCI) {
-                        if (s3->width == 2048) {
-                            switch (svga->dispend) {
-                                case 480:
-                                    svga->hdisp = 640;
-                                    break;
-
-                                default:
-                                    break;
-                            }
-                        }
-                    } else if (s3->chip == S3_86C924) {
-                        if (svga->dispend == 480)
-                            svga->hdisp = 640;
-                    }
-                } else {
-                    if ((s3->card_type == S3_MIROVIDEO40SV_ERGO_968) ||
-                        (s3->card_type == S3_PHOENIX_VISION968) || (s3->card_type == S3_SPEA_MERCURY_P64V))
-                        svga->hdisp = s3->width;
-                }
-#endif
                 break;
             case 32:
                 svga->render = svga_render_32bpp_highres;
@@ -4097,48 +3966,6 @@ s3_recalctimings(svga_t *svga)
                     default:
                         break;
                 }
-#ifdef OLD_CODE_REFERENCE
-                if ((s3->chip < S3_TRIO32) && (s3->chip != S3_VISION964) && (s3->chip != S3_VISION968) && (s3->chip != S3_86C928)) {
-                    if (s3->chip == S3_VISION868)
-                        svga->hdisp >>= 1;
-                    else
-                        svga->hdisp >>= 2;
-                }
-                if (s3->width == 1280 || s3->width == 1600 || (s3->card_type == S3_SPEA_MERCURY_P64V || s3->card_type == S3_NUMBER9_9FX_771))
-                    svga->hdisp <<= 1;
-                if (s3->card_type == S3_NUMBER9_9FX_771) {
-                    if (svga->hdisp == 832)
-                        svga->hdisp -= 32;
-                }
-                if (s3->card_type == S3_MIROVIDEO40SV_ERGO_968 || s3->card_type == S3_MIROCRYSTAL20SV_964 || s3->card_type == S3_MIROCRYSTAL20SD_864 || s3->card_type == S3_PHOENIX_VISION968 || s3->card_type == S3_SPEA_MERCURY_P64V) {
-                    svga->hdisp = s3->width;
-                    if (s3->card_type == S3_MIROCRYSTAL20SD_864 || s3->card_type == S3_MIROCRYSTAL20SV_964) {
-                        if (s3->width == 800 || s3->width == 1024 || s3->width == 1600) {
-                            switch (svga->dispend) {
-                                case 400:
-                                case 480:
-                                    svga->hdisp = 640;
-                                    break;
-
-                                case 576:
-                                    if (s3->width == 1600)
-                                        s3->width = 800;
-                                    svga->hdisp = 768;
-                                    break;
-
-                                case 600:
-                                    if (s3->width == 1600)
-                                        s3->width = 800;
-                                    svga->hdisp = 800;
-                                    break;
-
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                }
-#endif
                 break;
 
             default:
@@ -10270,11 +10097,6 @@ s3_phoenix_86c80x_available(void)
     return rom_present(ROM_PHOENIX_86C80X);
 }
 
-static int
-s3_mirocrystal_8s_805_available(void)
-{
-    return rom_present(ROM_MIROCRYSTAL8S_805);
-}
 
 static int
 s3_mirocrystal_10sd_805_available(void)
@@ -10426,11 +10248,6 @@ s3_phoenix_trio64vplus_available(void)
     return rom_present(ROM_PHOENIX_TRIO64VPLUS);
 }
 
-static int
-s3_cardex_trio64vplus_available(void)
-{
-    return rom_present(ROM_PHOENIX_TRIO64VPLUS);
-}
 
 static int
 s3_diamond_stealth64_764_available(void)
@@ -10660,19 +10477,6 @@ const device_t s3_spea_mirage_86c805_vlb_device = {
     .config        = s3_9fx_config
 };
 
-const device_t s3_mirocrystal_8s_805_vlb_device = {
-    .name          = "S3 86c805 VLB (MiroCRYSTAL 8S)",
-    .internal_name = "mirocrystal8s_vlb",
-    .flags         = DEVICE_VLB,
-    .local         = S3_MIROCRYSTAL8S_805,
-    .init          = s3_init,
-    .close         = s3_close,
-    .reset         = s3_reset,
-    { .available = s3_mirocrystal_8s_805_available },
-    .speed_changed = s3_speed_changed,
-    .force_redraw  = s3_force_redraw,
-    .config        = s3_9fx_config
-};
 
 const device_t s3_mirocrystal_10sd_805_vlb_device = {
     .name          = "S3 86c805 VLB (MiroCRYSTAL 10SD)",
@@ -11131,20 +10935,6 @@ const device_t s3_phoenix_trio64vplus_pci_device = {
     .close         = s3_close,
     .reset         = s3_reset,
     { .available = s3_phoenix_trio64vplus_available },
-    .speed_changed = s3_speed_changed,
-    .force_redraw  = s3_force_redraw,
-    .config        = s3_standard_config
-};
-
-const device_t s3_cardex_trio64vplus_pci_device = {
-    .name          = "S3 Trio64V+ PCI (Cardex)",
-    .internal_name = "cardex_trio64vplus_pci",
-    .flags         = DEVICE_PCI,
-    .local         = S3_CARDEX_TRIO64VPLUS,
-    .init          = s3_init,
-    .close         = s3_close,
-    .reset         = s3_reset,
-    { .available = s3_cardex_trio64vplus_available },
     .speed_changed = s3_speed_changed,
     .force_redraw  = s3_force_redraw,
     .config        = s3_standard_config

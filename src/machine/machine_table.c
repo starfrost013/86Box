@@ -86,7 +86,6 @@ const machine_filter_t machine_chipsets[] = {
     { "None",                       MACHINE_CHIPSET_NONE                },
     { "Discrete",                   MACHINE_CHIPSET_DISCRETE            },
     { "Proprietary",                MACHINE_CHIPSET_PROPRIETARY         },
-    { "Headland GC100A",            MACHINE_CHIPSET_GC100A              },
     { "Headland GC103",             MACHINE_CHIPSET_GC103               },
     { "Headland HT18",              MACHINE_CHIPSET_HT18                },
     { "ACC 2168",                   MACHINE_CHIPSET_ACC_2168            },
