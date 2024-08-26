@@ -83,42 +83,6 @@ machine_at_quadt386sx_init(const machine_t *model)
     return ret;
 }
 
-static void
-machine_at_scat_init(const machine_t *model, int is_v4, int is_ami)
-{
-    machine_at_common_init(model);
-
-    if (machines[machine].bus_flags & MACHINE_BUS_PS2) {
-        if (is_ami)
-            device_add(&keyboard_ps2_ami_device);
-        else
-            device_add(&keyboard_ps2_device);
-    } else {
-        if (is_ami)
-            device_add(&keyboard_at_ami_device);
-        else
-            device_add(&keyboard_at_device);
-    }
-
-    if (is_v4)
-        device_add(&scat_4_device);
-    else
-        device_add(&scat_device);
-}
-
-static void
-machine_at_scatsx_init(const machine_t *model)
-{
-    machine_at_common_init(model);
-
-    device_add(&keyboard_at_ami_device);
-
-    if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_at_device);
-
-    device_add(&scat_sx_device);
-}
-
 int
 machine_at_wd76c10_init(const machine_t *model)
 {
