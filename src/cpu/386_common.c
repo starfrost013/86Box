@@ -61,11 +61,7 @@ int nmi_enable = 1;
 int alt_access;
 int cpl_override = 0;
 
-#ifdef USE_NEW_DYNAREC
 uint16_t cpu_cur_status = 0;
-#else
-uint32_t cpu_cur_status = 0;
-#endif
 
 extern uint8_t *pccache2;
 
@@ -1559,9 +1555,7 @@ x86_int(int num)
 
             cpu_state.flags &= ~I_FLAG;
             cpu_state.flags &= ~T_FLAG;
-#ifndef USE_NEW_DYNAREC
-            oxpc = cpu_state.pc;
-#endif
+
             cpu_state.pc = readmemw(0, addr);
             cpu_use_exec ? loadcs(readmemw(0, addr + 2)) : loadcs_2386(readmemw(0, addr + 2));
         }
@@ -1601,9 +1595,7 @@ x86_int_sw(int num)
 
             cpu_state.flags &= ~I_FLAG;
             cpu_state.flags &= ~T_FLAG;
-#ifndef USE_NEW_DYNAREC
-            oxpc = cpu_state.pc;
-#endif
+
             cpu_state.pc = readmemw(0, addr);
             cpu_use_exec ? loadcs(readmemw(0, addr + 2)) : loadcs_2386(readmemw(0, addr + 2));
             cycles -= timing_int_rm;
@@ -1651,9 +1643,6 @@ x86_int_sw_rm(int num)
     cpu_state.flags &= ~T_FLAG;
     cpu_state.pc = new_pc;
     cpu_use_exec ? loadcs(new_cs) : loadcs_2386(new_cs);
-#ifndef USE_NEW_DYNAREC
-    oxpc = cpu_state.pc;
-#endif
 
     cycles -= timing_int_rm;
     if (cpu_use_exec)
@@ -1852,10 +1841,6 @@ sysenter(uint32_t fetchdat)
     /* Set VM, RF, and IF to 0. */
     cpu_state.eflags &= ~(RF_FLAG | VM_FLAG);
     cpu_state.flags &= ~I_FLAG;
-
-#ifndef USE_NEW_DYNAREC
-    oldcs = CS;
-#endif
     cpu_state.oldpc = cpu_state.pc;
     ESP             = msr.sysenter_esp;
     cpu_state.pc    = msr.sysenter_eip;
@@ -1939,9 +1924,6 @@ sysexit(uint32_t fetchdat)
     x386_common_log("             EFLAGS=%04X%04X/%i 32=%i/%i ECX=%08X EDX=%08X abrt=%02X\n", cpu_state.eflags, cpu_state.flags, !!trap, !!use32, !!stack32, ECX, EDX, cpu_state.abrt);
 #endif
 
-#ifndef USE_NEW_DYNAREC
-    oldcs = CS;
-#endif
     cpu_state.oldpc = cpu_state.pc;
     ESP             = ECX;
     cpu_state.pc    = EDX;
@@ -1999,9 +1981,6 @@ syscall_op(uint32_t fetchdat)
     cpu_state.eflags &= ~VM_FLAG;
     cpu_state.flags &= ~I_FLAG;
 
-#ifndef USE_NEW_DYNAREC
-    oldcs = CS;
-#endif
     cpu_state.oldpc = cpu_state.pc;
     ECX             = cpu_state.pc;
 
@@ -2059,9 +2038,6 @@ sysret(uint32_t fetchdat)
        there is a pending interrupt, following the STI logic */
     cpu_end_block_after_ins = 2;
 
-#ifndef USE_NEW_DYNAREC
-    oldcs = CS;
-#endif
     cpu_state.oldpc = cpu_state.pc;
     cpu_state.pc    = ECX;
 

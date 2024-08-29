@@ -84,11 +84,9 @@ opFINIT(uint32_t fetchdat)
     cpu_state.npxs = 0;
 #endif
     p              = (uint64_t *) cpu_state.tag;
-#ifdef USE_NEW_DYNAREC
+
     *p = 0;
-#else
-    *p                                            = 0x0303030303030303LL;
-#endif
+
     cpu_state.TOP   = 0;
     cpu_state.ismmx = 0;
     CLOCK_CYCLES_FPU((fpu_type >= FPU_487SX) ? (x87_timings.finit) : (x87_timings.finit * cpu_multi));
@@ -102,11 +100,9 @@ opFFREE(uint32_t fetchdat)
 {
     FP_ENTER();
     cpu_state.pc++;
-#ifdef USE_NEW_DYNAREC
+
     cpu_state.tag[(cpu_state.TOP + fetchdat) & 7] = TAG_EMPTY;
-#else
-    cpu_state.tag[(cpu_state.TOP + fetchdat) & 7] = 3;
-#endif
+
     CLOCK_CYCLES_FPU((fpu_type >= FPU_487SX) ? (x87_timings.ffree) : (x87_timings.ffree * cpu_multi));
     CONCURRENCY_CYCLES((fpu_type >= FPU_487SX) ? (x87_concurrency.ffree) : (x87_concurrency.ffree * cpu_multi));
     return 0;
@@ -196,11 +192,8 @@ FSTOR(void)
     /*Horrible hack, but as PCem doesn't keep the FPU stack in 80-bit precision at all times
       something like this is needed*/
     p = (uint64_t *) cpu_state.tag;
-#ifdef USE_NEW_DYNAREC
     if (cpu_state.MM_w4[0] == 0xffff && cpu_state.MM_w4[1] == 0xffff && cpu_state.MM_w4[2] == 0xffff && cpu_state.MM_w4[3] == 0xffff && cpu_state.MM_w4[4] == 0xffff && cpu_state.MM_w4[5] == 0xffff && cpu_state.MM_w4[6] == 0xffff && cpu_state.MM_w4[7] == 0xffff && !cpu_state.TOP && (*p == 0x0101010101010101ULL))
-#else
-    if (cpu_state.MM_w4[0] == 0xffff && cpu_state.MM_w4[1] == 0xffff && cpu_state.MM_w4[2] == 0xffff && cpu_state.MM_w4[3] == 0xffff && cpu_state.MM_w4[4] == 0xffff && cpu_state.MM_w4[5] == 0xffff && cpu_state.MM_w4[6] == 0xffff && cpu_state.MM_w4[7] == 0xffff && !cpu_state.TOP && !(*p))
-#endif
+
         cpu_state.ismmx = 1;
 
     CLOCK_CYCLES_FPU((fpu_type >= FPU_487SX) ? (x87_timings.frstor) : (x87_timings.frstor * cpu_multi));
@@ -416,11 +409,9 @@ FSAVE(void)
     cpu_state.npxs = 0;
 #endif
     p              = (uint64_t *) cpu_state.tag;
-#ifdef USE_NEW_DYNAREC
+
     *p = 0;
-#else
-    *p = 0x0303030303030303LL;
-#endif
+
     cpu_state.TOP   = 0;
     cpu_state.ismmx = 0;
 
@@ -560,13 +551,10 @@ opFXAM(uint32_t fetchdat)
     FP_ENTER();
     cpu_state.pc++;
     cpu_state.npxs &= ~(FPU_SW_C0 | FPU_SW_C1 | FPU_SW_C2 | FPU_SW_C3);
-#ifdef USE_NEW_DYNAREC
+
     if (cpu_state.tag[cpu_state.TOP & 7] == TAG_EMPTY)
         cpu_state.npxs |= (FPU_SW_C0 | FPU_SW_C3);
-#else
-    if (cpu_state.tag[cpu_state.TOP & 7] == 3)
-        cpu_state.npxs |= (FPU_SW_C0 | FPU_SW_C3);
-#endif
+
     else if (ST(0) == 0.0)
         cpu_state.npxs |= FPU_SW_C3;
     else
@@ -726,11 +714,9 @@ opFDECSTP(uint32_t fetchdat)
 {
     FP_ENTER();
     cpu_state.pc++;
-#ifdef USE_NEW_DYNAREC
+
     cpu_state.TOP--;
-#else
-    cpu_state.TOP = (cpu_state.TOP - 1) & 7;
-#endif
+
     CLOCK_CYCLES_FPU((fpu_type >= FPU_487SX) ? (x87_timings.fincdecstp) : (x87_timings.fincdecstp * cpu_multi));
     CONCURRENCY_CYCLES((fpu_type >= FPU_487SX) ? (x87_concurrency.fincdecstp) : (x87_concurrency.fincdecstp * cpu_multi));
     return 0;
@@ -741,11 +727,9 @@ opFINCSTP(uint32_t fetchdat)
 {
     FP_ENTER();
     cpu_state.pc++;
-#ifdef USE_NEW_DYNAREC
+
     cpu_state.TOP++;
-#else
-    cpu_state.TOP = (cpu_state.TOP + 1) & 7;
-#endif
+
     CLOCK_CYCLES_FPU((fpu_type >= FPU_487SX) ? (x87_timings.fincdecstp) : (x87_timings.fincdecstp * cpu_multi));
     CONCURRENCY_CYCLES((fpu_type >= FPU_487SX) ? (x87_concurrency.fincdecstp) : (x87_concurrency.fincdecstp * cpu_multi));
     return 0;

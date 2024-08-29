@@ -33,8 +33,9 @@
 #endif
 #include "x86seg.h"
 #include "386_common.h"
-#ifdef USE_NEW_DYNAREC
-#    include "codegen.h"
+
+#include "codegen.h"
+
 #endif
 
 #undef CPU_BLOCK_END
@@ -244,18 +245,8 @@ exec386_2386(int32_t cycs)
         while (cycdiff < cycle_period) {
             int ins_fetch_fault = 0;
             ins_cycles = cycles;
-
-#ifndef USE_NEW_DYNAREC
-            oldcs  = CS;
-            oldcpl = CPL;
-#endif
             cpu_state.oldpc = cpu_state.pc;
             cpu_state.op32  = use32;
-
-#ifndef USE_NEW_DYNAREC
-            x86_was_reset = 0;
-#endif
-
             cpu_state.ea_seg = &cpu_state.seg_ds;
             cpu_state.ssegs  = 0;
 
@@ -298,12 +289,6 @@ exec386_2386(int32_t cycs)
             else if (in_smm)
                 x386_log("[%04X:%08X] ABRT\n", CS, cpu_state.pc);
 #endif
-
-#ifndef USE_NEW_DYNAREC
-            if (!use32)
-                cpu_state.pc &= 0xffff;
-#endif
-
             if (cpu_end_block_after_ins)
                 cpu_end_block_after_ins--;
 
@@ -314,9 +299,6 @@ exec386_2386(int32_t cycs)
                 x86_doabrt_2386(tempi);
                 if (cpu_state.abrt) {
                     cpu_state.abrt = 0;
-#ifndef USE_NEW_DYNAREC
-                    CS = oldcs;
-#endif
                     cpu_state.pc = cpu_state.oldpc;
                     x386_log("Double fault\n");
                     pmodeint_2386(8, 0);
@@ -334,9 +316,6 @@ exec386_2386(int32_t cycs)
                 if (trap & 2) dr[6] |= 0x8000;
                 if (trap & 1) dr[6] |= 0x4000;
                 trap = 0;
-#ifndef USE_NEW_DYNAREC
-                oldcs = CS;
-#endif
                 cpu_state.oldpc = cpu_state.pc;
                 x86_int(1);
             }
@@ -344,9 +323,6 @@ exec386_2386(int32_t cycs)
             if (smi_line)
                 enter_smm_check(0);
             else if (nmi && nmi_enable && nmi_mask) {
-#ifndef USE_NEW_DYNAREC
-                oldcs = CS;
-#endif
                 cpu_state.oldpc = cpu_state.pc;
                 x86_int(2);
                 nmi_enable = 0;

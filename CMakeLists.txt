@@ -132,7 +132,7 @@ option(FLUIDSYNTH   "FluidSynth"                                                
 option(MUNT         "MUNT"                                                          ON)
 option(VNC          "VNC renderer"                                                  OFF)
 option(CPPTHREADS   "C++11 threads"                                                 ON)
-option(NEW_DYNAREC  "Use the PCem v15 (\"new\") dynamic recompiler"                 OFF)
+option(NEW_DYNAREC  "Use the PCem v15 (\"new\") dynamic recompiler"                 ON)
 option(MINITRACE    "Enable Chrome tracing using the modified minitrace library"    OFF)
 option(GDBSTUB      "Enable GDB stub server for debugging"                          OFF)
 option(DEV_BRANCH   "Development branch"                                            OFF)

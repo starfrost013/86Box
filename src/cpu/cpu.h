@@ -365,7 +365,6 @@ typedef struct {
 
     MMX_REG MM[8];
 
-#ifdef USE_NEW_DYNAREC
 #    if defined(__APPLE__) && defined(__aarch64__)
     uint64_t old_fp_control;
     uint64_t new_fp_control;
@@ -380,10 +379,6 @@ typedef struct {
 #    if defined i386 || defined __i386 || defined __i386__ || defined _X86_ || defined _M_IX86 || defined __amd64__ || defined _M_X64
     uint32_t trunc_fp_control;
 #    endif
-#else
-    uint16_t old_npxc;
-    uint16_t new_npxc;
-#endif
 
     x86seg seg_cs;
     x86seg seg_ds;
@@ -415,23 +410,16 @@ typedef struct {
 #define CPU_STATUS_PMODE   (1 << 2)
 #define CPU_STATUS_V86     (1 << 3)
 #define CPU_STATUS_SMM     (1 << 4)
-#ifdef USE_NEW_DYNAREC
-#    define CPU_STATUS_FLAGS 0xff
-#else
-#    define CPU_STATUS_FLAGS 0xffff
-#endif
+
+#define CPU_STATUS_FLAGS 0xff
 
 /*If the cpu_state.flags below are set in cpu_cur_status, they must be set in block->status.
   Otherwise they are ignored*/
-#ifdef USE_NEW_DYNAREC
-#    define CPU_STATUS_NOTFLATDS (1 << 8)
-#    define CPU_STATUS_NOTFLATSS (1 << 9)
-#    define CPU_STATUS_MASK      0xff00
-#else
-#    define CPU_STATUS_NOTFLATDS (1 << 16)
-#    define CPU_STATUS_NOTFLATSS (1 << 17)
-#    define CPU_STATUS_MASK      0xffff0000
-#endif
+
+#define CPU_STATUS_NOTFLATDS (1 << 8)
+#define CPU_STATUS_NOTFLATSS (1 << 9)
+#define CPU_STATUS_MASK      0xff00
+
 
 #ifdef _MSC_VER
 #    define COMPILE_TIME_ASSERT(expr) /*nada*/
@@ -536,11 +524,7 @@ extern int smi_latched;
 extern int smm_in_hlt;
 extern int smi_block;
 
-#ifdef USE_NEW_DYNAREC
 extern uint16_t cpu_cur_status;
-#else
-extern uint32_t cpu_cur_status;
-#endif
 extern uint64_t cpu_CR4_mask;
 extern uint64_t tsc;
 extern msr_t    msr;

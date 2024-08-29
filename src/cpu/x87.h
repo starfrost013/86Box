@@ -43,11 +43,8 @@ void     x87_settag(uint16_t new_tag);
 #define TAG_EMPTY 0
 #define TAG_VALID (1 << 0)
 /*Hack for FPU copy. If set then MM[].q contains the 64-bit integer loaded by FILD*/
-#ifdef USE_NEW_DYNAREC
-#    define TAG_UINT64 (1 << 7)
-#else
-#    define TAG_UINT64 (1 << 2)
-#endif
+
+#define TAG_UINT64 (1 << 7)
 
 /*Old dynarec stuff.*/
 #define TAG_NOT_UINT64       0xfb

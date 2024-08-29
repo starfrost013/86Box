@@ -94,9 +94,7 @@ opSAHF(uint32_t fetchdat)
     CLOCK_CYCLES(3);
     PREFETCH_RUN(3, 1, -1, 0, 0, 0, 0, 0);
 
-#if (defined(USE_DYNAREC) && defined(USE_NEW_DYNAREC))
     codegen_flags_changed = 0;
-#endif
 
     return 0;
 }
@@ -183,10 +181,7 @@ opPOPF_186(uint32_t fetchdat)
     CLOCK_CYCLES(5);
     PREFETCH_RUN(5, 1, -1, 1, 0, 0, 0, 0);
 
-#if (defined(USE_DYNAREC) && defined(USE_NEW_DYNAREC))
     codegen_flags_changed = 0;
-#endif
-
     return 0;
 }
 static int
@@ -217,9 +212,7 @@ opPOPF_286(uint32_t fetchdat)
     CLOCK_CYCLES(5);
     PREFETCH_RUN(5, 1, -1, 1, 0, 0, 0, 0);
 
-#if (defined(USE_DYNAREC) && defined(USE_NEW_DYNAREC))
     codegen_flags_changed = 0;
-#endif
 
     return 0;
 }
@@ -271,12 +264,10 @@ opPOPF(uint32_t fetchdat)
     CLOCK_CYCLES(5);
     PREFETCH_RUN(5, 1, -1, 1, 0, 0, 0, 0);
 
-#if (defined(USE_DYNAREC) && defined(USE_NEW_DYNAREC))
     codegen_flags_changed = 0;
-#endif
-
     return 0;
 }
+
 static int
 opPOPFD(uint32_t fetchdat)
 {
@@ -315,9 +306,7 @@ opPOPFD(uint32_t fetchdat)
     CLOCK_CYCLES(5);
     PREFETCH_RUN(5, 1, -1, 0, 1, 0, 0, 0);
 
-#if (defined(USE_DYNAREC) && defined(USE_NEW_DYNAREC))
     codegen_flags_changed = 0;
-#endif
 
     return 0;
 }
