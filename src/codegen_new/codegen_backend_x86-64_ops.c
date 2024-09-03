@@ -1,31 +1,32 @@
 #if defined __amd64__ || defined _M_X64
 
-#    include <stdint.h>
-#    include <inttypes.h>
-#    include <86box/86box.h>
-#    include "cpu.h"
-#    include <86box/mem.h>
-#    include <86box/plat_unused.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <inttypes.h>
+#include <86box/86box.h>
+#include "cpu.h"
+#include <86box/mem.h>
+#include <86box/plat_unused.h>
 
-#    include "codegen.h"
-#    include "codegen_allocator.h"
-#    include "codegen_backend.h"
-#    include "codegen_backend_x86-64_defs.h"
-#    include "codegen_backend_x86-64_ops.h"
-#    include "codegen_backend_x86-64_ops_helpers.h"
+#include "codegen.h"
+#include "codegen_allocator.h"
+#include "codegen_backend.h"
+#include "codegen_backend_x86-64_defs.h"
+#include "codegen_backend_x86-64_ops.h"
+#include "codegen_backend_x86-64_ops_helpers.h"
 
-#    define RM_OP_ADD 0x00
-#    define RM_OP_OR  0x08
-#    define RM_OP_AND 0x20
-#    define RM_OP_SUB 0x28
-#    define RM_OP_XOR 0x30
-#    define RM_OP_CMP 0x38
+#define RM_OP_ADD 0x00
+#define RM_OP_OR  0x08
+#define RM_OP_AND 0x20
+#define RM_OP_SUB 0x28
+#define RM_OP_XOR 0x30
+#define RM_OP_CMP 0x38
 
-#    define RM_OP_ROL 0x00
-#    define RM_OP_ROR 0x08
-#    define RM_OP_SHL 0x20
-#    define RM_OP_SHR 0x28
-#    define RM_OP_SAR 0x38
+#define RM_OP_ROL 0x00
+#define RM_OP_ROR 0x08
+#define RM_OP_SHL 0x20
+#define RM_OP_SHR 0x28
+#define RM_OP_SAR 0x38
 
 static inline void
 call(codeblock_t *block, uintptr_t func)

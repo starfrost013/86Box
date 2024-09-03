@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 #include <86box/86box.h>
 #include "cpu.h"
 #include <86box/mem.h>

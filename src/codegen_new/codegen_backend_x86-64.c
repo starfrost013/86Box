@@ -1,30 +1,31 @@
 #if defined __amd64__ || defined _M_X64
 
-#    include <stdlib.h>
-#    include <stdint.h>
-#    include <86box/86box.h>
-#    include "cpu.h"
-#    include <86box/mem.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <86box/86box.h>
+#include "cpu.h"
+#include <86box/mem.h>
 
-#    include "codegen.h"
-#    include "codegen_allocator.h"
-#    include "codegen_backend.h"
-#    include "codegen_backend_x86-64_defs.h"
-#    include "codegen_backend_x86-64_ops.h"
-#    include "codegen_backend_x86-64_ops_sse.h"
-#    include "codegen_reg.h"
-#    include "x86.h"
-#    include "x86seg_common.h"
-#    include "x86seg.h"
+#include "codegen.h"
+#include "codegen_allocator.h"
+#include "codegen_backend.h"
+#include "codegen_backend_x86-64_defs.h"
+#include "codegen_backend_x86-64_ops.h"
+#include "codegen_backend_x86-64_ops_sse.h"
+#include "codegen_reg.h"
+#include "x86.h"
+#include "x86seg_common.h"
+#include "x86seg.h"
 
-#    if defined(__linux__) || defined(__APPLE__)
-#        include <sys/mman.h>
-#        include <unistd.h>
-#    endif
-#    if defined WIN32 || defined _WIN32 || defined _WIN32
-#        include <windows.h>
-#    endif
-#    include <string.h>
+#if defined(__linux__) || defined(__APPLE__)
+#   include <sys/mman.h>
+#   include <unistd.h>
+#endif
+#if defined WIN32 || defined _WIN32 || defined _WIN32
+#   include <windows.h>
+#endif
+#include <string.h>
 
 void *codegen_mem_load_byte;
 void *codegen_mem_load_word;

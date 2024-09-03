@@ -1,8 +1,8 @@
 #if defined i386 || defined __i386 || defined __i386__ || defined _X86_ || defined _M_IX86
 
 #    include <stddef.h>
-#    include <stdint.h>
-#    include <stdlib.h>
+#include <stdint.h>
+#include <stdlib.h>
 #    include <86box/86box.h>
 #    include "cpu.h"
 #    include <86box/mem.h>

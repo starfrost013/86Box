@@ -36,8 +36,6 @@
 
 #include "codegen.h"
 
-#endif
-
 #undef CPU_BLOCK_END
 #define CPU_BLOCK_END()
 

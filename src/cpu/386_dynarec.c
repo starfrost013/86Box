@@ -32,6 +32,7 @@
 #include <86box/plat_fallthrough.h>
 #include <86box/gdbstub.h>
 #ifdef USE_DYNAREC
+    #include <codegen.h>
     #include <codegen_backend.h>
 #endif
 
@@ -233,6 +234,7 @@ fetch_ea_16_long(uint32_t rmdat)
 int32_t         cycles_main = 0;
 static int32_t  cycles_old  = 0;
 static uint64_t tsc_old     = 0;
+#endif
 
 #    ifdef USE_ACYCS
 int32_t acycs = 0;
@@ -448,9 +450,6 @@ exec386_dynarec_dyn(void)
                 block->flags |= CODEBLOCK_BYTE_MASK;
         }
         if (valid_block && (block->flags & CODEBLOCK_WAS_RECOMPILED) && (block->flags & CODEBLOCK_STATIC_TOP) && block->TOP != (cpu_state.TOP & 7))
-#    else
-        if (valid_block && block->was_recompiled && (block->flags & CODEBLOCK_STATIC_TOP) && block->TOP != cpu_state.TOP)
-#    endif
         {
             /* FPU top-of-stack does not match the value this block was compiled
                with, re-compile using dynamic top-of-stack*/
@@ -462,7 +461,7 @@ exec386_dynarec_dyn(void)
     {
         void (*code)(void) = (void *) &block->data[BLOCK_START];
 
-        codeblock_hash[hash] = block;
+        codeblock_hash[hash] = (uint16_t)block;
         inrecomp = 1;
         code();
 #    ifdef USE_ACYCS
@@ -748,7 +747,6 @@ exec386_dynarec(int32_t cycs)
         cycles_main -= (cycles_start - cycles);
     }
 }
-#endif
 
 void
 exec386(int32_t cycs)

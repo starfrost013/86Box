@@ -1,23 +1,24 @@
 #if defined __amd64__ || defined _M_X64
 
-#    include <stdint.h>
-#    include <86box/86box.h>
-#    include "cpu.h"
-#    include <86box/mem.h>
-#    include <86box/plat_unused.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <86box/86box.h>
+#include "cpu.h"
+#include <86box/mem.h>
+#include <86box/plat_unused.h>
 
-#    include "x86.h"
-#    include "x86seg_common.h"
-#    include "x86seg.h"
-#    include "x87_sf.h"
-#    include "x87.h"
-#    include "386_common.h"
-#    include "codegen.h"
-#    include "codegen_backend.h"
-#    include "codegen_backend_x86-64_defs.h"
-#    include "codegen_backend_x86-64_ops.h"
-#    include "codegen_backend_x86-64_ops_sse.h"
-#    include "codegen_ir_defs.h"
+#include "x86.h"
+#include "x86seg_common.h"
+#include "x86seg.h"
+#include "x87_sf.h"
+#include "x87.h"
+#include "386_common.h"
+#include "codegen.h"
+#include "codegen_backend.h"
+#include "codegen_backend_x86-64_defs.h"
+#include "codegen_backend_x86-64_ops.h"
+#include "codegen_backend_x86-64_ops_sse.h"
+#include "codegen_ir_defs.h"
 
 #    define STACK_ARG0        (0)
 #    define STACK_ARG1        (4)

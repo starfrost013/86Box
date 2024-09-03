@@ -1,17 +1,18 @@
 #if defined __amd64__ || defined _M_X64
 
-#    include <stdint.h>
-#    include <86box/86box.h>
-#    include "cpu.h"
-#    include <86box/mem.h>
-#    include <86box/plat_unused.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <86box/86box.h>
+#include "cpu.h"
+#include <86box/mem.h>
+#include <86box/plat_unused.h>
 
-#    include "codegen.h"
-#    include "codegen_allocator.h"
-#    include "codegen_backend.h"
-#    include "codegen_backend_x86-64_defs.h"
-#    include "codegen_backend_x86-64_ops_sse.h"
-#    include "codegen_backend_x86-64_ops_helpers.h"
+#include "codegen.h"
+#include "codegen_allocator.h"
+#include "codegen_backend.h"
+#include "codegen_backend_x86-64_defs.h"
+#include "codegen_backend_x86-64_ops_sse.h"
+#include "codegen_backend_x86-64_ops_helpers.h"
 
 void
 host_x86_ADDPS_XREG_XREG(codeblock_t *block, int dst_reg, int src_reg)
