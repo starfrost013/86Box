@@ -461,7 +461,6 @@ exec386_dynarec_dyn(void)
     {
         void (*code)(void) = (void *) &block->data[BLOCK_START];
 
-        codeblock_hash[hash] = (uint16_t)block;
         inrecomp = 1;
         code();
 #    ifdef USE_ACYCS
