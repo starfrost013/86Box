@@ -659,22 +659,6 @@ mach64_update_irqs(mach64_t *mach64)
         pci_clear_irq(mach64->pci_slot, PCI_INTA, &mach64->irq_state);
 }
 
-#if 0
-static __inline void
-wake_fifo_thread(mach64_t *mach64)
-{
-    thread_set_event(mach64->wake_fifo_thread); /*Wake up FIFO thread if moving from idle*/
-}
-
-static void
-mach64_wait_fifo_idle(mach64_t *mach64)
-{
-    while (!FIFO_EMPTY) {
-        wake_fifo_thread(mach64);
-        thread_wait_event(mach64->fifo_not_full_event, 1);
-    }
-}
-#endif
 
 #define READ8(addr, var)                \
     switch ((addr) &3) {                \
@@ -1173,72 +1157,6 @@ mach64_accel_write_fifo_l(mach64_t *mach64, uint32_t addr, uint32_t val)
             break;
     }
 }
-
-#if 0
-static void
-fifo_thread(void *param)
-{
-    mach64_t *mach64 = (mach64_t *) param;
-
-    while (mach64->thread_run) {
-        thread_set_event(mach64->fifo_not_full_event);
-        thread_wait_event(mach64->wake_fifo_thread, -1);
-        thread_reset_event(mach64->wake_fifo_thread);
-        mach64->blitter_busy = 1;
-        while (!FIFO_EMPTY) {
-            uint64_t      start_time = plat_timer_read();
-            uint64_t      end_time;
-            fifo_entry_t *fifo = &mach64->fifo[mach64->fifo_read_idx & FIFO_MASK];
-
-            switch (fifo->addr_type & FIFO_TYPE) {
-                case FIFO_WRITE_BYTE:
-                    mach64_accel_write_fifo(mach64, fifo->addr_type & FIFO_ADDR, fifo->val);
-                    break;
-                case FIFO_WRITE_WORD:
-                    mach64_accel_write_fifo_w(mach64, fifo->addr_type & FIFO_ADDR, fifo->val);
-                    break;
-                case FIFO_WRITE_DWORD:
-                    mach64_accel_write_fifo_l(mach64, fifo->addr_type & FIFO_ADDR, fifo->val);
-                    break;
-
-                default:
-                    break;
-            }
-
-            mach64->fifo_read_idx++;
-            fifo->addr_type = FIFO_INVALID;
-
-            if (FIFO_ENTRIES > 0xe000)
-                thread_set_event(mach64->fifo_not_full_event);
-
-            end_time = plat_timer_read();
-            mach64->blitter_time += end_time - start_time;
-        }
-        mach64->blitter_busy = 0;
-    }
-}
-
-static void
-mach64_queue(mach64_t *mach64, uint32_t addr, uint32_t val, uint32_t type)
-{
-    fifo_entry_t *fifo = &mach64->fifo[mach64->fifo_write_idx & FIFO_MASK];
-
-    if (FIFO_FULL) {
-        thread_reset_event(mach64->fifo_not_full_event);
-        if (FIFO_FULL) {
-            thread_wait_event(mach64->fifo_not_full_event, -1); /*Wait for room in ringbuffer*/
-        }
-    }
-
-    fifo->val       = val;
-    fifo->addr_type = (addr & FIFO_ADDR) | type;
-
-    mach64->fifo_write_idx++;
-
-    if (FIFO_ENTRIES > 0xe000 || FIFO_ENTRIES < 8)
-        wake_fifo_thread(mach64);
-}
-#endif
 
 void
 mach64_start_fill(mach64_t *mach64)

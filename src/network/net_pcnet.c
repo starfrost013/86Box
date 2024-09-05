@@ -505,27 +505,17 @@ pcnetTmdStorePassHost(nic_t *dev, TMD *tmd, uint32_t addr)
         xda[1] = ((((uint32_t *) tmd)[0] >> 16) & 0xff) | ((((uint32_t *) tmd)[1] >> 16) & 0xff00);
         xda[2] = ((uint32_t *) tmd)[1] & 0xffff;
         xda[3] = ((uint32_t *) tmd)[2] >> 16;
-#if 0
-        xda[1] |=  0x8000;
-        dma_bm_write(addr, (uint8_t*)&xda[0], sizeof(xda), dev->transfer_size);
-#endif
+
         xda[1] &= ~0x8000;
         dma_bm_write(addr, (uint8_t *) &xda[0], sizeof(xda), dev->transfer_size);
     } else if (BCR_SWSTYLE(dev) != 3) {
-#if 0
-        ((uint32_t*)tmd)[1] |=  0x80000000;
-        dma_bm_write(addr, (uint8_t*)tmd, 12, dev->transfer_size);
-#endif
+
         ((uint32_t *) tmd)[1] &= ~0x80000000;
         dma_bm_write(addr, (uint8_t *) tmd, 12, dev->transfer_size);
     } else {
         xda32[0] = ((uint32_t *) tmd)[2];
         xda32[1] = ((uint32_t *) tmd)[1];
         xda32[2] = ((uint32_t *) tmd)[0];
-#if 0
-        xda32[1] |=  0x80000000;
-        dma_bm_write(addr, (uint8_t*)&xda32[0], sizeof(xda32), dev->transfer_size);
-#endif
         xda32[1] &= ~0x80000000;
         dma_bm_write(addr, (uint8_t *) &xda32[0], sizeof(xda32), dev->transfer_size);
     }
@@ -600,27 +590,15 @@ pcnetRmdStorePassHost(nic_t *dev, RMD *rmd, uint32_t addr)
         rda[1] = ((((uint32_t *) rmd)[0] >> 16) & 0xff) | ((((uint32_t *) rmd)[1] >> 16) & 0xff00);
         rda[2] = ((uint32_t *) rmd)[1] & 0xffff;
         rda[3] = ((uint32_t *) rmd)[2] & 0xffff;
-#if 0
-        rda[1] |=  0x8000;
-        dma_bm_write(addr, (uint8_t*)&rda[0], sizeof(rda), dev->transfer_size);
-#endif
         rda[1] &= ~0x8000;
         dma_bm_write(addr, (uint8_t *) &rda[0], sizeof(rda), dev->transfer_size);
     } else if (BCR_SWSTYLE(dev) != 3) {
-#if 0
-        ((uint32_t*)rmd)[1] |=  0x80000000;
-        dma_bm_write(addr, (uint8_t*)rmd, 12, dev->transfer_size);
-#endif
         ((uint32_t *) rmd)[1] &= ~0x80000000;
         dma_bm_write(addr, (uint8_t *) rmd, 12, dev->transfer_size);
     } else {
         rda32[0] = ((uint32_t *) rmd)[2];
         rda32[1] = ((uint32_t *) rmd)[1];
         rda32[2] = ((uint32_t *) rmd)[0];
-#if 0
-        rda32[1] |=  0x80000000;
-        dma_bm_write(addr, (uint8_t*)&rda32[0], sizeof(rda32), dev->transfer_size);
-#endif
         rda32[1] &= ~0x80000000;
         dma_bm_write(addr, (uint8_t *) &rda32[0], sizeof(rda32), dev->transfer_size);
     }

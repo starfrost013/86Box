@@ -352,10 +352,7 @@ pitf_over(ctrf_t *ctr, void *priv)
                     ctr->newcount = (l & 1);
                 }
             }
-#if 0
-            if (!t)
-                pclog("pit_over: square wave mode c=%x  %lli  %f\n", pit.c[t], tsc, ctr->pit_const);
-#endif
+
             break;
         case 4: /*Software triggered strove*/
             if (!ctr->thit) {
@@ -397,10 +394,7 @@ static __inline void
 pitf_ctr_latch_count(ctrf_t *ctr)
 {
     ctr->rl = pitf_read_timer(ctr);
-#if 0
-    pclog("Timer latch %f %04X %04X\n",pit->c[0],pit->rl[0],pit->l[0]);
-    pit->ctrl |= 0x30;
-#endif
+
     ctr->rereadlatch = 0;
     ctr->rm          = 3;
     ctr->latched     = 1;

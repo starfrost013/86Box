@@ -299,9 +299,6 @@ ncr5380_bus_update(ncr_t *ncr, int bus)
                 if (ncr->command_pos == ncr5380_cmd_len[(ncr->command[0] >> 5) & 7]) {
                     if (ncr->is_msgout) {
                         ncr->is_msgout = 0;
-#if 0
-                        ncr->command[1] = (ncr->command[1] & 0x1f) | (ncr->msglun << 5);
-#endif
                     }
 
                     /*Reset data position to default*/

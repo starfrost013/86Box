@@ -657,41 +657,9 @@ VulkanRenderer2::initResources()
     }
 
     // Shaders
-#if 0
-    #version 440
 
-    layout(location = 0) in vec4 position;
-    layout(location = 1) in vec2 texcoord;
-
-    layout(location = 0) out vec2 v_texcoord;
-
-    layout(std140, binding = 0) uniform buf {
-        mat4 mvp;
-    } ubuf;
-
-    out gl_PerVertex { vec4 gl_Position; };
-
-    void main()
-    {
-        v_texcoord = texcoord;
-        gl_Position = ubuf.mvp * position;
-    }
-#endif
     VkShaderModule vertShaderModule = createShader(QStringLiteral(":/texture_vert.spv"));
-#if 0
-    #version 440
 
-    layout(location = 0) in vec2 v_texcoord;
-
-    layout(location = 0) out vec4 fragColor;
-
-    layout(binding = 1) uniform sampler2D tex;
-
-    void main()
-    {
-        fragColor = texture(tex, v_texcoord);
-    }
-#endif
     VkShaderModule fragShaderModule = createShader(QStringLiteral(":/texture_frag.spv"));
 
     // Graphics pipeline

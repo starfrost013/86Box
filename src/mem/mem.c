@@ -2590,9 +2590,6 @@ mem_a20_init(void)
         if (is6117)
             rammask |= 0x03000000;
         flushmmucache();
-#if 0
-        mem_a20_state = mem_a20_key | mem_a20_alt;
-#endif
     } else {
         rammask = 0xfffff;
         flushmmucache();

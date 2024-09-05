@@ -428,14 +428,8 @@ kbc_scan_kbd_at(atkbc_t *dev)
                 kbc_ibf_process(dev);
         /* AT mode. */
         } else {
-#if 0
-            dev->t = dev->mem[0x28];
-#endif
             if (dev->mem[0x2e] != 0x00) {
-#if 0
-                if (!(dev->t & 0x02))
-                    return;
-#endif
+
                 dev->mem[0x2e] = 0x00;
             }
             dev->p2 &= 0xbf;
@@ -500,9 +494,7 @@ at_main_ibf:
             /* Keyboard controller command want to output a single byte. */
             kbc_at_log("ATkbc: %02X coming from channel %i with high status %02X\n", dev->val, dev->channel, dev->stat_hi);
             kbc_send_to_ob(dev, dev->val, dev->channel, dev->stat_hi);
-#if 0
-            dev->state = (dev->pending == 2) ? STATE_KBC_AMI_OUT : STATE_MAIN_IBF;
-#endif
+
             dev->state = STATE_MAIN_IBF;
             dev->pending = 0;
             goto at_main_ibf;
@@ -644,9 +636,7 @@ kbc_at_poll_ps2(atkbc_t *dev)
             /* Keyboard controller command want to output a single byte. */
             kbc_at_log("ATkbc: %02X coming from channel %i with high status %02X\n", dev->val, dev->channel, dev->stat_hi);
             kbc_send_to_ob(dev, dev->val, dev->channel, dev->stat_hi);
-#if 0
-            dev->state = (dev->pending == 2) ? STATE_KBC_AMI_OUT : STATE_MAIN_IBF;
-#endif
+
             dev->state = STATE_MAIN_IBF;
             dev->pending = 0;
             // goto ps2_main_ibf;
@@ -727,17 +717,6 @@ write_p2(atkbc_t *dev, uint8_t val)
     kbc_at_log("ATkbc: write P2: %02X (old: %02X)\n", val, dev->p2);
 
     uint8_t kbc_ven = dev->flags & KBC_VEN_MASK;
-
-#if 0
-    /* PS/2: Handle IRQ's. */
-    if (dev->misc_flags & FLAG_PS2) {
-        /* IRQ 12 */
-        picint_common(1 << 12, 0, val & 0x20, NULL);
-
-        /* IRQ 1 */
-        picint_common(1 << 1, 0, val & 0x10, NULL);
-    }
-#endif
 
     /* AT, PS/2: Handle A20. */
     if ((mem_a20_key ^ val) & 0x02) { /* A20 enable change */

@@ -776,9 +776,7 @@ nic_pci_write(UNUSED(int func), int addr, uint8_t val, void *priv)
         case 0x32: /* PCI_ROMBAR */
         case 0x33: /* PCI_ROMBAR */
             dev->pci_bar[1].addr_regs[addr & 3] = val;
-#if 0
-            dev->pci_bar[1].addr_regs[1] &= dev->bios_mask;
-#endif
+            
             dev->pci_bar[1].addr &= 0xffff8001;
             dev->bios_addr = dev->pci_bar[1].addr & 0xffff8000;
             nic_update_bios(dev);

@@ -107,11 +107,6 @@ intel_82335_write(uint16_t addr, uint16_t val, void *priv)
                     shadowbios       = !!(dev->regs[0x22] & 0x01);
                     shadowbios_write = !!(dev->regs[0x22] & 0x01);
 
-                    /* Base System 512/640KB set */
-#if 0
-                    mem_set_mem_state_both(0x80000, 0x20000, (dev->regs[0x22] & 0x08) ? ENABLE_TOP_128KB : DISABLE_TOP_128KB);
-#endif
-
                     /* Video RAM shadow*/
                     mem_set_mem_state_both(0xa0000, 0x20000, (dev->regs[0x22] & (0x04 << 8)) ? DETERMINE_VIDEO_RAM_WRITE_ACCESS : DISABLED_SHADOW);
 

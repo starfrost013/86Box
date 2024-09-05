@@ -423,11 +423,9 @@ ac97_via_sgd_write(uint16_t addr, uint8_t val, void *priv)
 
             case 0x83:
                 /* Clear RWC status bits. */
-#if 0 /* race condition with Linux accessing a register and clearing status bits on the same dword write */
-            val = (dev->sgd_regs[addr] & ~(val & 0x0a)) | (val & 0xc0);
-#else
+
                 val = dev->sgd_regs[addr] | (val & 0xc0);
-#endif
+
                 break;
 
             default:

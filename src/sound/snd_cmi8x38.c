@@ -198,11 +198,8 @@ cmi8x38_sb_dma_post(cmi8x38_t *dev, uint16_t *addr, uint16_t *count, int channel
 
     /* Copy TDMA registers to DMA on CMI8738+. Everything so far suggests that
        those chips use PCI bus mastering to directly write to the DMA registers. */
-#if 0 /* TSRs don't set ENWR8237, except for the patched C3DPCI - does that bit have no effect? */
-    if ((dev->type != CMEDIA_CMI8338) && (dev->io_regs[0x17] & 0x10))
-#else
+
     if (dev->type != CMEDIA_CMI8338)
-#endif
     {
         if (channel & 4)
             dma[channel].ab = (dma[channel].ab & 0xfffe0000) | ((*addr) << 1);
@@ -1329,11 +1326,6 @@ cmi8x38_speed_changed(void *priv)
             case 0x02:
                 freq = 96000.0;
                 break;
-#if 0
-            case 0x03:
-                freq = 128000.0;
-                break;
-#endif
             default:
                 freq = freqs[freqreg & 0x07];
                 break;

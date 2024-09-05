@@ -94,22 +94,6 @@ static char flash_path[1024];
 #define SST39LF080    0xd800
 #define SST39LF016    0xd900
 
-#if 0
-// 16 wide
-#define SST39WF400      0x272f
-#define SST39WF400B     0x272e
-#define SST39WF800      0x273f
-#define SST39WF800B     0x273e
-#define SST39WF1601     0xbf274b
-#define SST39WF1602     0xbf274a
-
-#define SST39LF100      0x2788
-#define SST39LF200      0x2789
-#define SST39LF400      0x2780
-#define SST39LF800      0x2781
-#define SST39LF160      0x2782
-#endif
-
 #define SST49LF002  0x5700
 #define SST49LF020  0x6100
 #define SST49LF020A 0x5200

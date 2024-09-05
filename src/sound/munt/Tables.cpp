@@ -45,28 +45,12 @@ Tables::Tables() {
 		// CONFIRMED:KG: This matches a ROM table found by Mok
 		envLogarithmicTime[lf] = Bit8u(ceil(64.0f + LOG2F(float(lf)) * 8.0f));
 	}
-
-#if 0
-	// The table below is to be used in conjunction with emulation of VCA of newer generation units which is currently missing.
-	// These relatively small values are rather intended to fine-tune the overall amplification of the VCA.
-	// CONFIRMED: Based on a table found by Mok in the LAPC-I control ROM
-	// Note that this matches the MT-32 table, but with the values clamped to a maximum of 8.
-	memset(masterVolToAmpSubtraction, 8, 71);
-	memset(masterVolToAmpSubtraction + 71, 7, 3);
-	memset(masterVolToAmpSubtraction + 74, 6, 4);
-	memset(masterVolToAmpSubtraction + 78, 5, 3);
-	memset(masterVolToAmpSubtraction + 81, 4, 4);
-	memset(masterVolToAmpSubtraction + 85, 3, 3);
-	memset(masterVolToAmpSubtraction + 88, 2, 4);
-	memset(masterVolToAmpSubtraction + 92, 1, 4);
-	memset(masterVolToAmpSubtraction + 96, 0, 5);
-#else
+	
 	// CONFIRMED: Based on a table found by Mok in the MT-32 control ROM
 	masterVolToAmpSubtraction[0] = 255;
 	for (int masterVol = 1; masterVol <= 100; masterVol++) {
 		masterVolToAmpSubtraction[masterVol] = Bit8u(106.31 - 16.0f * LOG2F(float(masterVol)));
 	}
-#endif
 
 	for (int i = 0; i <= 100; i++) {
 		pulseWidth100To255[i] = Bit8u(i * 255 / 100.0f + 0.5f);

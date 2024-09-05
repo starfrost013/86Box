@@ -174,17 +174,7 @@ fdc37c67x_auxio_handler(fdc37c67x_t *dev)
 static void
 fdc37c67x_sio_handler(UNUSED(fdc37c67x_t *dev))
 {
-#if 0
-    if (dev->sio_base) {
-        io_removehandler(dev->sio_base, 0x0002,
-             fdc37c67x_read, NULL, NULL, fdc37c67x_write, NULL, NULL, dev);
-    }
-    dev->sio_base = (((uint16_t) dev->regs[0x27]) << 8) | dev->regs[0x26];
-    if (dev->sio_base) {
-        io_sethandler(dev->sio_base, 0x0002,
-             fdc37c67x_read, NULL, NULL, fdc37c67x_write, NULL, NULL, dev);
-    }
-#endif
+
 }
 
 static void
@@ -602,9 +592,6 @@ fdc37c67x_init(const device_t *info)
     dev->chip_id = info->local & 0xff;
 
     dev->gpio_regs[0] = 0xff;
-#if 0
-    dev->gpio_regs[1] = (info->local == 0x0030) ? 0xff : 0xfd;
-#endif
     dev->gpio_regs[1] = (dev->chip_id == 0x30) ? 0xff : 0xfd;
 
     fdc37c67x_reset(dev);

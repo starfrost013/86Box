@@ -706,9 +706,7 @@ MPU401_WriteCommand(mpu_t *mpu, uint8_t val)
                 break;
 
             default:
-#if 0
-                mpu401_log("MPU-401:Unhandled command %X",val);
-#endif
+
                 break;
         }
 
@@ -894,9 +892,6 @@ MPU401_WriteData(mpu_t *mpu, uint8_t val)
                     break;
 
                 case 0xf0:
-#if 0
-                    mpu401_log("MPU-401:Illegal WSD byte\n");
-#endif
                     mpu->state.wsd   = 0;
                     mpu->state.track = mpu->state.old_track;
                     return;

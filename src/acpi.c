@@ -2293,9 +2293,6 @@ acpi_apm_out(uint16_t port, uint8_t val, void *priv)
         if (port == 0x0001) {
             acpi_log("ALi SOFT SMI# status set (%i)\n", dev->apm->do_smi);
             dev->apm->cmd = val;
-#if 0
-            acpi_raise_smi(dev, dev->apm->do_smi);
-#endif
             if (dev->apm->do_smi)
                 smi_raise();
             dev->regs.ali_soft_smi = 1;

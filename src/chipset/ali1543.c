@@ -239,10 +239,6 @@ ali1533_write(int func, int addr, uint8_t val, void *priv)
                 dev->pci_conf[addr] = val;
 
                 ali1543_log("SIRQI = IRQ %i; SIRQII = IRQ %i\n", ali1533_irq_routing[(val >> 4) & 0x0f], ali1533_irq_routing[val & 0x0f]);
-#if 0
-                pci_set_mirq_routing(PCI_MIRQ0, ali1533_irq_routing[(val >> 4) & 0x0f]);
-                pci_set_mirq_routing(PCI_MIRQ1, ali1533_irq_routing[val & 0x0f]);
-#endif
             }
             break;
 

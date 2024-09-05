@@ -150,14 +150,9 @@ extern int                video_fullscreen_scale_maximized;
 
 typedef rgb_t PALETTE[256];
 
-#if 0
-extern int changeframecount;
-#endif
 
 extern volatile int screenshots;
-#if 0
-extern bitmap_t *buffer32;
-#endif
+
 #define buffer32             (monitors[monitor_index_global].target_buffer)
 #define pal_lookup           (monitors[monitor_index_global].mon_pal_lookup)
 #define overscan_x           (monitors[monitor_index_global].mon_overscan_x)
@@ -182,9 +177,7 @@ extern bitmap_t *buffer32;
 #define unscaled_size_y      (monitors[monitor_index_global].mon_unscaled_size_y)
 extern PALETTE      cgapal;
 extern PALETTE      cgapal_mono[6];
-#if 0
-extern uint32_t     pal_lookup[256];
-#endif
+
 extern int          video_fullscreen;
 extern int          video_fullscreen_scale;
 extern int          video_fullscreen_first;

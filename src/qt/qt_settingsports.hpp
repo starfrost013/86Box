@@ -16,17 +16,6 @@ public:
 
     void save();
 
-#if 0
-private slots:
-    void on_checkBoxSerialPassThru7_clicked(bool checked);
-
-private slots:
-    void on_checkBoxSerialPassThru6_clicked(bool checked);
-
-private slots:
-    void on_checkBoxSerialPassThru5_clicked(bool checked);
-#endif
-
 private slots:
     void on_checkBoxSerialPassThru4_clicked(bool checked);
 

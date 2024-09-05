@@ -190,8 +190,4 @@ codegen_ir_compile(ir_data_t *ir, codeblock_t *block)
 
     codegen_backend_epilogue(block);
     block_write_data = NULL;
-#if 0
-    if (has_ea)
-        fatal("IR compilation complete\n");
-#endif
 }

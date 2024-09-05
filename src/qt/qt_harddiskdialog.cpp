@@ -510,25 +510,6 @@ HarddiskDialog::recalcSelection()
 void
 HarddiskDialog::onExistingFileSelected(const QString &fileName, bool precheck)
 {
-    // TODO : Over to non-existing file selected
-#if 0
-    if (!(existing & 1)) {
-        fp = _wfopen(wopenfilestring, L"rb");
-        if (fp != NULL) {
-            fclose(fp);
-            if (settings_msgbox_ex(MBX_QUESTION_YN, L"Disk image file already exists", L"The selected file will be overwritten. Are you sure you want to use it?", L"Overwrite", L"Don't overwrite", NULL) != 0)	/ * yes * /
-                return false;
-        }
-    }
-
-    fp = _wfopen(wopenfilestring, (existing & 1) ? L"rb" : L"wb");
-    if (fp == NULL) {
-    hdd_add_file_open_error:
-        fclose(fp);
-        settings_msgbox_header(MBX_ERROR, (existing & 1) ? L"Make sure the file exists and is readable." : L"Make sure the file is being saved to a writable directory.", (existing & 1) ? L"Unable to read file" : L"Unable to write file");
-        return true;
-    }
-#endif
 
     uint64_t size        = 0;
     uint32_t sector_size = 0;

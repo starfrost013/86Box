@@ -121,25 +121,11 @@ monster_fdc_init(UNUSED(const device_t *info))
 
     dev = (monster_fdc_t *) calloc(1, sizeof(monster_fdc_t));
 
-#if 0
-    uint8_t sec_irq = device_get_config_int("sec_irq");
-    uint8_t sec_dma = device_get_config_int("sec_dma");
-#endif
-
     if (BIOS_ADDR != 0)
         rom_init(&dev->bios_rom, ROM_MONSTER_FDC, BIOS_ADDR, 0x2000, 0x1ffff, 0, MEM_MAPPING_EXTERNAL);
 
     // Primary FDC
     dev->fdc_pri = device_add(&fdc_at_device);
-
-#if 0
-    // Secondary FDC
-    uint8_t sec_enabled = device_get_config_int("sec_enabled");
-    if (sec_enabled)
-        dev->fdc_sec = device_add(&fdc_at_sec_device);
-        fdc_set_irq(dev->fdc_sec, sec_irq);
-        fdc_set_dma_ch(dev->fdc_sec, sec_dma);
-#endif
 
     uint8_t rom_writes_enabled = device_get_config_int("rom_writes_enabled");
     if (rom_writes_enabled) {
@@ -163,75 +149,7 @@ monster_fdc_available(void)
 
 static const device_config_t monster_fdc_config[] = {
   // clang-format off
-#if 0
-    {
-        .name = "sec_enabled",
-        .description = "Enable Secondary Controller",
-        .type = CONFIG_BINARY,
-        .default_string = "",
-        .default_int = 0
-    },
-    {
-        .name = "sec_irq",
-        .description = "Secondary Controller IRQ",
-        .type = CONFIG_SELECTION,
-        .default_string = "",
-        .default_int = 6,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            {
-                .description = "IRQ 2",
-                .value = 2
-            },
-            {
-                .description = "IRQ 3",
-                .value = 3
-            },
-            {
-                .description = "IRQ 4",
-                .value = 4
-            },
-            {
-                .description = "IRQ 5",
-                .value = 5
-            },
-            {
-                .description = "IRQ 6",
-                .value = 6
-            },
-            {
-                .description = "IRQ 7",
-                .value = 7
-            },
-            { .description = "" }
-        }
-    },
-    {
-        .name = "sec_dma",
-        .description = "Secondary Controller DMA",
-        .type = CONFIG_SELECTION,
-        .default_string = "",
-        .default_int = 2,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            {
-                .description = "DMA 1",
-                .value = 1
-            },
-            {
-                .description = "DMA 2",
-                .value = 2
-            },
-            {
-                .description = "DMA 3",
-                .value = 3
-            },
-            { .description = "" }
-        }
-    },
-#endif
+
     {
         .name = "bios_addr",
         .description = "BIOS Address:",
@@ -251,22 +169,6 @@ static const device_config_t monster_fdc_config[] = {
             { .description = ""                           }
         }
     },
-#if 0
-    {
-        .name = "bios_size",
-        .description = "BIOS Size:",
-        .type = CONFIG_HEX20,
-        .default_string = "32",
-        .default_int = 0xc8000,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "8K",  .value = 8  },
-            { .description = "32K", .value = 32 },
-            { .description = ""                 }
-        }
-    },
-#endif
     {
         .name = "rom_writes_enabled",
         .description = "Enable BIOS extension ROM Writes",

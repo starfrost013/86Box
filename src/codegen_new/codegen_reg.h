@@ -345,9 +345,7 @@ codegen_reg_read(int reg)
         CPU_BLOCK_END();
     if (version->refcount > max_version_refcount)
         max_version_refcount = version->refcount;
-#if 0
-    pclog("codegen_reg_read: %i %i %i\n", reg & IREG_REG_MASK, ireg.version, reg_version_refcount[IREG_GET_REG(ireg.reg)][ireg.version]);
-#endif
+
     return ireg;
 }
 
@@ -387,9 +385,7 @@ codegen_reg_write(int reg, int uop_nr)
     version->refcount   = 0;
     version->flags      = 0;
     version->parent_uop = uop_nr;
-#if 0
-    pclog("codegen_reg_write: %i\n", reg & IREG_REG_MASK);
-#endif
+
     return ireg;
 }
 

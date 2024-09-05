@@ -1705,11 +1705,6 @@ gd543x_recalc_mapping(gd54xx_t *gd54xx)
             }
         } else if (gd54xx->pci) {
             base = gd54xx->lfb_base;
-#if 0
-            if (svga->crtc[0x27] == CIRRUS_ID_CLGD5480)
-                size = 32 * 1024 * 1024;
-            else
-#endif
             if (svga->crtc[0x27] >= CIRRUS_ID_CLGD5436)
                 size = 16 * 1024 * 1024;
             else

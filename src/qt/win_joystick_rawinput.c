@@ -454,9 +454,6 @@ win_joystick_handle(PRAWINPUT raw)
         }
 
         plat_joystick_state[j].a[a] = value;
-#if 0
-        joystick_log("%s %-06d ", plat_joystick_state[j].axis[a].name, plat_joystick_state[j].a[a]);
-#endif
     }
 
     /* read povs */
@@ -475,14 +472,8 @@ win_joystick_handle(PRAWINPUT raw)
         }
 
         plat_joystick_state[j].p[p] = value;
-
-#if 0
-        joystick_log("%s %-3d ", plat_joystick_state[j].pov[p].name, plat_joystick_state[j].p[p]);
-#endif
     }
-#if 0
-    joystick_log("\n");
-#endif
+
 }
 
 static int

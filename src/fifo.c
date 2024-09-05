@@ -428,32 +428,14 @@ serial_receive_timer(fifo16_t *f16, uint8_t val)
            fifo_get_full(f16), fifo_get_empty(f16),
            fifo_get_overrun(f16), fifo_get_ready(f16));
 
-#if 0
-    if (fifo_get_d_overrun(f16))
-        dev->lsr = (dev->lsr & 0xfd) | (fifo_get_overrun(f16) << 1);
-#endif
-
     if (fifo_get_d_overrun(f16))  printf("    FIFO overrun state changed: %i -> %i\n",
                                         !fifo_get_overrun(f16), fifo_get_overrun(f16));
 
-#if 0
-    if (fifo_get_d_empty(f16)) {
-        dev->lsr = (dev->lsr & 0xfe) | !fifo_get_empty(f16);
-        timer_on_auto(&dev->timeout_timer, 4.0 * dev->bits * dev->transmit_period);
-    }
-#endif
 
     if (fifo_get_d_empty(f16))
         printf("    FIFO empty   state changed: %i -> %i\n",
                !fifo_get_empty(f16), fifo_get_empty(f16));
 
-#if 0
-    if (fifo_get_d_ready(f16)) {
-        dev->int_status = (dev->int_status & ~SERIAL_INT_RECEIVE) |
-                          (fifo_get_ready(f16) ? SERIAL_INT_RECEIVE : 0);
-        serial_update_ints();
-    }
-#endif
     if (fifo_get_d_ready(f16))  printf("    FIFO ready   state changed: %i -> %i\n",
                                       !fifo_get_ready(f16), fifo_get_ready(f16));
 }
@@ -469,24 +451,10 @@ serial_read(fifo16_t *f16)
            fifo_get_full(f16), fifo_get_empty(f16),
            fifo_get_overrun(f16), fifo_get_ready(f16));
 
-#if 0
-    if (fifo_get_d_ready(f16)) {
-        dev->int_status = (dev->int_status & ~SERIAL_INT_RECEIVE) |
-                          (fifo_get_ready(f16) ? SERIAL_INT_RECEIVE : 0);
-        serial_update_ints();
-    }
-#endif
-
     if (fifo_get_d_ready(f16))
         printf("    FIFO ready   state changed: %i -> %i\n",
               !fifo_get_ready(f16), fifo_get_ready(f16));
 
-#if 0
-        if (fifo_get_d_empty(f16)) {
-            dev->lsr = (dev->lsr & 0xfe) | !fifo_get_empty(f16);
-            timer_on_auto(&dev->timeout_timer, 4.0 * dev->bits * dev->transmit_period);
-        }
-#endif
     if (fifo_get_d_empty(f16))
         printf("    FIFO empty   state changed: %i -> %i\n",
               !fifo_get_empty(f16), fifo_get_empty(f16));

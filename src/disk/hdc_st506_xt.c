@@ -372,16 +372,6 @@ get_sector(hdc_t *dev, drive_t *drive, off64_t *addr)
         return 0;
     }
 
-#if 0
-    if (drive->cylinder != dev->cylinder) {
-#    ifdef ENABLE_ST506_XT_LOG
-        st506_xt_log("ST506: get_sector: wrong cylinder\n");
-#    endif
-        dev->error = ERR_ILLEGAL_ADDR;
-        return(0);
-    }
-#endif
-
     if (dev->head >= drive->cfg_hpc) {
 #ifdef ENABLE_ST506_XT_LOG
         st506_xt_log("ST506: get_sector: past end of configured heads\n");
@@ -700,9 +690,7 @@ st506_callback(void *priv)
             }
             fallthrough;
         case CMD_READ:
-#if 0
-        case CMD_READ_LONG:
-#endif
+
             switch (dev->state) {
                 case STATE_START_COMMAND:
                     (void) get_chs(dev, drive);
@@ -800,9 +788,6 @@ st506_callback(void *priv)
             }
             fallthrough;
         case CMD_WRITE:
-#if 0
-        case CMD_WRITE_LONG:
-#endif
             switch (dev->state) {
                 case STATE_START_COMMAND:
                     (void) get_chs(dev, drive);
@@ -1403,10 +1388,6 @@ mem_read(uint32_t addr, void *priv)
         case ST506_XT_TYPE_ST11R: /* ST-11R */
             mask = 0x1fff;        /* ST-11 decodes RAM on each 8K block */
             break;
-#if 0
-        default:
-                    break;
-#endif
     }
 
     addr = addr & dev->bios_rom.mask;

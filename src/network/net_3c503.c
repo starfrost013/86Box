@@ -630,9 +630,7 @@ threec503_nic_init(UNUSED(const device_t *info))
                     threec503_ram_read, NULL, NULL,
                     threec503_ram_write, NULL, NULL,
                     NULL, MEM_MAPPING_EXTERNAL, dev);
-#if 0
-    mem_mapping_disable(&dev->ram_mapping);
-#endif
+                    
     dev->regs.gacfr = 0x09; /* Start with RAM mapping enabled. */
 
     /* Attach ourselves to the network module. */

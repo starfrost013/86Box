@@ -494,9 +494,6 @@ hercules_poll(void *priv)
                     else
                         video_blit_memtoscreen(8, dev->firstline + 14, xsize, ysize);
                     frames++;
-#if 0
-                    if ((dev->ctrl & 2) && (dev->ctrl2 & 1)) {
-#endif
                     if (dev->ctrl & 0x02) {
                         video_res_x = dev->crtc[1] * 16;
                         video_res_y = dev->crtc[6] * 4;

@@ -29,9 +29,6 @@
 #define MOUSE_TYPE_INTERNAL 1 /* achine has internal mouse */
 #define MOUSE_TYPE_LOGIBUS  2 /* Logitech/ATI Bus Mouse */
 #define MOUSE_TYPE_INPORT   3 /* Microsoft InPort Mouse */
-#if 0
-#    define MOUSE_TYPE_GENIBUS 4 /* Genius Bus Mouse */
-#endif
 #define MOUSE_TYPE_MSYSTEMS  5  /* Mouse Systems mouse */
 #define MOUSE_TYPE_MICROSOFT 6  /* Microsoft 2-button Serial Mouse */
 #define MOUSE_TYPE_MS3BUTTON 7  /* Microsoft 3-button Serial Mouse */

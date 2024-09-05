@@ -1101,9 +1101,6 @@ mystique_recalctimings(svga_t *svga)
     svga->fb_only       = svga->packed_chain4;
     svga->disable_blink = (svga->bpp > 4);
     video_force_resize_set_monitor(1, svga->monitor_index);
-#if 0
-    pclog("PackedChain4=%d, chain4=%x, fast=%x, bit6 attrreg10=%02x, bits 5-6 gdcreg5=%02x, extmode=%02x.\n", svga->packed_chain4, svga->chain4, svga->fast, svga->attrregs[0x10] & 0x40, svga->gdcreg[5] & 0x60, mystique->pci_regs[0x41] & 1, mystique->crtcext_regs[3] & CRTCX_R3_MGAMODE);
-#endif
 }
 
 static void
@@ -1877,9 +1874,6 @@ mystique_accel_ctrl_write_b(uint32_t addr, uint8_t val, void *priv)
         case REG_YDSTLEN:
         case REG_YDSTLEN + 1:
             WRITE8(addr, mystique->dwgreg.length, val);
-#if 0
-            pclog("Write YDSTLEN+%i %i\n", addr&1, mystique->dwgreg.length);
-#endif
             break;
         case REG_YDSTLEN + 2:
             mystique->dwgreg.ydst = (mystique->dwgreg.ydst & ~0xff) | val;
@@ -2441,9 +2435,7 @@ mystique_accel_ctrl_write_l(uint32_t addr, uint32_t val, void *priv)
                         mystique->dwgreg.pattern[y][x] = val & (1 << (x + (y * 16)));
                     }
                 }
-#if 0
-                pclog("SRC0 = 0x%08X\n", val);
-#endif
+
                 if (mystique->busy && (mystique->dwgreg.dwgctrl_running & DWGCTRL_OPCODE_MASK) == DWGCTRL_OPCODE_ILOAD)
                     blit_iload_write(mystique, mystique->dwgreg.src[0], 32);
             }
@@ -2456,9 +2448,7 @@ mystique_accel_ctrl_write_l(uint32_t addr, uint32_t val, void *priv)
                         mystique->dwgreg.pattern[y][x] = val & (1 << (x + ((y - 2) * 16)));
                     }
                 }
-#if 0
-                pclog("SRC1 = 0x%08X\n", val);
-#endif
+
                 if (mystique->busy && (mystique->dwgreg.dwgctrl_running & DWGCTRL_OPCODE_MASK) == DWGCTRL_OPCODE_ILOAD)
                     blit_iload_write(mystique, mystique->dwgreg.src[1], 32);
             }
@@ -2471,9 +2461,7 @@ mystique_accel_ctrl_write_l(uint32_t addr, uint32_t val, void *priv)
                         mystique->dwgreg.pattern[y][x] = val & (1 << (x + ((y - 4) * 16)));
                     }
                 }
-#if 0
-                pclog("SRC2 = 0x%08X\n", val);
-#endif
+
                 if (mystique->busy && (mystique->dwgreg.dwgctrl_running & DWGCTRL_OPCODE_MASK) == DWGCTRL_OPCODE_ILOAD)
                     blit_iload_write(mystique, mystique->dwgreg.src[2], 32);
                 break;
@@ -2486,9 +2474,7 @@ mystique_accel_ctrl_write_l(uint32_t addr, uint32_t val, void *priv)
                         mystique->dwgreg.pattern[y][x] = val & (1 << (x + ((y - 6) * 16)));
                     }
                 }
-#if 0
-                pclog("SRC3 = 0x%08X\n", val);
-#endif
+
                 if (mystique->busy && (mystique->dwgreg.dwgctrl_running & DWGCTRL_OPCODE_MASK) == DWGCTRL_OPCODE_ILOAD)
                     blit_iload_write(mystique, mystique->dwgreg.src[3], 32);
                 break;
@@ -2808,9 +2794,6 @@ mystique_accel_iload_write_l(UNUSED(uint32_t addr), uint32_t val, void *priv)
             break;
 
         default:
-#if 0
-            pclog("ILOAD write DMAMOD %i\n", mystique->dwgreg.dmamod); */
-#endif
             break;
     }
 }
@@ -4618,9 +4601,6 @@ blit_line(mystique_t *mystique, int closed, int autoline)
             break;
 
         default:
-#if 0
-            pclog("Unknown atype %03x %08x LINE\n", mystique->dwgreg.dwgctrl_running & DWGCTRL_ATYPE_MASK, mystique->dwgreg.dwgctrl_running);
-#endif
             break;
     }
 
@@ -4982,9 +4962,6 @@ blit_trap(mystique_t *mystique)
             break;
 
         default:
-#if 0
-            pclog("Unknown atype %03x %08x TRAP\n", mystique->dwgreg.dwgctrl_running & DWGCTRL_ATYPE_MASK, mystique->dwgreg.dwgctrl_running);
-#endif
             break;
     }
 
@@ -5887,9 +5864,6 @@ blit_bitblt(mystique_t *mystique)
             break;
 
         default:
-#if 0
-            pclog("Unknown BITBLT atype %03x %08x\n", mystique->dwgreg.dwgctrl_running & DWGCTRL_ATYPE_MASK, mystique->dwgreg.dwgctrl_running);
-#endif
             break;
     }
 
@@ -5903,9 +5877,6 @@ blit_iload(mystique_t *mystique)
         case DWGCTRL_ATYPE_RPL:
         case DWGCTRL_ATYPE_RSTR:
         case DWGCTRL_ATYPE_BLK:
-#if 0
-            pclog("ILOAD BLTMOD DWGCTRL = %08x\n", mystique->dwgreg.dwgctrl_running & DWGCTRL_BLTMOD_MASK);
-#endif
             switch (mystique->dwgreg.dwgctrl_running & DWGCTRL_BLTMOD_MASK) {
                 case DWGCTRL_BLTMOD_BFCOL:
                 case DWGCTRL_BLTMOD_BMONOLEF:
@@ -5917,9 +5888,6 @@ blit_iload(mystique_t *mystique)
                     mystique->dwgreg.iload_rem_data  = 0;
                     mystique->dwgreg.iload_rem_count = 0;
                     mystique->busy                   = 1;
-#if 0
-                    pclog("ILOAD busy\n");
-#endif
                     mystique->dwgreg.words = 0;
                     break;
 
@@ -5947,9 +5915,6 @@ blit_idump(mystique_t *mystique)
             mystique->dwgreg.iload_rem_data    = 0;
             mystique->dwgreg.idump_end_of_line = 0;
             mystique->busy                     = 1;
-#if 0
-            pclog("IDUMP ATYPE RPL busy\n");
-#endif
             break;
 
         default:
@@ -6574,9 +6539,6 @@ mystique_pci_write(UNUSED(int func), int addr, uint8_t val, void *priv)
         case 0x4a:
         case 0x4b:
             addr = (mystique->pci_regs[0x44] & 0xfc) | ((mystique->pci_regs[0x45] & 0x3f) << 8) | (addr & 3);
-#if 0
-            pclog("mystique_ctrl_write_b(%04X, %02X)\n", addr, val);
-#endif
             mystique_ctrl_write_b(addr, val, mystique);
             break;
 
@@ -6607,15 +6569,11 @@ mystique_conv_16to32(svga_t* svga, uint16_t color, uint8_t bpp)
         if (bpp == 15) {
             if (mystique->xgenctrl & (1 << 2))
                 color &= 0x7FFF;
-#if 0
-            uint8_t b = getcolr(svga->pallook[(color & 0x1F) | (!!(color & 0x8000) >> 8)]);
-            uint8_t g = getcolg(svga->pallook[((color & 0x3E0) >> 5) | (!!(color & 0x8000) >> 8)]);
-            uint8_t r = getcolb(svga->pallook[((color & 0x7C00) >> 10) | (!!(color & 0x8000) >> 8)]);
-#else
+
             uint8_t b = getcolr(svga->pallook[color & 0x1f]);
             uint8_t g = getcolg(svga->pallook[(color & 0x3e0) >> 5]);
             uint8_t r = getcolb(svga->pallook[(color & 0x7c00) >> 10]);
-#endif
+
             ret = (video_15to32[color] & 0xFF000000) | makecol(r, g, b);
         } else {
             uint8_t b = getcolr(svga->pallook[color & 0x1f]);

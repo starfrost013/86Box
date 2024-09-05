@@ -662,10 +662,6 @@ static void
 
     pci_add_card(PCI_ADD_NORTHBRIDGE, sis_85c49x_pci_read, sis_85c49x_pci_write, dev, &dev->pci_slot);
 
-#if 0
-    sis_85c497_isa_reset(dev);
-#endif
-
     dev->port_92 = device_add(&port_92_device);
     port_92_set_period(dev->port_92, 2ULL * TIMER_USEC);
     port_92_set_features(dev->port_92, 0, 0);

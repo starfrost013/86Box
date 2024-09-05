@@ -536,9 +536,6 @@ cmd640_init(const device_t *info)
         if (dev->channels & 0x02)
             ide_board_set_force_ata3(1, 1);
 
-#if 0
-        ide_pri_disable();
-#endif
     } else if (info->flags & DEVICE_VLB) {
         device_add(&ide_vlb_2ch_device);
 

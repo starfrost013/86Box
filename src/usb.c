@@ -317,10 +317,7 @@ ohci_mmio_write(uint32_t addr, uint8_t val, void *priv)
 
             if (!(dev->ohci_mmio[addr] & 0x04) && (old & 0x04))
                 dev->ohci_mmio[addr + 2] |= 0x04;
-#if 0
-            if (!(dev->ohci_mmio[addr] & 0x02))
-                 dev->ohci_mmio[addr + 2] |= 0x02;
-#endif
+
             return;
         case 0x55:
             if ((val & 0x02) && ((dev->ohci_mmio[0x49] & 0x03) == 0x00) && (dev->ohci_mmio[0x4e] & 0x02)) {

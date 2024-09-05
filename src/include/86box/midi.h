@@ -85,18 +85,8 @@ extern void midi_in_handlers_clear(void);
 extern void midi_in_msg(uint8_t *msg, uint32_t len);
 extern void midi_in_sysex(uint8_t *buffer, uint32_t len);
 
-#if 0
-#    ifdef _WIN32
-#        define SYSTEM_MIDI_NAME          "Windows MIDI"
-#        define SYSTEM_MIDI_INTERNAL_NAME "windows_midi"
-#    else
-#        define SYSTEM_MIDI_NAME          "System MIDI"
-#        define SYSTEM_MIDI_INTERNAL_NAME "system_midi"
-#    endif
-#else
-#    define SYSTEM_MIDI_NAME          "System MIDI"
-#    define SYSTEM_MIDI_INTERNAL_NAME "system_midi"
-#endif
+#define SYSTEM_MIDI_NAME          "System MIDI"
+#define SYSTEM_MIDI_INTERNAL_NAME "system_midi"
 
 #define MIDI_INPUT_NAME          "MIDI Input Device"
 #define MIDI_INPUT_INTERNAL_NAME "midi_in"

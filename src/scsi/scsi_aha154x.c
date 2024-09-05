@@ -356,9 +356,6 @@ aha_cmds(void *priv)
                  * and expects a 0x04 back in the INTR
                  * register.  --FvK
                  */
-#if 0
-                dev->Interrupt = aha154x_shram(dev,val);
-#endif
                 dev->Interrupt = aha154x_shram(dev, dev->CmdBuf[0]);
                 break;
 

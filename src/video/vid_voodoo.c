@@ -428,9 +428,6 @@ voodoo_writel(uint32_t addr, uint32_t val, void *priv)
     {
         voodoo_queue_command(voodoo, addr | FIFO_WRITEL_FB, val);
     } else if ((addr & 0x200000) && (voodoo->fbiInit7 & FBIINIT7_CMDFIFO_ENABLE)) {
-#if 0
-        voodoo_log("Write CMDFIFO %08x(%08x) %08x  %08x\n", addr, voodoo->cmdfifo_base + (addr & 0x3fffc), val, (voodoo->cmdfifo_base + (addr & 0x3fffc)) & voodoo->fb_mask);
-#endif
         *(uint32_t *) &voodoo->fb_mem[(voodoo->cmdfifo_base + (addr & 0x3fffc)) & voodoo->fb_mask] = val;
         voodoo->cmdfifo_depth_wr++;
         if ((voodoo->cmdfifo_depth_wr - voodoo->cmdfifo_depth_rd) < 20)
@@ -493,9 +490,6 @@ voodoo_writel(uint32_t addr, uint32_t val, void *priv)
                 if (voodoo->initEnable & 0x01) {
                     voodoo->fbiInit4  = val;
                     voodoo->read_time = pci_nonburst_time + pci_burst_time * ((voodoo->fbiInit4 & 1) ? 2 : 1);
-#if 0
-                    voodoo_log("fbiInit4 write %08x - read_time=%i\n", val, voodoo->read_time);
-#endif
                 }
                 break;
             case SST_backPorch:
@@ -544,9 +538,6 @@ voodoo_writel(uint32_t addr, uint32_t val, void *priv)
                     voodoo->fbiInit1   = (val & ~5) | (voodoo->fbiInit1 & 5);
                     voodoo->write_time = pci_nonburst_time + pci_burst_time * ((voodoo->fbiInit1 & 2) ? 1 : 0);
                     voodoo->burst_time = pci_burst_time * ((voodoo->fbiInit1 & 2) ? 2 : 1);
-#if 0
-                    voodoo_log("fbiInit1 write %08x - write_time=%i burst_time=%i\n", val, voodoo->write_time, voodoo->burst_time);
-#endif
                 }
                 break;
             case SST_fbiInit2:
@@ -610,9 +601,6 @@ voodoo_writel(uint32_t addr, uint32_t val, void *priv)
                             voodoo->dac_pll_regs[voodoo->dac_data[4] & 0xf] = (voodoo->dac_pll_regs[voodoo->dac_data[4] & 0xf] & 0xff00) | val;
                         else
                             voodoo->dac_pll_regs[voodoo->dac_data[4] & 0xf] = (voodoo->dac_pll_regs[voodoo->dac_data[4] & 0xf] & 0xff) | (val << 8);
-#if 0
-                        voodoo_log("Write PLL reg %x %04x\n", voodoo->dac_data[4] & 0xf, voodoo->dac_pll_regs[voodoo->dac_data[4] & 0xf]);
-#endif
                         voodoo->dac_reg_ff = !voodoo->dac_reg_ff;
                         if (!voodoo->dac_reg_ff)
                             voodoo->dac_data[4]++;
@@ -655,9 +643,6 @@ voodoo_writel(uint32_t addr, uint32_t val, void *priv)
             case SST_cmdFifoBaseAddr:
                 voodoo->cmdfifo_base = (val & 0x3ff) << 12;
                 voodoo->cmdfifo_end  = ((val >> 16) & 0x3ff) << 12;
-#if 0
-                voodoo_log("CMDFIFO base=%08x end=%08x\n", voodoo->cmdfifo_base, voodoo->cmdfifo_end);
-#endif
                 break;
 
             case SST_cmdFifoRdPtr:
@@ -769,10 +754,6 @@ voodoo_pci_read(int func, int addr, void *priv)
     if (func)
         return 0;
 
-#if 0
-    voodoo_log("Voodoo PCI read %08X PC=%08x\n", addr, cpu_state.pc);
-#endif
-
     switch (addr) {
         case 0x00:
             return 0x1a; /*3Dfx*/
@@ -833,10 +814,6 @@ voodoo_pci_write(int func, int addr, uint8_t val, void *priv)
     if (func)
         return;
 
-#if 0
-    voodoo_log("Voodoo PCI write %04X %02X PC=%08x\n", addr, val, cpu_state.pc);
-#endif
-
     switch (addr) {
         case 0x04:
             voodoo->pci_enable = val & 2;
@@ -883,9 +860,6 @@ voodoo_speed_changed(void *priv)
         voodoo_set->voodoos[1]->write_time = pci_nonburst_time + pci_burst_time * ((voodoo_set->voodoos[1]->fbiInit1 & 2) ? 1 : 0);
         voodoo_set->voodoos[1]->burst_time = pci_burst_time * ((voodoo_set->voodoos[1]->fbiInit1 & 2) ? 2 : 1);
     }
-#if 0
-    voodoo_log("Voodoo read_time=%i write_time=%i burst_time=%i %08x %08x\n", voodoo->read_time, voodoo->write_time, voodoo->burst_time, voodoo->fbiInit1, voodoo->fbiInit4);
-#endif
 }
 
 static void

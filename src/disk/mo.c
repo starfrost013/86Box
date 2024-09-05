@@ -1164,9 +1164,6 @@ mo_pre_execution_check(mo_t *dev, uint8_t *cdb)
 static void
 mo_seek(mo_t *dev, uint32_t pos)
 {
-#if 0
-    mo_log("MO %i: Seek %08X\n", dev->id, pos);
-#endif
     dev->sector_pos = pos;
 }
 
@@ -1683,9 +1680,6 @@ mo_command(scsi_common_t *sc, uint8_t *cdb)
                 dev->buffer[1] = 0x80;                                              /*Removable*/
                 dev->buffer[2] = (dev->drv->bus_type == MO_BUS_SCSI) ? 0x02 : 0x00; /*SCSI-2 compliant*/
                 dev->buffer[3] = (dev->drv->bus_type == MO_BUS_SCSI) ? 0x02 : 0x21;
-#if 0
-                dev->buffer[4] = 31;
-#endif
                 dev->buffer[4] = 0;
                 if (dev->drv->bus_type == MO_BUS_SCSI) {
                     dev->buffer[6] = 1;    /* 16-bit transfers supported */
@@ -1836,10 +1830,6 @@ mo_command(scsi_common_t *sc, uint8_t *cdb)
             mo_illegal_opcode(dev);
             break;
     }
-
-#if 0
-    mo_log("MO %i: Phase: %02X, request length: %i\n", dev->id, dev->tf->phase, dev->tf->request_length);
-#endif
 
     if ((dev->packet_status == PHASE_COMPLETE) || (dev->packet_status == PHASE_ERROR))
         mo_buf_free(dev);

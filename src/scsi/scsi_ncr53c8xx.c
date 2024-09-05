@@ -1584,9 +1584,6 @@ ncr53c8xx_reg_writeb(ncr53c8xx_t *dev, uint32_t offset, uint8_t val)
                 ncr53c8xx_log("Woken by SIGP\n");
                 dev->waiting = 0;
                 dev->dsp     = dev->dnad;
-#if 0
-                ncr53c8xx_execute_script(dev);
-#endif
             }
             if ((val & NCR_ISTAT_SRST) && !(tmp & NCR_ISTAT_SRST)) {
                 ncr53c8xx_soft_reset(dev);

@@ -963,9 +963,7 @@ fdc37c93x_init(const device_t *info)
     dev->port_370 = ((info->local >> 8) & 0x08);
 
     dev->gpio_regs[0] = 0xff;
-#if 0
-    dev->gpio_regs[1] = (info->local == 0x0030) ? 0xff : 0xfd;
-#endif
+
     dev->gpio_regs[1] = (dev->chip_id == 0x30) ? 0xff : 0xfd;
 
     if (dev->has_nvr) {

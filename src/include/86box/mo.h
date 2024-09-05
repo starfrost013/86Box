@@ -176,10 +176,6 @@ typedef struct mo_t {
 
 extern mo_t      *mo[MO_NUM];
 extern mo_drive_t mo_drives[MO_NUM];
-#if 0
-extern uint8_t    atapi_mo_drives[8];
-extern uint8_t    scsi_mo_drives[16];
-#endif
 
 #define mo_sense_error dev->sense[0]
 #define mo_sense_key   dev->sense[2]

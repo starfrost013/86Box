@@ -496,9 +496,6 @@ ps2_mca_read(uint16_t port, UNUSED(void *priv))
 
     switch (port) {
         case 0x91:
-#if 0
-            fatal("Read 91 setup=%02x adapter=%02x\n", ps2.setup, ps2.adapter_setup);
-#endif
             if (!(ps2.setup & PS2_SETUP_IO))
                 temp = 0x00;
             else if (!(ps2.setup & PS2_SETUP_VGA))

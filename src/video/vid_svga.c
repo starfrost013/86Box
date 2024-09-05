@@ -1259,9 +1259,6 @@ svga_poll(void *priv)
             if (svga->vsync_callback)
                 svga->vsync_callback(svga);
         }
-#if 0
-        if (svga->vc == lines_num) {
-#endif
         if (svga->vc == svga->vtotal) {
             svga->vc       = 0;
             svga->sc       = (svga->crtc[0x8] & 0x1f);

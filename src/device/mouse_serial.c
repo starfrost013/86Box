@@ -438,10 +438,6 @@ ltsermouse_set_report_period(mouse_t *dev, int rps)
         dev->report_period = 0.0;
         dev->continuous = 1;
     } else {
-#if 0
-        if (rps > dev->max_rps)
-            rps = dev->max_rps;
-#endif
 
         dev->continuous = 0;
         dev->report_period = 1000000.0 / ((double) rps);
@@ -481,10 +477,6 @@ ltsermouse_switch_baud_rate(mouse_t *dev, int next_state)
 
     word_len += 1.0 + 2.0;            /* 1 start bit + 2 stop bits */
 
-#if 0
-    dev->max_rps = (int) floor(((double) dev->bps) / (word_len * num_words));
-#endif
-
     if (next_state == STATE_BAUD_RATE)
         dev->transmit_period = dev->host_transmit_period;
     else
@@ -494,9 +486,6 @@ ltsermouse_switch_baud_rate(mouse_t *dev, int next_state)
 
     dev->transmit_period *= word_len;
     /* The transmit period for the entire report, we're going to need this in ltsermouse_set_report_period(). */
-#if 0
-    dev->report_transmit_period = dev->transmit_period * num_words;
-#endif
 
     ltsermouse_set_report_period(dev, dev->rps);
 

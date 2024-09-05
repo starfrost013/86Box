@@ -591,9 +591,6 @@ do_format(hdc_t *dev, drive_t *drive, ccb_t *ccb)
     int     intr = 0;
     int     val;
     off64_t addr;
-#if 0
-    fcb_t *fcb;
-#endif
 
     /* Get the parameters from the CCB. */
     if (ccb->cmd == CMD_FORMAT_DRIVE) {
@@ -645,9 +642,6 @@ do_format(hdc_t *dev, drive_t *drive, ccb_t *ccb)
                 dev->status &= ~ASR_DATA_REQ;
 
                 /* Point to the FCB we got. */
-#if 0
-        fcb = (fcb_t *)dev->data;
-#endif
             dev->state = STATE_FINIT;
             fallthrough;
 
@@ -675,11 +669,8 @@ do_fmt:
              * the FCB, although we should at least
              * use it's "filler byte" value...
              */
-#if 0
-        hdd_image_zero_ex(drive->hdd_num, addr, fcb->fill, drive->spt);
-#else
+
             hdd_image_zero(drive->hdd_num, addr, drive->spt);
-#endif
 
             /* Done with this track. */
             dev->state = STATE_FDONE;

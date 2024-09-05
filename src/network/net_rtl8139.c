@@ -298,14 +298,7 @@ enum RxConfigBits {
 
 /* Twister tuning parameters from RealTek.
    Completely undocumented, but required to tune bad links on some boards. */
-#if 0
-enum CSCRBits {
-    CSCR_LinkOKBit = 0x0400,
-    CSCR_LinkChangeBit = 0x0800,
-    CSCR_LinkStatusBits = 0x0f000,
-    CSCR_LinkDownOffCmd = 0x003c0,
-    CSCR_LinkDownCmd = 0x0f3c0,
-#endif
+
 enum CSCRBits {
     CSCR_Testfun       = 1 << 15, /* 1 = Auto-neg speeds up internal timer, WO, def 0 */
     CSCR_Cable_Changed = 1 << 11, /* Undocumented: 1 = Cable status changed, 0 = No change */
@@ -1054,14 +1047,8 @@ rtl8139_reset(void *priv)
 
     /* ACK the reset */
     s->TxConfig = 0;
-
-#if 0
-//    s->TxConfig |= HW_REVID(1, 0, 0, 0, 0, 0, 0); // RTL-8139  HasHltClk
-    s->clock_enabled = 0;
-#else
     s->TxConfig |= HW_REVID(1, 1, 1, 0, 1, 1, 0); // RTL-8139C+ HasLWake
     s->clock_enabled = 1;
-#endif
 
     s->bChipCmdState = CmdReset; /* RxBufEmpty bit is calculated on read from ChipCmd */
 
@@ -1074,10 +1061,6 @@ rtl8139_reset(void *priv)
     s->CpCmd         = 0x0; /* reset C+ mode */
     s->cplus_enabled = 0;
 
-#if 0
-    s->BasicModeCtrl = 0x3100; // 100Mbps, full duplex, autonegotiation
-    s->BasicModeCtrl = 0x2100; // 100Mbps, full duplex
-#endif
     s->BasicModeCtrl = 0x1000; // autonegotiation
 
     rtl8139_reset_phy(s);
@@ -1086,9 +1069,6 @@ rtl8139_reset(void *priv)
     s->TCTR      = 0;
     s->TimerInt  = 0;
     s->TCTR_base = 0;
-#if 0
-    rtl8139_set_next_tctr_time(s);
-#endif
 
     /* reset tally counters */
     RTL8139TallyCounters_clear(&s->tally_counters);
@@ -1961,9 +1941,6 @@ rtl8139_cplus_transmit_one(RTL8139State *s)
 
                 /* a placeholder for checksum calculation routine in tcp case */
                 uint8_t *data_to_checksum = eth_payload_data + hlen - 12;
-#if 0
-                size_t   data_to_checksum_len = eth_payload_len  - hlen + 12;
-#endif
 
                 /* pointer to TCP header */
                 tcp_header *p_tcp_hdr = (tcp_header *) (eth_payload_data + hlen);
@@ -1993,11 +1970,6 @@ rtl8139_cplus_transmit_one(RTL8139State *s)
                         is_last_frame = 1;
                         chunk_size    = tcp_data_len - tcp_send_offset;
                     }
-
-#if 0
-                    rtl8139_log("+++ C+ mode TSO TCP seqno %08x\n",
-                                ldl_be_p(&p_tcp_hdr->th_seq));
-#endif
 
                     /* add 4 TCP pseudoheader fields */
                     /* copy IP source and destination fields */
@@ -2051,10 +2023,6 @@ rtl8139_cplus_transmit_one(RTL8139State *s)
                                            0, (uint8_t *) dot1q_buffer);
 
                     /* add transferred count to TCP sequence number */
-#if 0
-                    stl_be_p(&p_tcp_hdr->th_seq,
-                             chunk_size + ldl_be_p(&p_tcp_hdr->th_seq));
-#endif
                     p_tcp_hdr->th_seq = bswap32(chunk_size + bswap32(p_tcp_hdr->th_seq));
                 }
 
@@ -2068,9 +2036,6 @@ rtl8139_cplus_transmit_one(RTL8139State *s)
                 memcpy(saved_ip_header, eth_payload_data, hlen);
 
                 uint8_t *data_to_checksum = eth_payload_data + hlen - 12;
-#if 0
-                size_t   data_to_checksum_len = eth_payload_len  - hlen + 12;
-#endif
 
                 /* add 4 TCP pseudoheader fields */
                 /* copy IP source and destination fields */
@@ -2404,13 +2369,6 @@ rtl8139_IntrStatus_write(RTL8139State *s, uint32_t val)
 {
     rtl8139_log("IntrStatus write(w) val=0x%04x\n", val);
 
-#if 0
-
-    /* writing to ISR has no effect */
-
-    return;
-
-#else
     uint16_t newStatus = s->IntrStatus & ~val;
 
     /* mask unwritable bits */
@@ -2422,8 +2380,6 @@ rtl8139_IntrStatus_write(RTL8139State *s, uint32_t val)
 
     s->IntrStatus = newStatus;
     rtl8139_update_irq(s);
-
-#endif
 }
 
 static uint32_t
@@ -2432,15 +2388,6 @@ rtl8139_IntrStatus_read(RTL8139State *s)
     uint32_t ret = s->IntrStatus;
 
     rtl8139_log("IntrStatus read(w) val=0x%04x\n", ret);
-
-#if 0
-
-    /* reading ISR clears all interrupts */
-    s->IntrStatus = 0;
-
-    rtl8139_update_irq(s);
-
-#endif
 
     return ret;
 }
@@ -2533,9 +2480,6 @@ rtl8139_io_writeb(uint32_t addr, uint8_t val, void *priv)
             if (val & (1 << 7)) {
                 rtl8139_log("C+ TxPoll high priority transmission (not "
                             "implemented)\n");
-#if 0
-                rtl8139_cplus_transmit(s);
-#endif
             }
             if (val & (1 << 6)) {
                 rtl8139_log("C+ TxPoll normal priority transmission\n");
@@ -2656,10 +2600,6 @@ rtl8139_io_writel(uint32_t addr, uint32_t val, void *priv)
         case Timer:
             rtl8139_log("TCTR Timer reset on write\n");
             s->TCTR = 0;
-#if 0
-            s->TCTR_base = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
-            rtl8139_set_next_tctr_time(s);
-#endif
             break;
 
         case FlashReg:
@@ -2889,10 +2829,6 @@ rtl8139_io_readl(uint32_t addr, void *priv)
             break;
 
         case Timer:
-#if 0
-            ret = (qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) - s->TCTR_base) /
-                  PCI_PERIOD;
-#endif
             ret = s->TCTR;
             rtl8139_log("TCTR Timer read val=0x%08x\n", ret);
             break;

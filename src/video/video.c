@@ -1163,10 +1163,7 @@ uint32_t
 video_color_transform(uint32_t color)
 {
     uint8_t *clr8 = (uint8_t *) &color;
-#if 0
-    if (!video_grayscale && !invert_display)
-        return color;
-#endif
+
     if (video_grayscale) {
         if (video_graytype) {
             if (video_graytype == 1)

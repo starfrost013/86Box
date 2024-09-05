@@ -363,13 +363,7 @@ zxx(UNUSED(FDI *fdi))
 {
     fdi2raw_log("track %d: unknown track type 0x%02.2X\n", fdi->current_track, fdi->track_type);
 }
-/* unsupported track */
-#if 0
-static void zyy (FDI *fdi)
-{
-    fdi2raw_log("track %d: unsupported track type 0x%02.2X\n", fdi->current_track, fdi->track_type);
-}
-#endif
+
 /* empty track */
 static void
 track_empty(UNUSED(FDI *fdi))
@@ -644,200 +638,6 @@ s0d(FDI *fdi)
 /* ***** */
 /* AMIGA */
 /* ***** */
-
-/* just for testing integrity of Amiga sectors */
-#if 0
-static void
-rotateonebit (uint8_t *start, uint8_t *end, int shift)
-{
-        if (shift == 0)
-                return;
-        while (start <= end) {
-                start[0] <<= shift;
-                start[0] |= start[1] >> (8 - shift);
-                start++;
-        }
-}
-
-static uint16_t
-getmfmword (uint8_t *mbuf)
-{
-        uint32_t v;
-
-        v = (mbuf[0] << 8) | (mbuf[1] << 0);
-        if (check_offset == 0)
-                return (uint16_t)v;
-        v <<= 8;
-        v |= mbuf[2];
-        v >>= check_offset;
-        return (uint16_t)v;
-}
-
-#define MFMMASK 0x55555555
-static uint32_t
-getmfmlong (uint8_t * mbuf)
-{
-        return ((getmfmword (mbuf) << 16) | getmfmword (mbuf + 2)) & MFMMASK;
-}
-#endif
-
-#if 0
-static int amiga_check_track (FDI *fdi)
-{
-    int i, j, secwritten = 0;
-    int fwlen = fdi->out / 8;
-    int length = 2 * fwlen;
-    int drvsec = 11;
-    uint32_t odd, even, chksum, id, dlong;
-    uint8_t *secdata;
-    uint8_t secbuf[544];
-    uint8_t bigmfmbuf[60000];
-    uint8_t *mbuf, *mbuf2, *mend;
-    char sectable[22];
-    uint8_t *raw = fdi->track_dst_buffer;
-    int slabel, off;
-    int ok = 1;
-
-    memset (bigmfmbuf, 0, sizeof (bigmfmbuf));
-    mbuf = bigmfmbuf;
-    check_offset = 0;
-    for (i = 0; i < (fdi->out + 7) / 8; i++)
-        *mbuf++ = raw[i];
-    off = fdi->out & 7;
-#    if 1
-    if (off > 0) {
-        mbuf--;
-        *mbuf &= ~((1 << (8 - off)) - 1);
-    }
-    j = 0;
-    while (i < (fdi->out + 7) / 8 + 600) {
-        *mbuf++ |= (raw[j] >> off) | ((raw[j + 1]) << (8 - off));
-        j++;
-        i++;
-    }
-#    endif
-    mbuf = bigmfmbuf;
-
-    memset (sectable, 0, sizeof (sectable));
-    mend = bigmfmbuf + length;
-    mend -= (4 + 16 + 8 + 512);
-
-    while (secwritten < drvsec) {
-        int trackoffs;
-
-        for (;;) {
-            rotateonebit (bigmfmbuf, mend, 1);
-            if (getmfmword (mbuf) == 0)
-                break;
-            if (secwritten == 10) {
-                mbuf[0] = 0x44;
-                mbuf[1] = 0x89;
-            }
-            if (check_offset > 7) {
-                check_offset = 0;
-                mbuf++;
-                if (mbuf >= mend || *mbuf == 0)
-                    break;
-            }
-            if (getmfmword (mbuf) == 0x4489)
-                break;
-        }
-        if (mbuf >= mend || *mbuf == 0)
-            break;
-
-        rotateonebit (bigmfmbuf, mend, check_offset);
-        check_offset = 0;
-
-        while (getmfmword (mbuf) == 0x4489)
-            mbuf+= 1 * 2;
-        mbuf2 = mbuf + 8;
-
-        odd = getmfmlong (mbuf);
-        even = getmfmlong (mbuf + 2 * 2);
-        mbuf += 4 * 2;
-        id = (odd << 1) | even;
-
-        trackoffs = (id & 0xff00) >> 8;
-        if (trackoffs + 1 > drvsec) {
-            fdi2raw_log("illegal sector offset %d\n",trackoffs);
-            ok = 0;
-            mbuf = mbuf2;
-            continue;
-        }
-        if ((id >> 24) != 0xff) {
-            fdi2raw_log("sector %d format type %02.2X?\n", trackoffs, id >> 24);
-            ok = 0;
-        }
-        chksum = odd ^ even;
-        slabel = 0;
-        for (i = 0; i < 4; i++) {
-            odd = getmfmlong (mbuf);
-            even = getmfmlong (mbuf + 8 * 2);
-            mbuf += 2* 2;
-
-            dlong = (odd << 1) | even;
-            if (dlong) slabel = 1;
-                chksum ^= odd ^ even;
-        }
-        mbuf += 8 * 2;
-        odd = getmfmlong (mbuf);
-        even = getmfmlong (mbuf + 2 * 2);
-        mbuf += 4 * 2;
-        if (((odd << 1) | even) != chksum) {
-            fdi2raw_log("sector %d header crc error\n", trackoffs);
-            ok = 0;
-            mbuf = mbuf2;
-            continue;
-        }
-        fdi2raw_log("sector %d header crc ok\n", trackoffs);
-        if (((id & 0x00ff0000) >> 16) != (uint32_t)fdi->current_track) {
-            fdi2raw_log("illegal track number %d <> %d\n",fdi->current_track,(id & 0x00ff0000) >> 16);
-            ok++;
-            mbuf = mbuf2;
-            continue;
-        }
-        odd = getmfmlong (mbuf);
-        even = getmfmlong (mbuf + 2 * 2);
-        mbuf += 4 * 2;
-        chksum = (odd << 1) | even;
-        secdata = secbuf + 32;
-        for (i = 0; i < 128; i++) {
-            odd = getmfmlong (mbuf);
-            even = getmfmlong (mbuf + 256 * 2);
-            mbuf += 2 * 2;
-            dlong = (odd << 1) | even;
-            *secdata++ = (uint8_t) (dlong >> 24);
-            *secdata++ = (uint8_t) (dlong >> 16);
-            *secdata++ = (uint8_t) (dlong >> 8);
-            *secdata++ = (uint8_t) dlong;
-            chksum ^= odd ^ even;
-        }
-        mbuf += 256 * 2;
-        if (chksum) {
-            fdi2raw_log("sector %d data checksum error\n",trackoffs);
-            ok = 0;
-        } else if (sectable[trackoffs]) {
-            fdi2raw_log("sector %d already found?\n", trackoffs);
-            mbuf = mbuf2;
-        } else {
-            fdi2raw_log("sector %d ok\n",trackoffs);
-            if (slabel) fdi2raw_log("(non-empty sector header)\n");
-            sectable[trackoffs] = 1;
-            secwritten++;
-            if (trackoffs == 9)
-                mbuf += 0x228;
-        }
-    }
-    for (i = 0; i < drvsec; i++) {
-        if (!sectable[i]) {
-            fdi2raw_log("sector %d missing\n", i);
-            ok = 0;
-        }
-    }
-    return ok;
-}
-#endif
-
 static void
 amiga_data_raw(FDI *fdi, uint8_t *secbuf, uint8_t *crc, int len)
 {
@@ -1498,19 +1298,6 @@ fdi_decompress(int pulses, uint8_t *sizep, uint8_t *src, int *dofree)
     return dst;
 }
 
-static void
-dumpstream(UNUSED(int track), UNUSED(uint8_t *stream), UNUSED(int len))
-{
-#if 0
-    char name[100];
-    FILE *fp;
-
-    sprintf (name, "track_%d.raw", track);
-    fp = fopen(name, "wb");
-    fwrite (stream, 1, len * 4, fp);
-    fclose (fp);
-#endif
-}
 
 static int bitoffset;
 
@@ -1546,134 +1333,6 @@ init_array(uint32_t standard_MFM_2_bit_cell_size, int nb_of_bits)
     }
     array_index = 0;
 }
-
-#if 0
-
-static void fdi2_decode (FDI *fdi, uint32_t totalavg, uint32_t *avgp, uint32_t *minp, uint32_t *maxp, uint8_t *idx, int maxidx, int *indexoffsetp, int pulses, int mfm)
-{
-    uint32_t adjust;
-    uint32_t adjusted_pulse;
-    uint32_t standard_MFM_2_bit_cell_size = totalavg / 50000;
-    uint32_t standard_MFM_8_bit_cell_size = totalavg / 12500;
-    int real_size, i, j, eodat, outstep;
-    int indexoffset = *indexoffsetp;
-    uint8_t *d = fdi->track_dst_buffer;
-    uint16_t *pt = fdi->track_dst_buffer_timing;
-    uint32_t ref_pulse, pulse;
-
-    /* detects a long-enough stable pulse coming just after another stable pulse */
-    i = 1;
-    while ( (i < pulses) && ( (idx[i] < maxidx)
-        || (idx[i - 1] < maxidx)
-        || (avgp[i] < (standard_MFM_2_bit_cell_size - (standard_MFM_2_bit_cell_size / 4))) ) )
-            i++;
-    if (i == pulses)  {
-        fdi2raw_log("No stable and long-enough pulse in track.\n");
-        return;
-    }
-    i--;
-    eodat = i;
-    adjust = 0;
-    total = 0;
-    totaldiv = 0;
-    init_array(standard_MFM_2_bit_cell_size, 2);
-    bitoffset = 0;
-    ref_pulse = 0;
-    outstep = 0;
-    while (outstep < 2) {
-
-        /* calculates the current average bitrate from previous decoded data */
-        uint32_t avg_size = (total << 3) / totaldiv; /* this is the new average size for one MFM bit */
-        /* uint32_t avg_size = (uint32_t)((((float)total)*8.0) / ((float)totaldiv)); */
-        /* you can try tighter ranges than 25%, or wider ranges. I would probably go for tighter... */
-        if ((avg_size < (standard_MFM_8_bit_cell_size - (pulse_limitval * standard_MFM_8_bit_cell_size / 100))) ||
-            (avg_size > (standard_MFM_8_bit_cell_size + (pulse_limitval * standard_MFM_8_bit_cell_size / 100)))) {
-                avg_size = standard_MFM_8_bit_cell_size;
-        }
-        /* this is to prevent the average value from going too far
-        * from the theoretical value, otherwise it could progressively go to (2 *
-        * real value), or (real value / 2), etc. */
-
-        /* gets the next long-enough pulse (this may require more than one pulse) */
-        pulse = 0;
-        while (pulse < ((avg_size / 4) - (avg_size / 16))) {
-            int indx;
-            i++;
-            if (i >= pulses)
-                i = 0;
-            indx = idx[i];
-            if (rand() <= (indx * RAND_MAX) / maxidx) {
-                pulse += avgp[i] - ref_pulse;
-                if (indx >= maxidx)
-                    ref_pulse = 0;
-                else
-                    ref_pulse = avgp[i];
-            }
-            if (i == eodat)
-                outstep++;
-            if (outstep == 1 && indexoffset == i)
-                *indexoffsetp = bitoffset;
-        }
-
-        /* gets the size in bits from the pulse width, considering the current average bitrate */
-        adjusted_pulse = pulse;
-        real_size = 0;
-        while (adjusted_pulse >= avg_size) {
-            real_size += 4;
-            adjusted_pulse -= avg_size / 2;
-        }
-        adjusted_pulse <<= 3;
-        while (adjusted_pulse >= ((avg_size * 4) + (avg_size / 4))) {
-            real_size += 2;
-            adjusted_pulse -= avg_size * 2;
-        }
-        if (adjusted_pulse >= ((avg_size * 3) + (avg_size / 4))) {
-            if (adjusted_pulse <= ((avg_size * 4) - (avg_size / 4))) {
-                if ((2 * ((adjusted_pulse >> 2) - adjust)) <= ((2 * avg_size) - (avg_size / 4)))
-                    real_size += 3;
-                else
-                    real_size += 4;
-            } else
-                real_size += 4;
-        } else {
-            if (adjusted_pulse > ((avg_size * 3) - (avg_size / 4))) {
-                real_size += 3;
-            } else {
-                if (adjusted_pulse >= ((avg_size * 2) + (avg_size / 4))) {
-                    if ((2 * ((adjusted_pulse >> 2) - adjust)) < (avg_size + (avg_size / 4)))
-                        real_size += 2;
-                    else
-                        real_size += 3;
-                } else
-                    real_size += 2;
-            }
-        }
-
-        if (outstep == 1) {
-            for (j = real_size; j > 1; j--)
-                addbit (d, 0);
-            addbit (d, 1);
-            for (j = 0; j < real_size; j++)
-                *pt++ = (uint16_t)(pulse / real_size);
-        }
-
-        /* prepares for the next pulse */
-        adjust = ((real_size * avg_size)/8) - pulse;
-        total -= psarray[array_index].size;
-        totaldiv -= psarray[array_index].number_of_bits;
-        psarray[array_index].size = pulse;
-        psarray[array_index].number_of_bits = real_size;
-        total += pulse;
-        totaldiv += real_size;
-        array_index++;
-        if (array_index >= FDI_MAX_ARRAY)
-            array_index = 0;
-    }
-
-    fdi->out = bitoffset;
-}
-
-#else
 
 static void
 fdi2_decode(FDI *fdi, uint32_t totalavg, uint32_t *avgp, uint32_t *minp, uint32_t *maxp, uint8_t *idx, int maxidx, int *indexoffsetp, int pulses, int mfm)
@@ -1719,9 +1378,6 @@ fdi2_decode(FDI *fdi, uint32_t totalavg, uint32_t *avgp, uint32_t *minp, uint32_
 
         /* calculates the current average bitrate from previous decoded data */
         uint32_t avg_size = (uint32_t) ((total << (2 + mfm)) / totaldiv); /* this is the new average size for one MFM bit */
-#if 0
-        uint32_t avg_size = (uint32_t)((((float)total)*((float)(mfm+1))*4.0) / ((float)totaldiv));
-#endif
         /* you can try tighter ranges than 25%, or wider ranges. I would probably go for tighter... */
         if ((avg_size < (standard_MFM_8_bit_cell_size - (pulse_limitval * standard_MFM_8_bit_cell_size / 100))) || (avg_size > (standard_MFM_8_bit_cell_size + (pulse_limitval * standard_MFM_8_bit_cell_size / 100)))) {
             avg_size = standard_MFM_8_bit_cell_size;
@@ -1915,8 +1571,6 @@ fdi2_decode(FDI *fdi, uint32_t totalavg, uint32_t *avgp, uint32_t *minp, uint32_
     fdi->out = bitoffset;
 }
 
-#endif
-
 static void
 fdi2_celltiming(FDI *fdi, uint32_t totalavg, int bitoffset, uint16_t *out)
 {
@@ -1969,7 +1623,6 @@ decode_lowlevel_track(FDI *fdi, int track, struct fdi_cache *cache)
     p1 += 4;
     len  = 12;
     avgp = (uint32_t *) fdi_decompress(pulses, p1 + 0, p1 + len, &avg_free);
-    dumpstream(track, (uint8_t *) avgp, pulses);
     len += get_u24(p1 + 0) & 0x3fffff;
     if (!avgp)
         return -1;
@@ -2064,10 +1717,7 @@ decode_lowlevel_track(FDI *fdi, int track, struct fdi_cache *cache)
         idxp[i] = sum;
     }
     len = totalavg / 100000;
-#if 0
-    fdi2raw_log("totalavg=%u index=%d (%d) maxidx=%d weakbits=%d len=%d\n",
-                totalavg, indexoffset, maxidx, weakbits, len);
-#endif
+
     cache->avgp        = avgp;
     cache->idxp        = idxp;
     cache->minp        = minp;
@@ -2249,10 +1899,7 @@ fdi2raw_loadrevolution_2(FDI *fdi, uint16_t *mfmbuf, uint16_t *tracktiming, int 
     fdi2_decode(fdi, cache->totalavg,
                 cache->avgp, cache->minp, cache->maxp, cache->idxp,
                 cache->maxidx, &idx, cache->pulses, mfm);
-#if 0
-    fdi2raw_log("track %d: nbits=%d avg len=%.2f weakbits=%d idx=%d\n",
-                track, bitoffset, (double)cache->totalavg / bitoffset, cache->weakbits, cache->indexoffset);
-#endif
+
     len = fdi->out;
     if (cache->weakbits >= 10 && multirev)
         *multirev = 1;
@@ -2309,11 +1956,6 @@ fdi2raw_loadtrack(FDI *fdi, uint16_t *mfmbuf, uint16_t *tracktiming, int track, 
         fdi->bit_rate = bit_rate_table[fdi->track_type & 0x0f];
     else
         fdi->bit_rate = 250;
-
-#if 0
-    fdi2raw_log("track %d: srclen: %d track_type: %02.2X, bitrate: %d\n",
-                fdi->current_track, fdi->track_src_len, fdi->track_type, fdi->bit_rate);
-#endif
 
     if ((fdi->track_type & 0xc0) == 0x80) {
 

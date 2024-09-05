@@ -5,9 +5,6 @@ codegen_addbyte(UNUSED(codeblock_t *block), uint8_t val)
 {
     if (block_pos >= BLOCK_MAX) {
         fatal("codegen_addbyte over! %i\n", block_pos);
-#if 0
-        CPU_BLOCK_END();
-#endif
     }
     block_write_data[block_pos++] = val;
 }

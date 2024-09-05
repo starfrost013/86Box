@@ -297,10 +297,6 @@ fdi_seek(int drive, int track)
     if (track < 0)
         track = 0;
 
-#if 0
-    if (track > dev->lasttrack)
-        track = dev->lasttrack - 1;
-#endif
 
     dev->track = track;
 

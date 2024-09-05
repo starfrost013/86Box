@@ -78,11 +78,6 @@ SettingsPorts::SettingsPorts(QWidget *parent)
     ui->pushButtonSerialPassThru2->setEnabled(serial_passthrough_enabled[1]);
     ui->pushButtonSerialPassThru3->setEnabled(serial_passthrough_enabled[2]);
     ui->pushButtonSerialPassThru4->setEnabled(serial_passthrough_enabled[3]);
-#if 0
-    ui->pushButtonSerialPassThru5->setEnabled(serial_passthrough_enabled[4]);
-    ui->pushButtonSerialPassThru6->setEnabled(serial_passthrough_enabled[5]);
-    ui->pushButtonSerialPassThru7->setEnabled(serial_passthrough_enabled[6]);
-#endif
 }
 
 SettingsPorts::~SettingsPorts()
@@ -201,23 +196,3 @@ SettingsPorts::on_checkBoxSerialPassThru4_clicked(bool checked)
 {
     ui->pushButtonSerialPassThru4->setEnabled(checked);
 }
-
-#if 0
-void
-SettingsPorts::on_checkBoxSerialPassThru5_clicked(bool checked)
-{
-    ui->pushButtonSerialPassThru5->setEnabled(checked);
-}
-
-void
-SettingsPorts::on_checkBoxSerialPassThru6_clicked(bool checked)
-{
-    ui->pushButtonSerialPassThru6->setEnabled(checked);
-}
-
-void
-SettingsPorts::on_checkBoxSerialPassThru7_clicked(bool checked)
-{
-    ui->pushButtonSerialPassThru7->setEnabled(checked);
-}
-#endif

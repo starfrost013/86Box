@@ -258,10 +258,6 @@ tc8521_start(nvr_t *nvr)
         nvr_time_set(&tm);
     }
 
-#if 0
-    /* Start the RTC - BIOS will do this. */
-    nvr->regs[TC8521_PAGE] |= 0x80;
-#endif
 }
 
 /* Write to one of the chip registers. */
@@ -345,9 +341,6 @@ ems_execaddr(t1000_t *sys, UNUSED(int pg), uint16_t val)
                      * HardRAM or conventional RAM */
     val &= 0x7f;
 
-#if 0
-    t1000_log("Select EMS page: %d of %d\n", val, sys->ems_pages);
-#endif
     if (val < sys->ems_pages) {
         /* EMS is any memory above 512k,
            with ems_base giving the start address */
@@ -361,10 +354,6 @@ static uint8_t
 ems_in(uint16_t addr, void *priv)
 {
     const t1000_t *sys = (t1000_t *) priv;
-
-#if 0
-    t1000_log("ems_in(%04x)=%02x\n", addr, sys->ems_reg[(addr >> 14) & 3]);
-#endif
     return (sys->ems_reg[(addr >> 14) & 3]);
 }
 
@@ -374,9 +363,6 @@ ems_out(uint16_t addr, uint8_t val, void *priv)
     t1000_t *sys = (t1000_t *) priv;
     int      pg  = (addr >> 14) & 3;
 
-#if 0
-    t1000_log("ems_out(%04x, %02x) pg=%d\n", addr, val, pg);
-#endif
     sys->ems_reg[pg]   = val;
     sys->page_exec[pg] = ems_execaddr(sys, pg, val);
     if (sys->page_exec[pg]) {
@@ -398,9 +384,6 @@ ems_set_hardram(t1000_t *sys, uint8_t val)
     else
         sys->ems_base = 0;
 
-#if 0
-    t1000_log("EMS base set to %02x\n", val);
-#endif
     sys->ems_pages = ((mem_size - 512) / 16) - 4 * sys->ems_base;
     if (sys->ems_pages < 0)
         sys->ems_pages = 0;
@@ -427,9 +410,6 @@ ems_set_port(t1000_t *sys, uint8_t val)
 {
     int n;
 
-#if 0
-    t1000_log("ems_set_port(%d)", val & 0x0f);
-#endif
     if (sys->ems_port) {
         for (n = 0; n <= 0xc000; n += 0x4000) {
             io_removehandler(sys->ems_port + n, 1,
@@ -452,9 +432,6 @@ ems_set_port(t1000_t *sys, uint8_t val)
         sys->ems_port = 0;
     }
 
-#if 0
-    t1000_log(" -> %04x\n", sys->ems_port);
-#endif
 }
 
 static int
@@ -486,14 +463,7 @@ ems_read_ramw(uint32_t addr, void *priv)
     if (pg < 0)
         return 0xff;
 
-#if 0
-    t1000_log("ems_read_ramw addr=%05x ", addr);
-#endif
     addr = sys->page_exec[pg] + (addr & 0x3FFF);
-
-#if 0
-    t1000_log("-> %06x val=%04x\n", addr, *(uint16_t *)&ram[addr]);
-#endif
 
     return (*(uint16_t *) &ram[addr]);
 }
@@ -537,14 +507,7 @@ ems_write_ramw(uint32_t addr, uint16_t val, void *priv)
     if (pg < 0)
         return;
 
-#if 0
-    t1000_log("ems_write_ramw addr=%05x ", addr);
-#endif
     addr = sys->page_exec[pg] + (addr & 0x3fff);
-
-#if 0
-    t1000_log("-> %06x val=%04x\n", addr, val);
-#endif
 
     if (*(uint16_t *) &ram[addr] != val)
         nvr_dosave = 1;

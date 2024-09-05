@@ -1008,10 +1008,7 @@ ics9xxx_read(UNUSED(void *bus), UNUSED(uint8_t addr), void *priv)
         dev->addr_register = -1;
         ret                = dev->model->max_reg + 1;
     }
-#if 0
-    else if ((dev->model_idx == ICS9250_50) && (dev->addr_register == 0))
-    ret = dev->regs[dev->addr_register] & 0x0b; /* -50 reads back revision ID instead */
-#endif
+
     else
         ret = dev->regs[dev->addr_register];
 
@@ -1078,34 +1075,6 @@ ics9xxx_write(UNUSED(void *bus), UNUSED(uint8_t addr), uint8_t data, void *priv)
             }
         }
 
-#if 0
-    switch (dev->addr_register) {
-        case 0:
-            if (dev->model_idx == ICS9250_38)
-                data = (dev->regs[dev->addr_register] & ~0xe8) | (data & 0xe8);
-            break;
-
-        case 1:
-            if (dev->model_idx == ICS9250_38)
-                data = (dev->regs[dev->addr_register] & ~0xfe) | (data & 0xfe);
-            break;
-
-        case 3:
-            if (dev->model_idx == ICS9250_32)
-                data ^= 0x70;
-            break;
-
-        case 4:
-            if (dev->model_idx == ICS9250_38)
-                data = (dev->regs[dev->addr_register] & ~0xfc) | (data & 0xfc);
-            break;
-
-        case 6:
-            if (dev->model_idx == ICS9250_38) /* read-only */
-                data = dev->regs[dev->addr_register];
-            break;
-    }
-#endif
         dev->regs[dev->addr_register] = data;
 
         /* Update frequency if a relevant register was written to. */
@@ -1115,22 +1084,6 @@ ics9xxx_write(UNUSED(void *bus), UNUSED(uint8_t addr), uint8_t data, void *priv)
                 case ICS9xxx_xx:
                     ics9xxx_detect(dev);
                     break;
-#endif
-#if 0
-            case ICS9250_10:
-                ics9xxx_set(dev, (cpu_busspeed >= 100000000) * 0x08);
-                break;
-
-            case ICS9250_16:
-            case ICS9250_26:
-                ics9xxx_set(dev, ((cpu_busspeed >= 120000000) * 0x08) | ((((cpu_busspeed >= 100000000) && (cpu_busspeed < 120000000)) || (cpu_busspeed == 150000000) || (cpu_busspeed == 132999999)) * 0x04));
-                break;
-
-            case ICS9250_27:
-            case ICS9250_28:
-            case ICS9250_29:
-                ics9xxx_set(dev, ((cpu_busspeed == 100000000) * 0x02) | ((cpu_busspeed > 100000000) * 0x01));
-                break;
 #endif
                 default:
                     ics9xxx_set(dev, 0x00);

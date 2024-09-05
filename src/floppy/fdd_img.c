@@ -897,10 +897,7 @@ img_load(int drive, char *fn)
 
             fseek(dev->fp, 0x03, SEEK_SET);
             (void) !fread(&bpb_bps, 1, 2, dev->fp);
-#if 0
-            fseek(dev->fp, 0x0B, SEEK_SET);
-            (void) !fread(&bpb_total, 1, 2, dev->fp);
-#endif
+
             fseek(dev->fp, 0x10, SEEK_SET);
             bpb_sectors = fgetc(dev->fp);
             fseek(dev->fp, 0x12, SEEK_SET);
@@ -1107,12 +1104,7 @@ jump_if_fdf:
         } else if (size <= 3440640) { /*ED, maximum possible size*/
             dev->sectors = 42;
             dev->tracks  = 80;
-#if 0
-        } else if (size <= 3440640) { /*HD 1024 sector*/
-            dev->sectors = 21;
-            dev->tracks = 80;
-            dev->sector_size = 3;
-#endif
+
         } else if (size <= 3604480) { /*HD 1024 sector*/
             dev->sectors     = 22;
             dev->tracks      = 80;

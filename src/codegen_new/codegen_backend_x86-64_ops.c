@@ -1114,11 +1114,6 @@ host_x86_MOVZX_REG_ABS_32_8(codeblock_t *block, int dst_reg, void *p)
     int64_t offset     = (uintptr_t) p - (((uintptr_t) &cpu_state) + 128);
     int64_t ram_offset = (uintptr_t) p - (uintptr_t) ram;
 
-#if 0
-    if (dst_reg & 8)
-        fatal("host_x86_MOVZX_REG_ABS_32_8 - bad reg\n");
-#endif
-
     if (offset >= -128 && offset < 127) {
         if (dst_reg & 8) {
             codegen_alloc_bytes(block, 5);

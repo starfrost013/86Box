@@ -760,10 +760,6 @@ codegen_reg_rename(codeblock_t *block, ir_reg_t src, ir_reg_t dst)
     int             c;
     int             target;
 
-#if 0
-    pclog("rename: %i.%i -> %i.%i\n", src.reg,src.version, dst.reg, dst.version);
-#endif
-
     /*Search for required register*/
     for (c = 0; c < reg_set->nr_regs; c++) {
         if (!ir_reg_is_invalid(reg_set->regs[c]) && IREG_GET_REG(reg_set->regs[c].reg) == IREG_GET_REG(src.reg) && reg_set->regs[c].version == src.version)
@@ -778,10 +774,7 @@ codegen_reg_rename(codeblock_t *block, ir_reg_t src, ir_reg_t dst)
         codegen_reg_writeback(reg_set, block, target, 0);
     reg_set->regs[target]  = dst;
     reg_set->dirty[target] = 1;
-#if 0
-    pclog("renamed reg %i dest=%i.%i\n", target, dst.reg, dst.version);
-#endif
-
+    
     /*Invalidate any stale copies of the dest register*/
     for (c = 0; c < reg_set->nr_regs; c++) {
         if (c == target)

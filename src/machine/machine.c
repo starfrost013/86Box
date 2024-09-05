@@ -85,10 +85,6 @@ machine_init_ex(int m)
         gameport_instance_id     = 0;
 
         /* Set up the architecture flags. */
-#if 0
-        AT = IS_AT(machine);
-        PCI = IS_ARCH(machine, MACHINE_BUS_PCI);
-#endif
 
         cpu_set();
         pc_speed_changed();

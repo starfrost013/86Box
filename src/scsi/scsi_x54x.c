@@ -613,9 +613,7 @@ static void
 x54x_mbi(x54x_t *dev)
 {
     Req_t *req = &dev->Req;
-#if 0
-    uint32_t CCBPointer = req->CCBPointer;
-#endif
+
     addr24_t  CCBPointer;
     CCBU     *CmdBlock              = &(req->CmdBlock);
     uint8_t   HostStatus            = req->HostStatus;
@@ -1171,10 +1169,7 @@ x54x_mbo_process(x54x_t *dev)
     } else if (!dev->MailboxIsBIOS && (mb32.u.out.ActionCode == MBO_ABORT)) {
         x54x_log("Abort Mailbox Command\n");
         x54x_req_abort(dev, mb32.CCBPointer);
-#if 0
-    } else {
-        x54x_log("Invalid action code: %02X\n", mb32.u.out.ActionCode);
-#endif
+
     }
 
     if ((mb32.u.out.ActionCode == MBO_START) || (!dev->MailboxIsBIOS && (mb32.u.out.ActionCode == MBO_ABORT))) {
@@ -1294,9 +1289,7 @@ x54x_cmd_callback(void *priv)
 
     period = (1000000.0 / dev->ha_bps) * ((double) dev->temp_period);
     timer_on_auto(&dev->timer, dev->media_period + period + 10.0);
-#if 0
-    x54x_log("Temporary period: %lf us (%" PRIi64 " periods)\n", dev->timer.period, dev->temp_period);
-#endif
+
 }
 
 static uint8_t

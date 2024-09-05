@@ -594,9 +594,6 @@ typedef struct voodoo_t {
         uint32_t vidOverlayDudxOffsetSrcWidth;
         uint32_t vidOverlayDvdy;
         uint32_t vidOverlayDvdyOffset;
-#if 0
-        uint32_t vidDesktopOverlayStride;
-#endif
 
         int start_x;
         int start_y;

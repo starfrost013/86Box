@@ -3961,9 +3961,6 @@ pentium_invalid_wrmsr:
                 /* IA32_APIC_BASE - APIC Base Address */
                 case 0x1b:
                     cpu_log("APIC_BASE write: %08X%08X\n", EDX, EAX);
-#if 0
-                    msr.apic_base = EAX | ((uint64_t) EDX << 32);
-#endif
                     break;
                 /* Unknown (undocumented?) MSR used by the Hyper-V BIOS */
                 case 0x20:

@@ -165,9 +165,6 @@
 
 static int azt2316a_wss_dma[4] = { 0, 0, 1, 3 };
 static int azt2316a_wss_irq[8] = { 5, 7, 9, 10, 11, 12, 14, 15 }; /* W95 only uses 7-10, others may be wrong */
-#if 0
-static uint16_t azt2316a_wss_addr[4] = {0x530, 0x604, 0xe80, 0xf40};
-#endif
 
 typedef struct azt2316a_t {
     int type;
@@ -252,21 +249,11 @@ azt1605_create_config_word(void *priv)
     switch (azt2316a->cur_addr) {
         case 0x220:
             // do nothing
-#if 0
-            temp += 0 << 0;
-#endif
             break;
         case 0x240:
             temp += 1 << 0;
             break;
-#if 0
-        case 0x260: // TODO: INVALID?
-            temp += 2 << 0;
-            break;
-        case 0x280: // TODO: INVALID?
-            temp += 3 << 0;
-            break;
-#endif
+
         default:
             break;
     }
@@ -292,9 +279,6 @@ azt1605_create_config_word(void *priv)
     switch (azt2316a->cur_wss_addr) {
         case 0x530:
             // do nothing
-#if 0
-            temp += 0 << 16;
-#endif
             break;
         case 0x604:
             temp += 1 << 16;
@@ -319,9 +303,6 @@ azt1605_create_config_word(void *priv)
     switch (azt2316a->cur_mpu401_addr) {
         case 0x300:
             // do nothing
-#if 0
-            temp += 0 << 2;
-#endif
             break;
         case 0x330:
             temp += 1 << 2;
@@ -445,21 +426,10 @@ azt2316a_create_config_word(void *priv)
     switch (azt2316a->cur_addr) {
         case 0x220:
             // do nothing
-#if 0
-            temp += 0 << 0;
-#endif
             break;
         case 0x240:
             temp += 1 << 0;
             break;
-#if 0
-        case 0x260: // TODO: INVALID?
-            temp += 2 << 0;
-            break;
-        case 0x280: // TODO: INVALID?
-            temp += 3 << 0;
-            break;
-#endif
         default:
             break;
     }
@@ -483,13 +453,6 @@ azt2316a_create_config_word(void *priv)
     }
 
     switch (azt2316a->cur_dma) {
-#if 0
-        // TODO: INVALID?
-        case 0xFF: // -1
-            // do nothing
-            //temp += 0 << 6;
-            break;
-#endif
         case 0:
             temp += 1 << 6;
             break;
@@ -507,9 +470,7 @@ azt2316a_create_config_word(void *priv)
     switch (azt2316a->cur_wss_addr) {
         case 0x530:
             // do nothing
-#if 0
-            temp += 0 << 8;
-#endif
+
             break;
         case 0x604:
             temp += 1 << 8;
@@ -531,9 +492,6 @@ azt2316a_create_config_word(void *priv)
     switch (azt2316a->cur_mpu401_addr) {
         case 0x300:
             // do nothing
-#if 0
-            temp += 0 << 12;
-#endif
             break;
         case 0x330:
             temp += 1 << 12;
@@ -549,9 +507,6 @@ azt2316a_create_config_word(void *priv)
     switch (cd_addr) {
         case 0x310:
             // do nothing
-#if 0
-            temp += 0 << 14;
-#endif
             break;
         case 0x320:
             temp += 1 << 14;
@@ -569,9 +524,6 @@ azt2316a_create_config_word(void *priv)
     switch (cd_type) {
         case 0: /* disabled */
             // do nothing
-#if 0
-            temp += 0 << 16; */
-#endif
             break;
         case 1: /* panasonic */
             temp += 1 << 16;
@@ -607,11 +559,6 @@ azt2316a_create_config_word(void *priv)
         case 0:
             temp += 1 << 20;
             break;
-#if 0
-        case 1: // TODO: INVALID?
-            temp += 2 << 20;
-            break;
-#endif
         case 3:
             temp += 3 << 20;
             break;
@@ -746,12 +693,6 @@ azt1605_config_write(uint16_t addr, uint8_t val, void *priv)
                     azt2316a->cur_addr = 0x220;
                 else if (temp == 1)
                     azt2316a->cur_addr = 0x240;
-#if 0
-                else if (temp == 2)
-                    azt2316a->cur_addr = 0x260; // TODO: INVALID
-                else if (temp == 3)
-                    azt2316a->cur_addr = 0x280; // TODO: INVALID
-#endif
                 if (val & 0x4)
                     azt2316a->cur_mpu401_addr = 0x330;
                 else

@@ -257,29 +257,6 @@ codegen_reset(void)
     }
 }
 
-void
-dump_block(void)
-{
-#if 0
-    codeblock_t *block = pages[0x119000 >> 12].block;
-
-    pclog("dump_block:\n");
-    while (block) {
-        uint32_t start_pc = (block->pc & 0xffc) | (block->phys & ~0xfff);
-        uint32_t end_pc = (block->endpc & 0xffc) | (block->phys & ~0xfff);
-
-        pclog(" %p : %08x-%08x  %08x-%08x %p %p\n", (void *)block, start_pc, end_pc,  block->pc, block->endpc, (void *)block->prev, (void *)block->next);
-
-        if (!block->pc)
-            fatal("Dead PC=0\n");
-
-        block = block->next;
-    }
-
-    pclog("dump_block done\n");*/
-#endif
-}
-
 static void
 add_to_block_list(codeblock_t *block)
 {

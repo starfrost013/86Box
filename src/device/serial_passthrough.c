@@ -88,18 +88,9 @@ host_to_serial_cb(void *priv)
         }
     }
     if (plat_serpt_read(dev, &byte)) {
-#if 0
-        printf("got byte %02X\n", byte);
-#endif
         serial_write_fifo(dev->serial, byte);
-#if 0
-        serial_set_dsr(dev->serial, 1);
-#endif
     }
 no_write_to_machine:
-#if 0
-    serial_device_timeout(dev->serial);
-#endif
     timer_on_auto(&dev->host_to_serial_timer, (1000000.0 / dev->baudrate) * (double) dev->bits);
 }
 
@@ -111,9 +102,6 @@ serial_passthrough_rcr_cb(UNUSED(struct serial_s *serial), void *priv)
     timer_stop(&dev->host_to_serial_timer);
     /* FIXME: do something to dev->baudrate */
     timer_on_auto(&dev->host_to_serial_timer, (1000000.0 / dev->baudrate) * (double) dev->bits);
-#if 0
-    serial_clear_fifo(dev->serial);
-#endif
 }
 
 static void
@@ -126,9 +114,6 @@ serial_passthrough_speed_changed(void *priv)
     timer_stop(&dev->host_to_serial_timer);
     /* FIXME: do something to dev->baudrate */
     timer_on_auto(&dev->host_to_serial_timer, (1000000.0 / dev->baudrate) * (double) dev->bits);
-#if 0
-    serial_clear_fifo(dev->serial);
-#endif
 }
 
 static void
@@ -245,26 +230,10 @@ static const device_config_t serial_passthrough_config[] = {
                 .description = "Named Pipe (Server)",
                 .value = SERPT_MODE_VCON
             },
-#if 0 /* TODO */
-            {
-                .description = "Named Pipe (Client)",
-                .value = SERPT_MODE_VCON
-            },
-#endif
 #else
             {
                 .description = "Pseudo Terminal/Virtual Console",
                 .value = SERPT_MODE_VCON
-            },
-#endif
-#if 0 /* TODO */
-            {
-                .description = "TCP Server",
-                .value = SERPT_MODE_TCPSRV
-            },
-            {
-                .description = "TCP Client",
-                .value = SERPT_MODE_TCPCLNT
             },
 #endif
             {
@@ -305,9 +274,6 @@ static const device_config_t serial_passthrough_config[] = {
         .file_filter = NULL,
         .spinner = { 0 },
         .selection = {
-#if 0 /* Mentioned by WFW 3.1x, not supported, atleast on Linux */
-            { .description = "4", .value = 4 },
-#endif
             { .description = "5", .value = 5 },
             { .description = "6", .value = 6 },
             { .description = "7", .value = 7 },
@@ -324,9 +290,6 @@ static const device_config_t serial_passthrough_config[] = {
         .spinner = { 0 },
         .selection = {
             { .description = "1",   .value = 1   },
-#if 0
-            { .description = "1.5", .value = 1.5 },
-#endif
             { .description = "2",   .value = 2   }
         }
     },
@@ -339,10 +302,6 @@ static const device_config_t serial_passthrough_config[] = {
         .file_filter = NULL,
         .spinner = { 0 },
         .selection = {
-#if 0
-            { .description = "256000", .value = 256000 },
-            { .description = "128000", .value = 128000 },
-#endif
             { .description = "115200", .value = 115200 },
             { .description =  "57600", .value =  57600 },
             { .description =  "56000", .value =  56000 },
@@ -358,9 +317,6 @@ static const device_config_t serial_passthrough_config[] = {
             { .description =    "600", .value =    600 },
             { .description =    "300", .value =    300 },
             { .description =    "150", .value =    150 },
-#if 0
-            { .description =  "134.5", .value =    134.5 },
-#endif
             { .description =    "110", .value =    110 },
             { .description =     "75", .value =     75 }
         }

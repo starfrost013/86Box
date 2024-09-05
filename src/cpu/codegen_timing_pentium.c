@@ -1019,14 +1019,6 @@ codegen_instruction(uint64_t *timings, uint64_t *deps, uint8_t opcode, uint32_t 
     if ((timings[opcode] & PAIR_FPU) && !(deps[opcode] & FPU_FXCH))
         instr_cycles = latency = codegen_fpu_latencies(deps[opcode], fetchdat & 7);
     else {
-#if 0
-        if (timings[opcode] & FPU_WRITE_ST0)
-            fatal("FPU_WRITE_ST0\n");
-        if (timings[opcode] & FPU_WRITE_ST1)
-            fatal("FPU_WRITE_ST1\n");
-        if (timings[opcode] & FPU_WRITE_STREG)
-            fatal("FPU_WRITE_STREG\n");*/
-#endif
         instr_cycles = 0;
     }
 
@@ -1063,17 +1055,9 @@ codegen_instruction(uint64_t *timings, uint64_t *deps, uint8_t opcode, uint32_t 
         fpu_st_latency[0] = 0;
     }
     if (deps[opcode] & FPU_WRITE_ST0) {
-#if 0
-        if (fpu_st_latency[0])
-            fatal("Bad latency ST0\n");*/
-#endif
         fpu_st_latency[0] = FPU_RESULT_LATENCY(timings[opcode]);
     }
     if (deps[opcode] & FPU_WRITE_ST1) {
-#if 0
-        if (fpu_st_latency[1])
-            fatal("Bad latency ST1\n");*/
-#endif
         fpu_st_latency[1] = FPU_RESULT_LATENCY(timings[opcode]);
     }
     if (deps[opcode] & FPU_WRITE_STREG) {

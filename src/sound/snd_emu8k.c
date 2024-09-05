@@ -20,24 +20,11 @@
 #include <86box/plat_unused.h>
 
 #if !defined FILTER_INITIAL && !defined FILTER_MOOG && !defined FILTER_CONSTANT
-#if 0
-#define FILTER_INITIAL
-#endif
-#    define FILTER_MOOG
-#if 0
-#define FILTER_CONSTANT
-#endif
+# define FILTER_MOOG
 #endif
 
 #if !defined RESAMPLER_LINEAR && !defined RESAMPLER_CUBIC
-#if 0
-#define RESAMPLER_LINEAR
-#endif
 #    define RESAMPLER_CUBIC
-#endif
-
-#if 0
-#define EMU8K_DEBUG_REGISTERS
 #endif
 
 char *PORT_NAMES[][8] = {
@@ -162,24 +149,6 @@ static int32_t env_decay_to_dbs_or_oct[128] = {
     1106, 1160, 1219, 1285, 1321, 1399, 1441, 1534, 1585, 1640, 1698, 1829, 1902, 1981, 2068, 2162
 };
 
-/* The table "env_decay_to_millis" is based on the table "decay_time_tbl" found in the freebsd/linux
- * AWE32 driver.
- * I tried calculating it using the instructions in awe32p10 from Judge Dredd, but the formula there
- * is wrong.
- *
- */
-#if 0
-static int32_t env_decay_to_millis[128] = {
-       0, 45120, 22614, 15990, 11307, 9508, 7995, 6723, 5653, 5184, 4754, 4359, 3997, 3665, 3361, 3082,
-    2828,  2765,  2648,  2535,  2428, 2325, 2226, 2132, 2042, 1955, 1872, 1793, 1717, 1644, 1574, 1507,
-    1443,  1382,  1324,  1267,  1214, 1162, 1113, 1066,  978,  936,  897,  859,  822,  787,  754,  722,
-     691,   662,   634,   607,   581,  557,  533,  510,  489,  468,  448,  429,  411,  393,  377,  361,
-     345,   331,   317,   303,   290,  278,  266,  255,  244,  234,  224,  214,  205,  196,  188,  180,
-     172,   165,   158,   151,   145,  139,  133,  127,  122,  117,  112,  107,  102,   98,   94,   90,
-      86,    82,    79,    75,    72,   69,   66,   63,   61,   58,   56,   53,   51,   49,   47,   45,
-      43,    41,    39,    37,    36,   34,   33,   31,   30,   29,   28,   26,   25,   24,   23,   22,
-};
-#endif
 
 /* Table represeting the LFO waveform (signed 16bits with 32768 max int. >> 15 to move back to +/-1 range). */
 static int32_t lfotable[65536];
@@ -359,9 +328,6 @@ EMU8K_READ_INTERP_CUBIC(emu8k_t *emu8k, uint32_t int_addr, uint16_t fract)
      * the card could use two oscillators (usually 31 and 32) where it would
      * be writing the OPL3 output, and to which, chorus and reverb could be applied to get
      * those effects for OPL3 sounds.*/
-#if 0
-    if ((addr & EMU8K_FM_MEM_ADDRESS) == EMU8K_FM_MEM_ADDRESS) {}
-#endif
 
     /* This is cubic interpolation.
      * Not the same than 3-point interpolation, but a better approximation than linear
@@ -1006,28 +972,14 @@ emu8k_outw(uint16_t addr, uint16_t val, void *priv)
                             case 0x9:
                                 emu8k->reverb_engine.reflections[0].feedback = (val & 0xF) / 15.0;
                                 break;
-                            case 0xB: 
-#if 0
-                                emu8k->reverb_engine.reflections[0].feedback_r =  (val&0xF)/15.0;
-#endif
-                                break;
                             case 0x11:
                                 emu8k->reverb_engine.reflections[1].feedback = (val & 0xF) / 15.0;
                                 break;
                             case 0x13:
-#if 0
-                                emu8k->reverb_engine.reflections[1].feedback_r =  (val&0xF)/15.0;
-#endif
                                 break;
                             case 0x19:
                                 emu8k->reverb_engine.reflections[2].feedback = (val & 0xF) / 15.0;
                                 break;
-                            case 0x1B:
-#if 0
-                                emu8k->reverb_engine.reflections[2].feedback_r =  (val&0xF)/15.0;
-#endif
-                                break;
-
                             default:
                                 break;
                         }
@@ -1050,12 +1002,6 @@ emu8k_outw(uint16_t addr, uint16_t val, void *priv)
                             case 1:
                                 emu8k->reverb_engine.refl_in_amp = val & 0xFF;
                                 break;
-                            case 3: 
-#if 0
-                                emu8k->reverb_engine.refl_in_amp_r = val&0xFF;
-#endif
-                                break;
-
                             default:
                                 break;
                         }
@@ -1294,26 +1240,12 @@ emu8k_outw(uint16_t addr, uint16_t val, void *priv)
                             case 0x1:
                                 emu8k->reverb_engine.reflections[3].feedback = (val & 0xF) / 15.0;
                                 break;
-                            case 0x3:
-#if 0
-                                emu8k->reverb_engine.reflections[3].feedback_r =  (val&0xF)/15.0;
-#endif
-                                break;
                             case 0x9:
                                 emu8k->reverb_engine.reflections[4].feedback = (val & 0xF) / 15.0;
                                 break;
-                            case 0xb:
-#if 0
-                                emu8k->reverb_engine.reflections[4].feedback_r =  (val&0xF)/15.0;
-#endif
                                 break;
                             case 0x11:
                                 emu8k->reverb_engine.reflections[5].feedback = (val & 0xF) / 15.0;
-                                break;
-                            case 0x13:
-#if 0
-                                emu8k->reverb_engine.reflections[5].feedback_r =  (val&0xF)/15.0;
-#endif
                                 break;
 
                             default:
@@ -1556,9 +1488,6 @@ emu8k_work_chorus(int32_t *inbuf, int32_t *outbuf, emu8k_chorus_eng_t *engine, i
 {
     for (int pos = 0; pos < count; pos++) {
         double lfo_inter1 = chortable[engine->lfo_pos.int_address];
-#if 0
-        double lfo_inter2 = chortable[(engine->lfo_pos.int_address+1)&0xFFFF];
-#endif
 
         double offset_lfo = lfo_inter1; //= lfo_inter1 + ((lfo_inter2-lfo_inter1)*engine->lfo_pos.fract_address/65536.0);
         offset_lfo *= engine->lfodepth_multip;
@@ -1657,14 +1586,8 @@ emu8k_reverb_tail_work(emu8k_reverb_combfilter_t *comb, emu8k_reverb_combfilter_
     /* store new value in delayed buffer */
     comb->reflection[comb->read_pos] = in;
 
-#if 0
-    output = emu8k_reverb_allpass_work(&allpasses[0],output);
-#endif
     output = emu8k_reverb_diffuser_work(&allpasses[1], output);
     output = emu8k_reverb_diffuser_work(&allpasses[2], output);
-#if 0
-    output = emu8k_reverb_allpass_work(&allpasses[3],output);
-#endif
 
     if (++comb->read_pos >= comb->bufsize)
         comb->read_pos = 0;
@@ -1750,11 +1673,6 @@ emu8k_vol_slide(emu8k_slide_t *slide, int32_t target)
     return slide->last;
 }
 
-#if 0
-int32_t old_pitch[32] = { 0 };
-int32_t old_cut[32]   = { 0 };
-int32_t old_vol[32]   = { 0 };
-#endif
 void
 emu8k_update(emu8k_t *emu8k)
 {
@@ -2109,14 +2027,6 @@ emu8k_update(emu8k_t *emu8k)
         /* Update EMU voice registers. */
         emu_voice->ccca               = (((uint32_t) emu_voice->ccca_qcontrol) << 24) | emu_voice->addr.int_address;
         emu_voice->cpf_curr_frac_addr = emu_voice->addr.fract_address;
-
-#if 0
-        if (emu_voice->cvcf_curr_volume != old_vol[c]) {
-            pclog("EMUVOL (%d):%d\n", c, emu_voice->cvcf_curr_volume);
-            old_vol[c]=emu_voice->cvcf_curr_volume;
-        }
-        pclog("EMUFILT :%d\n", emu_voice->cvcf_curr_filt_ctoff);
-#endif
     }
 
     buf = &emu8k->buffer[emu8k->pos * 2];
@@ -2230,10 +2140,6 @@ emu8k_init(emu8k_t *emu8k, uint16_t emu_addr, int onboard_ram)
      * Important: Using 65535 as max output value because this is intended to be used with the volume target register! */
     out = 65535.0;
     for (c = 0; c < 0x10000; c++) {
-#if 0
-        double db = -(c*6.0205999/65535.0)*16.0;
-        out = powf(10.f,db/20.f) * 65536.0;
-#endif
         env_vol_db_to_vol_target[c] = (int32_t) out;
         /* calculated from the 65536th root of 65536 */
         out /= 1.00016923970;

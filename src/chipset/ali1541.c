@@ -375,10 +375,6 @@ ali1541_write(UNUSED(int func), int addr, uint8_t val, void *priv)
         case 0x87: /* H2PO */
             dev->pci_conf[addr] = val;
             /* Find where the Shut-down Special cycle is initiated. */
-#if 0
-            if (!(val & 0x20))
-                outb(0x92, 0x01);
-#endif
             break;
 
         case 0x88:

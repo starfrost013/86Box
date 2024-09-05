@@ -122,9 +122,7 @@ vnc_clientgone(UNUSED(rfbClientPtr cl))
         vnc_log("VNC: no clients, pausing..\n");
 
         /* Disable the mouse. */
-#if 0
-        plat_mouse_capture(0);
-#endif
+
         mouse_set_poll_ex(NULL);
 
         plat_pause(1);
@@ -148,10 +146,6 @@ vnc_newclient(rfbClientPtr cl)
         /* We now have clients, un-pause the emulator if needed. */
         vnc_log("VNC: unpausing..\n");
 
-        /* Enable the mouse. */
-#if 0
-        plat_mouse_capture(1);
-#endif
         mouse_set_poll_ex(vnc_mouse_poll);
 
         plat_pause(0);

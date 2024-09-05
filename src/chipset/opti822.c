@@ -111,9 +111,6 @@ opti822_update_irqs(opti822_t *dev, int set)
     int     irq_map[8] = { -1, 5, 9, 10, 11, 12, 14, 15 };
     pic_t  *temp_pic;
 
-#if 0
-    dev->irq_convert = (dev->pci_regs[0x53] & 0x08);
-#endif
     dev->irq_convert = 1;
 
     for (uint8_t i = 0; i < 16; i++) {

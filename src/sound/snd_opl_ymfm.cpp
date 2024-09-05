@@ -171,49 +171,6 @@ public:
         }
     }
 
-#if 0
-    virtual void generate_resampled(int32_t *data, uint32_t num_samples) override
-    {
-        if ((m_samplerate == FREQ_49716) || (m_samplerate == FREQ_44100)) {
-            generate(data, num_samples);
-            return;
-        }
-
-        for (uint32_t i = 0; i < num_samples; i++) {
-            while (m_samplecnt >= m_rateratio) {
-                m_oldsamples[0] = m_samples[0];
-                m_oldsamples[1] = m_samples[1];
-                m_chip.generate(&m_output);
-                if ((m_type == FM_YMF278B) && (sizeof(m_output.data) > (4 * sizeof(int32_t)))) {
-                    if (ChipType::OUTPUTS == 1) {
-                        m_samples[0] = m_output.data[4];
-                        m_samples[1] = m_output.data[4];
-                    } else {
-                        m_samples[0] = m_output.data[4];
-                        m_samples[1] = m_output.data[5];
-                    }
-                } else if (ChipType::OUTPUTS == 1) {
-                    m_samples[0] = m_output.data[0];
-                    m_samples[1] = m_output.data[0];
-                } else {
-                    m_samples[0] = m_output.data[0];
-                    m_samples[1] = m_output.data[1 % ChipType::OUTPUTS];
-                }
-                m_samplecnt -= m_rateratio;
-            }
-
-            *data++ = ((int32_t) ((m_oldsamples[0] * (m_rateratio - m_samplecnt)
-                                   + m_samples[0] * m_samplecnt)
-                                  / m_rateratio));
-            *data++ = ((int32_t) ((m_oldsamples[1] * (m_rateratio - m_samplecnt)
-                                   + m_samples[1] * m_samplecnt)
-                                  / m_rateratio));
-
-            m_samplecnt += 1 << RSM_FRAC;
-        }
-    }
-#endif
-
     virtual int32_t *update() override
     {
         if (m_buf_pos >= *m_buf_pos_global)

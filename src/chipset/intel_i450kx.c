@@ -169,10 +169,7 @@ pb_write(int func, int addr, uint8_t val, void *priv)
             case 0x4a:
             case 0x4b:
                 dev->pb_pci_conf[addr] = val;
-#if 0
-                if (addr == 0x4a)
-                    pci_remap_bus(dev->bus_index, val);
-#endif
+            
                 break;
 
             case 0x4c:
@@ -677,11 +674,6 @@ i450kx_reset(void *priv)
     dev->pb_pci_conf[0xa5] = 0xc0;
     dev->pb_pci_conf[0xa6] = 0xfe;
     dev->pb_pci_conf[0xa7] = 0x00;
-    /* Note: Do NOT reset these two registers on programmed (TRC) hard reset! */
-#if 0
-    dev->pb_pci_conf[0xb0] = 0x00;
-    dev->pb_pci_conf[0xb1] = 0x00;
-#endif
     dev->pb_pci_conf[0xb4] = 0xff;
     dev->pb_pci_conf[0xb5] = 0x00;
     dev->pb_pci_conf[0xb8] = 0x05;
@@ -702,9 +694,6 @@ i450kx_reset(void *priv)
     dev->pb_pci_conf[0xca] = 0x00;
     dev->pb_pci_conf[0xcb] = 0x00;
 
-#if 0
-    pci_remap_bus(dev->bus_index, 0x00);
-#endif
     i450kx_smram_recalc(dev, 1);
     i450kx_vid_buf_recalc(dev, 1);
     pb_write(0, 0x59, 0x30, dev);

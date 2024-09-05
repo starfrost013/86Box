@@ -29,43 +29,6 @@
 #define HDD_NUM             88 /* total of 88 images supported */
 
 /* Hard Disk bus types. */
-#if 0
-/* Bit 4 = DMA supported (0 = no, 1 yes) - used for IDE and ATAPI only;
-   Bit 5 = Removable (0 = no, 1 yes). */
-
-enum {
-    BUS_DISABLED            = 0x00,
-
-    BUS_MFM                 = 0x01,    /* These four are for hard disk only. */
-    BUS_XIDE                = 0x02,
-    BUS_XTA                 = 0x03,
-    BUS_ESDI                = 0x04,
-
-    BUS_PANASONIC           = 0x21,    / These four are for CD-ROM only. */
-    BUS_PHILIPS             = 0x22,
-    BUS_SONY                = 0x23,
-    BUS_MITSUMI             = 0x24,
-
-    BUS_IDE_PIO_ONLY        = 0x05,
-    BUS_IDE_PIO_AND_DMA     = 0x15,
-    BUS_IDE_R_PIO_ONLY      = 0x25,
-    BUS_IDE_R_PIO_AND_DMA   = 0x35,
-
-    BUS_ATAPI_PIO_ONLY      = 0x06,
-    BUS_ATAPI_PIO_AND_DMA   = 0x16,
-    BUS_ATAPI_R_PIO_ONLY    = 0x26,
-    BUS_ATAPI_R_PIO_AND_DMA = 0x36,
-
-    BUS_SASI                = 0x07,
-    BUS_SASI_R              = 0x27,
-
-    BUS_SCSI                = 0x08,
-    BUS_SCSI_R              = 0x28,
-
-    BUS_USB                 = 0x09,
-    BUS_USB_R               = 0x29
-};
-#else
 enum {
     HDD_BUS_DISABLED = 0,
     HDD_BUS_MFM      = 1,
@@ -76,7 +39,6 @@ enum {
     HDD_BUS_SCSI     = 6,
     HDD_BUS_USB      = 7
 };
-#endif
 
 enum {
     HDD_OP_SEEK  = 0,

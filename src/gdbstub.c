@@ -76,10 +76,6 @@ enum {
     GDB_REG_ES,
     GDB_REG_FS,
     GDB_REG_GS,
-#if 0
-    GDB_REG_FS_BASE,
-    GDB_REG_GS_BASE,
-#endif
     GDB_REG_CR0,
     GDB_REG_CR2,
     GDB_REG_CR3,
@@ -223,10 +219,7 @@ static char      target_xml[]   = /* QEMU gdb-xml/i386-32bit.xml with modificati
             "<reg name=\"fs\" bitsize=\"16\" type=\"int32\"/>"
             "<reg name=\"gs\" bitsize=\"16\" type=\"int32\"/>"
             ""
-#if 0
-            "<reg name=\"fs_base\" bitsize=\"32\" type=\"int32\"/>"
-            "<reg name=\"gs_base\" bitsize=\"32\" type=\"int32\"/>"
-#endif
+            
             ""
             "<flags id=\"i386_cr0\" size=\"4\">"
                 "<field name=\"PG\" start=\"31\" end=\"31\"/>"
@@ -545,13 +538,6 @@ gdbstub_client_write_reg(int index, uint8_t *buf)
             flushmmucache();
             break;
 
-#if 0
-        case GDB_REG_FS_BASE ... GDB_REG_GS_BASE:
-            /* Do what qemu does and just load the base. */
-            segment_regs[(index - 16) + (GDB_REG_FS - GDB_REG_CS)]->base = *((uint32_t *) buf);
-            break;
-#endif
-
         case GDB_REG_CR0 ... GDB_REG_CR4:
             *cr_regs[index - GDB_REG_CR0] = *((uint32_t *) buf);
             flushmmucache();
@@ -678,12 +664,6 @@ gdbstub_client_read_reg(int index, uint8_t *buf)
         case GDB_REG_CS ... GDB_REG_GS:
             *((uint16_t *) buf) = segment_regs[index - GDB_REG_CS]->seg;
             break;
-
-#if 0
-        case GDB_REG_FS_BASE ... GDB_REG_GS_BASE:
-            *((uint32_t *) buf) = segment_regs[(index - 16) + (GDB_REG_FS - GDB_REG_CS)]->base;
-            break;
-#endif
 
         case GDB_REG_CR0 ... GDB_REG_CR4:
             *((uint32_t *) buf) = *cr_regs[index - GDB_REG_CR0];

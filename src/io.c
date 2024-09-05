@@ -376,10 +376,6 @@ inb(uint16_t port)
         cycles -= io_delay;
 
     /* TriGem 486-BIOS MHz output. */
-#if 0
-    if (port == 0x1ed)
-        ret = 0xfe;
-#endif
 
     io_log("[%04X:%08X] (%i, %i, %04i) in b(%04X) = %02X\n", CS, cpu_state.pc, in_smm, found, qfound, port, ret);
 

@@ -282,10 +282,7 @@ flash_writew(uint32_t addr, uint16_t val, void *priv)
 static void
 flash_writel(UNUSED(uint32_t addr), UNUSED(uint32_t val), UNUSED(void *priv))
 {
-#if 0
-    flash_writew(addr, val & 0xffff, priv);
-    flash_writew(addr + 2, (val >> 16) & 0xffff, priv);
-#endif
+
 }
 
 static void

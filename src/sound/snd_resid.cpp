@@ -22,16 +22,10 @@ psid_t *psid;
 void *
 sid_init(void)
 {
-#if 0
-    psid_t *psid;
-#endif
     reSIDfp::SamplingMethod method         = reSIDfp::DECIMATE;
     float                   cycles_per_sec = 14318180.0 / 16.0;
 
     psid = new psid_t;
-#if 0
-    psid = (psid_t *) malloc(sizeof(sound_t));
-#endif
     psid->sid = new SID;
 
     psid->sid->setChipModel(reSIDfp::MOS8580);
@@ -45,9 +39,6 @@ sid_init(void)
     try {
         psid->sid->setSamplingParameters(cycles_per_sec, method, (float) RESID_FREQ, 0.9 * (float) RESID_FREQ / 2.0);
     } catch (reSIDfp::SIDError) {
-#if 0
-        printf("reSID failed!\n");
-#endif
     }
 
     psid->sid->setChipModel(reSIDfp::MOS6581);
@@ -59,22 +50,12 @@ sid_init(void)
 void
 sid_close(UNUSED(void *priv))
 {
-#if 0
-    psid_t *psid = (psid_t *) priv;
-#endif
     delete psid->sid;
-#if 0
-    free(psid);
-#endif
 }
 
 void
 sid_reset(UNUSED(void *priv))
 {
-#if 0
-    psid_t *psid = (psid_t *) priv;
-#endif
-
     psid->sid->reset();
 
     for (uint8_t c = 0; c < 32; c++)
@@ -84,23 +65,12 @@ sid_reset(UNUSED(void *priv))
 uint8_t
 sid_read(uint16_t addr, UNUSED(void *priv))
 {
-#if 0
-    psid_t *psid = (psid_t *) priv;
-#endif
-
     return psid->sid->read(addr & 0x1f);
-#if 0
-    return 0xFF;
-#endif
 }
 
 void
 sid_write(uint16_t addr, uint8_t val, UNUSED(void *priv))
 {
-#if 0
-    psid_t *psid = (psid_t *) priv;
-#endif
-
     psid->sid->write(addr & 0x1f, val);
 }
 
@@ -118,9 +88,6 @@ fillbuf2(int &count, int16_t *buf, int len)
 void
 sid_fillbuf(int16_t *buf, int len, UNUSED(void *priv))
 {
-#if 0
-    psid_t *psid = (psid_t *) priv;
-#endif
     int x = CLOCK_DELTA(len);
 
     fillbuf2(x, buf, len);

@@ -42,9 +42,6 @@ plat_serpt_close(void *priv)
 {
     serial_passthrough_t *dev = (serial_passthrough_t *) priv;
 
-#if 0
-    fclose(dev->master_fd);
-#endif
     FlushFileBuffers((HANDLE) dev->master_fd);
     if (dev->mode == SERPT_MODE_VCON)
         DisconnectNamedPipe((HANDLE) dev->master_fd);
@@ -58,26 +55,10 @@ plat_serpt_close(void *priv)
 static void
 plat_serpt_write_vcon(serial_passthrough_t *dev, uint8_t data)
 {
-#if 0
-    fd_set wrfds;
-    int res;
-#endif
 
     /* We cannot use select here, this would block the hypervisor! */
-#if 0
-    FD_ZERO(&wrfds);
-    FD_SET(ctx->master_fd, &wrfds);
-
-    res = select(ctx->master_fd + 1, NULL, &wrfds, NULL, NULL);
-
-    if (res <= 0)
-        return;
-#endif
 
     /* just write it out */
-#if 0
-    fwrite(dev->master_fd, &data, 1);
-#endif
     DWORD bytesWritten = 0;
     WriteFile((HANDLE) dev->master_fd, &data, 1, &bytesWritten, NULL);
 }

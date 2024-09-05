@@ -174,10 +174,6 @@ serial_receive_timer(void *priv)
             fifo_write_evt((uint8_t) (dev->out_new & 0xff), dev->rcvr_fifo);
             dev->out_new = 0xffff;
 
-#if 0
-            pclog("serial_receive_timer(): lsr = %02X, ier = %02X, iir = %02X, int_status = %02X\n",
-                  dev->lsr, dev->ier, dev->iir, dev->int_status);
-#endif
 
             timer_on_auto(&dev->timeout_timer, 4.0 * dev->bits * dev->transmit_period);
         }
@@ -630,10 +626,6 @@ serial_write(uint16_t addr, uint8_t val, void *priv)
             serial_update_ints(dev);
             break;
         case 6:
-#if 0
-            dev->msr = (val & 0xf0) | (dev->msr & 0x0f);
-            dev->msr = val;
-#endif
             /* The actual condition bits of the MSR are read-only, but the delta bits are
                undocumentedly writable, and the PCjr BIOS uses them to raise MSR interrupts. */
             dev->msr = (dev->msr & 0xf0) | (val & 0x0f);

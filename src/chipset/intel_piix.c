@@ -1038,11 +1038,7 @@ piix_write(int func, int addr, uint8_t val, void *priv)
                 if (val & 0x08)
                     fregs[0x07] &= 0xf7;
                 break;
-#if 0
-            case 0x3c:
-                fregs[0x3c] = val;
-                break;
-#endif
+
             case 0x40:
                 fregs[0x40]       = (val & 0xc0) | 1;
                 dev->acpi_io_base = (dev->regs[3][0x41] << 8) | (dev->regs[3][0x40] & 0xc0);
@@ -1651,10 +1647,6 @@ piix_init(const device_t *info)
         dev->readout_regs[1] |= 0x80;
 
     io_sethandler(0x00e0, 0x0002, board_read, NULL, NULL, board_write, NULL, NULL, dev);
-
-#if 0
-    device_add(&i8254_sec_device);
-#endif
 
     return dev;
 }

@@ -163,9 +163,6 @@ nmc93cxx_eeprom_write(nmc93cxx_eeprom_t *eeprom, int eecs, int eesk, int eedi)
             } else {
                 nmc93cxx_eeprom_log(1, "wrong 1st start bit (is 1, should be 0)\n");
                 tick = 2;
-#if 0
-                ~ assert(!"wrong start bit");
-#endif
             }
         } else if (tick == 1) {
             /* Wait for 2nd start bit. */

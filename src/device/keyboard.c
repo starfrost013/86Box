@@ -54,9 +54,7 @@ void (*keyboard_send)(uint16_t val);
 static int recv_key[512] = { 0 }; /* keyboard input buffer */
 static int recv_key_ui[512] = { 0 }; /* keyboard input buffer */
 static int oldkey[512];
-#if 0
-static int keydelay[512];
-#endif
+
 static scancode *scan_table; /* scancode table for keyboard */
 
 static uint8_t caps_lock   = 0;

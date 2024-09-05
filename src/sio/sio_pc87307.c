@@ -546,11 +546,7 @@ pc87307_reset(pc87307_t *dev)
 
     dev->ld_regs[0x08][0x44] = 0x04;
     dev->ld_regs[0x08][0x45] = 0x04;
-
-#if 0
-    dev->gpio[0] = 0xff;
-    dev->gpio[1] = 0xfb;
-#endif
+    
     dev->gpio[0][0] = 0xff;
     dev->gpio[0][1] = 0x00;
     dev->gpio[0][2] = 0x00;

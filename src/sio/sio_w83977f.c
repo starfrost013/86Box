@@ -201,10 +201,7 @@ w83977f_write(uint16_t port, uint8_t val, void *priv)
 
     switch (dev->cur_reg) {
         case 0x02:
-#if 0
-            if (valxor & 0x02)
-                    softresetx86();
-#endif
+
             break;
         case 0x22:
             if (valxor & 0x20)

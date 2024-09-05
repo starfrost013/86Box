@@ -969,9 +969,6 @@ hdc_write(uint16_t port, uint8_t val, void *priv)
             break;
 
         case 3: /* DMA/IRQ intr register */
-#if 0
-            xta_log("%s: WriteMASK(%02X)\n", dev->name, val);
-#endif
             dev->intr = val;
             break;
 

@@ -175,9 +175,6 @@ static int
 codegen_ANDN(codeblock_t *block, uop_t *uop)
 {
     int dest_reg = HOST_REG_GET(uop->dest_reg_a_real);
-#if 0
-    int src_reg_a = HOST_REG_GET(uop->src_reg_a_real);
-#endif
     int src_reg_b  = HOST_REG_GET(uop->src_reg_b_real);
     int dest_size  = IREG_GET_SIZE(uop->dest_reg_a_real);
     int src_size_a = IREG_GET_SIZE(uop->src_reg_a_real);

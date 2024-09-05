@@ -1160,9 +1160,6 @@ BuslogicPCIRead(UNUSED(int func), int addr, void *priv)
         case 0x13:
             return buslogic_pci_bar[0].addr_regs[3];
         case 0x14:
-#if 0
-            return (buslogic_pci_bar[1].addr_regs[0] & 0xe0); /*Memory space*/
-#endif
             return 0x00;
         case 0x15:
             return buslogic_pci_bar[1].addr_regs[1] & 0xc0;
@@ -1268,9 +1265,6 @@ BuslogicPCIWrite(UNUSED(int func), int addr, uint8_t val, void *priv)
             /* Then let's set the PCI regs. */
             buslogic_pci_bar[1].addr_regs[addr & 3] = val;
             /* Then let's calculate the new I/O base. */
-#if 0
-            bl->MMIOBase = buslogic_pci_bar[1].addr & 0xffffffe0;
-#endif
             /* Give it a 4 kB alignment as that's this emulator's granularity. */
             buslogic_pci_bar[1].addr &= 0xffffc000;
             bl->MMIOBase = buslogic_pci_bar[1].addr & 0xffffc000;

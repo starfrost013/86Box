@@ -54,9 +54,6 @@
 #    include <sys/mman.h>
 #endif
 
-#if 0
-static QByteArray buf;
-#endif
 extern QElapsedTimer elapsed_timer;
 extern MainWindow   *main_window;
 QElapsedTimer        elapsed_timer;
@@ -158,9 +155,7 @@ void
 do_stop(void)
 {
     cpu_thread_run = 0;
-#if 0
-    main_window->close();
-#endif
+
 }
 
 void

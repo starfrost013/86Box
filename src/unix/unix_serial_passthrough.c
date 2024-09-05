@@ -90,23 +90,8 @@ plat_serpt_close(void *priv)
 static void
 plat_serpt_write_vcon(serial_passthrough_t *dev, uint8_t data)
 {
-#if 0
-    fd_set wrfds;
-    int    res;
-#endif
+
     size_t res;
-
-    /* We cannot use select here, this would block the hypervisor! */
-#if 0
-    FD_ZERO(&wrfds);
-    FD_SET(ctx->master_fd, &wrfds);
-
-    res = select(ctx->master_fd + 1, NULL, &wrfds, NULL, NULL);
-
-    if (res <= 0) {
-        return;
-    }
-#endif
 
     /* just write it out */
     if (dev->mode == SERPT_MODE_HOSTSER) {

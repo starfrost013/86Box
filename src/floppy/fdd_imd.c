@@ -927,10 +927,6 @@ imd_load(int drive, char *fn)
     if (dev->sides == 2)
         dev->disk_flags |= 8;
 
-#if 0
-    imd_log("%i tracks, %i sides\n", dev->track_count, dev->sides);
-#endif
-
     /* Attach this format to the D86F engine. */
     d86f_handler[drive].disk_flags        = disk_flags;
     d86f_handler[drive].side_flags        = side_flags;

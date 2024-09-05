@@ -141,11 +141,7 @@ voodoo_calc_clutData(voodoo_t *voodoo)
         int r = (c >> 8) & 0xf8;
         int g = (c >> 3) & 0xfc;
         int b = (c << 3) & 0xf8;
-#if 0
-        r |= (r >> 5);
-        g |= (g >> 6);
-        b |= (b >> 5);
-#endif
+
         voodoo->video_16to32[c] = (voodoo->clutData256[r].r << 16) | (voodoo->clutData256[g].g << 8) | voodoo->clutData256[b].b;
     }
 }
@@ -580,9 +576,7 @@ voodoo_callback(void *priv)
     }
 skip_draw:
     if (voodoo->line == voodoo->v_disp) {
-#if 0
-        voodoodisp_log("retrace %i %i %08x %i\n", voodoo->retrace_count, voodoo->swap_interval, voodoo->swap_offset, voodoo->swap_pending);
-#endif
+
         voodoo->retrace_count++;
         if (SLI_ENABLED && (voodoo->fbiInit2 & FBIINIT2_SWAP_ALGORITHM_MASK) == FBIINIT2_SWAP_ALGORITHM_SLI_SYNC) {
             if (voodoo == voodoo->set->voodoos[0]) {

@@ -254,10 +254,6 @@ codegen_generate_ea_32_long(ir_data_t *ir, x86seg *op_ea_seg, uint32_t fetchdat,
         }
         if (stack_offset && (sib & 7) == 4 && (cpu_mod || (sib & 7) != 5)) { /*ESP*/
             uop_ADD_IMM(ir, IREG_eaaddr, IREG_eaaddr, stack_offset);
-#if 0
-            addbyte(0x05);
-            addlong(stack_offset);
-#endif
         }
         if (((sib & 7) == 4 || (cpu_mod && (sib & 7) == 5)) && !op_ssegs)
             op_ea_seg = &cpu_state.seg_ss;
@@ -660,10 +656,6 @@ generate_call:
     }
     codegen_mark_code_present(block, cs + old_pc, (op_pc - old_pc) - pc_off);
     /* It is apparently a prefixed instruction. */
-#if 0
-    if ((recomp_op_table == recomp_opcodes) && (opcode == 0x48))
-        goto codegen_skip;
-#endif
 
     if (recomp_op_table && recomp_op_table[(opcode | op_32) & recomp_opcode_mask]) {
         uint32_t new_pc = recomp_op_table[(opcode | op_32) & recomp_opcode_mask](block, ir, opcode, fetchdat, op_32, op_pc);
@@ -735,9 +727,6 @@ generate_call:
     last_op_32     = op_32;
     last_op_ea_seg = op_ea_seg;
     last_op_ssegs  = op_ssegs;
-#if 0
-    codegen_block_ins++;
-#endif
 
     block->ins++;
 
@@ -745,9 +734,4 @@ generate_call:
         CPU_BLOCK_END();
 
     codegen_endpc = (cs + cpu_state.pc) + 8;
-
-#if 0
-    if (has_ea)
-        fatal("Has EA\n");
-#endif
 }

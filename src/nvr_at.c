@@ -664,10 +664,6 @@ nvr_write(uint16_t addr, uint8_t val, void *priv)
         return;
 
     if (addr & 1) {
-#if 0
-        if (local->bank[addr_id] == 0xff)
-            return;
-#endif
         nvr_reg_write(local->addr[addr_id], val, priv);
     } else {
         local->addr[addr_id] = (val & (nvr->size - 1));
@@ -842,9 +838,6 @@ nvr_reset(nvr_t *nvr)
 {
     const local_t *local = (local_t *) nvr->data;
 
-#if 0
-    memset(nvr->regs, local->def, RTC_REGS);
-#endif
     memset(nvr->regs, local->def, nvr->size);
     nvr->regs[RTC_DOM]   = 1;
     nvr->regs[RTC_MONTH] = 1;

@@ -164,11 +164,6 @@ voodoo_v2_blit_start(voodoo_t *voodoo)
     uint32_t src_base_addr = (voodoo->bltCommand & BLTCMD_SRC_TILED) ? ((voodoo->bltSrcBaseAddr & 0x3ff) << 12) : (voodoo->bltSrcBaseAddr & 0x3ffff8);
     uint32_t dst_base_addr = (voodoo->bltCommand & BLTCMD_DST_TILED) ? ((voodoo->bltDstBaseAddr & 0x3ff) << 12) : (voodoo->bltDstBaseAddr & 0x3ffff8);
 
-#if 0
-    voodooblt_log("blit_start: command=%08x srcX=%i srcY=%i dstX=%i dstY=%i sizeX=%i sizeY=%i color=%04x,%04x\n",
-                  voodoo->bltCommand, voodoo->bltSrcX, voodoo->bltSrcY, voodoo->bltDstX, voodoo->bltDstY, voodoo->bltSizeX, voodoo->bltSizeY, voodoo->bltColorFg, voodoo->bltColorBg);
-#endif
-
     voodoo_wait_for_render_thread_idle(voodoo);
 
     switch (voodoo->bltCommand & BLIT_COMMAND_MASK) {

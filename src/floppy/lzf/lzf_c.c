@@ -66,13 +66,6 @@
  * (int)(cos(h & 0xffffff) * 1e6)
  */
 
-#if 0
-/* original lzv-like hash function, much worse and thus slower */
-# define FRST(p) (p[0] << 5) ^ p[1]
-# define NEXT(v,p) ((v) << 5) ^ p[2]
-# define IDX(h) ((h) & (HSIZE - 1))
-#endif
-
 #define        MAX_LIT        (1 <<  5)
 #define        MAX_OFF        (1 << 13)
 #define        MAX_REF        ((1 << 8) + (1 << 3))

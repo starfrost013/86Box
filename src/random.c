@@ -28,18 +28,13 @@ uint32_t preconst = 0x6ED9EBA1;
 static __inline uint32_t
 rotl32c(uint32_t x, uint32_t n)
 {
-#if 0
-  assert (n<32);
-#endif
+
     return (x << n) | (x >> (-n & 31));
 }
 
 static __inline uint32_t
 rotr32c(uint32_t x, uint32_t n)
 {
-#if 0
-  assert (n<32);
-#endif
     return (x >> n) | (x << (-n & 31));
 }
 

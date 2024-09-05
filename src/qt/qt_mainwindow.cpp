@@ -48,9 +48,7 @@ extern "C" {
 #include <86box/machine.h>
 #include <86box/vid_ega.h>
 #include <86box/version.h>
-#if 0
-#include <86box/acpi.h> /* Requires timer.h include, which conflicts with Qt headers */
-#endif
+
 extern atomic_int acpi_pwrbut_pressed;
 extern int acpi_enabled;
 
@@ -1135,12 +1133,7 @@ MainWindow::processMacKeyboardInput(bool down, const QKeyEvent *event)
                     (key == Qt::Key_Slash) /* French Canadian unshifted, Ukrainian shifted */
                 ))
                 mac_iso_swap = true;
-#if 0
-            if (down) {
-                QMessageBox questionbox(QMessageBox::Icon::Information, QString("Mac key swap test"), QString("nativeVirtualKey 0x%1\nnativeScanCode 0x%2\nkey 0x%3\nmac_iso_swap %4").arg(nvk, 0, 16).arg(event->nativeScanCode(), 0, 16).arg(key, 0, 16).arg(mac_iso_swap ? "yes" : "no"), QMessageBox::Ok, this);
-                questionbox.exec();
-            }
-#endif
+
             if (mac_iso_swap)
                 nvk = (nvk == 0x0a) ? 0x32 : 0x0a;
         }

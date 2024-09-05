@@ -83,9 +83,6 @@ int fpu_cycles = 0;
 int in_lock = 0;
 
 #ifdef ENABLE_X86_LOG
-#if 0
-void dumpregs(int);
-#endif
 
 int x86_do_log = ENABLE_X86_LOG;
 int indump     = 0;
@@ -102,55 +99,9 @@ x86_log(const char *fmt, ...)
     }
 }
 
-#if 0
-void
-dumpregs(int force)
-{
-    int   c;
-    char *seg_names[4] = { "ES", "CS", "SS", "DS" };
 
-    /* Only dump when needed, and only once.. */
-    if (indump || (!force && !dump_on_exit))
-        return;
+#define x86_log(fmt, ...)
 
-    x86_log("EIP=%08X CS=%04X DS=%04X ES=%04X SS=%04X FLAGS=%04X\n",
-            cpu_state.pc, CS, DS, ES, SS, cpu_state.flags);
-    x85_log("Old CS:EIP: %04X:%08X; %i ins\n", oldcs, cpu_state.oldpc, ins);
-    for (c = 0; c < 4; c++) {
-        x86_log("%s : base=%06X limit=%08X access=%02X  limit_low=%08X limit_high=%08X\n",
-                seg_names[c], _opseg[c]->base, _opseg[c]->limit,
-                _opseg[c]->access, _opseg[c]->limit_low, _opseg[c]->limit_high);
-    }
-    if (is386) {
-        x86_log("FS : base=%06X limit=%08X access=%02X  limit_low=%08X limit_high=%08X\n",
-                seg_fs, cpu_state.seg_fs.limit, cpu_state.seg_fs.access, cpu_state.seg_fs.limit_low,
-                cpu_state.seg_fs.limit_high);
-        x86_log("GS : base=%06X limit=%08X access=%02X  limit_low=%08X limit_high=%08X\n",
-                gs, cpu_state.seg_gs.limit, cpu_state.seg_gs.access, cpu_state.seg_gs.limit_low,
-                cpu_state.seg_gs.limit_high);
-        x86_log("GDT : base=%06X limit=%04X\n", gdt.base, gdt.limit);
-        x86_log("LDT : base=%06X limit=%04X\n", ldt.base, ldt.limit);
-        x86_log("IDT : base=%06X limit=%04X\n", idt.base, idt.limit);
-        x86_log("TR  : base=%06X limit=%04X\n", tr.base, tr.limit);
-        x86_log("386 in %s mode: %i-bit data, %-i-bit stack\n",
-                (msw & 1) ? ((cpu_state.eflags & VM_FLAG) ? "V86" : "protected") : "real",
-                (use32) ? 32 : 16, (stack32) ? 32 : 16);
-        x86_log("CR0=%08X CR2=%08X CR3=%08X CR4=%08x\n", cr0, cr2, cr3, cr4);
-        x86_log("EAX=%08X EBX=%08X ECX=%08X EDX=%08X\nEDI=%08X ESI=%08X EBP=%08X ESP=%08X\n",
-                EAX, EBX, ECX, EDX, EDI, ESI, EBP, ESP);
-    } else {
-        x86_log("808x/286 in %s mode\n", (msw & 1) ? "protected" : "real");
-        x86_log("AX=%04X BX=%04X CX=%04X DX=%04X DI=%04X SI=%04X BP=%04X SP=%04X\n",
-                AX, BX, CX, DX, DI, SI, BP, SP);
-    }
-    x86_log("Entries in readlookup : %i    writelookup : %i\n", readlnum, writelnum);
-    x87_dumpregs();
-    indump = 0;
-}
-#endif
-#else
-#    define x86_log(fmt, ...)
-#endif
 
 /* Preparation of the various arrays needed to speed up the MOD and R/M work. */
 static void

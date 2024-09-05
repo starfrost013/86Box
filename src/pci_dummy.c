@@ -187,10 +187,6 @@ pci_dummy_pci_read(int func, int addr, void *priv)
                 break;
         }
 
-#if 0
-    pclog("AB0B:071A: PCI_Read(%d, %04X) = %02X\n", func, addr, ret);
-#endif
-
     return ret;
 }
 
@@ -199,10 +195,6 @@ pci_dummy_pci_write(int func, int addr, uint8_t val, void *priv)
 {
     pci_dummy_t *dev = (pci_dummy_t *) priv;
     uint8_t      valxor;
-
-#if 0
-    pclog("AB0B:071A: PCI_Write(%d, %04X, %02X)\n", func, addr, val);
-#endif
 
     if (func == 0x00)
         switch (addr) {
