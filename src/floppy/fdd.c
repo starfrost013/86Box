@@ -31,10 +31,8 @@
 #include <86box/ui.h>
 #include <86box/fdd.h>
 #include <86box/fdd_86f.h>
-#include <86box/fdd_fdi.h>
 #include <86box/fdd_imd.h>
 #include <86box/fdd_img.h>
-#include <86box/fdd_pcjs.h>
 #include <86box/fdd_mfm.h>
 #include <86box/fdd_td0.h>
 #include <86box/fdc.h>

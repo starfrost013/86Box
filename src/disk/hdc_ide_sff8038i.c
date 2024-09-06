@@ -43,7 +43,6 @@
 #include <86box/hdc_ide.h>
 #include <86box/hdc_ide_sff8038i.h>
 #include <86box/zip.h>
-#include <86box/mo.h>
 #include <86box/plat_unused.h>
 
 static int next_id = 0;
@@ -485,10 +484,6 @@ sff_reset(void *priv)
     for (uint8_t i = 0; i < ZIP_NUM; i++) {
         if ((zip_drives[i].bus_type == ZIP_BUS_ATAPI) && (zip_drives[i].ide_channel < 4) && zip_drives[i].priv)
             zip_reset((scsi_common_t *) zip_drives[i].priv);
-    }
-    for (uint8_t i = 0; i < MO_NUM; i++) {
-        if ((mo_drives[i].bus_type == MO_BUS_ATAPI) && (mo_drives[i].ide_channel < 4) && mo_drives[i].priv)
-            mo_reset((scsi_common_t *) mo_drives[i].priv);
     }
 
     sff_bus_master_set_irq(0x00, priv);

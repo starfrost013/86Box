@@ -20,7 +20,5 @@ add_library(hdd OBJECT hdd.c hdd_image.c hdd_table.c hdc.c hdc_st506_xt.c
 
 add_library(zip OBJECT zip.c)
 
-add_library(mo OBJECT mo.c)
-
 add_subdirectory(minivhd)
 target_link_libraries(86Box minivhd)

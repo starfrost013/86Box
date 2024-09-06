@@ -594,9 +594,6 @@ msgstr "Preverjaj BPB"
 msgid "CD-ROM drives:"
 msgstr "Pogoni CD-ROM:"
 
-msgid "MO drives:"
-msgstr "Magnetno-optični pogoni:"
-
 msgid "ZIP drives:"
 msgstr "Pogoni ZIP:"
 

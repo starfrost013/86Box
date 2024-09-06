@@ -594,9 +594,6 @@ msgstr "BPB überprüfen"
 msgid "CD-ROM drives:"
 msgstr "CD-ROM-Laufwerke:"
 
-msgid "MO drives:"
-msgstr "MO-Laufwerke:"
-
 msgid "ZIP drives:"
 msgstr "ZIP-Laufwerke:"
 

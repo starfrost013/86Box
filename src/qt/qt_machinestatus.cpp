@@ -35,7 +35,6 @@ extern uint64_t tsc;
 #include <86box/scsi.h>
 #include <86box/scsi_device.h>
 #include <86box/zip.h>
-#include <86box/mo.h>
 #include <86box/plat.h>
 #include <86box/machine.h>
 #include <86box/thread.h>
@@ -87,7 +86,6 @@ struct Pixmaps {
     PixmapSetEmptyActive floppy_35;
     PixmapSetEmptyActive cdrom;
     PixmapSetEmptyActive zip;
-    PixmapSetEmptyActive mo;
     PixmapSetActive      hd;
     PixmapSetEmptyActive net;
     QPixmap              sound;
@@ -212,7 +210,6 @@ struct MachineStatus::States {
         pixmaps.floppy_35.load("/floppy_35%1.ico");
         pixmaps.cdrom.load("/cdrom%1.ico");
         pixmaps.zip.load("/zip%1.ico");
-        pixmaps.mo.load("/mo%1.ico");
         pixmaps.hd.load("/hard_disk%1.ico");
         pixmaps.net.load("/network%1.ico");
         pixmaps.sound = ProgSettings::loadIcon("/sound.ico").pixmap(pixmap_size);
@@ -229,9 +226,6 @@ struct MachineStatus::States {
         for (auto &z : zip) {
             z.pixmaps = &pixmaps.zip;
         }
-        for (auto &m : mo) {
-            m.pixmaps = &pixmaps.mo;
-        }
         for (auto &h : hdds) {
             h.pixmaps = &pixmaps.hd;
         }
@@ -245,7 +239,6 @@ struct MachineStatus::States {
     std::array<StateEmptyActive, FDD_NUM>      fdd;
     std::array<StateEmptyActive, CDROM_NUM>    cdrom;
     std::array<StateEmptyActive, ZIP_NUM>      zip;
-    std::array<StateEmptyActive, MO_NUM>       mo;
     std::array<StateActive, HDD_BUS_USB>       hdds;
     std::array<StateEmptyActive, NET_CARD_MAX> net;
     std::unique_ptr<ClickableLabel>            sound;
@@ -336,27 +329,6 @@ MachineStatus::iterateZIP(const std::function<void(int)> &cb)
 }
 
 void
-MachineStatus::iterateMO(const std::function<void(int)> &cb)
-{
-    auto hdc_name = QString(hdc_get_internal_name(hdc_current[0]));
-    for (size_t i = 0; i < MO_NUM; i++) {
-        /* Could be Internal or External IDE.. */
-        if ((mo_drives[i].bus_type == MO_BUS_ATAPI) && !hasIDE() &&
-            (hdc_name.left(3) != QStringLiteral("ide")) &&
-            (hdc_name.left(5) != QStringLiteral("xtide")) &&
-            (hdc_name.left(5) != QStringLiteral("mcide")))
-            continue;
-        if ((mo_drives[i].bus_type == MO_BUS_SCSI) && !hasSCSI() &&
-            (scsi_card_current[0] == 0) && (scsi_card_current[1] == 0) &&
-            (scsi_card_current[2] == 0) && (scsi_card_current[3] == 0))
-            continue;
-        if (mo_drives[i].bus_type != 0) {
-            cb(i);
-        }
-    }
-}
-
-void
 MachineStatus::iterateNIC(const std::function<void(int)> &cb)
 {
     for (int i = 0; i < NET_CARD_MAX; i++) {
@@ -405,13 +377,6 @@ MachineStatus::refreshIcons()
 
         d->zip[i].setEmpty(machine_status.zip[i].empty);
     }
-    for (size_t i = 0; i < MO_NUM; i++) {
-        d->mo[i].setActive(machine_status.mo[i].active);
-        if (machine_status.mo[i].active)
-            ui_sb_update_icon(SB_MO | i, 0);
-
-        d->mo[i].setEmpty(machine_status.mo[i].empty);
-    }
 
     d->cassette.setEmpty(machine_status.cassette.empty);
 
@@ -440,8 +405,6 @@ MachineStatus::clearActivity()
         cdrom.setActive(false);
     for (auto &zip : d->zip)
         zip.setActive(false);
-    for (auto &mo : d->mo)
-        mo.setActive(false);
     for (auto &hdd : d->hdds)
         hdd.setActive(false);
     for (auto &net : d->net)
@@ -475,9 +438,7 @@ MachineStatus::refresh(QStatusBar *sbar)
     for (size_t i = 0; i < ZIP_NUM; i++) {
         sbar->removeWidget(d->zip[i].label.get());
     }
-    for (size_t i = 0; i < MO_NUM; i++) {
-        sbar->removeWidget(d->mo[i].label.get());
-    }
+
     for (size_t i = 0; i < HDD_BUS_USB; i++) {
         sbar->removeWidget(d->hdds[i].label.get());
     }
@@ -572,22 +533,6 @@ MachineStatus::refresh(QStatusBar *sbar)
         d->zip[i].label->setToolTip(MediaMenu::ptr->zipMenus[i]->title());
         d->zip[i].label->setAcceptDrops(true);
         sbar->addWidget(d->zip[i].label.get());
-    });
-
-    iterateMO([this, sbar](int i) {
-        d->mo[i].label = std::make_unique<ClickableLabel>();
-        d->mo[i].setEmpty(QString(mo_drives[i].image_path).isEmpty());
-        d->mo[i].setActive(false);
-        d->mo[i].refresh();
-        connect((ClickableLabel *) d->mo[i].label.get(), &ClickableLabel::clicked, [i](QPoint pos) {
-            MediaMenu::ptr->moMenus[i]->popup(pos - QPoint(0, MediaMenu::ptr->moMenus[i]->sizeHint().height()));
-        });
-        connect((ClickableLabel *) d->mo[i].label.get(), &ClickableLabel::dropped, [i](QString str) {
-            MediaMenu::ptr->moMount(i, str, false);
-        });
-        d->mo[i].label->setToolTip(MediaMenu::ptr->moMenus[i]->title());
-        d->mo[i].label->setAcceptDrops(true);
-        sbar->addWidget(d->mo[i].label.get());
     });
 
     iterateNIC([this, sbar](int i) {
@@ -705,10 +650,6 @@ MachineStatus::updateTip(int tag)
         case SB_ZIP:
             if (d->zip[item].label && MediaMenu::ptr->zipMenus[item])
                 d->zip[item].label->setToolTip(MediaMenu::ptr->zipMenus[item]->title());
-            break;
-        case SB_MO:
-            if (d->mo[item].label && MediaMenu::ptr->moMenus[item])
-                d->mo[item].label->setToolTip(MediaMenu::ptr->moMenus[item]->title());
             break;
         case SB_HDD:
             break;

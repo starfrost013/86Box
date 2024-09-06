@@ -35,7 +35,6 @@
 #include <86box/hdc_ide.h>
 #include <86box/hdc_ide_sff8038i.h>
 #include <86box/zip.h>
-#include <86box/mo.h>
 
 typedef struct w83769f_t {
     uint8_t  vlb_idx;
@@ -301,11 +300,6 @@ w83769f_reset(void *priv)
         if ((zip_drives[i].bus_type == ZIP_BUS_ATAPI) && (zip_drives[i].ide_channel >= min_channel) &&
             (zip_drives[i].ide_channel <= max_channel) && zip_drives[i].priv)
             zip_reset((scsi_common_t *) zip_drives[i].priv);
-    }
-    for (i = 0; i < MO_NUM; i++) {
-        if ((mo_drives[i].bus_type == MO_BUS_ATAPI) && (mo_drives[i].ide_channel >= min_channel) &&
-            (mo_drives[i].ide_channel <= max_channel) && mo_drives[i].priv)
-            mo_reset((scsi_common_t *) mo_drives[i].priv);
     }
 
     if (dev->channels & 0x01)

@@ -44,7 +44,7 @@ public:
     int scsi_bus_full();
 
     /* Set: 0 = Clear the device from the tracking, 1 = Set the device on the tracking.
-       Device type: 1 = Hard Disk, 2 = CD-ROM, 4 = ZIP, 8 = Magneto-Optical.
+       Device type: 1 = Hard Disk, 2 = CD-ROM, 
        Bus: 0 = MFM, 1 = ESDI, 2 = XTA, 3 = IDE, 4 = SCSI. */
     void device_track(int set, uint8_t dev_type, int bus, int channel);
 

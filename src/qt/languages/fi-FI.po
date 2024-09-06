@@ -594,9 +594,6 @@ msgstr "Tarkista BPB"
 msgid "CD-ROM drives:"
 msgstr "CD-ROM-asemat:"
 
-msgid "MO drives:"
-msgstr "Magneettisoptiset asemat (MO):"
-
 msgid "ZIP drives:"
 msgstr "ZIP-asemat:"
 

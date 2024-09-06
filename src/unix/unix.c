@@ -964,12 +964,10 @@ monitor_thread(void *param)
                         "cdload <id> <filename> - Load CD-ROM image into drive <id>.\n"
                         "zipload <id> <filename> <wp> - Load ZIP image into ZIP drive <id>.\n"
                         "cartload <id> <filename> <wp> - Load cartridge image into cartridge drive <id>.\n"
-                        "moload <id> <filename> <wp> - Load MO image into MO drive <id>.\n\n"
                         "fddeject <id> - eject disk from floppy drive <id>.\n"
                         "cdeject <id> - eject disc from CD-ROM drive <id>.\n"
                         "zipeject <id> - eject ZIP image from ZIP drive <id>.\n"
                         "carteject <id> - eject cartridge from drive <id>.\n"
-                        "moeject <id> - eject image from MO drive <id>.\n\n"
                         "hardreset - hard reset the emulated system.\n"
                         "pause - pause the the emulated system.\n"
                         "fullscreen - toggle fullscreen.\n"
@@ -1062,8 +1060,6 @@ monitor_thread(void *param)
                     floppy_eject(atoi(xargv[1]));
                 } else if (strncasecmp(xargv[0], "cdeject", 8) == 0 && cmdargc >= 2) {
                     cdrom_mount(atoi(xargv[1]), "");
-                } else if (strncasecmp(xargv[0], "moeject", 8) == 0 && cmdargc >= 2) {
-                    mo_eject(atoi(xargv[1]));
                 } else if (strncasecmp(xargv[0], "carteject", 8) == 0 && cmdargc >= 2) {
                     cartridge_eject(atoi(xargv[1]));
                 } else if (strncasecmp(xargv[0], "zipeject", 8) == 0 && cmdargc >= 2) {
@@ -1089,28 +1085,6 @@ monitor_thread(void *param)
                             fn[strlen(fn) - 1] = '\0';
                         printf("Inserting disk into floppy drive %c: %s\n", id + 'A', fn);
                         floppy_mount(id, fn, wp);
-                    }
-                } else if (strncasecmp(xargv[0], "moload", 7) == 0 && cmdargc >= 4) {
-                    uint8_t id;
-                    uint8_t wp;
-                    bool    err = false;
-                    char    fn[PATH_MAX];
-
-                    memset(fn, 0, sizeof(fn));
-
-                    if (!xargv[2] || !xargv[1]) {
-                        free(line);
-                        free(linecpy);
-                        line = NULL;
-                        continue;
-                    }
-                    err = process_media_commands_3(&id, fn, &wp, cmdargc);
-                    if (!err) {
-                        if (fn[strlen(fn) - 1] == '\''
-                            || fn[strlen(fn) - 1] == '"')
-                            fn[strlen(fn) - 1] = '\0';
-                        printf("Inserting into mo drive %hhu: %s\n", id, fn);
-                        mo_mount(id, fn, wp);
                     }
                 } else if (strncasecmp(xargv[0], "cartload", 7) == 0 && cmdargc >= 4) {
                     uint8_t id;

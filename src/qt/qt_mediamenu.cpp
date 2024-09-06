@@ -57,7 +57,6 @@ extern "C" {
 #include <86box/cdrom.h>
 #include <86box/scsi_device.h>
 #include <86box/zip.h>
-#include <86box/mo.h>
 #include <86box/sound.h>
 #include <86box/ui.h>
 #include <86box/thread.h>
@@ -185,22 +184,6 @@ MediaMenu::refresh(QMenu *parentMenu)
         menu->addAction(tr("&Reload previous image"), [this, i]() { zipReload(i); });
         zipMenus[i] = menu;
         zipUpdateMenu(i);
-    });
-
-    moMenus.clear();
-    MachineStatus::iterateMO([this, parentMenu](int i) {
-        auto *menu = parentMenu->addMenu("");
-        menu->addAction(tr("&New image..."), [this, i]() { moNewImage(i); });
-        menu->addSeparator();
-        menu->addAction(tr("&Existing image..."), [this, i]() { moSelectImage(i, false); });
-        menu->addAction(tr("Existing image (&Write-protected)..."), [this, i]() { moSelectImage(i, true); });
-        menu->addSeparator();
-        moEjectPos = menu->children().count();
-        menu->addAction(tr("E&ject"), [this, i]() { moEject(i); });
-        moReloadPos = menu->children().count();
-        menu->addAction(tr("&Reload previous image"), [this, i]() { moReload(i); });
-        moMenus[i] = menu;
-        moUpdateMenu(i);
     });
 
     netMenus.clear();
@@ -803,122 +786,6 @@ MediaMenu::zipUpdateMenu(int i)
 }
 
 void
-MediaMenu::moNewImage(int i)
-{
-    NewFloppyDialog dialog(NewFloppyDialog::MediaType::Mo, parentWidget);
-    switch (dialog.exec()) {
-        default:
-            break;
-        case QDialog::Accepted:
-            QByteArray filename = dialog.fileName().toUtf8();
-            moMount(i, filename, false);
-            break;
-    }
-}
-
-void
-MediaMenu::moSelectImage(int i, bool wp)
-{
-    const auto filename = QFileDialog::getOpenFileName(
-        parentWidget,
-        QString(),
-        getMediaOpenDirectory(),
-        tr("MO images") % util::DlgFilter({ "im?", "mdi" }) % tr("All files") % util::DlgFilter({
-                                                                                                    "*",
-                                                                                                },
-                                                                                                true));
-
-    if (!filename.isEmpty())
-        moMount(i, filename, wp);
-}
-
-void
-MediaMenu::moMount(int i, const QString &filename, bool wp)
-{
-    const auto dev = static_cast<mo_t *>(mo_drives[i].priv);
-
-    mo_disk_close(dev);
-    mo_drives[i].read_only = wp;
-    if (!filename.isEmpty()) {
-        QByteArray filenameBytes = filename.toUtf8();
-        mo_load(dev, filenameBytes.data());
-        mo_insert(dev);
-    }
-
-    ui_sb_update_icon_state(SB_MO | i, filename.isEmpty() ? 1 : 0);
-    moUpdateMenu(i);
-    ui_sb_update_tip(SB_MO | i);
-
-    config_save();
-}
-
-void
-MediaMenu::moEject(int i)
-{
-    const auto dev = static_cast<mo_t *>(mo_drives[i].priv);
-
-    mo_disk_close(dev);
-    mo_drives[i].image_path[0] = 0;
-    if (mo_drives[i].bus_type) {
-        /* Signal disk change to the emulated machine. */
-        mo_insert(dev);
-    }
-
-    ui_sb_update_icon_state(SB_MO | i, 1);
-    moUpdateMenu(i);
-    ui_sb_update_tip(SB_MO | i);
-    config_save();
-}
-
-void
-MediaMenu::moReload(int i)
-{
-    mo_t *dev = (mo_t *) mo_drives[i].priv;
-
-    mo_disk_reload(dev);
-    if (strlen(mo_drives[i].image_path) == 0) {
-        ui_sb_update_icon_state(SB_MO | i, 1);
-    } else {
-        ui_sb_update_icon_state(SB_MO | i, 0);
-    }
-
-    moUpdateMenu(i);
-    ui_sb_update_tip(SB_MO | i);
-
-    config_save();
-}
-
-void
-MediaMenu::moUpdateMenu(int i)
-{
-    QString name      = mo_drives[i].image_path;
-    QString prev_name = mo_drives[i].prev_image_path;
-    if (!moMenus.contains(i))
-        return;
-    auto *menu   = moMenus[i];
-    auto  childs = menu->children();
-
-    auto *ejectMenu  = dynamic_cast<QAction *>(childs[moEjectPos]);
-    auto *reloadMenu = dynamic_cast<QAction *>(childs[moReloadPos]);
-    ejectMenu->setEnabled(!name.isEmpty());
-    reloadMenu->setEnabled(!prev_name.isEmpty());
-
-    QString busName = tr("Unknown Bus");
-    switch (mo_drives[i].bus_type) {
-        default:
-            break;
-        case MO_BUS_ATAPI:
-            busName = "ATAPI";
-            break;
-        case MO_BUS_SCSI:
-            busName = "SCSI";
-            break;
-    }
-
-    menu->setTitle(QString::asprintf(tr("MO %i (%ls): %ls").toUtf8().constData(), i + 1, busName.toStdU16String().data(), name.isEmpty() ? tr("(empty)").toStdU16String().data() : name.toStdU16String().data()));
-}
-
-void
 MediaMenu::nicConnect(int i)
 {
     network_connect(i, 1);
@@ -1046,21 +913,4 @@ zip_reload(uint8_t id)
     MediaMenu::ptr->zipReload(id);
 }
 
-void
-mo_eject(uint8_t id)
-{
-    MediaMenu::ptr->moEject(id);
-}
-
-void
-mo_mount(uint8_t id, char *fn, uint8_t wp)
-{
-    MediaMenu::ptr->moMount(id, QString(fn), wp);
-}
-
-void
-mo_reload(uint8_t id)
-{
-    MediaMenu::ptr->moReload(id);
-}
 }

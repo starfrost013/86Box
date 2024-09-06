@@ -17,7 +17,6 @@
 #include <86box/cassette.h>
 #include <86box/cdrom.h>
 #include <86box/zip.h>
-#include <86box/mo.h>
 #include <86box/hdd.h>
 #include <86box/thread.h>
 #include <86box/network.h>
@@ -40,11 +39,7 @@ machine_status_init(void)
         machine_status.zip[i].empty  = (strlen(zip_drives[i].image_path) == 0);
         machine_status.zip[i].active = false;
     }
-    for (size_t i = 0; i < MO_NUM; i++) {
-        machine_status.mo[i].empty  = (strlen(mo_drives[i].image_path) == 0);
-        machine_status.mo[i].active = false;
-    }
-
+    
     machine_status.cassette.empty = (strlen(cassette_fname) == 0);
 
     for (size_t i = 0; i < HDD_BUS_USB; i++) {

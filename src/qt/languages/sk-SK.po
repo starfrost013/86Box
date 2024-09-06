@@ -594,9 +594,6 @@ msgstr "Kontrola BPB"
 msgid "CD-ROM drives:"
 msgstr "Mechaniky CD-ROM:"
 
-msgid "MO drives:"
-msgstr "Magnetooptické mechaniky:"
-
 msgid "ZIP drives:"
 msgstr "Mechaniky ZIP:"
 

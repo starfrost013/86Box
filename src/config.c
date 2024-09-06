@@ -67,7 +67,6 @@
 #include <86box/cdrom.h>
 #include <86box/cdrom_interface.h>
 #include <86box/zip.h>
-#include <86box/mo.h>
 #include <86box/sound.h>
 #include <86box/midi.h>
 #include <86box/snd_mpu401.h>
@@ -1452,117 +1451,6 @@ load_other_removable_devices(void)
     }
 
     memset(temp, 0x00, sizeof(temp));
-    for (c = 0; c < MO_NUM; c++) {
-        sprintf(temp, "mo_%02i_parameters", c + 1);
-        p = ini_section_get_string(cat, temp, NULL);
-        if (p != NULL)
-            sscanf(p, "%u, %s", &mo_drives[c].type, s);
-        else
-            sscanf("00, none", "%u, %s", &mo_drives[c].type, s);
-        mo_drives[c].bus_type = hdd_string_to_bus(s, 1);
-
-        /* Default values, needed for proper operation of the Settings dialog. */
-        mo_drives[c].ide_channel = mo_drives[c].scsi_device_id = c + 2;
-
-        if (mo_drives[c].bus_type == MO_BUS_ATAPI) {
-            sprintf(temp, "mo_%02i_ide_channel", c + 1);
-            sprintf(tmp2, "%01u:%01u", (c + 2) >> 1, (c + 2) & 1);
-            p = ini_section_get_string(cat, temp, tmp2);
-            sscanf(p, "%01u:%01u", &board, &dev);
-            board &= 3;
-            dev &= 1;
-            mo_drives[c].ide_channel = (board << 1) + dev;
-
-            if (mo_drives[c].ide_channel > 7)
-                mo_drives[c].ide_channel = 7;
-        } else if (mo_drives[c].bus_type == MO_BUS_SCSI) {
-            sprintf(temp, "mo_%02i_scsi_location", c + 1);
-            sprintf(tmp2, "%01u:%02u", SCSI_BUS_MAX, c + 2);
-            p = ini_section_get_string(cat, temp, tmp2);
-            sscanf(p, "%01u:%02u", &board, &dev);
-            if (board >= SCSI_BUS_MAX) {
-                /* Invalid bus - check legacy ID */
-                sprintf(temp, "mo_%02i_scsi_id", c + 1);
-                mo_drives[c].scsi_device_id = ini_section_get_int(cat, temp, c + 2);
-
-                if (mo_drives[c].scsi_device_id > 15)
-                    mo_drives[c].scsi_device_id = 15;
-            } else {
-                board %= SCSI_BUS_MAX;
-                dev &= 15;
-                mo_drives[c].scsi_device_id = (board << 4) + dev;
-            }
-        }
-
-        if (mo_drives[c].bus_type != MO_BUS_ATAPI) {
-            sprintf(temp, "mo_%02i_ide_channel", c + 1);
-            ini_section_delete_var(cat, temp);
-        }
-
-        if (mo_drives[c].bus_type != MO_BUS_SCSI) {
-            sprintf(temp, "mo_%02i_scsi_location", c + 1);
-            ini_section_delete_var(cat, temp);
-        }
-
-        sprintf(temp, "mo_%02i_scsi_id", c + 1);
-        ini_section_delete_var(cat, temp);
-
-        sprintf(temp, "mo_%02i_image_path", c + 1);
-        p = ini_section_get_string(cat, temp, "");
-
-        if (!strcmp(p, usr_path))
-            p[0] = 0x00;
-
-        if (p[0] != 0x00) {
-            if (path_abs(p)) {
-                if (strlen(p) > 511)
-                    fatal("load_other_removable_devices(): strlen(p) > 511 (mo_drives[%i].image_path)\n",
-                          c);
-                else
-                    strncpy(mo_drives[c].image_path, p, 511);
-            } else
-                path_append_filename(mo_drives[c].image_path, usr_path, p);
-            path_normalize(mo_drives[c].image_path);
-        }
-
-        for (int i = 0; i < MAX_PREV_IMAGES; i++) {
-            mo_drives[c].image_history[i] = (char *) calloc((MAX_IMAGE_PATH_LEN + 1) << 1, sizeof(char));
-            sprintf(temp, "mo_%02i_image_history_%02i", c + 1, i + 1);
-            p = ini_section_get_string(cat, temp, NULL);
-            if (p) {
-                if (path_abs(p)) {
-                    if (strlen(p) > (MAX_IMAGE_PATH_LEN - 1))
-                        fatal("load_other_removable_devices(): strlen(p) > 2047 "
-                              "(mo_drives[%i].image_history[%i])\n", c, i);
-                    else
-                        snprintf(mo_drives[c].image_history[i], (MAX_IMAGE_PATH_LEN - 1), "%s", p);
-                } else
-                    snprintf(mo_drives[c].image_history[i], (MAX_IMAGE_PATH_LEN - 1), "%s%s%s", usr_path,
-                             path_get_slash(usr_path), p);
-                path_normalize(mo_drives[c].image_history[i]);
-            }
-        }
-
-        /* If the MO drive is disabled, delete all its variables. */
-        if (mo_drives[c].bus_type == MO_BUS_DISABLED) {
-            sprintf(temp, "mo_%02i_parameters", c + 1);
-            ini_section_delete_var(cat, temp);
-
-            sprintf(temp, "mo_%02i_ide_channel", c + 1);
-            ini_section_delete_var(cat, temp);
-
-            sprintf(temp, "mo_%02i_scsi_id", c + 1);
-            ini_section_delete_var(cat, temp);
-
-            sprintf(temp, "mo_%02i_image_path", c + 1);
-            ini_section_delete_var(cat, temp);
-
-            for (int i = 0; i < MAX_PREV_IMAGES; i++) {
-                sprintf(temp, "mo_%02i_image_history_%02i", c + 1, i + 1);
-                ini_section_delete_var(cat, temp);
-            }
-        }
-    }
 }
 
 /* Load "Other Peripherals" section. */
@@ -2709,49 +2597,6 @@ save_other_removable_devices(void)
                 ini_section_set_string(cat, temp, &zip_drives[c].image_path[strlen(usr_path)]);
             else
                 ini_section_set_string(cat, temp, zip_drives[c].image_path);
-        }
-    }
-
-    for (c = 0; c < MO_NUM; c++) {
-        sprintf(temp, "mo_%02i_parameters", c + 1);
-        if (mo_drives[c].bus_type == 0) {
-            ini_section_delete_var(cat, temp);
-        } else {
-            sprintf(tmp2, "%u, %s", mo_drives[c].type,
-                    hdd_bus_to_string(mo_drives[c].bus_type, 1));
-            ini_section_set_string(cat, temp, tmp2);
-        }
-
-        sprintf(temp, "mo_%02i_ide_channel", c + 1);
-        if (mo_drives[c].bus_type != MO_BUS_ATAPI)
-            ini_section_delete_var(cat, temp);
-        else {
-            sprintf(tmp2, "%01u:%01u", mo_drives[c].ide_channel >> 1,
-                    mo_drives[c].ide_channel & 1);
-            ini_section_set_string(cat, temp, tmp2);
-        }
-
-        sprintf(temp, "mo_%02i_scsi_id", c + 1);
-        ini_section_delete_var(cat, temp);
-
-        sprintf(temp, "mo_%02i_scsi_location", c + 1);
-        if (mo_drives[c].bus_type != MO_BUS_SCSI)
-            ini_section_delete_var(cat, temp);
-        else {
-            sprintf(tmp2, "%01u:%02u", mo_drives[c].scsi_device_id >> 4,
-                    mo_drives[c].scsi_device_id & 15);
-            ini_section_set_string(cat, temp, tmp2);
-        }
-
-        sprintf(temp, "mo_%02i_image_path", c + 1);
-        if ((mo_drives[c].bus_type == 0) || (strlen(mo_drives[c].image_path) == 0))
-            ini_section_delete_var(cat, temp);
-        else {
-            path_normalize(mo_drives[c].image_path);
-            if (!strnicmp(mo_drives[c].image_path, usr_path, strlen(usr_path)))
-                ini_section_set_string(cat, temp, &mo_drives[c].image_path[strlen(usr_path)]);
-            else
-                ini_section_set_string(cat, temp, mo_drives[c].image_path);
         }
     }
 

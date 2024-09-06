@@ -594,9 +594,6 @@ msgstr "Kiểm tra BPB"
 msgid "CD-ROM drives:"
 msgstr "Ổ đĩa CD-ROM:"
 
-msgid "MO drives:"
-msgstr "Ổ đĩa MO:"
-
 msgid "ZIP drives:"
 msgstr "Ổ đĩa ZIP:"
 

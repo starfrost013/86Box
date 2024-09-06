@@ -594,9 +594,6 @@ msgstr "BPB'yi denetle"
 msgid "CD-ROM drives:"
 msgstr "CD-ROM sürücüleri:"
 
-msgid "MO drives:"
-msgstr "MO sürücüleri:"
-
 msgid "ZIP drives:"
 msgstr "ZIP sürücüleri:"
 

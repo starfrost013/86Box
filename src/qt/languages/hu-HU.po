@@ -594,9 +594,6 @@ msgstr "BPB ellenőrzés"
 msgid "CD-ROM drives:"
 msgstr "CD-ROM meghajtók:"
 
-msgid "MO drives:"
-msgstr "MO-meghajtók:"
-
 msgid "ZIP drives:"
 msgstr "ZIP-meghajtók:"
 

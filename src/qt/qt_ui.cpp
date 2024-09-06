@@ -50,7 +50,6 @@ extern "C" {
 #include <86box/cassette.h>
 #include <86box/cdrom.h>
 #include <86box/zip.h>
-#include <86box/mo.h>
 #include <86box/hdd.h>
 #include <86box/thread.h>
 #include <86box/network.h>
@@ -244,9 +243,6 @@ ui_sb_update_icon_state(int tag, int state)
         case SB_ZIP:
             machine_status.zip[item].empty = state > 0 ? true : false;
             break;
-        case SB_MO:
-            machine_status.mo[item].empty = state > 0 ? true : false;
-            break;
         case SB_HDD:
             break;
         case SB_NETWORK:
@@ -278,9 +274,6 @@ ui_sb_update_icon(int tag, int active)
             break;
         case SB_ZIP:
             machine_status.zip[item].active = active > 0 ? true : false;
-            break;
-        case SB_MO:
-            machine_status.mo[item].active = active > 0 ? true : false;
             break;
         case SB_HDD:
             machine_status.hdd[item].active = active > 0 ? true : false;

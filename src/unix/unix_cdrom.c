@@ -32,7 +32,6 @@
 #include <86box/hdd.h>
 #include <86box/scsi_device.h>
 #include <86box/cdrom.h>
-#include <86box/mo.h>
 #include <86box/zip.h>
 #include <86box/scsi_disk.h>
 #include <86box/plat.h>
@@ -140,57 +139,6 @@ cdrom_mount(uint8_t id, char *fn)
         ui_sb_update_icon_state(SB_CDROM | id, 1);
 
     ui_sb_update_tip(SB_CDROM | id);
-    config_save();
-}
-
-void
-mo_eject(uint8_t id)
-{
-    mo_t *dev = (mo_t *) mo_drives[id].priv;
-
-    mo_disk_close(dev);
-    if (mo_drives[id].bus_type) {
-        /* Signal disk change to the emulated machine. */
-        mo_insert(dev);
-    }
-
-    ui_sb_update_icon_state(SB_MO | id, 1);
-
-    ui_sb_update_tip(SB_MO | id);
-    config_save();
-}
-
-void
-mo_mount(uint8_t id, char *fn, uint8_t wp)
-{
-    mo_t *dev = (mo_t *) mo_drives[id].priv;
-
-    mo_disk_close(dev);
-    mo_drives[id].read_only = wp;
-    mo_load(dev, fn);
-    mo_insert(dev);
-
-    ui_sb_update_icon_state(SB_MO | id, strlen(mo_drives[id].image_path) ? 0 : 1);
-
-    ui_sb_update_tip(SB_MO | id);
-
-    config_save();
-}
-
-void
-mo_reload(uint8_t id)
-{
-    mo_t *dev = (mo_t *) mo_drives[id].priv;
-
-    mo_disk_reload(dev);
-    if (strlen(mo_drives[id].image_path) == 0) {
-        ui_sb_update_icon_state(SB_MO | id, 1);
-    } else {
-        ui_sb_update_icon_state(SB_MO | id, 0);
-    }
-
-    ui_sb_update_tip(SB_MO | id);
-
     config_save();
 }
 

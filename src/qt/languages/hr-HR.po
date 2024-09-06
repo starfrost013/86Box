@@ -594,9 +594,6 @@ msgstr "Provjeraj BPB"
 msgid "CD-ROM drives:"
 msgstr "CD-ROM pogoni:"
 
-msgid "MO drives:"
-msgstr "MO pogoni:"
-
 msgid "ZIP drives:"
 msgstr "ZIP pogoni:"
 

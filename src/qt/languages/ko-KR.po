@@ -594,9 +594,6 @@ msgstr "BPB 확인"
 msgid "CD-ROM drives:"
 msgstr "CD-ROM 드라이브:"
 
-msgid "MO drives:"
-msgstr "광자기 드라이브:"
-
 msgid "ZIP drives:"
 msgstr "ZIP 드라이브:"
 

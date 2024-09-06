@@ -594,8 +594,6 @@ msgstr "Перевіряти BPB"
 msgid "CD-ROM drives:"
 msgstr "Дисководи CD-ROM:"
 
-msgid "MO drives:"
-msgstr "Магнітооптичні дисководи:"
 
 msgid "ZIP drives:"
 msgstr "ZIP дисководи:"

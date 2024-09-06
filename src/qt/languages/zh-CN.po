@@ -594,9 +594,6 @@ msgstr "检查 BPB"
 msgid "CD-ROM drives:"
 msgstr "光盘驱动器:"
 
-msgid "MO drives:"
-msgstr "磁光盘驱动器:"
-
 msgid "ZIP drives:"
 msgstr "ZIP 驱动器:"
 

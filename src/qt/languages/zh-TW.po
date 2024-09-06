@@ -594,9 +594,6 @@ msgstr "檢查 BPB"
 msgid "CD-ROM drives:"
 msgstr "光碟機:"
 
-msgid "MO drives:"
-msgstr "磁光碟機:"
-
 msgid "ZIP drives:"
 msgstr "ZIP 磁碟機:"
 

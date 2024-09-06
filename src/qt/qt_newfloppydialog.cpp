@@ -30,7 +30,6 @@ extern "C" {
 #include <86box/random.h>
 #include <86box/scsi_device.h>
 #include <86box/zip.h>
-#include <86box/mo.h>
 }
 
 #include <cstdio>
@@ -144,12 +143,6 @@ NewFloppyDialog::NewFloppyDialog(MediaType type, QWidget *parent)
             }
             ui->fileField->setFilter(tr("ZIP images") % util::DlgFilter({ "im?", "img", "zdi" }, true));
             break;
-        case MediaType::Mo:
-            for (int i = 0; i < moTypes.size(); ++i) {
-                Models::AddEntry(model, tr(moTypes[i].toUtf8().data()), i);
-            }
-            ui->fileField->setFilter(tr("MO images") % util::DlgFilter({ "im?", "img", "mdi" }) % tr("All files") % util::DlgFilter({ "*" }, true));
-            break;
     }
 
     model = ui->comboBoxRpm->model();
@@ -204,7 +197,7 @@ NewFloppyDialog::onCreate()
                     return;
                 }
             } else {
-                fileType = fi.suffix().toLower() == QStringLiteral("zdi") ? FileType::Fdi : FileType::Img;
+                fileType = FileType::Img;
                 if (createSectorImage(filename, disk_sizes[ui->comboBoxSize->currentIndex()], fileType)) {
                     return;
                 }
@@ -226,22 +219,7 @@ NewFloppyDialog::onCreate()
                 }
             }
             break;
-        case MediaType::Mo:
-            {
-                fileType = fi.suffix().toLower() == QStringLiteral("mdi") ? FileType::Mdi : FileType::Img;
 
-                std::atomic_bool res;
-                std::thread      t([this, &res, filename, fileType, &progress] {
-                    res = createMoSectorImage(filename, ui->comboBoxSize->currentIndex(), fileType, progress);
-                });
-                progress.exec();
-                t.join();
-
-                if (res) {
-                    return;
-                }
-            }
-            break;
     }
 
     QMessageBox::critical(this, tr("Unable to write file"), tr("Make sure the file is being saved to a writable directory"));
@@ -386,18 +364,6 @@ NewFloppyDialog::createSectorImage(const QString &filename, const disk_size_t &d
     fat1_offs      = sector_bytes;
     fat2_offs      = fat1_offs + fat_size;
     zero_bytes     = fat2_offs + fat_size + root_dir_bytes;
-
-    if (type == FileType::Fdi) {
-        QByteArray bytes(base, 0);
-        auto       empty             = bytes.data();
-        *(uint32_t *) &(empty[0x08]) = (uint32_t) base;
-        *(uint32_t *) &(empty[0x0C]) = total_size;
-        *(uint16_t *) &(empty[0x10]) = (uint16_t) sector_bytes;
-        *(uint8_t *) &(empty[0x14])  = (uint8_t) disk_size.sectors;
-        *(uint8_t *) &(empty[0x18])  = (uint8_t) disk_size.sides;
-        *(uint8_t *) &(empty[0x1C])  = (uint8_t) disk_size.tracks;
-        stream.writeRawData(empty, base);
-    }
 
     QByteArray bytes(total_size, 0);
     auto       empty = bytes.data();
@@ -633,72 +599,6 @@ NewFloppyDialog::createZipSectorImage(const QString &filename, const disk_size_t
         fileProgress(i);
     }
     fileProgress(pbar_max);
-
-    return true;
-}
-
-bool
-NewFloppyDialog::createMoSectorImage(const QString &filename, int8_t disk_size, FileType type, QProgressDialog &pbar)
-{
-    const mo_type_t *dp            = &mo_types[disk_size];
-    uint32_t         total_size    = 0;
-    uint32_t         total_size2;
-    uint32_t         total_sectors = 0;
-    uint32_t         sector_bytes  = 0;
-    uint16_t         base          = 0x1000;
-    uint32_t         pbar_max      = 0;
-    uint32_t         blocks_num;
-
-    QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly)) {
-        return false;
-    }
-    QDataStream stream(&file);
-    stream.setByteOrder(QDataStream::LittleEndian);
-
-    sector_bytes  = dp->bytes_per_sector;
-    total_sectors = dp->sectors;
-    total_size    = total_sectors * sector_bytes;
-
-    total_size2 = (total_size >> 20) << 20;
-    total_size2 = total_size - total_size2;
-
-    pbar_max = total_size;
-    pbar_max >>= 20;
-    blocks_num = pbar_max;
-    if (type == FileType::Mdi)
-        pbar_max++;
-    if (total_size2 == 0)
-        pbar_max++;
-
-    if (type == FileType::Mdi) {
-        QByteArray bytes(base, 0);
-        auto       empty = bytes.data();
-
-        *(uint32_t *) &(empty[0x08]) = (uint32_t) base;
-        *(uint32_t *) &(empty[0x0C]) = total_size;
-        *(uint16_t *) &(empty[0x10]) = (uint16_t) sector_bytes;
-        *(uint8_t *) &(empty[0x14])  = (uint8_t) 25;
-        *(uint8_t *) &(empty[0x18])  = (uint8_t) 64;
-        *(uint8_t *) &(empty[0x1C])  = (uint8_t) (dp->sectors / 64) / 25;
-
-        stream.writeRawData(empty, base);
-    }
-
-    QByteArray bytes(1048576, 0);
-    auto       empty = bytes.data();
-
-    pbar.setMaximum(blocks_num);
-    for (uint32_t i = 0; i < blocks_num; i++) {
-        stream.writeRawData(empty, bytes.size());
-        fileProgress(i);
-    }
-
-    if (total_size2 > 0) {
-        QByteArray extra_bytes(total_size2, 0);
-        stream.writeRawData(extra_bytes.data(), total_size2);
-    }
-    fileProgress(blocks_num);
 
     return true;
 }

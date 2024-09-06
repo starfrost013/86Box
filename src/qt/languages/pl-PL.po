@@ -594,9 +594,6 @@ msgstr "Sprawdzaj BPB"
 msgid "CD-ROM drives:"
 msgstr "Napędy CD-ROM:"
 
-msgid "MO drives:"
-msgstr "Napędy MO:"
-
 msgid "ZIP drives:"
 msgstr "Napędy ZIP:"
 

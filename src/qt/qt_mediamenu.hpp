@@ -59,7 +59,6 @@ public:
     void moNewImage(int i);
     void moSelectImage(int i, bool wp);
     void moMount(int i, const QString &filename, bool wp);
-    void moEject(int i);
     void moReload(int i);
     void moUpdateMenu(int i);
 
@@ -109,10 +108,7 @@ private:
 
     int zipEjectPos;
     int zipReloadPos;
-
-    int moEjectPos;
-    int moReloadPos;
-
+    
     int netDisconnPos;
 
     friend class MachineStatus;

@@ -594,9 +594,6 @@ msgstr "BPBチェック"
 msgid "CD-ROM drives:"
 msgstr "CD-ROMドライブ:"
 
-msgid "MO drives:"
-msgstr "光磁気ドライブ:"
-
 msgid "ZIP drives:"
 msgstr "ZIPドライブ:"
 
