@@ -1848,76 +1848,7 @@ ESFM_process_feedback(esfm_chip *chip)
 				  [exprom] "m"   (exprom)
 				: "cc", "ax", "bx", "cx", "dx", "r8", "r9", "r10", "r11"
 			);
-#elif defined(__GNUC__) && defined(__i386__) && !defined(_ESFMU_DISABLE_ASM_OPTIMIZATIONS)
-			size_t logsinrom_addr = (size_t)logsinrom;
-			size_t exprom_addr = (size_t)exprom;
-
-			asm (
-				"movzbl  %b[wave], %%eax             \n\t"
-				"shll    $11, %%eax                  \n\t"
-				"movl    %[sinrom], %%edi            \n\t"
-				"addl    %%eax, %%edi                \n\t"
-				"shlw    $3, %[eg_out]               \n\t"
-				"xorl    %[out], %[out]              \n\t"
-				"movl    %[out], %[last]             \n\t"
-				"movl    $29, %[i]                   \n"
-				"1:                                  \n\t"
-				// phase_feedback = (wave_out + wave_last) >> 2;
-				"movl    %[out], %%eax               \n\t"
-				"addl    %[last], %%eax              \n\t"
-				"sarl    $2, %%eax                   \n\t"
-				"movl    %%eax, %[p_fb]              \n\t"
-				// wave_last = wave_out
-				"movl    %[out], %[last]             \n\t"
-				// phase = phase_feedback >> mod_in_shift;
-				"movb    %[mod_in], %%cl             \n\t"
-				"sarl    %%cl, %%eax                 \n\t"
-				// phase += phase_acc >> 9;
-				"movl    %[p_acc], %%ebx             \n\t"
-				"shrl    $9, %%ebx                   \n\t"
-				"addl    %%ebx, %%eax                \n\t"
-				// lookup = logsinrom[(waveform << 10) | (phase & 0x3ff)];
-				"andl    $0x3ff, %%eax               \n\t"
-				"movzwl  (%%edi, %%eax, 2), %%ebx    \n\t"
-				"movl    %%ebx, %%eax                \n\t"
-				// level = (lookup & 0x1fff) + (envelope << 3);
-				"movl    $0x1fff, %%ecx              \n\t"
-				"andl    %%ecx, %%eax                \n\t"
-				"addw    %[eg_out], %%ax             \n\t"
-				// if (level > 0x1fff) level = 0x1fff;
-				"cmpl    %%ecx, %%eax                \n\t"
-				"cmoval  %%ecx, %%eax                \n\t"
-				// wave_out = exprom[level & 0xff] >> (level >> 8);
-				"movb    %%ah, %%cl                  \n\t"
-				"movzbl  %%al, %%eax                 \n\t"
-				"movl    %[exprom], %[out]           \n\t"
-				"movzwl  (%[out], %%eax, 2), %[out]  \n\t"
-				"shrl    %%cl, %[out]                \n\t"
-				// if (lookup & 0x8000) wave_out = -wave_out;
-				// in other words, lookup is negative
-				"movl    %[out], %%ecx               \n\t"
-				"negl    %%ecx                       \n\t"
-				"testw   %%bx, %%bx                  \n\t"
-				"cmovsl  %%ecx, %[out]               \n\t"
-				// phase_acc += phase_offset
-				"addl    %[p_off], %[p_acc]          \n\t"
-				// loop
-				"decl    %[i]                        \n\t"
-				"jne     1b                          \n\t"
-				: [p_fb]   "=&m" (phase_feedback),
-				  [p_acc]  "+r"  (phase_acc),
-				  [out]    "=&r" (wave_out),
-				  [last]   "=&m" (wave_last),
-				  [eg_out] "+m"  (eg_output)
-				: [p_off]  "m"   (phase_offset),
-				  [mod_in] "m"   (mod_in_shift),
-				  [wave]   "m"   (waveform),
-				  [sinrom] "m"   (logsinrom_addr),
-				  [exprom] "m"   (exprom_addr),
-				  [i]      "m"   (iter_counter)
-				: "cc", "ax", "bx", "cx", "di"
-			);
-#elif defined(__GNUC__) && defined(__arm__) && !defined(_ESFMU_DISABLE_ASM_OPTIMIZATIONS)
+#elif defined(__GNUC__) && defined(__arm__) && !defined(_ESFMU_DISABLE_ASM_OPTIMIZATIONS) // Is this also on ARM64?
 			asm (
 				"movs    r3, #0                     \n\t"
 				"movs    %[out], #0                 \n\t"

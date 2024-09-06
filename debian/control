@@ -24,7 +24,7 @@ Homepage: https://86box.net/
 Rules-Requires-Root: no
 
 Package: 86box
-Architecture: amd64 armhf arm64 i386
+Architecture: amd64 arm64
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          sse2-support [i386]

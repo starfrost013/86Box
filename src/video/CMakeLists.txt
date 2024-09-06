@@ -38,6 +38,6 @@ add_library(voodoo OBJECT vid_voodoo.c vid_voodoo_banshee.c
     vid_voodoo_fb.c vid_voodoo_fifo.c vid_voodoo_reg.c vid_voodoo_render.c
     vid_voodoo_setup.c vid_voodoo_texture.c)
 
-if(NOT MSVC AND (ARCH STREQUAL "i386" OR ARCH STREQUAL "x86_64"))
+if(NOT MSVC AND (ARCH STREQUAL "x86_64"))
     target_compile_options(voodoo PRIVATE "-msse2")
 endif()

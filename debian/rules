@@ -5,7 +5,7 @@
 
 ARCH=$(shell dpkg-architecture -qDEB_HOST_ARCH)
 
-ifeq ($(ARCH), $(filter $(ARCH), amd64 i386))
+ifeq ($(ARCH), $(filter $(ARCH), amd64))
 	NDR=off
 	ifeq ($(ARCH),amd64)
 		TOOLCHAIN=cmake/flags-gcc-x86_64.cmake

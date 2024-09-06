@@ -25,11 +25,11 @@
 #include <86Box/video.h>
 #include <86Box/nv/vid_nv.h>
 
-nv_device_nv3_t* nv3;
+nv3_device_t* nv3;
 
 void* nv3_init(const device_t *info)
 {
-    nv3 = (nv_device_nv3_t*)calloc(1, sizeof(nv_device_nv3_t));
+    nv3 = (nv3_device_t*)calloc(1, sizeof(nv3_device_t));
     //int ret;
 
     // ELSA VICTORY Erazor Ver. 1.55.00    [WD/VBE30/DDC2B/DPMS]

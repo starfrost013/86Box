@@ -161,16 +161,6 @@ CPU_CONVERT(le, 64, uint64_t)
 
 /* unaligned versions (optimized for frequent unaligned accesses)*/
 
-#if defined(__i386__) || defined(__powerpc__)
-#    define cpu_to_le16wu(p, v) cpu_to_le16w(p, v)
-#    define cpu_to_le32wu(p, v) cpu_to_le32w(p, v)
-#    define le16_to_cpupu(p)    le16_to_cpup(p)
-#    define le32_to_cpupu(p)    le32_to_cpup(p)
-#    define cpu_to_be16wu(p, v) cpu_to_be16w(p, v)
-#    define cpu_to_be32wu(p, v) cpu_to_be32w(p, v)
-
-#else
-
 static __inline void
 cpu_to_le16wu(uint16_t *p, uint16_t v)
 {
@@ -224,8 +214,6 @@ cpu_to_be32wu(uint32_t *p, uint32_t v)
     p1[2] = v >> 8;
     p1[3] = v;
 }
-
-#endif
 
 #ifdef WORDS_BIGENDIAN
 #    define cpu_to_32wu cpu_to_be32wu

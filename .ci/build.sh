@@ -574,9 +574,7 @@ then
 else
 	# Determine Debian architecture.
 	case $arch in
-		x86)	arch_deb="i386";;
 		x86_64)	arch_deb="amd64";;
-		arm32)	arch_deb="armhf";;
 		*)	arch_deb="$arch";;
 	esac
         grep -q " bullseye " /etc/apt/sources.list || echo [!] WARNING: System not running the expected Debian version
@@ -614,15 +612,12 @@ else
 
 	# Determine toolchain architecture triplet.
 	case $arch in
-		x86)	arch_triplet="i686-linux-gnu";;
-		arm32)	arch_triplet="arm-linux-gnueabihf";;
 		arm64)	arch_triplet="aarch64-linux-gnu";;
-		*)	arch_triplet="$arch-linux-gnu";;
+		*)	arch_triplet="$arch-linux-gnu";; # AMD64
 	esac
 
 	# Determine library directory name for this architecture.
 	case $arch in
-		x86)	libdir="i386-linux-gnu";;
 		*)	libdir="$arch_triplet";;
 	esac
 
@@ -695,9 +690,7 @@ rm -rf build
 
 # Add ARCH to skip the arch_detect process.
 case $arch in
-	32 | x86)	cmake_flags_extra="$cmake_flags_extra -D ARCH=i386";;
 	64 | x86_64*)	cmake_flags_extra="$cmake_flags_extra -D ARCH=x86_64";;
-	ARM32 | arm32)	cmake_flags_extra="$cmake_flags_extra -D ARCH=arm -D NEW_DYNAREC=ON";;
 	ARM64 | arm64)	cmake_flags_extra="$cmake_flags_extra -D ARCH=arm64 -D NEW_DYNAREC=ON";;
 	*)		cmake_flags_extra="$cmake_flags_extra -D \"ARCH=$arch\"";;
 esac

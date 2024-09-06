@@ -982,12 +982,8 @@ monitor_thread(void *param)
 #        define EMU_GIT_HASH "0000000"
 #    endif
 
-#    if defined(__arm__) || defined(__TARGET_ARCH_ARM)
-#        define ARCH_STR "arm"
-#    elif defined(__aarch64__) || defined(_M_ARM64)
+#    if defined(__aarch64__) || defined(_M_ARM64)
 #        define ARCH_STR "arm64"
-#    elif defined(__i386) || defined(__i386__) || defined(_M_IX86)
-#        define ARCH_STR "i386"
 #    elif defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(_M_X64)
 #        define ARCH_STR "x86_64"
 #    else
@@ -995,7 +991,7 @@ monitor_thread(void *param)
 #    endif
 
 #ifdef USE_NEW_DYNAREC
-    #define DYNAREC_STR "new dynarec"
+    #define DYNAREC_STR "dynarec (86Box 'new'/PCem v15)"
 #else
     #define DYNAREC_STR "no dynarec"
 #endif

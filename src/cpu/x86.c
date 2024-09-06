@@ -98,10 +98,9 @@ x86_log(const char *fmt, ...)
         va_end(ap);
     }
 }
-
-
+#else
 #define x86_log(fmt, ...)
-
+#endif
 
 /* Preparation of the various arrays needed to speed up the MOD and R/M work. */
 static void

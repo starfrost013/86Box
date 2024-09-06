@@ -19,7 +19,14 @@
 #include <stdlib.h>
 #include <86box/random.h>
 
-#if !(defined(__i386__) || defined(__x86_64__))
+// Same function in different headers
+#ifdef _MSC_VER
+    #include <intrin.h>     
+#else
+    #include <x86intrin.h>
+#endif
+
+#if defined(__x86_64__)
 #    include <time.h>
 #endif
 
@@ -45,20 +52,9 @@ rotr32c(uint32_t x, uint32_t n)
 static __inline unsigned long long
 rdtsc(void)
 {
-#if defined(__i386__) || defined(__x86_64__)
-    unsigned int hi;
-    unsigned int lo;
-#    ifdef _MSC_VER
-    __asm {
-        rdtsc
-        mov hi, edx ; EDX:EAX is already standard return!!
-        mov lo, eax
-    }
-#    else
-    __asm__ __volatile__("rdtsc"
-                         : "=a"(lo), "=d"(hi));
-#    endif
-    return ((unsigned long long) lo) | (((unsigned long long) hi) << 32);
+    // intrinsic, spits out "rdtsc" instruction
+#if defined(__x86_64__)
+        return __rdtsc(); // same shit
 #else
     return time(NULL);
 #endif

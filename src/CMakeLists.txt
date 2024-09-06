@@ -78,14 +78,6 @@ endif()
 target_link_libraries(86Box cpu chipset mch dev mem fdd game cdrom zip mo hdd
     net print scsi sio snd vid voodoo plat ui)
 
-if(WIN32 AND ARCH STREQUAL "i386")
-    if(MINGW)
-        target_link_options(86Box PRIVATE "LINKER:--large-address-aware")
-    else()
-        target_link_options(86Box PRIVATE "LINKER:/LARGEADDRESSAWARE")
-    endif()
-endif()
-
 if(STATIC_BUILD)
     if(MINGW OR UNIX)
         target_link_options(86Box PRIVATE "-static")

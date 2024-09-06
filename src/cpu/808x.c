@@ -87,10 +87,23 @@ static int       refresh = 0, cycdiff;
         wait(val, 0); \
     }
 
+#define CLOCK_CYCLES(val) \
+    {                     \
+        wait(val, 0);     \
+    }
+
+#define CLOCK_CYCLES_FPU(val) \
+    {                         \
+        wait(val, 0);         \
+    }
+
+#define CONCURRENCY_CYCLES(c)
+
 #define CLOCK_CYCLES_ALWAYS(val) \
     {                            \
         wait(val, 0);            \
     }
+
 
 typedef int (*OpFn)(uint32_t fetchdat);
 
