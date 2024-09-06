@@ -69,6 +69,10 @@ SettingsOtherRemovable::SettingsOtherRemovable(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::SettingsOtherRemovable)
 {
+
+    ui->setupUi(this);
+
+    Harddrives::populateRemovableBuses(ui->comboBoxZIPBus->model());
     auto* model = new QStandardItemModel(0, 2, this);
     
     ui->tableViewZIP->setModel(model);
