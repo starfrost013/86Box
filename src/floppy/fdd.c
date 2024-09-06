@@ -124,14 +124,12 @@ static const struct
     { "CQM",  img_load,  img_close,  -1},
     { "DDI",  img_load,  img_close,  -1},
     { "DSK",  img_load,  img_close,  -1},
-    { "FDI",  fdi_load,  fdi_close,  -1},
     { "FDF",  img_load,  img_close,  -1},
     { "FLP",  img_load,  img_close,  -1},
     { "HDM",  img_load,  img_close,  -1},
     { "IMA",  img_load,  img_close,  -1},
     { "IMD",  imd_load,  imd_close,  -1},
     { "IMG",  img_load,  img_close,  -1},
-    { "JSON", pcjs_load, pcjs_close, -1},
     { "MFM",  mfm_load,  mfm_close,  -1},
     { "TD0",  td0_load,  td0_close,  -1},
     { "VFD",  img_load,  img_close,  -1},
@@ -661,7 +659,6 @@ fdd_init(void)
     d86f_init();
     td0_init();
     imd_init();
-    pcjs_init();
 
     for (i = 0; i < FDD_NUM; i++) {
         fdd_load(i, floppyfns[i]);

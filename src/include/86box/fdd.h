@@ -189,7 +189,6 @@ typedef union sector_id_t {
 } sector_id_t;
 
 void d86f_set_fdc(void *fdc);
-void fdi_set_fdc(void *fdc);
 void fdd_set_fdc(void *fdc);
 void imd_set_fdc(void *fdc);
 void img_set_fdc(void *fdc);

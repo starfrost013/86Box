@@ -2326,7 +2326,6 @@ fdc_init(const device_t *info)
     timer_add(&fdc->timer, fdc_callback, fdc, 0);
 
     d86f_set_fdc(fdc);
-    fdi_set_fdc(fdc);
     fdd_set_fdc(fdc);
     imd_set_fdc(fdc);
     img_set_fdc(fdc);
