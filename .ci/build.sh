@@ -251,9 +251,7 @@ echo [-] Building [$package_name] for [$arch] with flags [$cmake_flags]
 toolchain_prefix=flags-gcc
 is_mac && toolchain_prefix=llvm-macos
 case $arch in
-	32 | x86)	toolchain="$toolchain_prefix-i686";;
 	64 | x86_64*)	toolchain="$toolchain_prefix-x86_64";;
-	ARM32 | arm32)	toolchain="$toolchain_prefix-armv7";;
 	ARM64 | arm64)	toolchain="$toolchain_prefix-aarch64";;
 	*)		toolchain="$toolchain_prefix-$arch";;
 esac
@@ -769,7 +767,6 @@ fi
 
 # Determine Discord Game SDK architecture.
 case $arch in
-	32)		arch_discord="x86";;
 	64 | x86_64*)	arch_discord="x86_64";;
 	arm64 | ARM64)	arch_discord="aarch64";;
 	*)		arch_discord="$arch";;
@@ -794,7 +791,6 @@ then
 	# Manual checks because MSYS is bad at passing the ProgramFiles variables.
 	pf="/c/Program Files"
 	sevenzip="$pf/7-Zip/7z.exe"
-	[ "$arch" = "32" -a -d "/c/Program Files (x86)" ] && pf="/c/Program Files (x86)"
 
 	# Archive Ghostscript DLL from local official distribution installation.
 	for gs in "$pf"/gs/gs*.*.*
@@ -1081,8 +1077,6 @@ then
 else
 	# Determine AppImage runtime architecture.
 	case $arch in
-		x86)	arch_appimage="i686";;
-		arm32)	arch_appimage="armhf";;
 		arm64)	arch_appimage="aarch64";;
 		*)	arch_appimage="$arch";;
 	esac
