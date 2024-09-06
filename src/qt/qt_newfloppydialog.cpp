@@ -106,19 +106,6 @@ static const QStringList zipTypes = {
     "ZIP 250",
 };
 
-static const QStringList moTypes = {
-    "3.5\" 128 MB (ISO 10090)",
-    "3.5\" 230 MB (ISO 13963)",
-    "3.5\" 540 MB (ISO 15498)",
-    "3.5\" 640 MB (ISO 15498)",
-    "3.5\" 1.3 GB (GigaMO)",
-    "3.5\" 2.3 GB (GigaMO 2)",
-    "5.25\" 600 MB",
-    "5.25\" 650 MB",
-    "5.25\" 1 GB",
-    "5.25\" 1.3 GB",
-};
-
 NewFloppyDialog::NewFloppyDialog(MediaType type, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::NewFloppyDialog)

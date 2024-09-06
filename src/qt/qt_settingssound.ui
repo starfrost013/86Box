@@ -27,14 +27,14 @@
     <number>0</number>
    </property>
    <item row="5" column="0">
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="midiInDeviceHeader">
      <property name="text">
       <string>MIDI In Device:</string>
      </property>
     </widget>
    </item>
    <item row="0" column="0">
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="soundCard1Header">
      <property name="text">
       <string>Sound card #1:</string>
      </property>
@@ -48,7 +48,7 @@
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="QLabel" name="label_4">
+    <widget class="QLabel" name="soundCard2Header">
      <property name="text">
       <string>Sound card #2:</string>
      </property>
@@ -62,7 +62,7 @@
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QLabel" name="label_5">
+    <widget class="QLabel" name="soundCard3Header">
      <property name="text">
       <string>Sound card #3:</string>
      </property>
@@ -77,7 +77,7 @@
    </item>
 
    <item row="3" column="0">
-    <widget class="QLabel" name="label_6">
+    <widget class="QLabel" name="soundCard4Header">
      <property name="text">
       <string>Sound card #4:</string>
      </property>

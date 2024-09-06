@@ -1095,36 +1095,6 @@ msgstr "2.88 Mo"
 msgid "ZIP 100"
 msgstr "ZIP 100"
 
-msgid "3.5\" 128 MB (ISO 10090)"
-msgstr "3.5\" 128 Mo (ISO 10090)"
-
-msgid "3.5\" 230 MB (ISO 13963)"
-msgstr "3.5\" 230 Mo (ISO 13963)"
-
-msgid "3.5\" 540 MB (ISO 15498)"
-msgstr "3.5\" 540 Mo (ISO 15498)"
-
-msgid "3.5\" 640 MB (ISO 15498)"
-msgstr "3.5\" 640 Mo (ISO 15498)"
-
-msgid "3.5\" 1.3 GB (GigaMO)"
-msgstr "3.5\" 1.3 Go (GigaMO)"
-
-msgid "3.5\" 2.3 GB (GigaMO 2)"
-msgstr "3.5\" 2.3 Go (GigaMO 2)"
-
-msgid "5.25\" 600 MB"
-msgstr "5.25\" 600 Mo"
-
-msgid "5.25\" 650 MB"
-msgstr "5.25\" 650 Mo"
-
-msgid "5.25\" 1 GB"
-msgstr "5.25\" 1 Go"
-
-msgid "5.25\" 1.3 GB"
-msgstr "5.25\" 1.3 Go"
-
 msgid "Perfect RPM"
 msgstr "RPM précis"
 

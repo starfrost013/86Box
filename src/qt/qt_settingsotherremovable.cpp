@@ -100,9 +100,8 @@ SettingsOtherRemovable::~SettingsOtherRemovable()
 void
 SettingsOtherRemovable::save()
 {
-    const auto *model = ui->tableViewMO->model();
+    const auto *model = ui->tableViewZIP->model();
 
-    model = ui->tableViewZIP->model();
     for (uint8_t i = 0; i < ZIP_NUM; i++) {
         zip_drives[i].fp       = NULL;
         zip_drives[i].priv     = NULL;

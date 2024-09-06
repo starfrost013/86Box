@@ -49,14 +49,14 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="fpuHeader">
         <property name="text">
          <string>FPU:</string>
         </property>
        </widget>
       </item>
       <item row="5" column="0">
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="memoryHeader">
         <property name="text">
          <string>Memory:</string>
         </property>

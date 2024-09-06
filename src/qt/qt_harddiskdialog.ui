@@ -57,14 +57,14 @@
     </widget>
    </item>
    <item row="3" column="4">
-    <widget class="QLabel" name="label_5">
+    <widget class="QLabel" name="sectorsHeader">
      <property name="text">
       <string>Sectors:</string>
      </property>
     </widget>
    </item>
    <item row="4" column="2">
-    <widget class="QLabel" name="label_6">
+    <widget class="QLabel" name="typeHeader">
      <property name="text">
       <string>Type:</string>
      </property>

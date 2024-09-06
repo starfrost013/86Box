@@ -99,7 +99,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_6">
+    <widget class="QLabel" name="cdRomDrivesHeader">
      <property name="text">
       <string>CD-ROM drives:</string>
      </property>
