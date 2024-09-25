@@ -574,62 +574,6 @@ const device_t ide_cmd640_vlb_178_device = {
     .config        = NULL
 };
 
-const device_t ide_cmd640_vlb_pri_device = {
-    .name          = "CMD PCI-0640B VLB",
-    .internal_name = "ide_cmd640_vlb",
-    .flags         = DEVICE_VLB,
-    .local         = 0x20078,
-    .init          = cmd640_init,
-    .close         = cmd640_close,
-    .reset         = cmd640_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t ide_cmd640_vlb_pri_178_device = {
-    .name          = "CMD PCI-0640B VLB (Port 178h)",
-    .internal_name = "ide_cmd640_vlb_178",
-    .flags         = DEVICE_VLB,
-    .local         = 0x20178,
-    .init          = cmd640_init,
-    .close         = cmd640_close,
-    .reset         = cmd640_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t ide_cmd640_vlb_sec_device = {
-    .name          = "CMD PCI-0640B VLB",
-    .internal_name = "ide_cmd640_vlb",
-    .flags         = DEVICE_VLB,
-    .local         = 0x40078,
-    .init          = cmd640_init,
-    .close         = cmd640_close,
-    .reset         = cmd640_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t ide_cmd640_vlb_sec_178_device = {
-    .name          = "CMD PCI-0640B VLB (Port 178h)",
-    .internal_name = "ide_cmd640_vlb_178",
-    .flags         = DEVICE_VLB,
-    .local         = 0x40178,
-    .init          = cmd640_init,
-    .close         = cmd640_close,
-    .reset         = cmd640_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
 const device_t ide_cmd640_pci_device = {
     .name          = "CMD PCI-0640B PCI",
     .internal_name = "ide_cmd640_pci",
@@ -644,44 +588,3 @@ const device_t ide_cmd640_pci_device = {
     .config        = NULL
 };
 
-const device_t ide_cmd640_pci_legacy_only_device = {
-    .name          = "CMD PCI-0640B PCI (Legacy Mode Only)",
-    .internal_name = "ide_cmd640_pci_legacy_only",
-    .flags         = DEVICE_PCI,
-    .local         = 0x60000,
-    .init          = cmd640_init,
-    .close         = cmd640_close,
-    .reset         = cmd640_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t ide_cmd640_pci_single_channel_device = {
-    .name          = "CMD PCI-0640B PCI",
-    .internal_name = "ide_cmd640_pci_single_channel",
-    .flags         = DEVICE_PCI,
-    .local         = 0x2000a,
-    .init          = cmd640_init,
-    .close         = cmd640_close,
-    .reset         = cmd640_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t ide_cmd640_pci_single_channel_sec_device = {
-    .name          = "CMD PCI-0640B PCI",
-    .internal_name = "ide_cmd640_pci_single_channel_sec",
-    .flags         = DEVICE_PCI,
-    .local         = 0x4000a,
-    .init          = cmd640_init,
-    .close         = cmd640_close,
-    .reset         = cmd640_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};

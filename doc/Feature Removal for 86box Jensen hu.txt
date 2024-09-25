@@ -1,0 +1,353 @@
+Feature Removal for 86box Obatn't edition
+	- one of the jits
+	- 8080.c
+	- Centaur WinChip?
+	- Centaur WinChip2?
+
+Machines:
+	- [8088] American XT computer
+	- [8088] AMI XT clone
+	- [8088] Bondwell BW230
+	- [8088] Columbia Data Products MPC-1600
+	- [8088] DTK PIM-TB10-Z
+	- [8088] Eagle PC Spirit
+	- [8088] GLaBIOS
+	- [8088] Hyosung Topstar 88T
+	- [8088] Hyundai SUPER-16T
+	- [8088] Hyundai SUPER-16TE
+	- [8088] Juko ST
+	- [8088] Kaypro PC
+	- [8088] Micoms XL-7 Turbo
+	- [8088] Multitech PC-500
+	- [8088] Multitech PC-700
+	- [8088] NCR PC4i
+	- [8088] Olivetti M19
+	- [8088] Packard Bell PB8810
+	- [8088] Philips P3105/NMS9100
+	- [8088] Sanyo SX-16
+	- [8088] Schneider EuroPC
+	- [8088] Super PC/Turbo XT
+	- [8088] Tandy 1000 SX (keeping HX)
+	- [8088] Vendex HeadStart Turbo 888-XT
+	- [8088] VTech Laser Turbo XT
+	- [8088] Xi8088
+	- [8088] Z-NIX PC-1600
+	- [8088] Zenith Data Systems Z-151/152/161
+	- [8088] Zenith Data Systems Z-159
+	- [8088] Zenith Data Systems SupersPort (Z-184)
+	- [8088 GC100A chipset] Philips P3120
+	- [8086] Amstrad PC1512
+	- [8086] Amstrad PC1640
+	- [8086] Amstrad PC2086
+	- [8086] Amstrad PC3086
+	- [8086] Amstrad PC20(0)
+	- [8086] Amstrad PPC512/640
+	- [8086] Epson Equity LT
+	- [8086] Olivetti M21/24/24SP
+	- [8086] Olivetti M240
+	- [8086] Toshiba T1200
+	- [8086] Victor V86P
+	- [8086] VTech Laser XT3
+	- [ISA] IBM PS/2 model 30-286
+	- [ISA] IBM XT Model 286
+	- [ISA] AMI IBM AT
+	- [ISA] Commodore PC 30 III
+	- [ISA] IBM PS/1 model 2011
+	- [ISA] MR BIOS 286 clone
+	- [ISA] NCR PC8/810/710/3390/3392
+	- [ISA] Wells American A*Star
+	- [ISA] Olivetti M290 (unfinished)
+	- [ISA] OpenAT (unfinished) 
+	- [ISA] Quadtel IBM AT
+	- [ISA] Siemens PCD-2L ("This has a Siemens proprietary KBC which is completely undocumented.")
+	- [ISA] Toshiba T3100e
+	- [GC103] Quadtel 286 clone
+	- [GC103] TriGem 286
+	- [NEAT] DataExpert 286
+	- [NEAT] Hyundai Super-286C
+	- [NEAT] NCR 3302
+	- [NEAT] Arche AMA-2010
+	- [SCAT] GW-286CT GEAR
+	- [SCAT] Goldstar GDC-212M
+	- [SCAT] Hyundai Solomon 286KP
+	- [SCAT] Hyundai Super-286TR
+	- [SCAT] Samsung SPC-4200P
+	- [SCAT] Samsung SPC-4216P
+	- [SCAT] Samsung SPC-4620P
+	- [SCAT] Senor Science Co. SCAT-286-003
+	- [SCAT] Samsung Deskmaster 286
+	- [MCA] IBM PS/2 model 50
+	- [ISA] NCR PC916SX
+	- [ISA] QTC-SXM KT X20T02/HI
+	- [ALi M1217] Acrosser AR-B1374
+	- [ALi M1217] AAEON SBC-350A
+	- [ALi M1217] Flytech A36
+	- [ALi M1217] Chaintech 325AX
+	- [ALi M1217] Chaintech 325AX (MR BIOS)
+	- [ALI M1409] Acer 100T
+	- [ALi M6117] Acrosser PJ-A511M
+	- [ALi M6117] Protech ProX-1332
+	- [HT18] Arche AMA-932J
+	- [Intel 82335] ADI 386SX
+	- [Intel 82335] Shuttle 386SX
+	- [NEAT] Commodore SL386SX-16
+	- [NEAT] DTK PM-1630C
+	- [OPTi 291] DTK PPM-3333P
+	- [SCAMP] DataExpert 386SX
+	- [SCAMP] Samsung SPC-6033P
+	- [SCAMP] Commodore SL386SX-25
+	- [SCAT] Kaimei KMX-C-02
+	- [WD76C10] Amstrad MegaPC
+	- [MCA] IBM PS/2 model 55SX
+	- [MCA] IBM PS/2 model 65SX
+	- [OPTi 283] RYC Leopard LX
+	- [ACC 2168] Juko AT046DX3
+	- [C&T 386] ECS 386/32
+	- [C&T 386] Samsung SPC-6000A
+	- [ISA] Micronics 09-00021
+	- [ISA] Tandy 4000
+	- [ALi M1429] ECS Panda 386V
+	- [OPTi 391] DataExpert 386WB
+	- [OPTi 495] U-Board OPTi 495SLC
+	- [SiS 310] ASUS ISA-386C
+	- [OPTi 495] DataExpert SX495
+	- [OPTi 495] DataExpert SX495 (MR BIOS)
+	- [MCA] IBM PS/2 model 80 (type 2)
+	- [ALi M1429G] DataExpert EXP4349
+	- [MCA] IBM PS/2 model 70 (type 3)
+	- [ZyMOS Poach] Genoa Unknown 486
+	- [OPTi 381] Gigabyte GA-486L
+	- [CS4031] AMI 486 CS4031
+	- [OPTi 895] Mylex MVI486
+	- [SiS 401] ASUS ISA-486
+	- [SiS 401] Chaintech 433SC
+	- [SiS 460] ABIT AV4
+	- [VIA VT82C495] FIC 486-VC-HD
+	- [VLSI 82C480] HP Vectra 486VL
+	- [VLSI 82C481] Siemens Nixdorf D824
+	- [ACC 2168] Packard Bell PB410A
+	- [ALi M1429G] Acer A1G
+	- [ALi M1429G] Kaimei SA-486 VL-BUS M.B.
+	- [ALi M1429] Olystar LIL1429
+	- [IMS 8848] Tekram G486IP
+	- [OPTi 499] Alaris COUGAR 486BL
+	- [SiS 461] DEC DECpc LPV
+	- [i420TX] J-Bond PCI400C-A
+	- [Contaq 82C596A] A-Trend 4GPV5
+	- [Contaq 82C597] Visionex Green-B
+	- [OPTi 895] Jetway J-403TG
+	- [OPTi 895] Jetway J-403TG Rev D (MR BIOS)
+	- [OPTi 895] Packard Bell PB450
+	- [SiS 461] IBM PS/ValuePoint 433DX/Si
+	- [SiS 461] Acer V10
+	- [SiS 471] ABIT AB-AH4
+	- [SiS 471] AOpen Vi15G
+	- [SiS 471] ASUS VL/I-486SV2G (GX4)
+	- [SiS 471] DTK PKM-0038S E-2
+	- [SiS 471] Epox GXA486SG
+	- [SiS 471] SiS VL-BUS 471 REV. A1
+	- [SiS 471] TriGem 486G
+	- [SiS 471] DEC Venturis 4xx
+	- [ALi M1429G] ECS AL486
+	- [ALi M1429G] Lanner Electronics AP-4100AA
+	- [ALi M1429G] A-Trend ATC-1762"
+	- [ALi M1429G] MSI MS-4134
+	- [ALi M1429G] TriGem 486GP
+	- [ALi M1489] AAEON SBC-490
+	- [ALi M1489] ABIT AB-PB4
+	- [ALi M1489] MSI MS-4145
+	- [ALi M1489] ESA TF-486
+	- [ALi M1489] Acrosser AR-B1476
+	- [OPTi 802G] IBM Aptiva 510/710/Vision
+	- [i420EX] ASUS PVI-486AP4
+	- [i420EX] Intel Classic/PCI ED (ninja)
+	- [i420EX] Anigma BAT4IP3e
+	- [i420EX] Advanced Integration Research 486PI
+	- [i420EX] ICS SB486P
+	- [i420TX] ASUS PCI/I-486SP3
+	- [i420TX] AMI Super Voyager PCI
+	- [IMS 8848] J-Bond PCI400C-B
+	- [SiS 496] ASUS PVI-486SP3C
+	- [SiS 496] Lucky Star LS-486E
+	- [SiS 496] Micronics M4Li
+	- [SiS 496] Rise Computer R418
+	- [SiS 496] Soyo 4SAW2
+	- [SiS 496] Zida Tomato 4DP
+	- [SiS 496] MSI MS-4144
+	- [UMC 8881] A-Trend ATC-1415
+	- [UMC 8881] ECS Elite UM8810P-AIO
+	- [UMC 8881] Epson ActionPC 2600
+	- [UMC 8881] Epson ActionTower 8400
+	- [UMC 8881] PC Chips M919
+	- [UMC 8881] Samsung SPC7700P-LW
+	- [UMC 8881] Shuttle HOT-433A
+	- [VIA VT82C496G] DFI G486VPA
+	- [VIA VT82C496G] FIC VIP-IO2
+	- [STPC Client] ITOX STAR
+	- [STPC Consumer-II] Acrosser AR-B1423C
+	- [STPC Consumer-II] Acrosser AR-B1479
+	- [STPC Consumer-II] Lanner Electronics IAC-H488
+	- [STPC Elite] Advantech PCM-9340
+	- [STPC Atlas] AAEON PCM-5330
+	- [i430LX] AMI Excalibur PCI Pentium
+	- [i430LX] ASUS P/I-P5MP3
+	- [i430LX] Dell Dimension XPS P60
+	- [i430LX] AMBRA DP60 PCI
+	- [i430LX] IBM PS/ValuePoint P60
+	- [i430LX] Gigabyte GA-586IS
+	- [i430LX] Packard Bell PB520R 
+	- [i430LX] Intel Premiere/PCI (revenge)
+	- [OPTi 597] AMI Excalibur VLB
+	- [OPTi 597] Supermicro P5VL-PCI
+	- [SiS 501] AMI Excalibur PCI-II Pentium ISA
+	- [SiS 501] ASUS PCI/I-P5SP4
+	- [i430NX] Dell Dimension XPS Pxxx
+	- [i430NX] AMBRA DP90 PCI
+	- [i430NX] Gigabyte GA-586IP
+	- [i430NX] Teknor TEK-932
+	- [i430FX] Acer V30
+	- [i430FX] AMI Apollo
+	- [i430FX] NEC PowerMate V
+	- [i430FX] TriGem Hawk
+	- [i430FX] FIC PT-2000
+	- [OPTi 597] TMC PAT54PV
+	- [OPTi 597] Shuttle HOT-543
+	- [OPTi 597] Northgate Computer Systems Elegance Pentium 90
+	- [SiS 501] ASUS PCI/I-P54SP4
+	- [SiS 501] BCM SQ-588
+	- [SiS 501] Gemlight GMB-P54SPS
+	- [SiS 5501] MSI MS-5109
+	- [SiS 5501] TriGem Torino
+	- [i430FX] Intel Advanced/ZP (zappa)
+	- [UMC 889x] Shuttle HOT-539
+	- [i430FX] ASUS P/I-P55TP4XE (MR BIOS)
+	- [i430FX] DataExpert EXP8551
+	- [i430FX] Gateway 2000 Thor
+	- [i430FX] HP Vectra VL 5 Series 4
+	- [i430FX] Intel Advanced/ATX
+	- [i430FX] Intel Advanced/ATX (MR BIOS)
+	- [i430FX] Intel Advanced/EV (endeavour)
+	- [i430FX] MSI MS-5119
+	- [i430FX] Packard Bell PB640
+	- [i430FX] PC Partner MB500N
+	- [i430FX] QDI FMB
+	- [i430HX] Acer V35N
+	- [i430HX] AOpen AP53
+	- [i430HX] Biostar MB-8500TUC
+	- [SiS 5501] Chaintech 5SBM2 (M103)
+	- [SiS 5511] AOpen AP5S
+	- [SiS 5511] IBM PC 140 (type 6260)
+	- [SiS 5511] MSI MS-5124
+	- [SiS 5511] AMI Atlas PCI-II
+	- [i430HX] Acer M3A
+	- [i430HX] ASUS P/I-P55T2P4
+	- [i430HX] ASUS P/I-P65UP5 (C-P55T2D)
+	- [i430HX] Micronics M7S-Hi
+	- [i430HX] Intel TC430HX
+	- [i430HX] Intel CU430HX
+	- [i430HX] Toshiba Equium 5200D
+	- [i430HX] Sony Vaio PCV-90
+	- [i430HX] Supermicro P55T2S
+	- [i430VX] AOpen AP5VM
+	- [i430VX] ASUS P/I-P55TVP4
+	- [i430VX] Azza PT-5IV
+	- [i430VX] Biostar MB-8500TVX-A
+	- [i430VX] Compaq Presario 2240
+	- [i430VX] Compaq Presario 450
+	- [i430VX] Dell Hannibal+
+	- [i430VX] ECS P5VX-B
+	- [i430VX] Epox P55-VA
+	- [i430VX] HP Brio 80xx
+	- [i430VX] Packard Bell PB680
+	- [i430VX] Packard Bell PB810
+	- [i430VX] PC Partner MB520N
+	- [i430HX] Radisys EPC-2102
+	- [i430TX] ADLink NuPRO-591/592	
+	- [i430TX] Gateway Tomahawk
+	- [i430TX] Intel AN430TX
+	- [i430TX] Intel YM430TX
+	- [i430TX] Micronics Thunderbolt
+	- [i430TX] NEC Mate NX MA23C
+	- [i430TX] PC Partner MB540N
+	- [i430TX] Soltek SL-56A5
+	- [i430TX] Supermicro P5MMS98
+	- [i430TX] TriGem Richmond
+	- [VIA VPX] FIC VA-502
+	- [VIA VP3] FIC PA-2012
+	- [SiS 5571] Daewoo CB52X-SI
+	- [SiS 5571] MSI MS-5146
+	- [SiS 5581] ASUS SP97-XV
+	- [SiS 5581] BCM SQ-578
+	- [SiS 5591] MSI MS-5172
+	- [ALi ALADDiN IV+] MSI MS-5164
+	- [ALi ALADDiN IV+] PC Chips M560
+	- [ALi ALADDiN V] ASUS P5A
+	- [ALi ALADDiN V] PC Chips M579
+	- [ALi ALADDiN V] Gigabyte GA-5AA
+	- [ALi ALADDiN V] Gigabyte GA-5AX
+	- [VIA MVP3] AOpen AX59 Pro
+	- [VIA MVP3] FIC VA-503+
+	- [VIA MVP3] FIC VA-503A
+	- [VIA MVP3] Soyo 5EMA PRO
+	- [SiS 5591] Gigabyte GA-5SG100
+	- [i450KX] ASUS P/I-P6RP4
+	- [i450KX] AOpen AP61
+	- [i440FX] Acer V60N
+	- [i440FX] ASUS P/I-P65UP5 (C-P6ND)
+	- [i440FX] Biostar MB-8600TTC
+	- [i440FX] Gateway 2000 Venus
+	- [i440FX] Intel AP440FX
+	- [i440FX] Intel VS440FX
+	- [i440FX] LG IBM Multinet x61 (MSI MS-6106)
+	- [i440FX] Micronics M6Mi
+	- [i440FX] PC Partner MB600N
+	- [ALi ALADDiN-PRO II] PC Chips M729
+	- [i440FX] ASUS KN97
+	- [i440LX] ABIT LX6	
+	- [i440LX] Micronics Spitfire
+	- [i440LX] NEC Mate NX MA30D/23D
+	- [i440EX] QDI EXCELLENT II
+	- [i440BX] ASUS P3B-F
+	- [i440BX] ASUS P2B-LS
+	- [i440BX] ABIT BF6
+	- [i440BX] AOpen AX6BC
+	- [i440BX] HP Vectra VEi 8
+	- [i440BX] LG IBM Multinet i x7G (MSI MS-6119)
+	- [i440BX] Tyan Tsunami ATX
+	- [i440BX] Supermicro P6SBA
+	- [i440ZX] MSI MS-6168
+	- [i440ZX] Packard Bell Bora Pro
+	- [SMSC VictoryBX-66] A-Trend ATC-6310BXII
+	- [VIA Apollo Pro] FIC KA-6130
+	- [VIA Apollo Pro 133] ASUS P3V133
+	- [VIA Apollo Pro 133A] BCM GT694VA
+	- [SiS 5600] Freetech/Flexus P6F99
+	- [i440GX] Freeway FW-6400GX
+	- [i440BX] Tyan Trinity 371
+	- [VIA Apollo Pro 133] ECS P6BAT-A+
+	- [i440GX] Supermicro S2DGE
+	- [i440LX] Supermicro 370SLM
+	- [i440BX] AEWIN AW-O671R
+	- [i440BX] AmazePC AM-BX133
+	- [i440ZX] Soltek SL-63A1
+	- [SMSC VictoryBX-66] A-Trend ATC-7020BXII
+	- [SMSC VictoryBX-66] PC Chips M773
+	- [VIA Apollo Pro] PC Partner APAS3
+	- [VIA Apollo Pro 133] ECS P6BAP-A+
+	- [VIA Apollo Pro 133A] Acorp 6VIA90AP
+
+Floppy Drives:
+	- PCjs json floppy format support
+	- 86f? (wtf is that)	
+Joystick support, but keep gameport
+
+Sound Cards:
+	- Gravis Ultrasound
+	- Clone sound cards (only one SB16, ES1371 etc) 
+
+Network Cards:
+	- DECchip "Tulip" 21143
+
+Any chipsets no longer used after machine removal
+
+16644,16,63
