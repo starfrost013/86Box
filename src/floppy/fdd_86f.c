@@ -3213,6 +3213,8 @@ d86f_writeback(int drive)
         free(dev->filebuf);
     }
 #endif
+
+    fflush(dev->fp);
 }
 
 void
