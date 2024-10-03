@@ -21,18 +21,12 @@
 extern const device_t acc2168_device;
 
 /* ALi */
-extern const device_t ali1217_device;
 extern const device_t ali1429_device;
 extern const device_t ali1429g_device;
-extern const device_t ali1409_device;
-extern const device_t ali1435_device;
 extern const device_t ali1489_device;
-extern const device_t ali1531_device;
 extern const device_t ali1541_device;
 extern const device_t ali1543_device;
 extern const device_t ali1543c_device;
-extern const device_t ali1621_device;
-extern const device_t ali6117d_device;
 
 /* AMD */
 extern const device_t amd640_device;

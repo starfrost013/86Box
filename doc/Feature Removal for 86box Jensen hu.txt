@@ -349,5 +349,6 @@ Network Cards:
 	- DECchip "Tulip" 21143
 
 Any chipsets no longer used after machine removal
+	- ALi 12xx, 1409, 1435, 1531, 1621, 6117 CPU to PCI bridges
 
 16644,16,63
