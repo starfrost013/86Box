@@ -210,7 +210,7 @@ msgstr "도움말(&H)"
 msgid "&Documentation..."
 msgstr "문서(&D)..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "86Box에 대해(&A)..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "사용중인 머신이 재부팅됩니다."
 msgid "Save"
 msgstr "저장"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "86Box에 대해"
 
 msgid "86Box v"

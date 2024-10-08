@@ -210,7 +210,7 @@ msgstr "&Ohje"
 msgid "&Documentation..."
 msgstr "&Ohjekirja..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&Tietoja 86Boxista..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "Tämä käynnistää emuloidun tietokoneen uudelleen."
 msgid "Save"
 msgstr "Tallenna"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "Tietoja 86Box:sta"
 
 msgid "86Box v"

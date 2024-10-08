@@ -210,7 +210,7 @@ msgstr "&Pomoč"
 msgid "&Documentation..."
 msgstr "&Dokumentacija..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&O programu 86Box..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "To bo ponovno zagnalo emuliran sistem."
 msgid "Save"
 msgstr "Shrani"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "O programu 86Box"
 
 msgid "86Box v"

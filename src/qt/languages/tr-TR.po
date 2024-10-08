@@ -210,7 +210,7 @@ msgstr "&Yardım"
 msgid "&Documentation..."
 msgstr "&Dökümanlar..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&86Box Hakkında..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "Bu makineyi yeniden başlatacak."
 msgid "Save"
 msgstr "Kaydet"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "86Box Hakkında"
 
 msgid "86Box v"

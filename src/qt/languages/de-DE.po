@@ -210,7 +210,7 @@ msgstr "&Hilfe"
 msgid "&Documentation..."
 msgstr "&Dokumentation..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&Über 86Box..."
 
 msgid "&New image..."
@@ -834,7 +834,7 @@ msgstr "Dies wird zu einem Hard-Reset des emulierten Systems führen."
 msgid "Save"
 msgstr "Speichern"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "Über 86Box"
 
 msgid "86Box v"

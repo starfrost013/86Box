@@ -210,7 +210,7 @@ msgstr "&Trợ giúp"
 msgid "&Documentation..."
 msgstr "&Trợ giúp..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&Về 86Box..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "Lệnh này sẽ buộc khởi động lại máy ảo."
 msgid "Save"
 msgstr "Lưu"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "Về 86Box"
 
 msgid "86Box v"

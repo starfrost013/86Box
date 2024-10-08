@@ -25,7 +25,7 @@ void nv_log(const char *fmt, ...);
 // NV Base
 typedef struct nv_base_s
 {
-    mem_mapping_t mmio;
+    mem_mapping_t mmio; // mmio mapping (16mb ) 
     rom_t vbios;        // NVIDIA VBIOS
     svga_t svga;
     

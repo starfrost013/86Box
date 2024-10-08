@@ -210,7 +210,7 @@ msgstr "&Pomoc"
 msgid "&Documentation..."
 msgstr "&Dokumentacja..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&O 86Box..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "To spowoduje twardy reset wirtualnej maszyny."
 msgid "Save"
 msgstr "Zapisz"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "O 86Box"
 
 msgid "86Box v"

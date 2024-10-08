@@ -243,7 +243,7 @@ msgstr "&Помощь"
 msgid "&Documentation..."
 msgstr "&Документация..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&О программе 86Box..."
 
 msgid "&New image..."
@@ -924,7 +924,7 @@ msgstr "Это приведёт к холодной перезагрузке э�
 msgid "Save"
 msgstr "Сохранить"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "О 86Box"
 
 msgid "86Box v"

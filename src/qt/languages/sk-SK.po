@@ -210,7 +210,7 @@ msgstr "&Pomoc"
 msgid "&Documentation..."
 msgstr "&Dokumentácia"
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&O programu 86Box"
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "Pokračovaním sa resetuje emulovaný počítač."
 msgid "Save"
 msgstr "Uložiť"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "O programe 86Box"
 
 msgid "86Box v"

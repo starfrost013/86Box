@@ -210,7 +210,7 @@ msgstr "&Pomoć"
 msgid "&Documentation..."
 msgstr "&Dokumentacija..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&O programu 86Box..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "Ovo će napraviti hard resetiranje emuliranog sistema."
 msgid "Save"
 msgstr "Spremaj"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "O programu 86Box"
 
 msgid "86Box v"

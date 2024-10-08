@@ -27,9 +27,57 @@
 
 nv3_device_t* nv3;
 
+#define MMIO_SIZE       0x1000000
+
+// Read 8-bit MMIO
+uint8_t nv3_mmio_read8(uint32_t addr, void* priv)
+{
+
+}
+
+uint16_t nv3_mmio_read16(uint32_t addr, void* priv)
+{
+
+}
+
+uint32_t nv3_mmio_read32(uint32_t addr, void* priv)
+{
+
+}
+
+void nv3_mmio_write8(uint32_t addr, uint8_t val, void* priv)
+{
+
+}
+
+void nv3_mmio_write16(uint32_t addr, uint16_t val, void* priv)
+{
+    
+}
+
+void nv3_mmio_write32(uint32_t addr, uint32_t val, void* priv)
+{
+    
+}
+
 void nv3_init_mmio()
 {
     nv_log("NV3: Initialising 32MB MMIO area");
+
+    // 0x0 - 1000000: regs
+    // 0x1000000-2000000
+
+    // initialize the mmio mapping
+    mem_mapping_add(&nv3->nvbase.mmio, 0, MMIO_SIZE, 
+    nv3_mmio_read8,
+    nv3_mmio_read16,
+    nv3_mmio_read32,
+    nv3_mmio_write8,
+    nv3_mmio_write16,
+    nv3_mmio_write32,
+    NULL,
+    MEM_MAPPING_EXTERNAL,
+    nv3);
 }
 
 void* nv3_init(const device_t *info)

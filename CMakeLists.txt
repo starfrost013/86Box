@@ -144,11 +144,6 @@ else()
     option(QT "Qt GUI" ON)
 endif()
 
-# Development branch features
-#
-#                      Option         Description                                   Def.    Condition       Otherwise
-#                      ------         -----------                                   ----    ---------       ---------
-
 # Ditto but for Qt
 if(QT)
     option(USE_QT6 "Use Qt6 instead of Qt5" OFF)

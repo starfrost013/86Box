@@ -210,7 +210,7 @@ msgstr "ヘルプ(&H)"
 msgid "&Documentation..."
 msgstr "文書(&D)..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "86Boxのバージョン情報(&A)..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "使用中のマシンがハードリセットされます。"
 msgid "Save"
 msgstr "保存"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "86Boxのバージョン情報"
 
 msgid "86Box v"

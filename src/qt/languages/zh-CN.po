@@ -210,7 +210,7 @@ msgstr "帮助(&H)"
 msgid "&Documentation..."
 msgstr "文档(&D)..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "关于 86Box(&A)..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "此操作将硬重置模拟器。"
 msgid "Save"
 msgstr "保存"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "关于 86Box"
 
 msgid "86Box v"

@@ -692,7 +692,7 @@
   </action>
   <action name="actionAbout_86Box">
    <property name="text">
-    <string>&amp;About 86Box...</string>
+    <string>&amp;About Rivalution...</string>
    </property>
    <property name="menuRole">
     <enum>QAction::AboutRole</enum>

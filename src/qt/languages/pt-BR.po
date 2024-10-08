@@ -210,7 +210,7 @@ msgstr "&Ajuda"
 msgid "&Documentation..."
 msgstr "&Documentação..."
 
-msgid "&About 86Box..."
+msgid "&About Rivalution..."
 msgstr "&Sobre o 86Box..."
 
 msgid "&New image..."
@@ -831,7 +831,7 @@ msgstr "Isto fará com que a máquina emulada seja reinicializada."
 msgid "Save"
 msgstr "Salvar"
 
-msgid "About 86Box"
+msgid "About Rivalution"
 msgstr "Sobre o 86Box"
 
 msgid "86Box v"
