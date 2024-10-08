@@ -1412,131 +1412,6 @@ cpu_set(void)
 #endif /* USE_DYNAREC */
             break;
 
-#ifdef USE_CYRIX_6X86
-        case CPU_Cx6x86:
-        case CPU_Cx6x86L:
-        case CPU_CxGX1:
-        case CPU_Cx6x86MX:
-            if (cpu_s->cpu_type == CPU_Cx6x86MX) {
-#    ifdef USE_DYNAREC
-                if (fpu_softfloat) {
-                    x86_dynarec_opcodes_da_a16 = dynarec_ops_sf_fpu_686_da_a16;
-                    x86_dynarec_opcodes_da_a32 = dynarec_ops_sf_fpu_686_da_a32;
-                    x86_dynarec_opcodes_db_a16 = dynarec_ops_sf_fpu_686_db_a16;
-                    x86_dynarec_opcodes_db_a32 = dynarec_ops_sf_fpu_686_db_a32;
-                    x86_dynarec_opcodes_df_a16 = dynarec_ops_sf_fpu_686_df_a16;
-                    x86_dynarec_opcodes_df_a32 = dynarec_ops_sf_fpu_686_df_a32;
-                } else {
-                    x86_dynarec_opcodes_da_a16 = dynarec_ops_fpu_686_da_a16;
-                    x86_dynarec_opcodes_da_a32 = dynarec_ops_fpu_686_da_a32;
-                    x86_dynarec_opcodes_db_a16 = dynarec_ops_fpu_686_db_a16;
-                    x86_dynarec_opcodes_db_a32 = dynarec_ops_fpu_686_db_a32;
-                    x86_dynarec_opcodes_df_a16 = dynarec_ops_fpu_686_df_a16;
-                    x86_dynarec_opcodes_df_a32 = dynarec_ops_fpu_686_df_a32;
-                }
-#    endif /* USE_DYNAREC */
-                if (fpu_softfloat) {
-                    x86_opcodes_da_a16 = ops_sf_fpu_686_da_a16;
-                    x86_opcodes_da_a32 = ops_sf_fpu_686_da_a32;
-                    x86_opcodes_db_a16 = ops_sf_fpu_686_db_a16;
-                    x86_opcodes_db_a32 = ops_sf_fpu_686_db_a32;
-                    x86_opcodes_df_a16 = ops_sf_fpu_686_df_a16;
-                    x86_opcodes_df_a32 = ops_sf_fpu_686_df_a32;
-                } else {
-                    x86_opcodes_da_a16 = ops_fpu_686_da_a16;
-                    x86_opcodes_da_a32 = ops_fpu_686_da_a32;
-                    x86_opcodes_db_a16 = ops_fpu_686_db_a16;
-                    x86_opcodes_db_a32 = ops_fpu_686_db_a32;
-                    x86_opcodes_df_a16 = ops_fpu_686_df_a16;
-                    x86_opcodes_df_a32 = ops_fpu_686_df_a32;
-                }
-            }
-
-#    ifdef USE_DYNAREC
-            if (cpu_s->cpu_type == CPU_Cx6x86MX)
-                x86_setopcodes(ops_386, ops_c6x86mx_0f, dynarec_ops_386, dynarec_ops_c6x86mx_0f);
-            else if (cpu_s->cpu_type == CPU_Cx6x86L)
-                x86_setopcodes(ops_386, ops_pentium_0f, dynarec_ops_386, dynarec_ops_pentium_0f);
-            else
-                x86_setopcodes(ops_386, ops_c6x86mx_0f, dynarec_ops_386, dynarec_ops_c6x86mx_0f);
-#        if 0
-                x86_setopcodes(ops_386, ops_c6x86_0f, dynarec_ops_386, dynarec_ops_c6x86_0f);
-#        endif
-#    else
-            if (cpu_s->cpu_type == CPU_Cx6x86MX)
-                x86_setopcodes(ops_386, ops_c6x86mx_0f);
-            else if (cpu_s->cpu_type == CPU_Cx6x86L)
-                x86_setopcodes(ops_386, ops_pentium_0f);
-            else
-                x86_setopcodes(ops_386, ops_c6x86mx_0f);
-#        if 0
-                x86_setopcodes(ops_386, ops_c6x86_0f);
-#        endif
-#    endif /* USE_DYNAREC */
-
-            timing_rr  = 1; /* register dest - register src */
-            timing_rm  = 1; /* register dest - memory src */
-            timing_mr  = 2; /* memory dest   - register src */
-            timing_mm  = 2;
-            timing_rml = 1; /* register dest - memory src long */
-            timing_mrl = 2; /* memory dest   - register src long */
-            timing_mml = 2;
-            if (cpu_s->cpu_type == CPU_CxGX1) {
-                timing_bt  = 4; /* branch taken */
-                timing_bnt = 1; /* branch not taken */
-            } else {
-                timing_bt  = 0; /* branch taken */
-                timing_bnt = 2; /* branch not taken */
-            }
-
-            /* Make the CxGX1 share the timings with most other Cyrix C6x86's due to the real
-               ones still being unknown. */
-            timing_int_rm             = 9;
-            timing_int_v86            = 46;
-            timing_int_pm             = 21;
-            timing_int_pm_outer       = 32;
-            timing_iret_rm            = 7;
-            timing_iret_v86           = 26;
-            timing_iret_pm            = 10;
-            timing_iret_pm_outer      = 26;
-            timing_call_rm            = 3;
-            timing_call_pm            = 4;
-            timing_call_pm_gate       = 15;
-            timing_call_pm_gate_inner = 26;
-            timing_retf_rm            = 4;
-            timing_retf_pm            = 4;
-            timing_retf_pm_outer      = 23;
-            timing_jmp_rm             = 1;
-            timing_jmp_pm             = 4;
-            timing_jmp_pm_gate        = 14;
-
-            timing_misaligned = 2;
-
-            cpu_cyrix_alignment = 1;
-
-            cpu_features = CPU_FEATURE_RDTSC;
-            if (cpu_s->cpu_type >= CPU_CxGX1)
-                cpu_features |= CPU_FEATURE_MSR | CPU_FEATURE_CR4;
-            if (cpu_s->cpu_type == CPU_Cx6x86MX)
-                cpu_features |= CPU_FEATURE_MMX;
-            if (cpu_s->cpu_type >= CPU_CxGX1)
-                cpu_CR4_mask = CR4_TSD | CR4_DE | CR4_PCE;
-
-#    ifdef USE_DYNAREC
-            codegen_timing_set(&codegen_timing_686);
-#    endif /* USE_DYNAREC */
-
-            if ((cpu_s->cpu_type == CPU_Cx6x86L) || (cpu_s->cpu_type == CPU_Cx6x86MX))
-                ccr4 = 0x80;
-            else if (CPU_Cx6x86)
-                CPUID = 0; /* Disabled on powerup by default */
-            break;
-#endif /* USE_CYRIX_6X86 */
-
-#ifdef USE_AMD_K5
-        case CPU_K5:
-        case CPU_5K86:
-#endif /* USE_AMD_K5 */
         case CPU_K6:
         case CPU_K6_2:
         case CPU_K6_2C:
@@ -1546,27 +1421,13 @@ cpu_set(void)
 #ifdef USE_DYNAREC
             if (cpu_s->cpu_type >= CPU_K6_2)
                 x86_setopcodes(ops_386, ops_k62_0f, dynarec_ops_386, dynarec_ops_k62_0f);
-#    ifdef USE_AMD_K5
-            else if (cpu_s->cpu_type == CPU_K6)
-                x86_setopcodes(ops_386, ops_k6_0f, dynarec_ops_386, dynarec_ops_k6_0f);
-            else
-                x86_setopcodes(ops_386, ops_pentiummmx_0f, dynarec_ops_386, dynarec_ops_pentiummmx_0f);
-#    else
             else
                 x86_setopcodes(ops_386, ops_k6_0f, dynarec_ops_386, dynarec_ops_k6_0f);
-#    endif /* USE_AMD_K5 */
 #else
             if (cpu_s->cpu_type >= CPU_K6_2)
                 x86_setopcodes(ops_386, ops_k62_0f);
-#    ifdef USE_AMD_K5
-            else if (cpu_s->cpu_type == CPU_K6)
-                x86_setopcodes(ops_386, ops_k6_0f);
-            else
-                x86_setopcodes(ops_386, ops_pentiummmx_0f);
-#    else
             else
                 x86_setopcodes(ops_386, ops_k6_0f);
-#    endif /* USE_AMD_K5 */
 #endif /* USE_DYNAREC */
 
             if ((cpu_s->cpu_type == CPU_K6_2P) || (cpu_s->cpu_type == CPU_K6_3P)) {
@@ -1613,23 +1474,11 @@ cpu_set(void)
                 cpu_features |= CPU_FEATURE_3DNOW;
             if ((cpu_s->cpu_type == CPU_K6_2P) || (cpu_s->cpu_type == CPU_K6_3P))
                 cpu_features |= CPU_FEATURE_3DNOWE;
-#ifdef USE_AMD_K5
-            cpu_CR4_mask = CR4_TSD | CR4_DE | CR4_MCE;
-            if (cpu_s->cpu_type >= CPU_K6) {
-                cpu_CR4_mask |= (CR4_VME | CR4_PVI | CR4_PSE);
-                if (cpu_s->cpu_type <= CPU_K6)
-                    cpu_CR4_mask |= CR4_PCE;
-                else if (cpu_s->cpu_type >= CPU_K6_2C)
-                    cpu_CR4_mask |= CR4_PGE;
-            } else
-                cpu_CR4_mask |= CR4_PGE;
-#else
             cpu_CR4_mask = CR4_VME | CR4_PVI | CR4_TSD | CR4_DE | CR4_PSE | CR4_MCE;
             if (cpu_s->cpu_type == CPU_K6)
                 cpu_CR4_mask |= CR4_PCE;
             else if (cpu_s->cpu_type >= CPU_K6_2C)
                 cpu_CR4_mask |= CR4_PGE;
-#endif /* USE_AMD_K5 */
 
 #ifdef USE_DYNAREC
             codegen_timing_set(&codegen_timing_k6);
@@ -2065,66 +1914,7 @@ cpu_CPUID(void)
                 EAX = EBX = ECX = EDX = 0;
             break;
 
-#ifdef USE_AMD_K5
-        case CPU_K5:
-            if (!EAX) {
-                EAX = 0x00000001;
-                EBX = 0x68747541; /* AuthenticAMD */
-                EDX = 0x69746E65;
-                ECX = 0x444D4163;
-            } else if (EAX == 1) {
-                EAX = CPUID;
-                EBX = ECX = 0;
-                EDX       = CPUID_FPU | CPUID_DE | CPUID_TSC | CPUID_MSR | CPUID_MCE | CPUID_CMPXCHG8B | CPUID_AMDPGE;
-            } else
-                EAX = EBX = ECX = EDX = 0;
-            break;
-
-        case CPU_5K86:
-            switch (EAX) {
-                case 0:
-                    EAX = 0x00000001;
-                    EBX = 0x68747541; /* AuthenticAMD */
-                    EDX = 0x69746E65;
-                    ECX = 0x444D4163;
-                    break;
-                case 1:
-                    EAX = CPUID;
-                    EBX = ECX = 0;
-                    EDX       = CPUID_FPU | CPUID_DE | CPUID_TSC | CPUID_MSR | CPUID_MCE | CPUID_CMPXCHG8B | CPUID_PGE;
-                    break;
-                case 0x80000000:
-                    EAX = 0x80000005;
-                    EBX = ECX = EDX = 0;
-                    break;
-                case 0x80000001:
-                    EAX = CPUID;
-                    EBX = ECX = 0;
-                    EDX       = CPUID_FPU | CPUID_DE | CPUID_TSC | CPUID_MSR | CPUID_MCE | CPUID_CMPXCHG8B | CPUID_PGE;
-                    break;
-                case 0x80000002:      /* Processor name string */
-                    EAX = 0x2D444D41; /* AMD-K5(tm) Proce */
-                    EBX = 0x7428354B;
-                    ECX = 0x5020296D;
-                    EDX = 0x65636F72;
-                    break;
-                case 0x80000003:      /* Processor name string */
-                    EAX = 0x726F7373; /* ssor */
-                    EBX = ECX = EDX = 0;
-                    break;
-                case 0x80000005:      /* Cache information */
-                    EAX = 0;
-                    EBX = 0x04800000; /* TLBs */
-                    ECX = 0x08040120; /* L1 data cache */
-                    EDX = 0x10040120; /* L1 instruction cache */
-                    break;
-                default:
-                    EAX = EBX = ECX = EDX = 0;
-                    break;
-            }
-            break;
-#endif /* USE_AMD_K5 */
-
+        // amd k6
         case CPU_K6:
             switch (EAX) {
                 case 0:
@@ -2354,64 +2144,6 @@ cpu_CPUID(void)
                 EAX = EBX = ECX = EDX = 0;
             break;
 
-#ifdef USE_CYRIX_6X86
-        case CPU_Cx6x86:
-            if (!EAX) {
-                EAX = 0x00000001;
-                EBX = 0x69727943; /* CyrixInstead */
-                EDX = 0x736e4978;
-                ECX = 0x64616574;
-            } else if (EAX == 1) {
-                EAX = CPUID;
-                EBX = ECX = 0;
-                EDX       = CPUID_FPU;
-            } else
-                EAX = EBX = ECX = EDX = 0;
-            break;
-
-        case CPU_Cx6x86L:
-            if (!EAX) {
-                EAX = 0x00000001;
-                EBX = 0x69727943; /* CyrixInstead */
-                EDX = 0x736e4978;
-                ECX = 0x64616574;
-            } else if (EAX == 1) {
-                EAX = CPUID;
-                EBX = ECX = 0;
-                EDX       = CPUID_FPU | CPUID_CMPXCHG8B;
-            } else
-                EAX = EBX = ECX = EDX = 0;
-            break;
-
-        case CPU_CxGX1:
-            if (!EAX) {
-                EAX = 0x00000001;
-                EBX = 0x69727943; /* CyrixInstead */
-                EDX = 0x736e4978;
-                ECX = 0x64616574;
-            } else if (EAX == 1) {
-                EAX = CPUID;
-                EBX = ECX = 0;
-                EDX       = CPUID_FPU | CPUID_DE | CPUID_TSC | CPUID_MSR | CPUID_CMPXCHG8B;
-            } else
-                EAX = EBX = ECX = EDX = 0;
-            break;
-
-        case CPU_Cx6x86MX:
-            if (!EAX) {
-                EAX = 0x00000001;
-                EBX = 0x69727943; /* CyrixInstead */
-                EDX = 0x736e4978;
-                ECX = 0x64616574;
-            } else if (EAX == 1) {
-                EAX = CPUID;
-                EBX = ECX = 0;
-                EDX       = CPUID_FPU | CPUID_DE | CPUID_TSC | CPUID_MSR | CPUID_CMPXCHG8B | CPUID_CMOV | CPUID_MMX;
-            } else
-                EAX = EBX = ECX = EDX = 0;
-            break;
-#endif /* USE_CYRIX_6X86 */
-
         case CPU_PENTIUMPRO:
             if (!EAX) {
                 EAX = 0x00000002;
@@ -2565,10 +2297,7 @@ cpu_ven_reset(void)
             msr.amd_psor = (cpu_s->cpu_type >= CPU_K6_3) ? 0x008cULL : 0x018cULL;
             fallthrough;
         case CPU_K6_2:
-#ifdef USE_AMD_K5
-        case CPU_K5:
-        case CPU_5K86:
-#endif /* USE_AMD_K5 */
+
         case CPU_K6:
             msr.amd_efer = (cpu_s->cpu_type >= CPU_K6_2C) ? 2ULL : 0ULL;
             break;
@@ -2789,10 +2518,6 @@ cpu_RDMSR(void)
             }
             break;
 
-#ifdef USE_AMD_K5
-        case CPU_K5:
-        case CPU_5K86:
-#endif /* USE_AMD_K5 */
         case CPU_K6:
         case CPU_K6_2:
         case CPU_K6_2C:
@@ -3074,48 +2799,6 @@ pentium_invalid_rdmsr:
             }
             cpu_log("RDMSR: ECX = %08X, val = %08X%08X\n", ECX, EDX, EAX);
             break;
-
-#ifdef USE_CYRIX_6X86
-        case CPU_Cx6x86:
-        case CPU_Cx6x86L:
-        case CPU_CxGX1:
-        case CPU_Cx6x86MX:
-            switch (ECX) {
-                /* Test Data */
-                case 0x03:
-                    EAX = msr.tr3;
-                    break;
-                /* Test Address */
-                case 0x04:
-                    EAX = msr.tr4;
-                    break;
-                /* Test Command/Status */
-                case 0x05:
-                    EAX = msr.tr5;
-                    break;
-                /* Time Stamp Counter */
-                case 0x10:
-                    EAX = tsc & 0xffffffff;
-                    EDX = tsc >> 32;
-                    break;
-                /* Performance Monitor - Control and Event Select */
-                case 0x11:
-                    EAX = msr.cesr;
-                    break;
-                /* Performance Monitor - Event Counter 0 */
-                case 0x12:
-                    EAX = msr.pmc[0] & 0xffffffff;
-                    EDX = msr.pmc[0] >> 32;
-                    break;
-                /* Performance Monitor - Event Counter 1 */
-                case 0x13:
-                    EAX = msr.pmc[1] & 0xffffffff;
-                    EDX = msr.pmc[1] >> 32;
-                    break;
-            }
-            cpu_log("RDMSR: ECX = %08X, val = %08X%08X\n", ECX, EDX, EAX);
-            break;
-#endif /* USE_CYRIX_6X86 */
 
         case CPU_PENTIUMPRO:
         case CPU_PENTIUM2:
@@ -3629,10 +3312,6 @@ cpu_WRMSR(void)
             }
             break;
 
-#ifdef USE_AMD_K5
-        case CPU_K5:
-        case CPU_5K86:
-#endif /* USE_AMD_K5 */
         case CPU_K6:
         case CPU_K6_2:
         case CPU_K6_2C:
@@ -3892,42 +3571,6 @@ pentium_invalid_wrmsr:
                     break;
             }
             break;
-
-#ifdef USE_CYRIX_6X86
-        case CPU_Cx6x86:
-        case CPU_Cx6x86L:
-        case CPU_CxGX1:
-        case CPU_Cx6x86MX:
-            cpu_log("WRMSR: ECX = %08X, val = %08X%08X\n", ECX, EDX, EAX);
-            switch (ECX) {
-                /* Test Data */
-                case 0x03:
-                    msr.tr3 = EAX;
-                /* Test Address */
-                case 0x04:
-                    msr.tr4 = EAX;
-                /* Test Command/Status */
-                case 0x05:
-                    msr.tr5 = EAX & 0x008f0f3b;
-                /* Time Stamp Counter */
-                case 0x10:
-                    timer_set_new_tsc(EAX | ((uint64_t) EDX << 32));
-                    break;
-                /* Performance Monitor - Control and Event Select */
-                case 0x11:
-                    msr.cesr = EAX & 0x7ff07ff;
-                    break;
-                /* Performance Monitor - Event Counter 0 */
-                case 0x12:
-                    msr.pmc[0] = EAX | ((uint64_t) EDX << 32);
-                    break;
-                /* Performance Monitor - Event Counter 1 */
-                case 0x13:
-                    msr.pmc[1] = EAX | ((uint64_t) EDX << 32);
-                    break;
-            }
-            break;
-#endif /* USE_CYRIX_6X86 */
 
         case CPU_PENTIUMPRO:
         case CPU_PENTIUM2:
@@ -4237,14 +3880,6 @@ cpu_write(uint16_t addr, uint8_t val, UNUSED(void *priv))
             case 0xe8: /* CCR4 */
                 if ((ccr3 & 0xf0) == 0x10) {
                     ccr4 = val;
-#ifdef USE_CYRIX_6X86
-                    if (cpu_s->cpu_type >= CPU_Cx6x86) {
-                        if (val & 0x80)
-                            CPUID = cpu_s->cpuid_model;
-                        else
-                            CPUID = 0;
-                    }
-#endif /* USE_CYRIX_6X86 */
                 }
                 break;
             case 0xe9: /* CCR5 */

@@ -97,10 +97,8 @@
 #define ISAMEM_A6PAK_CARD      8
 #define ISAMEM_EMS5150_CARD    9
 #define ISAMEM_EV159_CARD      10
-#define ISAMEM_RAMPAGEXT_CARD  11
 #define ISAMEM_ABOVEBOARD_CARD 12
 #define ISAMEM_BRXT_CARD       13
-#define ISAMEM_BRAT_CARD       14
 #define ISAMEM_EV165A_CARD     15
 #define ISAMEM_LOTECH_CARD     16
 
@@ -556,17 +554,7 @@ isamem_init(const device_t *info)
             dev->frame_addr[0] = 0xe0000;
             break;
 
-        case ISAMEM_RAMPAGEXT_CARD:  /* AST RAMpage/XT */
-            dev->base_addr[0]  = device_get_config_hex16("base");
-            dev->total_size    = device_get_config_int("size");
-            dev->start_addr    = device_get_config_int("start");
-            tot                = dev->total_size;
-            dev->flags        |= FLAG_EMS;
-            dev->frame_addr[0] = 0xe0000;
-            break;
-
         case ISAMEM_ABOVEBOARD_CARD: /* Intel AboveBoard */
-        case ISAMEM_BRAT_CARD:       /* BocaRAM/AT */
             dev->base_addr[0]   = device_get_config_hex16("base");
             dev->total_size     = device_get_config_int("size");
             if (!!device_get_config_int("start"))
@@ -1699,113 +1687,6 @@ static const device_t brxt_device = {
     .config        = brxt_config
 };
 
-#ifdef USE_ISAMEM_BRAT
-static const device_config_t brat_config[] = {
-  // clang-format off
-    {
-        .name = "base",
-        .description = "Address",
-        .type = CONFIG_HEX16,
-        .default_string = "",
-        .default_int = 0x0268,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "208H", .value = 0x0208 },
-            { .description = "218H", .value = 0x0218 },
-            { .description = "258H", .value = 0x0258 },
-            { .description = "268H", .value = 0x0268 },
-            { .description = ""                      }
-        },
-    },
-    {
-        .name = "frame",
-        .description = "Frame Address",
-        .type = CONFIG_HEX20,
-        .default_string = "",
-        .default_int = 0xD0000,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "D000H",    .value = 0xD0000 },
-            { .description = "E000H",    .value = 0xE0000 },
-            { .description = ""                           }
-        },
-    },
-    {
-        .name = "width",
-        .description = "I/O Width",
-        .type = CONFIG_SELECTION,
-        .default_string = "",
-        .default_int = 8,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "8-bit",  .value =  8 },
-            { .description = "16-bit", .value = 16 },
-            { .description = ""                    }
-        },
-    },
-    {
-        .name = "speed",
-        .description = "Transfer Speed",
-        .type = CONFIG_SELECTION,
-        .default_string = "",
-        .default_int = 0,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "Standard",   .value = 0 },
-            { .description = "High-Speed", .value = 1 },
-            { .description = ""                       }
-        }
-    },
-    {
-        .name = "size",
-        .description = "Memory Size",
-        .type = CONFIG_SPINNER,
-        .default_string = "",
-        .default_int = 512,
-        .file_filter = "",
-        .spinner = {
-            .min = 0,
-            .max = 4096,
-            .step = 512
-        },
-        .selection = { { 0 } }
-    },
-    {
-        .name = "start",
-        .description = "Start Address",
-        .type = CONFIG_SPINNER,
-        .default_string = "",
-        .default_int = 0,
-        .file_filter = "",
-        .spinner = {
-            .min = 0,
-            .max = 14336,
-            .step = 512
-        },
-    },
-    { .name = "", .description = "", .type = CONFIG_END }
-  // clang-format on
-};
-
-static const device_t brat_device = {
-    .name          = "BocaRAM/AT",
-    .internal_name = "brat",
-    .flags         = DEVICE_ISA,
-    .local         = ISAMEM_BRAT_CARD,
-    .init          = isamem_init,
-    .close         = isamem_close,
-    .reset         = NULL,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = brat_config
-};
-#endif /* USE_ISAMEM_BRAT */
-
 static const device_config_t lotech_config[] = {
 // clang-format off
     {
@@ -1871,175 +1752,6 @@ static const device_t lotech_device = {
     .config = lotech_config
 };
 
-#ifdef USE_ISAMEM_RAMPAGE
-// TODO: Dual Paging support
-// TODO: Conventional memory suppport
-static const device_config_t rampage_config[] = {
-  // clang-format off
-    {
-        .name = "base",
-        .description = "Address",
-        .type = CONFIG_HEX16,
-        .default_string = "",
-        .default_int = 0x0218,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "208H", .value = 0x0208 },
-            { .description = "218H", .value = 0x0218 },
-            { .description = "258H", .value = 0x0258 },
-            { .description = "268H", .value = 0x0268 },
-            { .description = "2A8H", .value = 0x02A8 },
-            { .description = "2B8H", .value = 0x02B8 },
-            { .description = "2E8H", .value = 0x02E8 },
-            { .description = ""                      }
-        },
-    },
-    {
-        .name = "size",
-        .description = "Memory Size",
-        .type = CONFIG_SPINNER,
-        .default_string = "",
-        .default_int = 256, /* Technically 128k, but banks 2-7 must be 256, headaches elsewise */
-        .file_filter = "",
-        .spinner = {
-            .min = 256,
-            .max = 2048,
-            .step = 256
-        },
-        .selection = { { 0 } }
-    },
-    {
-        .name = "start",
-        .description = "Start Address",
-        .type = CONFIG_SPINNER,
-        .default_string = "",
-        .default_int = 640,
-        .file_filter = "",
-        .spinner = {
-            .min = 0,
-            .max = 640,
-            .step = 64
-        },
-    },
-    { .name = "", .description = "", .type = CONFIG_END }
-  // clang-format on
-};
-
-static const device_t rampage_device = {
-    .name          = "AST RAMpage/XT",
-    .internal_name = "rampage",
-    .flags         = DEVICE_ISA,
-    .local         = ISAMEM_RAMPAGEXT_CARD,
-    .init          = isamem_init,
-    .close         = isamem_close,
-    .reset         = NULL,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = rampage_config
-};
-#endif /* USE_ISAMEM_RAMPAGE */
-
-#ifdef USE_ISAMEM_IAB
-static const device_config_t iab_config[] = {
-  // clang-format off
-    {
-        .name = "base",
-        .description = "Address",
-        .type = CONFIG_HEX16,
-        .default_string = "",
-        .default_int = 0x0258,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "208H", .value = 0x0208 },
-            { .description = "218H", .value = 0x0218 },
-            { .description = "258H", .value = 0x0258 },
-            { .description = "268H", .value = 0x0268 },
-            { .description = "2A8H", .value = 0x02A8 },
-            { .description = "2B8H", .value = 0x02B8 },
-            { .description = "2E8H", .value = 0x02E8 },
-            { .description = ""                      }
-        },
-    },
-    {
-        .name = "frame",
-        .description = "Frame Address",
-        .type = CONFIG_HEX20,
-        .default_string = "",
-        .default_int = 0,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "Disabled", .value = 0x00000 },
-            { .description = "C000H",    .value = 0xC0000 },
-            { .description = "D000H",    .value = 0xD0000 },
-            { .description = "E000H",    .value = 0xE0000 },
-            { .description = ""                           }
-        },
-    },
-    {
-        .name = "width",
-        .description = "I/O Width",
-        .type = CONFIG_SELECTION,
-        .default_string = "",
-        .default_int = 8,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "8-bit",  .value =  8 },
-            { .description = "16-bit", .value = 16 },
-            { .description = ""                    }
-        },
-    },
-    {
-        .name = "speed",
-        .description = "Transfer Speed",
-        .type = CONFIG_SELECTION,
-        .default_string = "",
-        .default_int = 0,
-        .file_filter = "",
-        .spinner = { 0 },
-        .selection = {
-            { .description = "Standard",   .value = 0 },
-            { .description = "High-Speed", .value = 1 },
-            { .description = ""                       }
-        }
-    },
-    {
-        .name = "size",
-        .description = "Memory Size",
-        .type = CONFIG_SPINNER,
-        .default_string = "",
-        .default_int = 128,
-        .file_filter = "",
-        .spinner = {
-            .min = 0,
-            .max = 8192,
-            .step = 128
-        },
-        .selection = { { 0 } }
-    },
-    { .name = "", .description = "", .type = CONFIG_END }
-  // clang-format on
-};
-
-static const device_t iab_device = {
-    .name          = "Intel AboveBoard",
-    .internal_name = "iab",
-    .flags         = DEVICE_ISA,
-    .local         = ISAMEM_ABOVEBOARD_CARD,
-    .init          = isamem_init,
-    .close         = isamem_close,
-    .reset         = NULL,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = iab_config
-};
-#endif /* USE_ISAMEM_IAB */
-
 static const struct {
     const device_t *dev;
 } boards[] = {
@@ -2063,15 +1775,6 @@ static const struct {
     { &ev159_device        },
     { &ev165a_device       },
     { &brxt_device         },
-#ifdef USE_ISAMEM_BRAT
-    { &brat_device         },
-#endif /* USE_ISAMEM_BRAT */
-#ifdef USE_ISAMEM_RAMPAGE
-    { &rampage_device      },
-#endif /* USE_ISAMEM_RAMPAGE */
-#ifdef USE_ISAMEM_IAB
-    { &iab_device          },
-#endif /* USE_ISAMEM_IAB */
     { &lotech_device       },
     { NULL                 }
     // clang-format on

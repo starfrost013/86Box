@@ -28,7 +28,6 @@
 #include <86box/cdrom.h>
 #include <86box/cdrom_image.h>
 #include <86box/cdrom_interface.h>
-#include <86box/cdrom_mitsumi.h>
 #include <86box/plat.h>
 #include <86box/scsi.h>
 #include <86box/scsi_device.h>
@@ -1361,36 +1360,6 @@ cdrom_get_q(cdrom_t *dev, uint8_t *buf, int *curtoctrk, uint8_t mode)
             *curtoctrk = *curtoctrk + 1;
     } else
         memset(buf, 0x00, 10);
-}
-
-uint8_t
-cdrom_mitsumi_audio_play(cdrom_t *dev, uint32_t pos, uint32_t len)
-{
-    track_info_t ti;
-
-    if (dev->cd_status == CD_STATUS_DATA_ONLY)
-        return 0;
-
-    cdrom_log("CD-ROM 0: Play Mitsumi audio - %08X %08X\n", pos, len);
-    dev->ops->get_track_info(dev, pos, 0, &ti);
-    pos = MSFtoLBA(ti.m, ti.s, ti.f) - 150;
-    dev->ops->get_track_info(dev, len, 1, &ti);
-    len = MSFtoLBA(ti.m, ti.s, ti.f) - 150;
-
-    /* Do this at this point, since it's at this point that we know the
-       actual LBA position to start playing from. */
-    if (!(dev->ops->track_type(dev, pos) & CD_TRACK_AUDIO)) {
-        cdrom_log("CD-ROM %i: LBA %08X not on an audio track\n", dev->id, pos);
-        cdrom_stop(dev);
-        return 0;
-    }
-
-    dev->seek_pos  = pos;
-    dev->cd_end    = len;
-    dev->cd_status = CD_STATUS_PLAYING;
-    dev->cd_buflen = 0;
-
-    return 1;
 }
 
 uint8_t

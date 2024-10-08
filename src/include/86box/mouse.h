@@ -36,8 +36,6 @@
 #define MOUSE_TYPE_LOGITECH  9  /* Logitech 2-button Serial Mouse */
 #define MOUSE_TYPE_LT3BUTTON 10 /* Logitech 3-button Serial Mouse */
 #define MOUSE_TYPE_PS2       11 /* PS/2 series Bus Mouse */
-#define MOUSE_TYPE_WACOM     12 /* WACOM tablet */
-#define MOUSE_TYPE_WACOMARTP 13 /* WACOM tablet (ArtPad) */
 
 #define MOUSE_TYPE_ONBOARD   0x80 /* Mouse is an on-board version of one of the above. */
 
@@ -68,10 +66,6 @@ extern const device_t mouse_mssystems_device;
 extern const device_t mouse_msserial_device;
 extern const device_t mouse_ltserial_device;
 extern const device_t mouse_ps2_device;
-#    ifdef USE_WACOM
-extern const device_t mouse_wacom_device;
-extern const device_t mouse_wacom_artpad_device;
-#    endif
 extern const device_t mouse_mtouch_device;
 #endif
 

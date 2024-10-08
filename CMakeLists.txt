@@ -135,7 +135,6 @@ option(CPPTHREADS   "C++11 threads"                                             
 option(NEW_DYNAREC  "Use the PCem v15 (\"new\") dynamic recompiler"                 ON)
 option(MINITRACE    "Enable Chrome tracing using the modified minitrace library"    OFF)
 option(GDBSTUB      "Enable GDB stub server for debugging"                          OFF)
-option(DEV_BRANCH   "Development branch"                                            OFF)
 option(DISCORD      "Discord Rich Presence support"                                 ON)
 option(DEBUGREGS486 "Enable debug register opeartion on 486+ CPUs"                  OFF)
 
@@ -149,22 +148,6 @@ endif()
 #
 #                      Option         Description                                   Def.    Condition       Otherwise
 #                      ------         -----------                                   ----    ---------       ---------
-cmake_dependent_option(AMD_K5         "AMD K5"                                      ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(AN430TX        "Intel AN430TX"                               ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(CDROM_MITSUMI  "Mitsumi CDROM"                               ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(CYRIX_6X86     "Cyrix 6x86"                                  ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(G100           "Matrox Productiva G100"                      ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(GUSMAX         "Gravis UltraSound MAX"                       ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(ISAMEM_RAMPAGE "AST Rampage"                                 ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(ISAMEM_IAB     "Intel Above Board"                           ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(ISAMEM_BRAT    "BocaRAM/AT"                                  ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(LASERXT        "VTech Laser XT"                              ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(OLIVETTI       "Olivetti M290"                               ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(OPL4ML         "OPL4-ML daughterboard"                       ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(PCL            "Generic PCL5e Printer"                       ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(SIO_DETECT     "Super I/O Detection Helper"                  ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(WACOM          "Wacom Input Devices"                         ON      "DEV_BRANCH"    OFF)
-cmake_dependent_option(XL24           "ATI VGA Wonder XL24 (ATI-28800-6)"           ON      "DEV_BRANCH"    OFF)
 
 # Ditto but for Qt
 if(QT)

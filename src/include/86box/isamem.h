@@ -54,7 +54,6 @@ extern "C" {
 
 /* Global variables. */
 extern const device_t isamem_device;
-extern const device_t isamem_brat80_device;
 extern const device_t isamem_ev159_device;
 
 /* Functions. */

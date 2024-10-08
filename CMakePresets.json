@@ -11,7 +11,6 @@
             "cacheVariables": {
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/artifacts",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": true,
-                "DEV_BRANCH": "OFF",
                 "NEW_DYNAREC": "ON",
                 "QT": "ON"
             },
@@ -40,22 +39,6 @@
             },
             "inherits": "base"
             
-        },
-        {
-            "name": "development",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "DEV_BRANCH": "ON"
-            },
-            "inherits": "base"
-        },
-        {
-            "name": "dev_debug",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "DEV_BRANCH": "ON"
-            },
-            "inherits": "base"
         },
         {
             "name": "llvm-macos-aarch64.cmake",

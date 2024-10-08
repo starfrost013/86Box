@@ -289,7 +289,6 @@ extern int     cdrom_read_toc(cdrom_t *dev, unsigned char *b, int type,
 extern int     cdrom_read_toc_sony(cdrom_t *dev, unsigned char *b, unsigned char start_track, int msf, int max_len);
 extern void    cdrom_get_track_buffer(cdrom_t *dev, uint8_t *buf);
 extern void    cdrom_get_q(cdrom_t *dev, uint8_t *buf, int *curtoctrk, uint8_t mode);
-extern uint8_t cdrom_mitsumi_audio_play(cdrom_t *dev, uint32_t pos, uint32_t len);
 extern int     cdrom_readsector_raw(cdrom_t *dev, uint8_t *buffer, int sector, int ismsf,
                                     int cdrom_sector_type, int cdrom_sector_flags, int *len, uint8_t vendor_type);
 extern uint8_t cdrom_read_disc_info_toc(cdrom_t *dev, unsigned char *b, unsigned char track, int type);

@@ -926,13 +926,6 @@ kbd_read(uint16_t port, void *priv)
                 if (kbd->pb & 0x08) /* PB3 */
                     ret = kbd->pd >> 4;
                 else {
-                    /* LaserXT = Always 512k RAM;
-                       LaserXT/3 = Bit 0: set = 512k, clear = 256k. */
-#ifdef USE_LASERXT
-                    if (kbd->type == KBD_TYPE_VTECH)
-                        ret = ((mem_size == 512) ? 0x0d : 0x0c) | (hasfpu ? 0x02 : 0x00);
-                    else
-#endif /* USE_LASERXT */
                         ret = (kbd->pd & 0x0d) | (hasfpu ? 0x02 : 0x00);
                 }
             }
@@ -1291,22 +1284,6 @@ const device_t keyboard_xt_t1x00_device = {
     .force_redraw  = NULL,
     .config        = NULL
 };
-
-#ifdef USE_LASERXT
-const device_t keyboard_xt_lxt3_device = {
-    .name          = "VTech Laser XT3 Keyboard",
-    .internal_name = "keyboard_xt_lxt3",
-    .flags         = 0,
-    .local         = KBD_TYPE_VTECH,
-    .init          = kbd_init,
-    .close         = kbd_close,
-    .reset         = kbd_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-#endif /* USE_LASERXT */
 
 const device_t keyboard_xt_olivetti_device = {
     .name          = "Olivetti XT Keyboard",

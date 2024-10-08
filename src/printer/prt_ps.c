@@ -411,57 +411,6 @@ ps_init(void *lpt)
     return dev;
 }
 
-#ifdef USE_PCL
-static void *
-pcl_init(void *lpt)
-{
-    ps_t            *dev;
-    gsapi_revision_t rev;
-
-    dev = (ps_t *) malloc(sizeof(ps_t));
-    memset(dev, 0x00, sizeof(ps_t));
-    dev->ctrl = 0x04;
-    dev->lpt  = lpt;
-    dev->pcl  = true;
-
-    /* Try loading the DLL. */
-    ghostscript_handle = dynld_module(PATH_GHOSTPCL_DLL, ghostscript_imports);
-#ifdef PATH_GHOSTPCL_DLL_ALT1
-    if (ghostscript_handle == NULL) {
-        ghostscript_handle = dynld_module(PATH_GHOSTPCL_DLL_ALT1, ghostscript_imports);
-#    ifdef PATH_GHOSTPCL_DLL_ALT2
-        if (ghostscript_handle == NULL)
-            ghostscript_handle = dynld_module(PATH_GHOSTPCL_DLL_ALT2, ghostscript_imports);
-#    endif
-    }
-#endif
-    if (ghostscript_handle == NULL) {
-        ui_msgbox_header(MBX_ERROR, plat_get_string(STRING_GHOSTPCL_ERROR_TITLE), plat_get_string(STRING_GHOSTPCL_ERROR_DESC));
-    } else {
-        if (gsapi_revision(&rev, sizeof(rev)) == 0) {
-            pclog("Loaded %s, rev %ld (%ld)\n", rev.product, rev.revision, rev.revisiondate);
-        } else {
-            dynld_close(ghostscript_handle);
-            ghostscript_handle = NULL;
-        }
-    }
-
-    /* Cache print folder path. */
-    memset(dev->printer_path, 0x00, sizeof(dev->printer_path));
-    path_append_filename(dev->printer_path, usr_path, "printer");
-    if (!plat_dir_check(dev->printer_path))
-        plat_dir_create(dev->printer_path);
-    path_slash(dev->printer_path);
-
-    timer_add(&dev->pulse_timer, pulse_timer, dev, 0);
-    timer_add(&dev->timeout_timer, timeout_timer, dev, 0);
-
-    reset_ps(dev);
-
-    return dev;
-}
-#endif
-
 static void
 ps_close(void *priv)
 {
@@ -493,16 +442,3 @@ const lpt_device_t lpt_prt_ps_device = {
     .read_ctrl     = NULL
 };
 
-#ifdef USE_PCL
-const lpt_device_t lpt_prt_pcl_device = {
-    .name          = "Generic PCL5e Printer",
-    .internal_name = "pcl",
-    .init          = pcl_init,
-    .close         = ps_close,
-    .write_data    = ps_write_data,
-    .write_ctrl    = ps_write_ctrl,
-    .read_data     = NULL,
-    .read_status   = ps_read_status,
-    .read_ctrl     = NULL
-};
-#endif

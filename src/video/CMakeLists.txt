@@ -29,10 +29,6 @@ add_library(vid OBJECT agpgart.c video.c vid_table.c vid_cga.c vid_cga_comp.c
     vid_tvp3026_ramdac.c vid_att2xc498_ramdac.c vid_xga.c
     vid_bochs_vbe.c nv/nv_base.c nv/nv3/nv3_device.c)
 
-if(XL24)
-    target_compile_definitions(vid PRIVATE USE_XL24)
-endif()
-
 add_library(voodoo OBJECT vid_voodoo.c vid_voodoo_banshee.c
     vid_voodoo_banshee_blitter.c vid_voodoo_blitter.c vid_voodoo_display.c
     vid_voodoo_fb.c vid_voodoo_fifo.c vid_voodoo_reg.c vid_voodoo_render.c

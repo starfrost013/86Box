@@ -94,10 +94,6 @@ static mouse_t mouse_devices[] = {
     { &mouse_msserial_device     },
     { &mouse_ltserial_device     },
     { &mouse_ps2_device          },
-#ifdef USE_WACOM
-    { &mouse_wacom_device        },
-    { &mouse_wacom_artpad_device },
-#endif
     { &mouse_mtouch_device       },
     { NULL                       }
     // clang-format on

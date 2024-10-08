@@ -29,28 +29,3 @@ add_library(dev OBJECT bugger.c cassette.c cartridge.c hasp.c hwm.c hwm_lm75.c h
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_link_libraries(86Box atomic)
 endif()
-
-if(ISAMEM_RAMPAGE)
-    target_compile_definitions(dev PRIVATE USE_ISAMEM_RAMPAGE)
-endif()
-
-if(ISAMEM_IAB)
-    target_compile_definitions(dev PRIVATE USE_ISAMEM_IAB)
-endif()
-
-if(ISAMEM_BRAT)
-    target_compile_definitions(dev PRIVATE USE_ISAMEM_BRAT)
-endif()
-
-if(LASERXT)
-    target_compile_definitions(dev PRIVATE USE_LASERXT)
-endif()
-
-if(PCL)
-    target_compile_definitions(dev PRIVATE USE_PCL)
-endif()
-
-if(WACOM)
-    target_compile_definitions(dev PRIVATE USE_WACOM)
-    target_sources(dev PRIVATE mouse_wacom_tablet.c)
-endif()

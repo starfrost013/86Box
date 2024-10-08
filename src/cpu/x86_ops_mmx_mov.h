@@ -110,68 +110,6 @@ opMOVD_mm_l_a32(uint32_t fetchdat)
     return 0;
 }
 
-#ifdef USE_CYRIX_6X86
-/*Cyrix maps both MOVD and SMINT to the same opcode*/
-static int
-opMOVD_mm_l_a16_cx(uint32_t fetchdat)
-{
-    const MMX_REG *op;
-
-    if (in_smm)
-        return opSMINT(fetchdat);
-
-    MMX_ENTER();
-
-    fetch_ea_16(fetchdat);
-
-    op = MMX_GETREGP(cpu_reg);
-
-    if (cpu_mod == 3) {
-        cpu_state.regs[cpu_rm].l = op->l[0];
-        CLOCK_CYCLES(1);
-    } else {
-        SEG_CHECK_WRITE(cpu_state.ea_seg);
-        CHECK_WRITE_COMMON(cpu_state.ea_seg, cpu_state.eaaddr, cpu_state.eaaddr + 3);
-        writememl(easeg, cpu_state.eaaddr, op->l[0]);
-        if (cpu_state.abrt)
-            return 1;
-
-        CLOCK_CYCLES(2);
-    }
-
-    return 0;
-}
-static int
-opMOVD_mm_l_a32_cx(uint32_t fetchdat)
-{
-    const MMX_REG *op;
-
-    if (in_smm)
-        return opSMINT(fetchdat);
-
-    MMX_ENTER();
-
-    fetch_ea_32(fetchdat);
-
-    op = MMX_GETREGP(cpu_reg);
-
-    if (cpu_mod == 3) {
-        cpu_state.regs[cpu_rm].l = op->l[0];
-        CLOCK_CYCLES(1);
-    } else {
-        SEG_CHECK_WRITE(cpu_state.ea_seg);
-        CHECK_WRITE_COMMON(cpu_state.ea_seg, cpu_state.eaaddr, cpu_state.eaaddr + 3);
-        writememl(easeg, cpu_state.eaaddr, op->l[0]);
-        if (cpu_state.abrt)
-            return 1;
-
-        CLOCK_CYCLES(2);
-    }
-
-    return 0;
-}
-#endif /* USE_CYRIX_6X86 */
-
 static int
 opMOVQ_q_mm_a16(uint32_t fetchdat)
 {

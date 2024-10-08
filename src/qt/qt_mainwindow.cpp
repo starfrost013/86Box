@@ -205,11 +205,8 @@ MainWindow::MainWindow(QWidget *parent)
         ui->actionMCA_devices->setVisible(machine_has_bus(machine, MACHINE_BUS_MCA));
         while (QApplication::overrideCursor())
             QApplication::restoreOverrideCursor();
-#ifdef USE_WACOM
-        ui->menuTablet_tool->menuAction()->setVisible(mouse_input_mode >= 1);
-#else
+
         ui->menuTablet_tool->menuAction()->setVisible(false);
-#endif
     });
 
     connect(this, &MainWindow::showMessageForNonQtThread, this, &MainWindow::showMessage_, Qt::QueuedConnection);

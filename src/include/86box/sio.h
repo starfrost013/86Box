@@ -75,9 +75,6 @@ extern const device_t prime3b_ide_device;
 extern const device_t prime3c_device;
 extern const device_t prime3c_ide_device;
 extern const device_t ps1_m2133_sio;
-#ifdef USE_SIO_DETECT
-extern const device_t sio_detect_device;
-#endif /* USE_SIO_DETECT */
 extern const device_t um8663af_device;
 extern const device_t um8663af_ide_device;
 extern const device_t um8663af_sec_device;
