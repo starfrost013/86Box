@@ -16,12 +16,28 @@
  */
 #ifdef EMU_DEVICE_H // what
 
+#include <86box/timer.h>
+#include <86box/vid_svga.h>
+#include <86box/vid_svga_render.h>
+
+void nv_log(const char *fmt, ...);
+
 // NV Base
 typedef struct nv_base_s
 {
+    mem_mapping_t mmio;
     rom_t vbios;        // NVIDIA VBIOS
+    svga_t svga;
+    
 } nv_base_t;
 
+// Master Control
+typedef struct nv3_device_pmc_s
+{
+    int32_t pmc_enable;
+} nv3_device_pmc_t;
+
+// add enums for eac
 // Chip configuration
 typedef struct nv3_device_straps_s
 {

@@ -16,3 +16,28 @@
  */
 
 // Common NV1/3/4... init
+
+#include <86box/nv/vid_nv.h>
+
+// Common logging
+#ifdef ENABLE_NV_LOG
+int nv_log = ENABLE_NV_LOG;
+
+ void
+nv_log(const char *fmt, ...)
+{
+    va_list ap;
+
+    if (nv_do_log) {
+        va_start(ap, fmt);
+        pclog_ex(fmt, ap);
+        va_end(ap);
+    }
+}
+#else
+void
+nv_log(const char *fmt, ...)
+{
+
+}
+#endif

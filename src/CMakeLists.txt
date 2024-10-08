@@ -42,6 +42,10 @@ if(NEW_DYNAREC)
     add_compile_definitions(USE_NEW_DYNAREC)
 endif()
 
+if(NV_DEBUG)
+    add_compile_definitions(USE_NV_LOG)
+endif()
+
 if(RELEASE)
     add_compile_definitions(RELEASE_BUILD)
 endif()
