@@ -35,7 +35,9 @@
             "name": "debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "NV_DEBUG": "ON"
+                "NV_DEBUG": "ON",
+                "GDBSTUB" : "ON",
+                "GDBSTUB_LOG" : "ON"
             },
             "inherits": "base"
             

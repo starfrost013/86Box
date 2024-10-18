@@ -1218,7 +1218,6 @@ unknown:
                 goto ok;
             }
             break;
-
         case 'z': /* remove break/watchpoint */
         case 'Z': /* insert break/watchpoint */
 
@@ -1493,6 +1492,7 @@ gdbstub_client_thread(void *priv)
                 case '$': /* packet start */
                     /* Wait for any existing packets to be processed. */
                     thread_wait_event(client->processed_event, -1);
+                    thread_set_event(client->processed_event);
 
                     client->packet_pos = 0;
                     break;
@@ -1510,6 +1510,7 @@ gdbstub_client_thread(void *priv)
                 case 0x03: /* break */
                     /* Wait for any existing packets to be processed. */
                     thread_wait_event(client->processed_event, -1);
+                    thread_set_event(client->processed_event);
 
                     /* Break immediately. */
                     gdbstub_log("GDB Stub: Break requested\n");
@@ -1519,7 +1520,8 @@ gdbstub_client_thread(void *priv)
                 default:
                     /* Wait for any existing packets to be processed, just in case. */
                     thread_wait_event(client->processed_event, -1);
-
+                    thread_set_event(client->processed_event);
+                    
                     if (client->packet_pos < (sizeof(client->packet) - 1)) {
                         /* Append byte to the packet. */
                         client->packet[client->packet_pos++] = buf[i];

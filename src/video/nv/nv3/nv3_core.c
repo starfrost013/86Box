@@ -21,11 +21,12 @@
 #include <86Box/86box.h>
 #include <86Box/device.h>
 #include <86Box/mem.h>
+#include <86box/pci.h>
 #include <86Box/rom.h> // DEPENDENT!!!
 #include <86Box/video.h>
 #include <86Box/nv/vid_nv.h>
 
-nv3_device_t* nv3;
+nv3_t* nv3;
 
 #define MMIO_SIZE       0x1000000
 
@@ -67,7 +68,7 @@ void nv3_mmio_write32(uint32_t addr, uint32_t val, void* priv)
 
 void nv3_init_mmio()
 {
-    nv_log("NV3: Initialising 32MB MMIO area");
+    nv_log("NV3: Initialising 32MB MMIO area\n");
 
     // 0x0 - 1000000: regs
     // 0x1000000-2000000
@@ -85,16 +86,55 @@ void nv3_init_mmio()
     nv3);
 }
 
+// PCI
+
+uint8_t nv3_pci_read(int32_t func, int32_t addr, void* priv)
+{
+    /*
+    
+    // figure out what size this gets read as first
+    // seems func does not matter at least here?
+    switch (addr) 
+    {
+        // Get the pci vendor id..
+        case 0x00:
+            return PCI_VENDOR_SGS_NV;
+        case 0x04:
+            return NV_ARCHITECTURE_NV3; 
+    }
+    */
+    nv_log("nv3_pci_read func=%04x addr=%04x", func, addr);
+}
+
+void nv3_pci_write(int32_t func, int32_t addr, uint8_t val, void* priv)
+{
+    nv_log("nv3_pci_write func=%04x addr=%04x val=%04x", func, addr, val);
+}
+
 void* nv3_init(const device_t *info)
 {
-    nv_log("Initialising NV3 core");
+    nv_log("NV3: initialising core\n");
 
-    nv3 = (nv3_device_t*)calloc(1, sizeof(nv3_device_t));
+    nv3 = (nv3_t*)calloc(1, sizeof(nv3_t));
     //int ret;
 
     // ELSA VICTORY Erazor Ver. 1.55.00    [WD/VBE30/DDC2B/DPMS]
-    //ret = bios_load_linear("roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0); // TODO: HASH BASED!
-    rom_init(&nv3->nvbase.vbios, "roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0x7fff, 0, MEM_MAPPING_EXTERNAL);
+    //ret = bios_load_linear("roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0);
+    rom_init(&nv3->nvbase.vbios, "roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0x7fff, 0, MEM_MAPPING_EXTERNAL); // TODO: HASH BASED!
+
+    if (nv3->nvbase.bus_generation == nv_bus_pci)
+    {
+        nv_log("NV3: using PCI bus\n");
+
+        pci_add_card(PCI_ADD_NORMAL, nv3_pci_read, nv3_pci_write, NULL, &nv3->nvbase.pci_slot);
+    }
+    else if (nv3->nvbase.bus_generation == nv_bus_agp_1x)
+    {
+        nv_log("NV3: using AGP 1X bus\n");
+
+        pci_add_card(PCI_ADD_AGP, nv3_pci_read, nv3_pci_write, NULL, &nv3->nvbase.pci_slot);
+
+    }
 
     nv3_init_mmio();
 }

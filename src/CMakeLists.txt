@@ -43,7 +43,11 @@ if(NEW_DYNAREC)
 endif()
 
 if(NV_DEBUG)
-    add_compile_definitions(USE_NV_LOG)
+    add_compile_definitions(ENABLE_NV_LOG)
+endif()
+
+if(GDBSTUB_LOG)
+    add_compile_definitions(ENABLE_GDBSTUB_LOG)
 endif()
 
 if(RELEASE)
