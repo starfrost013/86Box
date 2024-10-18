@@ -29,6 +29,7 @@
 nv3_t* nv3;
 
 #define MMIO_SIZE       0x1000000
+#define NV_VBIOS_V15403 "roms/video/nvidia/nv3/VCERAZOR.BIN" //TODO: move to hash system
 
 // Read 8-bit MMIO
 uint8_t nv3_mmio_read8(uint32_t addr, void* priv)
@@ -90,25 +91,33 @@ void nv3_init_mmio()
 
 uint8_t nv3_pci_read(int32_t func, int32_t addr, void* priv)
 {
-    /*
-    
+    uint8_t ret = 0x00;
+
     // figure out what size this gets read as first
     // seems func does not matter at least here?
     switch (addr) 
     {
         // Get the pci vendor id..
         case 0x00:
-            return PCI_VENDOR_SGS_NV;
-        case 0x04:
-            return NV_ARCHITECTURE_NV3; 
+            ret = (PCI_VENDOR_SGS_NV & 0xFF);
+            break;
+        case 0x01:
+            ret = (PCI_VENDOR_SGS_NV >> 8);
+            break;
+        case 0x02:
+            ret = 0x00;
+            break;
+        case 0x03:
+            ret = NV_ARCHITECTURE_NV3;
+            break;
     }
-    */
-    nv_log("nv3_pci_read func=%04x addr=%04x", func, addr);
+
+    nv_log("nv3_pci_read func=0x%04x addr=0x%04x ret=0x%04x\n", func, addr, ret);
 }
 
 void nv3_pci_write(int32_t func, int32_t addr, uint8_t val, void* priv)
 {
-    nv_log("nv3_pci_write func=%04x addr=%04x val=%04x", func, addr, val);
+    nv_log("nv3_pci_write func=%04x addr=%04x val=%04x\n", func, addr, val);
 }
 
 void* nv3_init(const device_t *info)
@@ -118,9 +127,15 @@ void* nv3_init(const device_t *info)
     nv3 = (nv3_t*)calloc(1, sizeof(nv3_t));
     //int ret;
 
-    // ELSA VICTORY Erazor Ver. 1.55.00    [WD/VBE30/DDC2B/DPMS]
-    //ret = bios_load_linear("roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0);
-    rom_init(&nv3->nvbase.vbios, "roms/video/nvidia/nv3/Ver15500_.rv", 0xC000, 32768, 0x7fff, 0, MEM_MAPPING_EXTERNAL); // TODO: HASH BASED!
+    // currently using ELSA VICTORY Erazor    Ver. 1.54.03    [WD/VBE30/DDC2B/DPMS] 
+    // ELSA VICTORY Erazor    Ver. 1.55.00    [WD/VBE30/DDC2B/DPMS] seems to be broken :(
+    
+    int32_t err = rom_init(&nv3->nvbase.vbios, NV_VBIOS_V15403, 0xC0000, 32768, 0x7fff, 0, MEM_MAPPING_EXTERNAL);
+    
+    if (err)
+            nv_log("NV3: failed to load VBIOS err=%d\n", err);
+    else    
+            nv_log("NV3: Successfully loaded VBIOS %s\n", NV_VBIOS_V15403);
 
     if (nv3->nvbase.bus_generation == nv_bus_pci)
     {
@@ -137,6 +152,8 @@ void* nv3_init(const device_t *info)
     }
 
     nv3_init_mmio();
+
+    return nv3;
 }
 
 void nv3_close(void* priv)

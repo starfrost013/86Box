@@ -44,10 +44,7 @@ endif()
 
 if(NV_DEBUG)
     add_compile_definitions(ENABLE_NV_LOG)
-endif()
-
-if(GDBSTUB_LOG)
-    add_compile_definitions(ENABLE_GDBSTUB_LOG)
+    add_compile_definitions(ENABLE_ROM_LOG)    
 endif()
 
 if(RELEASE)
