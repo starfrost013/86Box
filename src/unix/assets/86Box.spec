@@ -14,10 +14,10 @@
 
 %global romver 4.1
 
-Name:		86Box
-Version:	4.2.1
+Name:		Rivalution
+Version:	0.01
 Release:	1%{?dist}
-Summary:	Classic PC emulator
+Summary:	Classic PC emulator (now Jensen Huang approved)
 License:	GPLv2+
 URL:		https://86box.net
 
@@ -121,5 +121,5 @@ popd
 %{_datadir}/%{name}/roms
 
 %changelog
-* Fri Jul 26 2024 Robert de Rooy <robert.de.rooy[AT]gmail.com> 4.2.1-1
+* Fri 18 Oct 2024 Connor Hyde <mario64crashed@gmail.com> 0.0.1-1
 - Bump release
