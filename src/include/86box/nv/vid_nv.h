@@ -68,20 +68,19 @@ typedef struct nv_device_pfifo_ramht_s
 typedef struct nv_device_pfifo_ramro_s
 {
 
-} nv3_device_pfifo_ramro_s;
+} nv3_device_pfifo_ramro_t;
 
 // context for unused channels
 typedef struct nv_device_pfifo_ramfc_s
 {
 
-} nv3_device_pfifo_ramfc_s;
-
+} nv3_device_pfifo_ramfc_t;
 
 // ????? ram auxillary
 typedef struct nv_device_pfifo_ramau_s
 {
 
-} nv3_device_pfifo_ramau_s;
+} nv3_device_pfifo_ramau_t;
 
 // Command submission to PGRAPH
 typedef struct nv_device_pfifo_s
