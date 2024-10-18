@@ -35,26 +35,31 @@ uint8_t nv3_mmio_read8(uint32_t addr, void* priv)
 
 }
 
+// Read 16-bit MMIO
 uint16_t nv3_mmio_read16(uint32_t addr, void* priv)
 {
 
 }
 
+// Read 32-bit MMIO
 uint32_t nv3_mmio_read32(uint32_t addr, void* priv)
 {
 
 }
 
+// Write 8-bit MMIO
 void nv3_mmio_write8(uint32_t addr, uint8_t val, void* priv)
 {
 
 }
 
+// Write 16-bit MMIO
 void nv3_mmio_write16(uint32_t addr, uint16_t val, void* priv)
 {
     
 }
 
+// Write 32-bit MMIO
 void nv3_mmio_write32(uint32_t addr, uint32_t val, void* priv)
 {
     

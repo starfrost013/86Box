@@ -134,7 +134,7 @@ option(VNC          "VNC renderer"                                              
 option(CPPTHREADS   "C++11 threads"                                                 ON)
 option(NEW_DYNAREC  "Use the PCem v15 (\"new\") dynamic recompiler"                 ON)
 option(MINITRACE    "Enable Chrome tracing using the modified minitrace library"    OFF)
-option(GDBSTUB      "Enable GDB stub server for debugging"                          OFF)
+option(GDBSTUB      "Enable GDB stub server for debugging"                          ON)
 option(DISCORD      "Discord Rich Presence support"                                 ON)
 option(DEBUGREGS486 "Enable debug register opeartion on 486+ CPUs"                  OFF)
 

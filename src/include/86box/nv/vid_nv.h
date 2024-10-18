@@ -16,6 +16,7 @@
  */
 #ifdef EMU_DEVICE_H // what
 
+//TODO: split this all into nv1, nv3, nv4...
 #include <86box/timer.h>
 #include <86box/vid_svga.h>
 #include <86box/vid_svga_render.h>
@@ -34,7 +35,8 @@ typedef struct nv_base_s
 // Master Control
 typedef struct nv3_device_pmc_s
 {
-    int32_t pmc_enable;
+    int32_t pmc_enable; // Determines which subsystems are enabled.
+
 } nv3_device_pmc_t;
 
 // add enums for eac
@@ -50,6 +52,37 @@ typedef struct nv3_device_pfb_s
 
 } nv3_device_pfb_t;
 
+// Bus Configuration
+typedef struct nv3_device_pbus_s
+{
+
+} nv3_device_pbus_t;
+
+// Graphics object hashtable
+typedef struct nv_device_pfifo_ramht_s
+{
+
+} nv3_device_pfifo_ramht_t;
+
+// Anti-fuckup device
+typedef struct nv_device_pfifo_ramro_s
+{
+
+} nv3_device_pfifo_ramro_s;
+
+// context for unused channels
+typedef struct nv_device_pfifo_ramfc_s
+{
+
+} nv3_device_pfifo_ramfc_s;
+
+
+// ????? ram auxillary
+typedef struct nv_device_pfifo_ramau_s
+{
+
+} nv3_device_pfifo_ramau_s;
+
 // Command submission to PGRAPH
 typedef struct nv_device_pfifo_s
 {
@@ -62,11 +95,17 @@ typedef struct nv3_device_pramdac_s
 
 } nv3_device_pramdac_t;
 
-// Graphics Subsysttem
+// Graphics Subsystem
 typedef struct nv3_device_pgraph_s
 {
 
 } nv3_device_pgraph_t;
+
+// Graphics Subsystem
+typedef struct nv3_device_pstraps_s
+{
+
+} nv3_device_pstraps_t;
 
 typedef struct nv3_device_s
 {
@@ -76,10 +115,18 @@ typedef struct nv3_device_s
     nv3_device_straps_t nvstraps;
 
     // Subsystems
-    nv3_device_pfb_t pfb;
-    nv3_device_pfifo_t pfifo;
-    nv3_device_pramdac_t pramdac;
-    nv3_device_pgraph_t pgraph;
+    nv3_device_pmc_t pmc;               // Master Control
+    nv3_device_pfb_t pfb;               // Framebuffer/VRAM
+    nv3_device_pbus_t pbus;             // Bus Control
+    nv3_device_pfifo_t pfifo;           // FIFO for command submisison
+    nv3_device_pfifo_ramht_t ramht;     // hashtable for PGRAPH objects
+    nv3_device_pfifo_ramro_t ramro;     // anti-fuckup mechanism for idiots who fucked up the FIFO submission
+    nv3_device_pfifo_ramfc_t ramfc;     // context for unused channels
+    nv3_device_pfifo_ramau_t ramau;     // auxillary weirdnes
+    nv3_device_pramdac_t pramdac;       // RAMDAC (CLUT etc)
+    nv3_device_pgraph_t pgraph;         // 2D/3D Graphics
+    nv3_device_pstraps_t pstraps;       // Chip configuration
+
     //more here
 
 } nv3_device_t;
