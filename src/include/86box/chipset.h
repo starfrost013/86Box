@@ -95,23 +95,14 @@ extern const device_t slc90e66_device;
 extern const device_t ioapic_device;
 
 /* OPTi */
-extern const device_t opti283_device;
-extern const device_t opti291_device;
 extern const device_t opti381_device;
 extern const device_t opti391_device;
 extern const device_t opti481_device;
-extern const device_t opti493_device;
-extern const device_t opti495_device;
-extern const device_t opti499_device;
 extern const device_t opti601_device;
 extern const device_t opti602_device;
 extern const device_t opti802g_device;
 extern const device_t opti802g_pci_device;
 extern const device_t opti822_device;
-extern const device_t opti895_device;
-
-extern const device_t opti5x7_device;
-extern const device_t opti5x7_pci_device;
 
 /* SiS */
 extern const device_t rabbit_device;
