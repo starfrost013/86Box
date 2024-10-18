@@ -54,9 +54,6 @@ extern "C" {
 
 #define VEN_ALI              0x010b9
 #define VEN_INTEL            0x08086
-#define VEN_SIS_5582         0x01039
-#define VEN_SIS_5595_1997    0x11039
-#define VEN_SIS_5595         0x21039
 #define VEN_SMC              0x01055
 #define VEN_VIA              0x01106
 #define VEN_VIA_596B         0x11106
@@ -184,9 +181,6 @@ extern const device_t acpi_intel_device;
 extern const device_t acpi_smc_device;
 extern const device_t acpi_via_device;
 extern const device_t acpi_via_596b_device;
-extern const device_t acpi_sis_5582_device;
-extern const device_t acpi_sis_5595_1997_device;
-extern const device_t acpi_sis_5595_device;
 
 /* Functions */
 extern void    acpi_update_irq(acpi_t *dev);
@@ -206,11 +200,6 @@ extern void    acpi_set_trap_update(acpi_t *dev, void (*update)(void *priv), voi
 extern uint8_t acpi_ali_soft_smi_status_read(acpi_t *dev);
 extern void    acpi_ali_soft_smi_status_write(acpi_t *dev, uint8_t soft_smi);
 extern void *  acpi_get_smbus(void *priv);
-extern void    acpi_sis5582_pmu_event(void *priv);
-extern void    acpi_sis5595_smi_raise(void *priv);
-extern void    acpi_sis5595_pmu_event(void *priv);
-extern void    acpi_sis5595_smbus_event(void *priv);
-extern void    acpi_sis5595_software_smi(void *priv);
 
 #ifdef __cplusplus
 }

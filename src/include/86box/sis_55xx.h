@@ -28,42 +28,27 @@ typedef struct
     acpi_t     *acpi;
 } sis_55xx_common_t;
 
-extern void    sis_5511_host_to_pci_write(int addr, uint8_t val, void *priv);
-extern uint8_t sis_5511_host_to_pci_read(int addr, void *priv);
-extern void    sis_5571_host_to_pci_write(int addr, uint8_t val, void *priv);
-extern uint8_t sis_5571_host_to_pci_read(int addr, void *priv);
-extern void    sis_5581_host_to_pci_write(int addr, uint8_t val, void *priv);
-extern uint8_t sis_5581_host_to_pci_read(int addr, void *priv);
-extern void    sis_5591_host_to_pci_write(int addr, uint8_t val, void *priv);
-extern uint8_t sis_5591_host_to_pci_read(int addr, void *priv);
-extern void    sis_5600_host_to_pci_write(int addr, uint8_t val, void *priv);
-extern uint8_t sis_5600_host_to_pci_read(int addr, void *priv);
-
 extern void    sis_5513_pci_to_isa_write(int addr, uint8_t val, void *priv);
 extern uint8_t sis_5513_pci_to_isa_read(int addr, void *priv);
 extern void    sis_5513_ide_write(int addr, uint8_t val, void *priv);
 extern uint8_t sis_5513_ide_read(int addr, void *priv);
+extern void    sis_5571_host_to_pci_write(int addr, uint8_t val, void *priv);
+extern uint8_t sis_5571_host_to_pci_read(int addr, void *priv);
+
 extern void    sis_5572_usb_write(int addr, uint8_t val, void *priv);
 extern uint8_t sis_5572_usb_read(int addr, void *priv);
-extern void    sis_5595_pmu_write(int addr, uint8_t val, void *priv);
-extern uint8_t sis_5595_pmu_read(int addr, void *priv);
 
-extern const device_t sis_5511_h2p_device;
+
 extern const device_t sis_5571_h2p_device;
 extern const device_t sis_5581_h2p_device;
-extern const device_t sis_5591_h2p_device;
-extern const device_t sis_5600_h2p_device;
 
-extern const device_t sis_5513_p2i_device;
 extern const device_t sis_5572_p2i_device;
 extern const device_t sis_5582_p2i_device;
 extern const device_t sis_5595_1997_p2i_device;
 extern const device_t sis_5595_p2i_device;
 
-extern const device_t sis_5513_ide_device;
 extern const device_t sis_5572_ide_device;
 extern const device_t sis_5582_ide_device;
-extern const device_t sis_5591_5600_ide_device;
 
 extern const device_t sis_5572_usb_device;
 extern const device_t sis_5582_usb_device;

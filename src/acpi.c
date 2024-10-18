@@ -145,48 +145,24 @@ acpi_gp_timer_update(acpi_t *dev, bool enable, int count)
         timer_stop(&dev->timer);
 }
 
-void
-acpi_sis5595_smi_raise(void *priv)
-{
-    acpi_t *dev = (acpi_t *) priv;
-    if (dev->regs.leg_en & 0x20) {
-        dev->regs.leg_sts |= 0x20;
-        smi_raise();
-    }
-}
-
 static void
 acpi_gp_timer(void *priv)
 {
     acpi_t *dev = (acpi_t *) priv;
-    if (dev->vendor == VEN_SIS_5595_1997) {
-        dev->regs.gpe_sts |= 0x20000000;
-        dev->regs.leg_sts |= 0x20;
-        acpi_gp_timer_update(dev, (dev->regs.gpe_en & 0x20000000), acpi_count);
-        acpi_sis5595_smi_raise(dev);
-    } else if (dev->vendor == VEN_SIS_5595) {
-        dev->regs.gpe_sts |= 0x00000400;
-        dev->regs.leg_sts |= 0x20;
-        acpi_gp_timer_update(dev, (dev->regs.gpe_en & 0x00000400), acpi_count);
-        acpi_sis5595_smi_raise(dev);
-    } else {
-        dev->regs.reg_14 |= 0x2000;
-        acpi_gp_timer_update(dev, (dev->regs.reg_16 & 0x2000), acpi_count);
-        smi_raise();
-    }
+
+    dev->regs.reg_14 |= 0x2000;
+    acpi_gp_timer_update(dev, (dev->regs.reg_16 & 0x2000), acpi_count);
+    smi_raise();
 }
 
 static void
 acpi_per_timer(void *priv)
 {
     acpi_t *dev = (acpi_t *) priv;
-    if (dev->vendor >= VEN_SIS_5595_1997) {
-        dev->regs.leg_sts |= 0x04;
-        acpi_sis5595_smi_raise(dev);
-    } else {
-        dev->regs.reg_25 |= 0x04;
-        smi_raise();
-    }
+
+    dev->regs.reg_25 |= 0x04;
+    smi_raise();
+
     timer_on_auto(&dev->per_timer, 16000000.0);
 }
 
@@ -199,13 +175,6 @@ acpi_update_irq(acpi_t *dev)
     switch (dev->vendor) {
         case VEN_SMC:
             sci_level |= (dev->regs.pmsts & BM_STS);
-            break;
-        case VEN_SIS_5595_1997:
-        case VEN_SIS_5595:
-            if ((sis != NULL) && (sis->pmu_regs != NULL)) {
-                sci_level |= (sis->pmu_regs[0x80] | sis->pmu_regs[0x81] |
-                              sis->pmu_regs[0x82] | sis->pmu_regs[0x83]);
-            }
             break;
     }
 
@@ -745,229 +714,6 @@ acpi_aux_reg_read_smc(UNUSED(int size), uint16_t addr, void *priv)
     return ret;
 }
 
-static uint32_t
-acpi_reg_read_sis_5582(int size, uint16_t addr, void *priv)
-{
-    const acpi_t  *dev = (acpi_t *) priv;
-    uint32_t       ret = 0x00000000;
-    int            shift16;
-    int            shift32;
-
-    addr &= 0x3f;
-    shift16 = (addr & 1) << 3;
-    shift32 = (addr & 3) << 3;
-
-    switch (addr) {
-        case 0x0c:
-        case 0x0d:
-        case 0x0e:
-        case 0x0f:
-            ret = (dev->regs.reg_0c >> shift32) & 0xff;
-            break;
-        case 0x10:
-            ret = dev->regs.enter_c2_ps;
-            break;
-        case 0x11:
-            ret = dev->regs.enter_c3_ps;
-            break;
-        case 0x12:
-            ret = dev->regs.reg_12;
-            break;
-        case 0x13:
-            ret = acpi_gp_timer_get((acpi_t *) dev) & 0xff;
-#ifdef USE_DYNAREC
-            if (cpu_use_dynarec)
-                update_tsc();
-#endif
-            break;
-        case 0x14:
-        case 0x15:
-            ret = (dev->regs.reg_14 >> shift16) & 0xff;
-            break;
-        case 0x16:
-        case 0x17:
-            ret = (dev->regs.reg_16 >> shift16) & 0xff;
-            break;
-        case 0x18:
-        case 0x19:
-            ret = (dev->regs.reg_18 >> shift16) & 0xff;
-            break;
-        case 0x1a:
-        case 0x1b:
-            ret = (dev->regs.reg_18 >> shift16) & 0xff;
-            break;
-        case 0x1c:
-        case 0x1d:
-            ret = (dev->regs.reg_1c >> shift16) & 0xff;
-            break;
-        case 0x20:
-            ret = dev->regs.smi_cmd;
-            break;
-        case 0x24:
-            ret = dev->regs.reg_24;
-            break;
-        case 0x25:
-            ret = dev->regs.reg_25;
-            break;
-        case 0x26:
-            ret = dev->regs.reg_26;
-            break;
-        case 0x28:
-            ret = dev->regs.smi_en_val;
-            break;
-        case 0x29:
-            ret = dev->regs.smi_dis_val;
-            break;
-        case 0x2a:
-            ret = dev->regs.mail_box;
-            break;
-        case 0x2b:
-            ret = dev->regs.reg_2b;
-            break;
-        default:
-            ret = acpi_reg_read_common_regs(size, addr, priv);
-            break;
-    }
-
-#ifdef ENABLE_ACPI_LOG
-        // if (size != 1)
-        // acpi_log("(%i) ACPI Read  (%i) %02X: %02X\n", in_smm, size, addr, ret);
-#endif
-    return ret;
-}
-
-static uint32_t
-acpi_reg_read_sis_5595(int size, uint16_t addr, void *priv)
-{
-    const acpi_t  *dev = (acpi_t *) priv;
-    uint32_t       ret = 0x00000000;
-    int            shift16;
-    int            shift32;
-
-    addr &= 0x3f;
-    shift16 = (addr & 1) << 3;
-    shift32 = (addr & 3) << 3;
-
-    switch (addr) {
-        case 0x0c:
-        case 0x0d:
-        case 0x0e:
-        case 0x0f:
-            ret = (dev->regs.reg_0c >> shift32) & 0xff;
-            break;
-        case 0x10:
-            ret = dev->regs.enter_c2_ps;
-            break;
-        case 0x11:
-            ret = dev->regs.enter_c3_ps;
-            break;
-        case 0x12:
-            ret = dev->regs.reg_12;
-            break;
-        case 0x13:
-            ret = dev->regs.reg_13;
-            break;
-        case 0x14:
-        case 0x15:
-        case 0x16:
-        case 0x17:
-            ret = (dev->regs.gpe_sts >> shift32) & 0xff;
-            break;
-        case 0x18:
-        case 0x19:
-        case 0x1a:
-        case 0x1b:
-            ret = (dev->regs.gpe_en >> shift32) & 0xff;
-            break;
-        case 0x1c:
-        case 0x1d:
-        case 0x1e:
-            ret = (dev->regs.gpe_pin >> shift32) & 0xff;
-            break;
-        case 0x1f:
-            ret = acpi_gp_timer_get((acpi_t *) dev) & 0xff;
-#ifdef USE_DYNAREC
-            if (cpu_use_dynarec)
-                update_tsc();
-#endif
-            break;
-        case 0x20:
-        case 0x21:
-        case 0x22:
-        case 0x23:
-            ret = (dev->regs.gpe_io >> shift32) & 0xff;
-            break;
-        case 0x24:
-        case 0x25:
-        case 0x26:
-        case 0x27:
-            ret = (dev->regs.gpe_pol >> shift32) & 0xff;
-            break;
-        case 0x28:
-        case 0x29:
-            ret = (dev->regs.gpe_mul >> shift16) & 0xff;
-            break;
-        case 0x2a:
-        case 0x2b:
-            ret = (dev->regs.gpe_ctl >> shift16) & 0xff;
-            break;
-        case 0x2c:
-        case 0x2d:
-            ret = (dev->regs.gpe_smi >> shift16) & 0xff;
-            break;
-        case 0x2e:
-        case 0x2f:
-            ret = (dev->regs.gpe_rl >> shift16) & 0xff;
-            break;
-        case 0x30:
-            ret = dev->regs.leg_sts;
-            break;
-        case 0x31:
-            ret = dev->regs.leg_en;
-            break;
-        case 0x32:
-            if (dev->vendor == VEN_SIS_5595_1997)
-                ret = dev->regs.smi_cmd;
-            else
-                ret = 0x00;
-            break;
-        case 0x33:
-            ret = dev->regs.tst_ctl;
-            break;
-        case 0x34:
-            if (dev->vendor == VEN_SIS_5595_1997)
-                ret = dev->regs.smi_en_val;
-            else
-                ret = dev->regs.reg_34;
-            break;
-        case 0x35:
-            if (dev->vendor == VEN_SIS_5595_1997)
-                ret = dev->regs.smi_dis_val;
-            else
-                ret = dev->regs.smi_cmd;
-            break;
-        case 0x36:
-            ret = dev->regs.mail_box;
-            break;
-        case 0x38:
-            if (dev->vendor == VEN_SIS_5595)
-                ret = smbus_sis5595_read_index(dev->smbus);
-            break;
-        case 0x39:
-            if (dev->vendor == VEN_SIS_5595)
-                ret = smbus_sis5595_read_data(dev->smbus);
-            break;
-        default:
-            ret = acpi_reg_read_common_regs(size, addr, priv);
-            break;
-    }
-
-#ifdef ENABLE_ACPI_LOG
-        // if (size != 1)
-        // acpi_log("(%i) ACPI Read  (%i) %02X: %02X\n", in_smm, size, addr, ret);
-#endif
-    return ret;
-}
 
 static void
 acpi_reg_write_common_regs(UNUSED(int size), uint16_t addr, uint8_t val, void *priv)
@@ -1510,374 +1256,7 @@ acpi_aux_reg_write_smc(UNUSED(int size), uint16_t addr, uint8_t val, void *priv)
     }
 }
 
-void
-acpi_sis5582_pmu_event(void *priv)
-{
-    acpi_t *dev = (acpi_t *) priv;
 
-    dev->regs.reg_25 |= 0x02;
-    if (dev->regs.reg_26 & 0x02)
-        smi_raise();
-}
-
-static void
-acpi_reg_write_sis_5582(int size, uint16_t addr, uint8_t val, void *priv)
-{
-    acpi_t *dev = (acpi_t *) priv;
-    int     shift16;
-    int     shift32;
-    uint8_t old;
-
-    addr &= 0x3f;
-#ifdef ENABLE_ACPI_LOG
-    if (size != 1)
-        acpi_log("(%i) ACPI Write (%i) %02X: %02X\n", in_smm, size, addr, val);
-#endif
-    shift16 = (addr & 1) << 3;
-    shift32 = (addr & 3) << 3;
-
-    switch (addr) {
-        case 0x0c:
-        case 0x0d:
-        case 0x0e:
-        case 0x0f:
-            dev->regs.reg_0c &= ~((val << shift32) & 0x007e);
-            break;
-        case 0x10:
-            dev->regs.enter_c2_ps = val;
-            break;
-        case 0x11:
-            dev->regs.enter_c3_ps = val;
-            break;
-        case 0x12:
-            dev->regs.reg_12 = val & 0x01;
-            break;
-        case 0x13:
-            dev->regs.reg_13 = val;
-            acpi_gp_timer_update(dev, (val != 0x00) && (dev->regs.reg_16 & 0x2000), val);
-            break;
-        case 0x14:
-        case 0x15:
-            dev->regs.reg_14 &= ~((val << shift32) & 0xff9f);
-            break;
-        case 0x16:
-        case 0x17:
-            dev->regs.reg_16 = ((dev->regs.reg_16 & ~(0xff << shift16)) | (val << shift16)) & 0xff1f;
-            break;
-        case 0x18:
-        case 0x19:
-            dev->regs.reg_18 = ((dev->regs.reg_18 & ~(0xff << shift16)) | (val << shift16)) & 0x07ff;
-            break;
-        case 0x1a:
-        case 0x1b:
-            dev->regs.reg_1a = ((dev->regs.reg_1a & ~(0xff << shift16)) | (val << shift16)) & 0x0387;
-            break;
-        case 0x1c:
-        case 0x1d:
-            dev->regs.reg_1c = ((dev->regs.reg_1c & ~(0xff << shift16)) | (val << shift16)) & 0x3f7f;
-            /* Setting BIOS_RLS also sets GBL_STS and generates SMI. */
-            if (dev->regs.reg_1c & 0x0400) {
-                dev->regs.pmsts |= 0x20;
-                if (dev->regs.pmen & 0x20)
-                    acpi_update_irq(dev);
-            }
-            break;
-        case 0x20:
-            /* SMI Command Port */
-            dev->regs.smi_cmd = val;
-            if (val == dev->regs.smi_en_val) {
-                dev->regs.reg_25 |= 0x08;
-                if (dev->regs.reg_26 & 0x08)
-                    smi_raise();
-            } else if (val == dev->regs.smi_dis_val) {
-                dev->regs.reg_25 |= 0x10;
-                if (dev->regs.reg_26 & 0x10)
-                    smi_raise();
-            }
-            break;
-        case 0x24:
-            dev->regs.reg_24 = val & 0x43;
-            break;
-        case 0x25:
-            dev->regs.reg_25 &= ~(val & 0x1f);
-            break;
-        case 0x26:
-            old = dev->regs.reg_26;
-            dev->regs.reg_26 = val & 0x3f;
-            if (!(old & 0x04) && (val & 0x04))
-                timer_on_auto(&dev->per_timer, 16000000.0);
-            else if ((old & 0x04) && !(val & 0x04))
-                timer_stop(&dev->per_timer);
-            break;
-        case 0x28:
-            dev->regs.smi_en_val = val;
-            break;
-        case 0x29:
-            dev->regs.smi_dis_val = val;
-            break;
-        case 0x2a:
-            dev->regs.mail_box = val;
-            break;
-        case 0x2b:
-            dev->regs.reg_2b = val & 0x01;
-            break;
-        default:
-            acpi_reg_write_common_regs(size, addr, val, priv);
-            /* Setting GBL_RLS also sets BIOS_STS and generates SMI. */
-            if ((addr == 0x00) && !(dev->regs.pmsts & 0x20))
-                dev->regs.reg_1c &= ~0x0400;
-            else if ((addr == 0x04) && (dev->regs.pmcntrl & 0x0004)) {
-                dev->regs.reg_25 |= 0x01;
-                if (dev->regs.reg_26 & 0x01)
-                    acpi_raise_smi(dev, 1);
-            }
-            break;
-    }
-}
-
-void
-acpi_sis5595_pmu_event(void *priv)
-{
-    acpi_t *dev = (acpi_t *) priv;
-
-    if (dev->vendor == VEN_SIS_5595_1997)
-        acpi_sis5595_smi_raise(dev);
-    else if (dev->regs.gpe_en & 0x00001000) {
-        dev->regs.gpe_sts |= 0x00001000;
-        acpi_sis5595_smi_raise(dev);
-    }
-}
-
-void
-acpi_sis5595_smbus_event(void *priv)
-{
-    acpi_t *dev = (acpi_t *) priv;
-
-    if (dev->regs.gpe_en & 0x00000800) {
-        dev->regs.gpe_sts |= 0x00000800;
-        acpi_sis5595_smi_raise(dev);
-    }
-}
-
-void
-acpi_sis5595_software_smi(void *priv)
-{
-    acpi_t *dev = (acpi_t *) priv;
-
-    if (dev->regs.leg_en & 0x01) {
-        dev->regs.leg_sts |= 0x01;
-        acpi_sis5595_smi_raise(dev);
-    }
-}
-
-static void
-acpi_reg_write_sis_5595(int size, uint16_t addr, uint8_t val, void *priv)
-{
-    acpi_t *dev = (acpi_t *) priv;
-    int     shift16;
-    int     shift32;
-    uint8_t old;
-    uint8_t do_smi = 0;
-
-    addr &= 0x3f;
-#ifdef ENABLE_ACPI_LOG
-    if (size != 1)
-        acpi_log("(%i) ACPI Write (%i) %02X: %02X\n", in_smm, size, addr, val);
-#endif
-    shift16 = (addr & 1) << 3;
-    shift32 = (addr & 3) << 3;
-
-    switch (addr) {
-        case 0x0c:
-        case 0x0d:
-        case 0x0e:
-        case 0x0f:
-            dev->regs.reg_0c &= ~((val << shift32) & 0x001e);
-            break;
-        case 0x10:
-            dev->regs.enter_c2_ps = val;
-            break;
-        case 0x11:
-            dev->regs.enter_c3_ps = val;
-            break;
-        case 0x12:
-            dev->regs.reg_12 = val & 0x01;
-            break;
-        case 0x13:
-            dev->regs.reg_13 = val;
-            /* Setting BIOS_RLS also sets GBL_STS and generates SMI. */
-            if (dev->regs.reg_13 & 0x02) {
-                dev->regs.pmsts |= 0x20;
-                if (dev->regs.pmen & 0x20)
-                    acpi_update_irq(dev);
-            }
-            break;
-        case 0x14:
-        case 0x15:
-        case 0x16:
-        case 0x17:
-            if (dev->vendor == VEN_SIS_5595_1997)
-                dev->regs.gpe_sts &= ~((val << shift32) & 0xff03ffbf);
-            else
-                dev->regs.gpe_sts &= ~((val << shift32) & 0xff83ffff);
-            break;
-        case 0x18:
-        case 0x19:
-        case 0x1a:
-        case 0x1b:
-            if (dev->vendor == VEN_SIS_5595_1997)
-                dev->regs.gpe_en = ((dev->regs.gpe_en & ~(0xff << shift32)) | (val << shift32));
-            else
-                dev->regs.gpe_en = ((dev->regs.gpe_en & ~(0xff << shift32)) |
-                                   (val << shift32)) & 0xff83ffff;
-            break;
-        case 0x1c:
-            dev->regs.gpe_pin = ((dev->regs.gpe_pin & ~(0xff << shift32)) | ((val & 0xff) << shift32));
-            break;
-        case 0x1d:
-            dev->regs.gpe_pin = ((dev->regs.gpe_pin & ~(0x0f << shift32)) | ((val & 0x0f) << shift32));
-            break;
-        case 0x1e:
-            dev->regs.gpe_pin = ((dev->regs.gpe_pin & ~(0x03 << shift32)) | ((val & 0x03) << shift32));
-            break;
-        case 0x1f:
-            dev->regs.gp_tmr = val;
-            acpi_gp_timer_update(dev, (val != 0x00) && (dev->regs.gpe_en & 0x00000400), val);
-            break;
-        case 0x20:
-            dev->regs.gpe_io = ((dev->regs.gpe_io & ~(0x9f << shift32)) | ((val & 0x9f) << shift32));
-            break;
-        case 0x21:
-            dev->regs.gpe_io = ((dev->regs.gpe_io & ~(0x0f << shift32)) | ((val & 0x0f) << shift32));
-            break;
-        case 0x22:
-            dev->regs.gpe_io = ((dev->regs.gpe_io & ~(0x03 << shift32)) | ((val & 0x03) << shift32));
-            break;
-        case 0x24:
-            dev->regs.gpe_pol = ((dev->regs.gpe_pol & ~(0xbf << shift32)) | ((val & 0xbf) << shift32));
-            break;
-        case 0x25:
-            dev->regs.gpe_pol = ((dev->regs.gpe_pol & ~(0x0f << shift32)) | ((val & 0x0f) << shift32));
-            break;
-        case 0x26:
-            dev->regs.gpe_pol = ((dev->regs.gpe_pol & ~(0x03 << shift32)) | ((val & 0x03) << shift32));
-            break;
-        case 0x27:
-            dev->regs.gpe_pol = ((dev->regs.gpe_pol & ~(0x10 << shift32)) | ((val & 0x10) << shift32));
-            break;
-        case 0x28:
-            dev->regs.gpe_mul = ((dev->regs.gpe_mul & ~(0xf9 << shift16)) | ((val & 0xf9) << shift16));
-            break;
-        case 0x29:
-            dev->regs.gpe_mul = ((dev->regs.gpe_mul & ~(0x13 << shift16)) | ((val & 0x13) << shift16));
-            break;
-        case 0x2a:
-        case 0x2b:
-            dev->regs.gpe_ctl = ((dev->regs.gpe_ctl & ~(0xff << shift16)) | ((val & 0xff) << shift16));
-            break;
-        case 0x2c:
-        case 0x2d:
-            dev->regs.gpe_smi = ((dev->regs.gpe_smi & ~(0xff << shift16)) | ((val & 0xff) << shift16));
-            break;
-        case 0x2e:
-        case 0x2f:
-            dev->regs.gpe_rl = ((dev->regs.gpe_rl & ~(0xff << shift16)) | ((val & 0xff) << shift16));
-            break;
-        case 0x30:
-            dev->regs.leg_sts &= ~val;
-            break;
-        case 0x31:
-            old = dev->regs.leg_en;
-            dev->regs.leg_en = val;
-            if (!(old & 0x04) && (val & 0x04))
-                timer_on_auto(&dev->per_timer, 16000000.0);
-            else if ((old & 0x04) && !(val & 0x04))
-                timer_stop(&dev->per_timer);
-            break;
-        case 0x32:
-            if (dev->vendor == VEN_SIS_5595_1997) {
-                /* SMI Command Port */
-                dev->regs.smi_cmd = val;
-                if (val == dev->regs.smi_en_val) {
-                    dev->regs.leg_sts |= 0x08;
-                    if (dev->regs.leg_en & 0x08)
-                        acpi_sis5595_smi_raise(dev);
-                } else if (val == dev->regs.smi_dis_val) {
-                    dev->regs.leg_sts |= 0x10;
-                    if (dev->regs.leg_en & 0x10)
-                        acpi_sis5595_smi_raise(dev);
-                }
-            }
-            break;
-        case 0x33:
-            dev->regs.tst_ctl = val & 0x01;
-            break;
-        case 0x34:
-            if (dev->vendor == VEN_SIS_5595_1997)
-                dev->regs.smi_en_val = val;
-            else
-                dev->regs.reg_34 = val;
-            break;
-        case 0x35:
-            if (dev->vendor == VEN_SIS_5595_1997)
-                dev->regs.smi_dis_val = val;
-            else {
-                /* SMI Command Port */
-                dev->regs.smi_cmd = val;
-                dev->regs.leg_sts |= 0x10;
-                if (dev->regs.leg_en & 0x10)
-                    acpi_sis5595_smi_raise(dev);
-            }
-            break;
-        case 0x36:
-            dev->regs.mail_box = val;
-            break;
-        case 0x38:
-            if (dev->vendor == VEN_SIS_5595) {
-                dev->regs.index = val;
-                smbus_sis5595_write_index(dev->smbus, val);
-            }
-            break;
-        case 0x39:
-            if (dev->vendor == VEN_SIS_5595) {
-                dev->regs.reg_ff = val & 0x3f;
-                smbus_sis5595_write_data(dev->smbus, val);
-                if (val & 0x20) {           /* Set GPIO5_STS of GPE_STS */
-                    dev->regs.gpe_sts |= 0x00000008;
-                    do_smi |= (dev->regs.gpe_en & 0x00000004);
-                } else if (val & 0x10) {    /* Set GPIO10_STS of GPE_STS */
-                    dev->regs.gpe_sts |= 0x00000004;
-                    do_smi |= (dev->regs.gpe_en & 0x00000008);
-                } else if (val & 0x08) {    /* Set RI_STS in GPE_STS */
-                    dev->regs.gpe_sts |= 0x00000002;
-                    do_smi |= (dev->regs.gpe_en & 0x00000002);
-                } else if (val & 0x04)      /* Set WAK_STS of PM1_STS */
-                    dev->regs.pmsts |= 0x8000;
-                else if (val & 0x02) {      /* Set RTC_STS of PM1_STS */
-                    dev->regs.pmsts |= 0x0400;
-                    do_smi |= (dev->regs.pmen & 0x0400);
-                } else if (val & 0x01) {    /* Set PWRBTN_STS of PM1_STS */
-                    dev->regs.pmsts |= 0x0100;
-                    do_smi |= (dev->regs.pmen & 0x0100);
-                }
-
-                if (do_smi)
-                    acpi_sis5595_smi_raise(dev);
-            }
-            break;
-        default:
-            acpi_reg_write_common_regs(size, addr, val, priv);
-            /* Setting GBL_RLS also sets BIOS_STS and generates SMI. */
-            if ((addr == 0x00) && !(dev->regs.pmsts & 0x20))
-                dev->regs.reg_13 &= ~0x02;
-            else if ((addr == 0x04) && (dev->regs.pmcntrl & 0x0004)) {
-                dev->regs.leg_sts |= 0x01;
-                if (dev->regs.leg_en & 0x01)
-                    acpi_sis5595_smi_raise(dev);
-            }
-            break;
-    }
-}
 
 static uint32_t
 acpi_reg_read_common(int size, uint16_t addr, void *priv)
@@ -1900,13 +1279,6 @@ acpi_reg_read_common(int size, uint16_t addr, void *priv)
             break;
         case VEN_SMC:
             ret = acpi_reg_read_smc(size, addr, priv);
-            break;
-        case VEN_SIS_5582:
-            ret = acpi_reg_read_sis_5582(size, addr, priv);
-            break;
-        case VEN_SIS_5595_1997:
-        case VEN_SIS_5595:
-            ret = acpi_reg_read_sis_5595(size, addr, priv);
             break;
     }
 
@@ -1933,13 +1305,6 @@ acpi_reg_write_common(int size, uint16_t addr, uint8_t val, void *priv)
             break;
         case VEN_SMC:
             acpi_reg_write_smc(size, addr, val, priv);
-            break;
-        case VEN_SIS_5582:
-            acpi_reg_write_sis_5582(size, addr, val, priv);
-            break;
-        case VEN_SIS_5595_1997:
-        case VEN_SIS_5595:
-            acpi_reg_write_sis_5595(size, addr, val, priv);
             break;
     }
 }
@@ -2110,9 +1475,6 @@ acpi_update_io_mapping(acpi_t *dev, uint32_t base, int chipset_en)
         default:
         case VEN_ALI:
         case VEN_INTEL:
-        case VEN_SIS_5582:
-        case VEN_SIS_5595_1997:
-        case VEN_SIS_5595:
             size = 0x040;
             break;
         case VEN_SMC:
@@ -2392,13 +1754,6 @@ acpi_reset(void *priv)
     acpi_count = 0;
 
     timer_disable(&dev->per_timer);
-
-    if ((dev->vendor == VEN_SIS_5595_1997) || (dev->vendor == VEN_SIS_5595)) {
-        dev->regs.reg_13 = 0x20;
-        dev->regs.gp_tmr = 0xff;
-        dev->regs.gpe_io = 0x00030b9f;
-        dev->regs.gpe_mul = 0x1001;
-    }
 }
 
 static void
@@ -2416,12 +1771,8 @@ acpi_speed_changed(void *priv)
         if (timer_is_on(&dev->gp_timer)) {
             timer_stop(&dev->gp_timer);
 
-            if (dev->vendor == VEN_SIS_5595_1997)
-                acpi_gp_timer_update(dev, (dev->regs.gpe_en & 0x20000000), acpi_count);
-            else if (dev->vendor == VEN_SIS_5595)
-                acpi_gp_timer_update(dev, (dev->regs.gpe_en & 0x00000400), acpi_count);
-            else
-                acpi_gp_timer_update(dev, (dev->regs.reg_16 & 0x2000), acpi_count);
+            acpi_gp_timer_update(dev, (dev->regs.reg_16 & 0x2000), acpi_count);
+
         }
 
         if (timer_is_on(&dev->per_timer)) {
@@ -2515,29 +1866,6 @@ acpi_init(const device_t *info)
             dev->suspend_types[3] = SUS_SUSPEND | SUS_RESET_CACHE;
             dev->suspend_types[4] = SUS_SUSPEND;
             break;
-
-        case VEN_SIS_5582:
-            dev->suspend_types[0] = SUS_SUSPEND;      /* S1 */
-            dev->suspend_types[4] = SUS_POWER_OFF;    /* S5 */
-
-            timer_add(&dev->gp_timer, acpi_gp_timer, dev, 0);
-            timer_add(&dev->per_timer, acpi_per_timer, dev, 0);
-            break;
-
-        case VEN_SIS_5595_1997:
-        case VEN_SIS_5595:
-            dev->suspend_types[1] = SUS_SUSPEND;
-            dev->suspend_types[2] = SUS_SUSPEND;
-            dev->suspend_types[3] = SUS_SUSPEND | SUS_NVR | SUS_RESET_CPU | SUS_RESET_PCI;
-            dev->suspend_types[4] = SUS_POWER_OFF;
-            dev->suspend_types[5] = SUS_POWER_OFF;
-
-            timer_add(&dev->gp_timer, acpi_gp_timer, dev, 0);
-            timer_add(&dev->per_timer, acpi_per_timer, dev, 0);
-
-            dev->smbus = device_add(&sis5595_smbus_device);
-            break;
-
         default:
             break;
     }
@@ -2626,44 +1954,5 @@ const device_t acpi_smc_device = {
     .config        = NULL
 };
 
-const device_t acpi_sis_5582_device = {
-    .name          = "SiS 5582 ACPI",
-    .internal_name = "acpi_sis_5582",
-    .flags         = DEVICE_PCI,
-    .local         = VEN_SIS_5582,
-    .init          = acpi_init,
-    .close         = acpi_close,
-    .reset         = acpi_reset,
-    { .available = NULL },
-    .speed_changed = acpi_speed_changed,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
 
-const device_t acpi_sis_5595_1997_device = {
-    .name          = "SiS 5595 (1997) ACPI",
-    .internal_name = "acpi_sis_5595_1997",
-    .flags         = DEVICE_PCI,
-    .local         = VEN_SIS_5595_1997,
-    .init          = acpi_init,
-    .close         = acpi_close,
-    .reset         = acpi_reset,
-    { .available = NULL },
-    .speed_changed = acpi_speed_changed,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
 
-const device_t acpi_sis_5595_device = {
-    .name          = "SiS 5595 ACPI",
-    .internal_name = "acpi_sis_5595",
-    .flags         = DEVICE_PCI,
-    .local         = VEN_SIS_5595,
-    .init          = acpi_init,
-    .close         = acpi_close,
-    .reset         = acpi_reset,
-    { .available = NULL },
-    .speed_changed = acpi_speed_changed,
-    .force_redraw  = NULL,
-    .config        = NULL
-};

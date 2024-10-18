@@ -675,17 +675,3 @@ const device_t via_vt8601_agp_device = {
     .force_redraw  = NULL,
     .config        = NULL
 };
-
-const device_t sis_5xxx_agp_device = {
-    .name          = "SiS 5591/(5)600 AGP Bridge",
-    .internal_name = "via_5xxx_agp",
-    .flags         = DEVICE_PCI,
-    .local         = AGP_BRIDGE_SIS_5XXX,
-    .init          = pci_bridge_init,
-    .close         = NULL,
-    .reset         = pci_bridge_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};

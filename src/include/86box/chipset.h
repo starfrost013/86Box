@@ -57,7 +57,6 @@ extern const device_t headland_ht21e_device;
 extern const device_t ims8848_device;
 
 /* Intel */
-extern const device_t intel_82335_device;
 extern const device_t i420ex_device;
 extern const device_t i420ex_ide_device;
 extern const device_t i420tx_device;
@@ -105,24 +104,15 @@ extern const device_t opti802g_pci_device;
 extern const device_t opti822_device;
 
 /* SiS */
-extern const device_t rabbit_device;
 extern const device_t sis_85c401_device;
 extern const device_t sis_85c460_device;
 extern const device_t sis_85c461_device;
 extern const device_t sis_85c471_device;
-extern const device_t sis_85c496_device;
-extern const device_t sis_85c496_ls486e_device;
 extern const device_t sis_85c50x_device;
 extern const device_t sis_550x_85c503_device;
 extern const device_t sis_85c50x_5503_device;
 extern const device_t sis_550x_device;
-extern const device_t sis_5511_device;
 extern const device_t sis_5571_device;
-extern const device_t sis_5581_device;
-extern const device_t sis_5591_1997_device;
-extern const device_t sis_5591_device;
-extern const device_t sis_5600_1997_device;
-extern const device_t sis_5600_device;
 
 /* ST */
 extern const device_t stpc_client_device;

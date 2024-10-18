@@ -1269,19 +1269,6 @@ sis_5513_pci_to_isa_init(UNUSED(const device_t *info))
   
             dev->ddma = device_add(&ddma_device);
 
-            switch (dev->rev) {
-                case 0x11:
-                    dev->sis->acpi   = device_add(&acpi_sis_5582_device);
-                    break;
-                case 0x81:
-                    dev->sis->acpi   = device_add(&acpi_sis_5595_1997_device);
-                    break;
-                case 0xb0:
-                    dev->sis->acpi   = device_add(&acpi_sis_5595_device);
-                    dev->smbus       = acpi_get_smbus(dev->sis->acpi);
-                    break;
-            }
-
             dev->sis->acpi->priv = dev->sis;
             acpi_set_slot(dev->sis->acpi, dev->sis->sb_pci_slot);
             acpi_set_nvr(dev->sis->acpi, dev->nvr);
@@ -1329,50 +1316,6 @@ const device_t sis_5572_p2i_device = {
     .internal_name = "sis_5572_pci_to_isa",
     .flags         = DEVICE_PCI,
     .local         = 0x01,
-    .init          = sis_5513_pci_to_isa_init,
-    .close         = sis_5513_pci_to_isa_close,
-    .reset         = sis_5513_pci_to_isa_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t sis_5582_p2i_device = {
-    .name          = "SiS 5582 PCI to ISA bridge",
-    .internal_name = "sis_5582_pci_to_isa",
-    .flags         = DEVICE_PCI,
-    .local         = 0x11,    /* Actually, 0x01, but we need to somehow distinguish it
-                                 from SiS 5572 and SiS 5595 1997, which are also revision 0x01. */
-    .init          = sis_5513_pci_to_isa_init,
-    .close         = sis_5513_pci_to_isa_close,
-    .reset         = sis_5513_pci_to_isa_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t sis_5595_1997_p2i_device = {
-    .name          = "SiS 5595 (1997) PCI to ISA bridge",
-    .internal_name = "sis_5595_1997_pci_to_isa",
-    .flags         = DEVICE_PCI,
-    .local         = 0x81,    /* Actually, 0x01, but we need to somehow distinguish it
-                                 from SiS 5572 and SiS 5582, which are also revision 0x01. */
-    .init          = sis_5513_pci_to_isa_init,
-    .close         = sis_5513_pci_to_isa_close,
-    .reset         = sis_5513_pci_to_isa_reset,
-    { .available = NULL },
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = NULL
-};
-
-const device_t sis_5595_p2i_device = {
-    .name          = "SiS 5595 PCI to ISA bridge",
-    .internal_name = "sis_5595_pci_to_isa",
-    .flags         = DEVICE_PCI,
-    .local         = 0xb0,
     .init          = sis_5513_pci_to_isa_init,
     .close         = sis_5513_pci_to_isa_close,
     .reset         = sis_5513_pci_to_isa_reset,
