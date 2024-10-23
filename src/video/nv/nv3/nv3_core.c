@@ -34,37 +34,38 @@ nv3_t* nv3;
 // Read 8-bit MMIO
 uint8_t nv3_mmio_read8(uint32_t addr, void* priv)
 {
-
+    nv_log("NV3: nv3_mmio_read8 0x%04x", addr);
 }
 
 // Read 16-bit MMIO
 uint16_t nv3_mmio_read16(uint32_t addr, void* priv)
 {
+    nv_log("NV3: nv3_mmio_read16 0x%04x", addr);
 
 }
 
 // Read 32-bit MMIO
 uint32_t nv3_mmio_read32(uint32_t addr, void* priv)
 {
-
+    nv_log("NV3: nv3_mmio_read32 0x%04x", addr);
 }
 
 // Write 8-bit MMIO
 void nv3_mmio_write8(uint32_t addr, uint8_t val, void* priv)
 {
-
+    nv_log("NV3: nv3_mmio_write8 0x%04x val=%04x", addr, val);
 }
 
 // Write 16-bit MMIO
 void nv3_mmio_write16(uint32_t addr, uint16_t val, void* priv)
 {
-    
+    nv_log("NV3: nv3_mmio_write16 0x%04x val=%04x", addr, val);
 }
 
 // Write 32-bit MMIO
 void nv3_mmio_write32(uint32_t addr, uint32_t val, void* priv)
 {
-    
+    nv_log("NV3: nv3_mmio_write32 0x%04x val=%04x", addr, val);
 }
 
 void nv3_init_mmio()
@@ -105,10 +106,10 @@ uint8_t nv3_pci_read(int32_t func, int32_t addr, void* priv)
             ret = (PCI_VENDOR_SGS_NV >> 8);
             break;
         case 0x02:
-            ret = 0x00;
+            ret = (PCI_DEVICE_NV3 & 0xFF);
             break;
         case 0x03:
-            ret = NV_ARCHITECTURE_NV3;
+            ret = (PCI_DEVICE_NV3 >> 8);
             break;
     }
 
@@ -130,7 +131,7 @@ void* nv3_init(const device_t *info)
     // currently using ELSA VICTORY Erazor    Ver. 1.54.03    [WD/VBE30/DDC2B/DPMS] 
     // ELSA VICTORY Erazor    Ver. 1.55.00    [WD/VBE30/DDC2B/DPMS] seems to be broken :(
     
-    int32_t err = rom_init(&nv3->nvbase.vbios, NV_VBIOS_V15403, 0xC0000, 32768, 0x7fff, 0, MEM_MAPPING_EXTERNAL);
+    int32_t err = rom_init(&nv3->nvbase.vbios, NV_VBIOS_V15403, 0xC0000, 0x8000, 0x7fff, 0, MEM_MAPPING_EXTERNAL);
     
     if (err)
             nv_log("NV3: failed to load VBIOS err=%d\n", err);

@@ -298,7 +298,11 @@ mmutranslatereal_normal(uint32_t addr, int rw)
 
     if ((temp & 0x80) && (cr4 & CR4_PSE)) {
         /*4MB page*/
-        if (((CPL == 3) && !(temp & 4) && !cpl_override) || (rw && !(temp & 2) && (((CPL == 3) && !cpl_override) || ((is486 || isibm486) && (cr0 & WP_FLAG))))) {
+
+        if (((CPL == 3) && !(temp & 4) && !cpl_override) 
+        || (rw && !cpl_override && !(temp & 2) && (((CPL == 3) && !cpl_override) 
+        || ((is486 || isibm486) && (cr0 & WP_FLAG))))) 
+        {
             cr2 = addr;
             temp &= 1;
             if (CPL == 3)
@@ -319,7 +323,11 @@ mmutranslatereal_normal(uint32_t addr, int rw)
 
     temp  = rammap((temp & ~0xfff) + ((addr >> 10) & 0xffc));
     temp3 = temp & temp2;
-    if (!(temp & 1) || ((CPL == 3) && !(temp3 & 4) && !cpl_override) || (rw && !(temp3 & 2) && (((CPL == 3) && !cpl_override) || ((is486 || isibm486) && (cr0 & WP_FLAG))))) {
+
+    if (!(temp & 1) || ((CPL == 3) && !(temp3 & 4) && !cpl_override) 
+    || (rw && !cpl_override &&  !(temp3 & 2) && (((CPL == 3) && !cpl_override) 
+    || ((is486 || isibm486) && (cr0 & WP_FLAG)))))
+    {
         cr2 = addr;
         temp &= 1;
         if (CPL == 3)
@@ -383,7 +391,11 @@ mmutranslatereal_pae(uint32_t addr, int rw)
 
     if (temp & 0x80) {
         /*2MB page*/
-        if (((CPL == 3) && !(temp & 4) && !cpl_override) || (rw && !(temp & 2) && (((CPL == 3) && !cpl_override) || (cr0 & WP_FLAG)))) {
+
+        if (((CPL == 3) && !(temp & 4) && !cpl_override) 
+        || (rw && !cpl_override && !(temp & 2) && (((CPL == 3) && !cpl_override)
+         || (cr0 & WP_FLAG)))) 
+         {
             cr2 = addr;
             temp &= 1;
             if (CPL == 3)
@@ -466,7 +478,10 @@ mmutranslate_noabrt_normal(uint32_t addr, int rw)
 
     if ((temp & 0x80) && (cr4 & CR4_PSE)) {
         /*4MB page*/
-        if (((CPL == 3) && !(temp & 4) && !cpl_override) || (rw && !(temp & 2) && ((CPL == 3) || (cr0 & WP_FLAG))))
+
+        if (((CPL == 3) && !(temp & 4) && !cpl_override) 
+        || (rw && !cpl_override && !(temp & 2) && ((CPL == 3) 
+        || (cr0 & WP_FLAG))))
             return 0xffffffffffffffffULL;
 
         return (temp & ~0x3fffff) + (addr & 0x3fffff);
@@ -475,7 +490,9 @@ mmutranslate_noabrt_normal(uint32_t addr, int rw)
     temp  = rammap((temp & ~0xfff) + ((addr >> 10) & 0xffc));
     temp3 = temp & temp2;
 
-    if (!(temp & 1) || ((CPL == 3) && !(temp3 & 4) && !cpl_override) || (rw && !(temp3 & 2) && ((CPL == 3) || (cr0 & WP_FLAG))))
+    if (!(temp & 1) 
+    || ((CPL == 3) && !(temp3 & 4) && !cpl_override) 
+    || (rw && !cpl_override && !(temp3 & 2) && ((CPL == 3) || (cr0 & WP_FLAG))))
         return 0xffffffffffffffffULL;
 
     return (uint64_t) ((temp & ~0xfff) + (addr & 0xfff));
@@ -510,7 +527,10 @@ mmutranslate_noabrt_pae(uint32_t addr, int rw)
 
     if (temp & 0x80) {
         /*2MB page*/
-        if (((CPL == 3) && !(temp & 4) && !cpl_override) || (rw && !(temp & 2) && ((CPL == 3) || (cr0 & WP_FLAG))))
+        
+        if (((CPL == 3) && !(temp & 4) && !cpl_override) 
+        || (rw && !cpl_override && !(temp & 2) && ((CPL == 3) 
+        || (cr0 & WP_FLAG))))
             return 0xffffffffffffffffULL;
 
         return ((temp & ~0x1fffffULL) + (addr & 0x1fffff)) & 0x000000ffffffffffULL;
@@ -521,7 +541,9 @@ mmutranslate_noabrt_pae(uint32_t addr, int rw)
 
     temp3 = temp & temp4;
 
-    if (!(temp & 1) || ((CPL == 3) && !(temp3 & 4) && !cpl_override) || (rw && !(temp3 & 2) && ((CPL == 3) || (cr0 & WP_FLAG))))
+    if (!(temp & 1) 
+    || ((CPL == 3) && !(temp3 & 4) && !cpl_override) 
+    || (rw && !cpl_override && !(temp3 & 2) && ((CPL == 3) || (cr0 & WP_FLAG))))
         return 0xffffffffffffffffULL;
 
     return ((temp & ~0xfffULL) + ((uint64_t) (addr & 0xfff))) & 0x000000ffffffffffULL;
