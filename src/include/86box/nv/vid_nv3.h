@@ -60,6 +60,8 @@
 #define NV3_CRTC_REGISTER_STANDARDVGA_END       0x18
 
 // These are nvidia (25-63)
+#define NV3_CRTC_REGISTER_READ_BANK             0x1D
+#define NV3_CRTC_REGISTER_WRITE_BANK            0x1E
 #define NV3_CRTC_REGISTER_FORMAT                0x25
 #define NV3_CRTC_REGISTER_PIXELMODE             0x28
 

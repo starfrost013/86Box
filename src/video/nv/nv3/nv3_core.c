@@ -21,6 +21,7 @@
 #include <86Box/86box.h>
 #include <86Box/device.h>
 #include <86Box/mem.h>
+#include <86box/io.h>
 #include <86box/pci.h>
 #include <86Box/rom.h> // DEPENDENT!!!
 #include <86Box/video.h>
@@ -80,7 +81,7 @@ void nv3_init_mmio()
     // 0x1000000-2000000
 
     // initialize the mmio mapping
-    mem_mapping_add(&nv3->nvbase.mmio, 0, MMIO_SIZE, 
+    mem_mapping_add(&nv3->nvbase.mmio, 0, 0, 
     nv3_mmio_read8,
     nv3_mmio_read16,
     nv3_mmio_read32,
@@ -133,12 +134,14 @@ void nv3_close(void* priv)
 
 void nv3_speed_changed(void* priv)
 {
-
+    svga_recalctimings(&nv3->nvbase.svga);
 }
 
+// Force Redraw
+// Reset etc.
 void nv3_force_redraw(void* priv)
 {
-
+    nv3->nvbase.svga.fullchange = changeframecount; 
 }
 
 //
@@ -148,8 +151,9 @@ void nv3_recalc_timings(svga_t* svga)
 {
     nv3_t* nv3 = (nv3_t*)svga->priv;
 
+
     // Set the pixel mode
-    switch (svga->crtc[NV3_CRTC_REGISTER_PIXELMODE])
+    switch (svga->crtc[NV3_CRTC_REGISTER_PIXELMODE] & 0x03)
     {
         case 0x0: // Verify this when my RIVA 128 turns up...
             svga->bpp = 4;
@@ -184,49 +188,98 @@ void nv3_recalc_timings(svga_t* svga)
 
 uint8_t nv3_svga_in(uint16_t addr, void* priv)
 {
+    nv3_t* nv3 = (nv3_t*)priv;
 
-    nv_log("nv3_svga_in addr=0x%04x", addr);
+    nv_log("nv3_svga_in addr=0x%04x\n", addr);
+
+    // mask off b0/d0 registers 
+    if ((((addr & 0xFFF0) == 0x3D0 || (addr & 0xFFF0) == 0x3B0) && addr < 0x3de) && !(nv3->nvbase.svga.miscout & 1))
+        addr ^= 0x60;
 
     uint8_t ret = 0x00;
 
     switch (addr)
     {
+        // Alias for "get current SVGA CRTC register ID"
+        case 0x3D4:
+            ret = nv3->nvbase.svga.crtcreg;
+            break;
         case 0x3D5:
             // Support the extended NVIDIA CRTC register range
             switch (nv3->nvbase.svga.crtcreg)
             {
                 default:
-                    return nv3->nvbase.svga.crtc[nv3->nvbase.svga.crtcreg];
+                    ret = nv3->nvbase.svga.crtc[nv3->nvbase.svga.crtcreg];
             }
             break;
         default:
-            return svga_in(addr, priv);
+            ret = svga_in(addr, &nv3->nvbase.svga);
+            break;
     }
 
-    return 0x00; //TEMP
+    return ret; //TEMP
 }
 
 void nv3_svga_out(uint16_t addr, uint8_t val, void* priv)
 {
     nv_log("nv3_svga_out addr=0x%04x val=0x%04x", addr, val);
 
+    // mask off b0/d0 registers 
+    if ((((addr & 0xFFF0) == 0x3D0 || (addr & 0xFFF0) == 0x3B0) 
+    && addr < 0x3de) 
+    && !(nv3->nvbase.svga.miscout & 1))
+        addr ^= 0x60;
+
     uint8_t crtcreg = nv3->nvbase.svga.crtcreg;
+    uint8_t old_value;
 
     switch (addr)
     {
+        case 0x3D4:
+            nv3->nvbase.svga.crtcreg = val;
+            break;
         // support the extended crtc regs and debug this out
         case 0x3D5:
 
+            // Implements the VGA Protect register
+            if ((nv3->nvbase.svga.crtcreg < NV3_CRTC_REGISTER_OVERFLOW) && (nv3->nvbase.svga.crtc[0x11] & 0x80))
+                return;
+
+            // Ignore certain bits when VGA Protect register set and we are writing to CRTC register=07h
+            if ((nv3->nvbase.svga.crtcreg == NV3_CRTC_REGISTER_OVERFLOW) && (nv3->nvbase.svga.crtc[0x11] & 0x80))
+                val = (nv3->nvbase.svga.crtc[NV3_CRTC_REGISTER_OVERFLOW] & ~0x10) | (val & 0x10);
+
+            // set the register value...
             nv3->nvbase.svga.crtc[crtcreg] = val;
+            // ...now act on it
 
             if (crtcreg > NV3_CRTC_REGISTER_STANDARDVGA_END)
                 nv_log("...Extended CRTC reg=0x%04x\n", crtcreg);
             else   
                 nv_log("...Standard CRTC reg=0x%04x\n", crtcreg);
 
+            // Handle nvidia extended Bank0/Bank1 IDs
+            switch (crtcreg)
+            {
+                case NV3_CRTC_REGISTER_READ_BANK:
+                        nv3->nvbase.cio_read_bank = val;
+                        if (nv3->nvbase.svga.chain4) // chain4 addressing (planar?)
+                            nv3->nvbase.svga.read_bank = nv3->nvbase.cio_read_bank << 15;
+                        else
+                            nv3->nvbase.svga.read_bank = nv3->nvbase.cio_read_bank << 13; // extended bank numbers
+                    break;
+                case NV3_CRTC_REGISTER_WRITE_BANK:
+                    nv3->nvbase.cio_write_bank = val;
+                        if (nv3->nvbase.svga.chain4)
+                            nv3->nvbase.svga.write_bank = nv3->nvbase.cio_write_bank << 15;
+                        else
+                            nv3->nvbase.svga.write_bank = nv3->nvbase.cio_write_bank << 13;
+                    break;
+            }
+
             break;
         default:
-            svga_out(addr, val, priv);
+            svga_out(addr, val, &nv3->nvbase.svga);
             nv_log("\n");
     }
 }
@@ -256,15 +309,17 @@ void* nv3_init(const device_t *info)
     else    
             nv_log("NV3: Successfully loaded VBIOS %s\n", NV_VBIOS_V15403);
 
+    // init the mmio
     nv3_init_mmio();
 
+    // set up the bus and start setting up SVGA core
     if (nv3->nvbase.bus_generation == nv_bus_pci)
     {
         nv_log("NV3: using PCI bus\n");
 
         pci_add_card(PCI_ADD_NORMAL, nv3_pci_read, nv3_pci_write, NULL, &nv3->nvbase.pci_slot);
 
-        svga_init(&nv3_device_pci, &nv3->nvbase.svga, &nv3, VRAM_SIZE_4MB, 
+        svga_init(&nv3_device_pci, &nv3->nvbase.svga, nv3, VRAM_SIZE_4MB, 
         nv3_recalc_timings, nv3_svga_in, nv3_svga_out, nv3_draw_cursor, NULL);
     }
     else if (nv3->nvbase.bus_generation == nv_bus_agp_1x)
@@ -273,10 +328,28 @@ void* nv3_init(const device_t *info)
 
         pci_add_card(PCI_ADD_AGP, nv3_pci_read, nv3_pci_write, NULL, &nv3->nvbase.pci_slot);
 
-        svga_init(&nv3_device_agp, &nv3->nvbase.svga, &nv3, VRAM_SIZE_4MB, 
+        svga_init(&nv3_device_agp, &nv3->nvbase.svga, nv3, VRAM_SIZE_4MB, 
         nv3_recalc_timings, nv3_svga_in, nv3_svga_out, nv3_draw_cursor, NULL);
     }
 
+    nv_log("NV3: Initialising SVGA core memory mapping\n");
+
+    mem_mapping_set(&nv3->nvbase.svga_mapping, 0, 0,
+        svga_read_linear,
+        svga_readw_linear,
+        svga_readl_linear,
+        svga_write_linear,
+        svga_writew_linear,
+        svga_writel_linear,
+        NULL, 0, &nv3->nvbase.svga);
+
+    io_sethandler(0x03c0, 0x0020, 
+    nv3_svga_in, NULL, NULL, 
+    nv3_svga_out, NULL, NULL, 
+    nv3);
+
+    // svga is done, so now initialise the real gpu
+    nv_log("NV3: Initialising GPU core...\n");
     nv3_pramdac_init();
 
     return nv3;

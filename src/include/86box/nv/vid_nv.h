@@ -67,12 +67,17 @@ typedef enum nv_bus_generation_e
 // NV Base
 typedef struct nv_base_s
 {
-    mem_mapping_t mmio; // mmio mapping (16mb ) 
-    rom_t vbios;        // NVIDIA VBIOS
-    svga_t svga;
-    uint8_t pci_slot;
+    rom_t vbios;                        // NVIDIA/OEm VBIOS
+    // move to nv3_cio_t?
+    svga_t svga;                        // SVGA core (separate to nv3)
+    // stuff that doesn't fit in the svga structure
+    uint32_t cio_read_bank;             // SVGA read bank
+    uint32_t cio_write_bank;            // SVGA write bank
+
+    mem_mapping_t svga_mapping;         // SVGA core memory mapping
+    mem_mapping_t mmio;                 // mmio mapping (32MB unified MMIO) 
+    uint8_t pci_slot;                   // pci slot number
     nv_bus_generation bus_generation;
-    
 } nv_base_t;
 
 // Master Control

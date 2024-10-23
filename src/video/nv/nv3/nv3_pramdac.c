@@ -33,22 +33,24 @@
 
 void nv3_pramdac_init()
 {
-    nv_log("NV3: Initialising PRAMDAC.........");
+    nv_log("NV3: Initialising PRAMDAC\n");
 
     // defaults, these come from vbios in reality
-    nv3->pramdac.memory_clock_m = nv3->pramdac.pixel_clock_m = 0x03;
-    nv3->pramdac.memory_clock_n = nv3->pramdac.pixel_clock_n = 0xc2;
-    nv3->pramdac.memory_clock_p = nv3->pramdac.pixel_clock_p = 0x0d;
+    // driver defaults are nonsensical(?), or the algorithm is wrong
+    // munged this to 100mhz for now
+    nv3->pramdac.memory_clock_m = nv3->pramdac.pixel_clock_m = 0x07;
+    nv3->pramdac.memory_clock_n = nv3->pramdac.pixel_clock_n = 0xc8;
+    nv3->pramdac.memory_clock_p = nv3->pramdac.pixel_clock_p = 0x0c;
 
     nv3_pramdac_set_pixel_clock();
     nv3_pramdac_set_vram_clock();
 
-    nv_log("Done!\n");
+    nv_log("NV3: Initialising PRAMDAC: Done\n");
 }
 
 void nv3_pramdac_set_vram_clock()
 {
-    int32_t frequency = 14318000.0f;
+    float frequency = 14318000000.0f;
 
     // prevent division by 0
     if (nv3->pramdac.memory_clock_m == 0)
@@ -69,15 +71,15 @@ void nv3_pramdac_set_pixel_clock()
         // missing section
         // if (nv3->pfb.vram_size == NV3_PFB_BOOT_0_VRAM_SIZE_8MB)
         // {
-        //      freq = 13500000.0f;
+        //      freq = 13500000000.0f;
         // }
         // else 
         //
         // {
-        //      freq = 14318000.0f;
+        //      freq = 14318000000.0f;
         // }
 
-        int32_t frequency = 14318000.0f;
+        float frequency = 14318000000.0f;
 
         // prevent division by 0
         if (nv3->pramdac.pixel_clock_m == 0)
