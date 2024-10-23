@@ -200,7 +200,7 @@ uint8_t nv3_svga_in(uint16_t addr, void* priv)
             }
             break;
         default:
-            svga_in(addr, priv);
+            return svga_in(addr, priv);
     }
 
     return 0x00; //TEMP
@@ -277,8 +277,7 @@ void* nv3_init(const device_t *info)
         nv3_recalc_timings, nv3_svga_in, nv3_svga_out, nv3_draw_cursor, NULL);
     }
 
-    nv3_pramdac_set_pixel_clock();
-    nv3_pramdac_set_vram_clock();
+    nv3_pramdac_init();
 
     return nv3;
 }

@@ -54,7 +54,7 @@ void nv3_pramdac_set_vram_clock()
     if (nv3->pramdac.memory_clock_m == 0)
         nv3->pramdac.memory_clock_m == 1;
     else
-        frequency = (frequency * nv3->pramdac.memory_clock_n) / (1 << nv3->pramdac.memory_clock_p) / nv3->pramdac.memory_clock_n;
+        frequency = (frequency * nv3->pramdac.memory_clock_n) / (1 << nv3->pramdac.memory_clock_p) / nv3->pramdac.memory_clock_m;
 
     nv_log("NV3: Memory clock = %.2f MHz\n", frequency / 1000000.0f);    
 }
@@ -83,7 +83,7 @@ void nv3_pramdac_set_pixel_clock()
         if (nv3->pramdac.pixel_clock_m == 0)
             nv3->pramdac.pixel_clock_m == 1;
         else
-            frequency = (frequency * nv3->pramdac.pixel_clock_n) / (1 << nv3->pramdac.pixel_clock_p) / nv3->pramdac.pixel_clock_n;
+            frequency = (frequency * nv3->pramdac.pixel_clock_n) / (1 << nv3->pramdac.pixel_clock_p) / nv3->pramdac.pixel_clock_m;
 
         nv3->nvbase.svga.clock = cpuclock / frequency;
 

@@ -134,12 +134,13 @@ typedef struct nv_pfifo_s
 // RAMDAC
 typedef struct nv3_pramdac_s
 {
-    uint8_t memory_clock_m;     // memory clock M-divider
-    uint8_t memory_clock_n;     // memory clock N-divider
-    uint8_t memory_clock_p;     // memory clock P-divider
-    uint8_t pixel_clock_m;     // pixel clock M-divider
-    uint8_t pixel_clock_n;     // pixel clock N-divider
-    uint8_t pixel_clock_p;     // pixel clock P-divider
+    // these should be uint8_t but C math is a lot better with this
+    uint32_t memory_clock_m;     // memory clock M-divider
+    uint32_t memory_clock_n;     // memory clock N-divider
+    uint32_t memory_clock_p;     // memory clock P-divider
+    uint32_t pixel_clock_m;     // pixel clock M-divider
+    uint32_t pixel_clock_n;     // pixel clock N-divider
+    uint32_t pixel_clock_p;     // pixel clock P-divider
     
 } nv3_pramdac_t;
 
