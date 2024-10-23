@@ -27,7 +27,7 @@ add_library(vid OBJECT agpgart.c video.c vid_table.c vid_cga.c vid_cga_comp.c
     vid_tkd8001_ramdac.c vid_att20c49x_ramdac.c vid_s3.c vid_s3_virge.c
     vid_ibm_rgb528_ramdac.c vid_sdac_ramdac.c vid_mga.c 
     vid_tvp3026_ramdac.c vid_att2xc498_ramdac.c vid_xga.c
-    vid_bochs_vbe.c nv/nv_base.c nv/nv3/nv3_core.c)
+    vid_bochs_vbe.c nv/nv_base.c nv/nv3/nv3_core.c nv/nv3/nv3_pramdac.c)
 
 add_library(voodoo OBJECT vid_voodoo.c vid_voodoo_banshee.c
     vid_voodoo_banshee_blitter.c vid_voodoo_blitter.c vid_voodoo_display.c

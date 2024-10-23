@@ -134,7 +134,13 @@ typedef struct nv_pfifo_s
 // RAMDAC
 typedef struct nv3_pramdac_s
 {
-
+    uint8_t memory_clock_m;     // memory clock M-divider
+    uint8_t memory_clock_n;     // memory clock N-divider
+    uint8_t memory_clock_p;     // memory clock P-divider
+    uint8_t pixel_clock_m;     // pixel clock M-divider
+    uint8_t pixel_clock_n;     // pixel clock N-divider
+    uint8_t pixel_clock_p;     // pixel clock P-divider
+    
 } nv3_pramdac_t;
 
 // Graphics Subsystem
@@ -182,4 +188,9 @@ void*   nv3_init(const device_t *info);
 void    nv3_close(void* priv);
 void    nv3_speed_changed(void *priv);
 void    nv3_force_redraw(void* priv);
+
+// NV3 PRAMDAC
+void    nv3_pramdac_init();
+void    nv3_pramdac_set_vram_clock();
+void    nv3_pramdac_set_pixel_clock();
 #endif
