@@ -139,7 +139,26 @@ uint8_t nv3_pci_read(int32_t func, int32_t addr, void* priv)
 
 void nv3_pci_write(int32_t func, int32_t addr, uint8_t val, void* priv)
 {
-    nv_log("nv3_pci_write func=%04x addr=%04x val=%04x\n", func, addr, val);
+    nv_log("nv3_pci_write func=%04x addr=%04x val=%04x", func, addr, val);
+
+    switch (addr)
+    {
+        // standard pci command stuff
+        case PCI_REG_COMMAND:
+            if (val & PCI_COMMAND_IO)
+            {
+                 nv_log("...I/O command\n");
+            }
+            else if (val & PCI_COMMAND_MEM)
+            {
+            nv_log("...Memory command\n");
+
+            }
+            
+            break;
+    }
+
+    nv_log("\n");
 }
 
 void nv3_close(void* priv)
@@ -171,22 +190,18 @@ void nv3_recalc_timings(svga_t* svga)
     // Set the pixel mode
     switch (svga->crtc[NV3_CRTC_REGISTER_PIXELMODE] & 0x03)
     {
-        case 0x0: // Verify this when my RIVA 128 turns up...
-            svga->bpp = 4;
-            svga->lowres = 0; //?
-            svga->render = svga_render_4bpp_highres;
-            break;
-        case 0x1:
+        ///0x0 is VGA textmode
+        case NV3_CRTC_REGISTER_PIXELMODE_8BPP:
             svga->bpp = 8;
             svga->lowres = 0;
             svga->render = svga_render_8bpp_highres;
             break;
-        case 0x2:
+        case NV3_CRTC_REGISTER_PIXELMODE_16BPP:
             svga->bpp = 16;
             svga->lowres = 0;
             svga->render = svga_render_16bpp_highres;
             break;
-        case 0x3:
+        case NV3_CRTC_REGISTER_PIXELMODE_32BPP:
             svga->bpp = 32;
             svga->lowres = 0;
             svga->render = svga_render_32bpp_highres;
@@ -248,6 +263,12 @@ void nv3_svga_out(uint16_t addr, uint8_t val, void* priv)
 
     uint8_t crtcreg = nv3->nvbase.svga.crtcreg;
     uint8_t old_value;
+
+    // todo:
+    // RMA
+    // Pixel formats (8bit vs 555 vs 565)
+    // VBE 3.0?
+    
 
     switch (addr)
     {
@@ -313,10 +334,9 @@ void* nv3_init(const device_t *info)
     nv_log("NV3: initialising core\n");
 
     nv3 = (nv3_t*)calloc(1, sizeof(nv3_t));
-    //int ret;
 
     // currently using ELSA VICTORY Erazor    Ver. 1.54.03    [WD/VBE30/DDC2B/DPMS] 
-    // ELSA VICTORY Erazor    Ver. 1.55.00    [WD/VBE30/DDC2B/DPMS] seems to be broken :(
+    //                 ELSA VICTORY Erazor    Ver. 1.55.00    [WD/VBE30/DDC2B/DPMS] seems to be broken :(
     
     int32_t err = rom_init(&nv3->nvbase.vbios, NV_VBIOS_V15403, 0xC0000, 0x8000, 0x7fff, 0, MEM_MAPPING_EXTERNAL);
     

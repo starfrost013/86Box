@@ -79,7 +79,7 @@
 
 //todo: pixel format
 
-#define NV3_CRTC_REGISTER_PIXELMODE_4BPP        0x00 // vga 16-colours?
+#define NV3_CRTC_REGISTER_PIXELMODE_VGA         0x00 // vga 16-colours?
 #define NV3_CRTC_REGISTER_PIXELMODE_8BPP        0x01
 #define NV3_CRTC_REGISTER_PIXELMODE_16BPP       0x02
 #define NV3_CRTC_REGISTER_PIXELMODE_32BPP       0x03 
