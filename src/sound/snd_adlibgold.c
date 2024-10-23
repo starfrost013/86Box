@@ -904,7 +904,6 @@ adgold_get_music_buffer(int32_t *buffer, int len, void *priv)
     int c;
 
     const int32_t *opl_buf = adgold->opl.update(adgold->opl.priv);
-    adgold_update(adgold);
 
     for (c = 0; c < len * 2; c += 2) {
         adgold_buffer[c] = ((opl_buf[c] * adgold->fm_vol_l) >> 7) / 2;
