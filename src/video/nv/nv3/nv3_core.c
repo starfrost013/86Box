@@ -46,7 +46,6 @@ uint8_t nv3_mmio_read8(uint32_t addr, void* priv)
 uint16_t nv3_mmio_read16(uint32_t addr, void* priv)
 {
     nv_log("NV3: nv3_mmio_read16 0x%04x\n", addr);
-
 }
 
 // Read 32-bit MMIO
@@ -104,18 +103,35 @@ uint8_t nv3_pci_read(int32_t func, int32_t addr, void* priv)
     switch (addr) 
     {
         // Get the pci vendor id..
-        case 0x00:
+        case NV3_PCI_CFG_VENDOR_ID:
             ret = (PCI_VENDOR_SGS_NV & 0xFF);
             break;
-        case 0x01:
+        case NV3_PCI_CFG_VENDOR_ID+1: // all access 8bit
             ret = (PCI_VENDOR_SGS_NV >> 8);
             break;
-        case 0x02:
+        // Subsystem ID
+        case NV3_PCI_CFG_DEVICE_ID:
             ret = (PCI_DEVICE_NV3 & 0xFF);
             break;
-        case 0x03:
+        case NV3_PCI_CFG_DEVICE_ID+1:
             ret = (PCI_DEVICE_NV3 >> 8);
             break;
+        // various capabilities
+        // IO space         enabled
+        // Memory space     enabled
+        // Bus master       enabled
+        // Write/inval      enabled
+        // Pal snoop        enabled
+        // Capabiliies list enabled
+        // 66Mhz FSB        capable
+
+        case 0x04 ... 0x07:
+            ret = 0xFF;
+            break;
+        case NV3_PCI_CFG_REVISION:
+            ret = NV3_PCI_CFG_REVISION_B00; // Commercial release
+            break;
+        
     }
 
     nv_log("nv3_pci_read func=0x%04x addr=0x%04x ret=0x%04x\n", func, addr, ret);

@@ -19,12 +19,22 @@
 // Last updated     23 October 2024
 
 // PCI config
+#define NV3_PCI_CFG_VENDOR_ID                   0x0
+#define NV3_PCI_CFG_DEVICE_ID                   0x2
+#define NV3_PCI_CFG_CAPABILITIES                0x4
+#define NV3_PCI_CFG_REVISION                    0x8
+
+#define NV3_PCI_CFG_REVISION_A00                0x00 // nv3a January 1997 - engineering sample, had NV1 PAUDIO and other minor incompatibilities
+#define NV3_PCI_CFG_REVISION_B00                0x10 // nv3b September 1997
+#define NV3_PCI_CFG_REVISION_C00                0x20 // todo: verify this - nv3c (nv3t?) / RIVA 128 ZX
+
+#define NV3_PCI_CFG_CLASS_CODE                  0x9
 
 // Master Control
 
-#define PMC_BOOT                                0x0 
-#define PMC_INTERRUPT                           0x100
-#define PMC_ENABLE                              0x200
+#define NV3_PMC_BOOT                            0x0 
+#define NV3_PMC_INTERRUPT                       0x100
+#define NV3_PMC_ENABLE                          0x200
 
 // CRTC/CIO (0x3b0-0x3df)
 
