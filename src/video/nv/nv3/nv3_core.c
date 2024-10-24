@@ -8,7 +8,8 @@
  *
  *          NV3 bringup and device emulation.
  *
- *
+ *          Notes:
+ *             xfree86 ref has INVERTED bit numbering? What?
  *
  * Authors: Connor Hyde, <mario64crashed@gmail.com> I need a better email address ;^)
  *
@@ -131,7 +132,12 @@ uint8_t nv3_pci_read(int32_t func, int32_t addr, void* priv)
         case NV3_PCI_CFG_REVISION:
             ret = NV3_PCI_CFG_REVISION_B00; // Commercial release
             break;
-        
+        case NV3_PCI_CFG_ENABLE_VBIOS:
+            ret = nv3->pci_config.vbios_enabled;
+            break;
+        default: // by default just return pci_config.pci_regs
+            ret = nv3->pci_config.pci_regs[addr];
+            break;
     }
 
     nv_log("nv3_pci_read func=0x%04x addr=0x%04x ret=0x%04x\n", func, addr, ret);
@@ -141,20 +147,59 @@ void nv3_pci_write(int32_t func, int32_t addr, uint8_t val, void* priv)
 {
     nv_log("nv3_pci_write func=%04x addr=%04x val=%04x", func, addr, val);
 
+    // TOTAL IRRELEVANCY
+    nv3->pci_config.pci_regs[addr] = val;
+
     switch (addr)
     {
         // standard pci command stuff
         case PCI_REG_COMMAND:
             if (val & PCI_COMMAND_IO)
             {
-                 nv_log("...I/O command\n");
+                 nv_log("...I/O command");
             }
             else if (val & PCI_COMMAND_MEM)
             {
-            nv_log("...Memory command\n");
-
+                nv_log("...Memory command");
             }
             
+            break;
+        case NV3_PCI_CFG_VBIOS_BASE:
+        case NV3_PCI_CFG_ENABLE_VBIOS:
+            
+            // make sure we are actually toggling the vbios, not the rom base
+            if (addr == NV3_PCI_CFG_ENABLE_VBIOS)
+                nv3->pci_config.vbios_enabled = (val & 0x01);
+
+            if (nv3->pci_config.vbios_enabled)
+            {
+                // First see if we simply wanted to change the VBIOS location
+
+                if (addr != NV3_PCI_CFG_ENABLE_VBIOS)
+                {
+                    uint32_t old_addr = nv3->nvbase.vbios.mapping.base;
+                    // 9bit register
+                    uint32_t new_addr = nv3->pci_config.pci_regs[NV3_PCI_CFG_VBIOS_BASE_H] << 24 |
+                    nv3->pci_config.pci_regs[NV3_PCI_CFG_VBIOS_BASE_L] << 16;
+
+                    // move it
+                    mem_mapping_set_addr(&nv3->nvbase.vbios.mapping, new_addr, 0x8000);
+
+                    nv_log("...i like to move it move it (VBIOS Relocation) 0x%04x -> 0x%04x\n", old_addr, new_addr);
+
+                }
+                else
+                {
+                    nv_log("...VBIOS Enable");
+                    mem_mapping_enable(&nv3->nvbase.vbios.mapping);
+                }
+            }
+            else
+            {
+                nv_log("...VBIOS Disable");
+                mem_mapping_disable(&nv3->nvbase.vbios.mapping);
+
+            }
             break;
     }
 

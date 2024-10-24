@@ -24,6 +24,12 @@
 #define NV3_PCI_CFG_CAPABILITIES                0x4
 #define NV3_PCI_CFG_REVISION                    0x8
 
+#define NV3_PCI_CFG_ENABLE_VBIOS                0x30
+#define NV3_PCI_CFG_VBIOS_BASE                  0x32 ... 0x33
+#define NV3_PCI_CFG_VBIOS_BASE_L                0x32
+#define NV3_PCI_CFG_VBIOS_BASE_H                0x33
+
+
 #define NV3_PCI_CFG_REVISION_A00                0x00 // nv3a January 1997 - engineering sample, had NV1 PAUDIO and other minor incompatibilities
 #define NV3_PCI_CFG_REVISION_B00                0x10 // nv3b September 1997
 #define NV3_PCI_CFG_REVISION_C00                0x20 // todo: verify this - nv3c (nv3t?) / RIVA 128 ZX

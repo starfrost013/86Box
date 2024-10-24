@@ -28,10 +28,12 @@ void nv_log(const char *fmt, ...);
 #define PCI_VENDOR_SGS          0x104A  // SGS-Thompson
 #define PCI_VENDOR_SGS_NV       0x12D2  // SGS-Thompson/NVidia joint venture
 
+#define NV_PCI_NUM_CFG_REGS     256     // number of pci config registers
+
 // 0x0000 was probably the NV0 'Nvidia Hardware Simulator'
 #define PCI_DEVICE_NV1          0x0008  // Nvidia NV1
 #define PCI_DEVICE_NV1_VGA      0x0009  // Nvidia NV1 VGA core
-#define PCI_DEVICE_NV2          0x0010  // Nvidia NV2 / Mutara V08 cancelled
+#define PCI_DEVICE_NV2          0x0010  // Nvidia NV2 / Mutara V08 (cancelled)
 #define PCI_DEVICE_NV3          0x0018  // Nvidia NV3 (Riva 128)
 #define PCI_DEVICE_NV3T         0x0019  // Nvidia NV3T (Riva 128 ZX)
 #define PCI_DEVICE_NV4          0x0020  // Nvidia NV4 (RIVA TNT)
@@ -44,10 +46,11 @@ void nv_log(const char *fmt, ...);
 #define CHIP_REVISION_NV3_B0    0x0010  // October 1997
 #define CHIP_REVISION_NV3_C0    0x0020  // 1998
 
-// Architecture ID
-#define NV_ARCHITECTURE_NV1   1
-#define NV_ARCHITECTURE_NV2   2
-#define NV_ARCHITECTURE_NV3   3
+// Architecture IDs
+#define NV_ARCHITECTURE_NV1     1
+#define NV_ARCHITECTURE_NV2     2
+#define NV_ARCHITECTURE_NV3     3
+
 
 typedef enum nv_bus_generation_e
 {
@@ -87,6 +90,12 @@ typedef struct nv3_pmc_s
 
 } nv3_pmc_t;
 
+typedef struct nv3_pci_config_s
+{
+    uint8_t pci_regs[NV_PCI_NUM_CFG_REGS];  // The actual pci register values (not really used, just so they can be stored - they aren't very good for code readability)
+    bool    vbios_enabled;                  // is the vbios enabled?
+} nv3_pci_config_t;
+
 // add enums for eac
 // Chip configuration
 typedef struct nv3_straps_s
@@ -119,7 +128,7 @@ typedef struct nv3_pfifo_ramro_s
 } nv3_pfifo_ramro_t;
 
 // context for unused channels
-typedef struct nv3_dfifo_ramfc_s
+typedef struct nv3_pfifo_ramfc_s
 {
 
 } nv3_pfifo_ramfc_t;
@@ -161,12 +170,18 @@ typedef struct nv3_pstraps_s
 
 } nv3_pstraps_t;
 
+typedef struct nv3_ptimer_s
+{
+
+} nv3_ptimer_t;
+
 typedef struct nv3_s
 {
     nv_base_t nvbase;   // Base Nvidia structure
     
     // Config
-    nv3_straps_t nvstraps;
+    nv3_straps_t straps;
+    nv3_pci_config_t pci_config;
 
     // Subsystems
     nv3_pmc_t pmc;               // Master Control
