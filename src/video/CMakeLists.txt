@@ -28,7 +28,7 @@ add_library(vid OBJECT agpgart.c video.c vid_table.c vid_cga.c vid_cga_comp.c
     vid_ibm_rgb528_ramdac.c vid_sdac_ramdac.c vid_mga.c 
     vid_tvp3026_ramdac.c vid_att2xc498_ramdac.c vid_xga.c
     vid_bochs_vbe.c 
-    nv/nv_base.c nv/nv3/nv3_core.c 
+    nv/nv_base.c nv/nv3/nv3_core.c nv/nv3/nv3_core_arbiter.c
     nv/nv3/subsystems/nv3_pramdac.c 
     nv/nv3/subsystems/nv3_pfifo.c nv/nv3/subsystems/nv3_pfifo_ramht.c nv/nv3/subsystems/nv3_pfifo_ramro.c 
     nv/nv3/subsystems/nv3_pgraph.c nv/nv3/subsystems/nv3_pmc.c nv/nv3/subsystems/nv3_pstraps.c

@@ -16,9 +16,9 @@
  */
 
 // vid_nv3.h: NV3 Architecture Hardware Reference (open-source)
-// Last updated     23 October 2024
+// Last updated     24 October 2024
 
-#define MMIO_SIZE       0x1000000
+#define NV3_MMIO_SIZE   0x1000000       // Max MMIO size
 #define NV_VBIOS_V15403 "roms/video/nvidia/nv3/VCERAZOR.BIN" //TODO: move to hash system
 
 // Temporary, will be loaded from settings
@@ -36,7 +36,6 @@
 #define NV3_PCI_CFG_VBIOS_BASE                  0x32 ... 0x33
 #define NV3_PCI_CFG_VBIOS_BASE_L                0x32
 #define NV3_PCI_CFG_VBIOS_BASE_H                0x33
-
 
 #define NV3_PCI_CFG_REVISION_A00                0x00 // nv3a January 1997 - engineering sample, had NV1 PAUDIO and other minor incompatibilities
 #define NV3_PCI_CFG_REVISION_B00                0x10 // nv3b September 1997
@@ -89,14 +88,20 @@
 #define NV3_CRTC_REGISTER_FORMAT                0x25
 #define NV3_CRTC_REGISTER_PIXELMODE             0x28
 
-// Register value defines start here 
-
-//todo: pixel format
 
 #define NV3_CRTC_REGISTER_PIXELMODE_VGA         0x00 // vga 16-colours?
 #define NV3_CRTC_REGISTER_PIXELMODE_8BPP        0x01
 #define NV3_CRTC_REGISTER_PIXELMODE_16BPP       0x02
 #define NV3_CRTC_REGISTER_PIXELMODE_32BPP       0x03 
+
+#define NV3_CRTC_REGISTER_RMA                   0x38 // REAL MODE ACCESS!
+
+#define NV3_CRTC_REGISTER_RMA_MODE_MAX          0x0F
+
+// Register value defines start here 
+
+//todo: pixel format
+
 
 // PRAMDAC
 #define NV3_PRAMDAC_CLOCK_MEMORY                0x680504

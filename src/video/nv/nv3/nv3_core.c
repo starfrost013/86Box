@@ -44,18 +44,24 @@ void nv3_svga_out(uint16_t addr, uint8_t val, void* priv);
 uint8_t nv3_mmio_read8(uint32_t addr, void* priv)
 {
     nv_log("NV3: nv3_mmio_read8 0x%04x\n", addr);
+
+    return 0x00;
 }
 
 // Read 16-bit MMIO
 uint16_t nv3_mmio_read16(uint32_t addr, void* priv)
 {
     nv_log("NV3: nv3_mmio_read16 0x%04x\n", addr);
+
+    return 0x00;
 }
 
 // Read 32-bit MMIO
 uint32_t nv3_mmio_read32(uint32_t addr, void* priv)
 {
     nv_log("NV3: nv3_mmio_read32 0x%04x\n", addr);
+
+    return 0x00;
 }
 
 // Write 8-bit MMIO
@@ -74,11 +80,6 @@ void nv3_mmio_write16(uint32_t addr, uint16_t val, void* priv)
 void nv3_mmio_write32(uint32_t addr, uint32_t val, void* priv)
 {
     nv_log("NV3: nv3_mmio_write32 0x%04x val=%04x\n", addr, val);
-}
-
-void nv3_init_mmio()
-{
-
 }
 
 // PCI
@@ -229,7 +230,6 @@ void nv3_recalc_timings(svga_t* svga)
 {
     nv3_t* nv3 = (nv3_t*)svga->priv;
 
-
     // Set the pixel mode
     switch (svga->crtc[NV3_CRTC_REGISTER_PIXELMODE] & 0x03)
     {
@@ -260,17 +260,33 @@ void nv3_recalc_timings(svga_t* svga)
     }
 }
 
+// Read from SVGA core memory
 uint8_t nv3_svga_in(uint16_t addr, void* priv)
 {
     nv3_t* nv3 = (nv3_t*)priv;
 
+    uint8_t ret = 0x00;
+
+    // If we need to RMA from GPU MMIO, go do that
+    if (addr >= 0x3d0
+    && addr <= 0x3d3)
+    {
+        if (!(nv3->pbus.rma.mode & 0x01))
+            return ret;
+
+        // must be dword aligned
+        uint32_t real_rma_read_addr = addr + ((nv3->pbus.rma.mode & NV3_CRTC_REGISTER_RMA_MODE_MAX - 1) << 1) + (addr & 0x03); 
+        ret = nv3_pbus_rma_read(real_rma_read_addr);
+        return ret;
+    }
+
     nv_log("nv3_svga_in addr=0x%04x\n", addr);
 
     // mask off b0/d0 registers 
-    if ((((addr & 0xFFF0) == 0x3D0 || (addr & 0xFFF0) == 0x3B0) && addr < 0x3de) && !(nv3->nvbase.svga.miscout & 1))
+    if ((((addr & 0xFFF0) == 0x3D0 
+    || (addr & 0xFFF0) == 0x3B0) && addr < 0x3de) 
+    && !(nv3->nvbase.svga.miscout & 1))
         addr ^= 0x60;
-
-    uint8_t ret = 0x00;
 
     switch (addr)
     {
@@ -294,9 +310,25 @@ uint8_t nv3_svga_in(uint16_t addr, void* priv)
     return ret; //TEMP
 }
 
+// Write to SVGA core memory
 void nv3_svga_out(uint16_t addr, uint8_t val, void* priv)
 {
     nv_log("nv3_svga_out addr=0x%04x val=0x%04x", addr, val);
+
+    // If we need to RMA to GPU MMIO, go do that
+    if (addr >= 0x3d0
+    && addr <= 0x3d3)
+    {
+        // we don't need to store these registers...
+        \
+        if (!(nv3->pbus.rma.mode & 0x01))
+            return;
+
+        uint32_t real_rma_write_addr = addr + ((nv3->pbus.rma.mode & NV3_CRTC_REGISTER_RMA_MODE_MAX - 1) << 1) + (addr & 0x03); 
+
+        nv3_pbus_rma_write(real_rma_write_addr, val);
+        return;
+    }
 
     // mask off b0/d0 registers 
     if ((((addr & 0xFFF0) == 0x3D0 || (addr & 0xFFF0) == 0x3B0) 
@@ -312,10 +344,10 @@ void nv3_svga_out(uint16_t addr, uint8_t val, void* priv)
     // Pixel formats (8bit vs 555 vs 565)
     // VBE 3.0?
     
-
     switch (addr)
     {
         case 0x3D4:
+            // real mode access to GPU MMIO space...
             nv3->nvbase.svga.crtcreg = val;
             break;
         // support the extended crtc regs and debug this out
@@ -334,9 +366,9 @@ void nv3_svga_out(uint16_t addr, uint8_t val, void* priv)
             // ...now act on it
 
             if (crtcreg > NV3_CRTC_REGISTER_STANDARDVGA_END)
-                nv_log("...Extended CRTC reg=0x%04x\n", crtcreg);
+                nv_log("...Extended CRTC reg=0x%04x", crtcreg);
             else   
-                nv_log("...Standard CRTC reg=0x%04x\n", crtcreg);
+                nv_log("...Standard CRTC reg=0x%04x", crtcreg);
 
             // Handle nvidia extended Bank0/Bank1 IDs
             switch (crtcreg)
@@ -354,6 +386,9 @@ void nv3_svga_out(uint16_t addr, uint8_t val, void* priv)
                             nv3->nvbase.svga.write_bank = nv3->nvbase.cio_write_bank << 15;
                         else
                             nv3->nvbase.svga.write_bank = nv3->nvbase.cio_write_bank << 13;
+                    break;
+                case NV3_CRTC_REGISTER_RMA:
+                    nv3->pbus.rma.mode = val & NV3_CRTC_REGISTER_RMA_MODE_MAX;
                     break;
             }
 
@@ -451,8 +486,6 @@ void* nv3_init(const device_t *info)
     else    
             nv_log("NV3: Successfully loaded VBIOS %s\n", NV_VBIOS_V15403);
 
-    // init the mmio
-    nv3_init_mmio();
 
     // set up the bus and start setting up SVGA core
     if (nv3->nvbase.bus_generation == nv_bus_pci)
@@ -474,8 +507,7 @@ void* nv3_init(const device_t *info)
         nv3_recalc_timings, nv3_svga_in, nv3_svga_out, nv3_draw_cursor, NULL);
     }
 
-
-
+    // init memory mappings
     nv3_init_mappings();
 
     // svga is done, so now initialise the real gpu

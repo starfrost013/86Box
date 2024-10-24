@@ -109,10 +109,18 @@ typedef struct nv3_pfb_s
 
 } nv3_pfb_t;
 
+// Access the GPU from real-mode
+typedef struct nv3_pbus_rma_s
+{
+    uint32_t addr;              // Address to RMA to
+    uint32_t data;              // Data to RMA
+    uint8_t mode; 
+} nv3_pbus_rma_t;
+
 // Bus Configuration
 typedef struct nv3_pbus_s
 {
-
+    nv3_pbus_rma_t rma;
 } nv3_pbus_t;
 
 // Graphics object hashtable
@@ -216,6 +224,17 @@ void*   nv3_init(const device_t *info);
 void    nv3_close(void* priv);
 void    nv3_speed_changed(void *priv);
 void    nv3_force_redraw(void* priv);
+
+uint8_t nv3_mmio_read8(uint32_t addr, void* priv); // Read 8-bit MMIO
+uint16_t nv3_mmio_read16(uint32_t addr, void* priv); // Read 16-bit MMIO
+uint32_t nv3_mmio_read32(uint32_t addr, void* priv); // Read 32-bit MMIO
+void    nv3_mmio_write8(uint32_t addr, uint8_t val, void* priv); // Write 8-bit MMIO
+void    nv3_mmio_write16(uint32_t addr, uint16_t val, void* priv); // Write 16-bit MMIO
+void    nv3_mmio_write32(uint32_t addr, uint32_t val, void* priv); // Write 32-bit MMIO
+
+// NV3 PBUS RMA - Real Mode Access for VBIOS
+uint8_t nv3_pbus_rma_read(uint16_t addr);
+void    nv3_pbus_rma_write(uint16_t addr, uint8_t val);
 
 // NV3 PRAMDAC
 void    nv3_pramdac_init();
