@@ -18,6 +18,14 @@
 // vid_nv3.h: NV3 Architecture Hardware Reference (open-source)
 // Last updated     23 October 2024
 
+#define MMIO_SIZE       0x1000000
+#define NV_VBIOS_V15403 "roms/video/nvidia/nv3/VCERAZOR.BIN" //TODO: move to hash system
+
+// Temporary, will be loaded from settings
+#define VRAM_SIZE_2MB   0x200000 // 2MB
+#define VRAM_SIZE_4MB   0x400000 // 4MB
+#define VRAM_SIZE_8MB   0x800000 // NV3T only
+
 // PCI config
 #define NV3_PCI_CFG_VENDOR_ID                   0x0
 #define NV3_PCI_CFG_DEVICE_ID                   0x2

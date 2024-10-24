@@ -175,6 +175,11 @@ typedef struct nv3_ptimer_s
 
 } nv3_ptimer_t;
 
+typedef struct nv3_pramin_s
+{
+
+} nv3_pramin_t;
+
 typedef struct nv3_s
 {
     nv_base_t nvbase;   // Base Nvidia structure
@@ -195,6 +200,8 @@ typedef struct nv3_s
     nv3_pramdac_t pramdac;       // RAMDAC (CLUT etc)
     nv3_pgraph_t pgraph;         // 2D/3D Graphics
     nv3_pstraps_t pstraps;       // Chip configuration
+    nv3_ptimer_t ptimer;         // programmable interval timer
+    nv3_pramin_t pramin;         // Ram for INput of DMA objects. Very important!
 
     //more here
 

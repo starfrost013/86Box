@@ -31,11 +31,14 @@
 
 nv3_t* nv3;
 
-#define MMIO_SIZE       0x1000000
-#define NV_VBIOS_V15403 "roms/video/nvidia/nv3/VCERAZOR.BIN" //TODO: move to hash system
+// Prototypes for functions only used in this translation unit
+void nv3_init_mappings_mmio();
+void nv3_init_mappings_svga();
+void nv3_shutdown_mappings_mmio();
+void nv3_shutdown_mappings_svga();
 
-// Temporary, will be loaded from settings
-#define VRAM_SIZE_4MB   0x4000000 // 4MB
+uint8_t nv3_svga_in(uint16_t addr, void* priv);
+void nv3_svga_out(uint16_t addr, uint8_t val, void* priv);
 
 // Read 8-bit MMIO
 uint8_t nv3_mmio_read8(uint32_t addr, void* priv)
@@ -75,22 +78,7 @@ void nv3_mmio_write32(uint32_t addr, uint32_t val, void* priv)
 
 void nv3_init_mmio()
 {
-    nv_log("NV3: Initialising 32MB MMIO area\n");
 
-    // 0x0 - 1000000: regs
-    // 0x1000000-2000000
-
-    // initialize the mmio mapping
-    mem_mapping_add(&nv3->nvbase.mmio, 0, 0, 
-    nv3_mmio_read8,
-    nv3_mmio_read16,
-    nv3_mmio_read32,
-    nv3_mmio_write8,
-    nv3_mmio_write16,
-    nv3_mmio_write32,
-    NULL,
-    MEM_MAPPING_EXTERNAL,
-    nv3);
 }
 
 // PCI
@@ -154,14 +142,24 @@ void nv3_pci_write(int32_t func, int32_t addr, uint8_t val, void* priv)
     {
         // standard pci command stuff
         case PCI_REG_COMMAND:
+
+            // you have to turn everything off first
+            nv3_shutdown_mappings_mmio();
+            nv3_shutdown_mappings_svga();
+
+            (val & PCI_COMMAND_IO) ? nv_log("...Enable I/O") : nv_log("...Disable I/O");
+            (val & PCI_COMMAND_MEM) ? nv_log("...Enable Memory") : nv_log("...Disable Memory");
+            
+            // don't call init_svga as this is IO only
             if (val & PCI_COMMAND_IO)
-            {
-                 nv_log("...I/O command");
-            }
-            else if (val & PCI_COMMAND_MEM)
-            {
-                nv_log("...Memory command");
-            }
+                    io_sethandler(0x03c0, 0x0020, 
+                    nv3_svga_in, NULL, NULL, 
+                    nv3_svga_out, NULL, NULL, 
+                    nv3);
+
+            if (val & PCI_COMMAND_MEM)
+                nv3_init_mappings_mmio();
+                nv3_init_mappings_svga();
             
             break;
         case NV3_PCI_CFG_VBIOS_BASE:
@@ -362,13 +360,76 @@ void nv3_svga_out(uint16_t addr, uint8_t val, void* priv)
             break;
         default:
             svga_out(addr, val, &nv3->nvbase.svga);
-            nv_log("\n");
+            break;
     }
+
+    nv_log("\n");
 }
 
 void nv3_draw_cursor(svga_t* svga, int32_t drawline)
 {
     nv_log("nv3_draw_cursor drawline=0x%04x", drawline);
+}
+
+// Initialise the MMIO mappings
+void nv3_init_mappings_mmio()
+{
+    nv_log("NV3: Initialising 32MB MMIO area\n");
+
+    // 0x0 - 1000000: regs
+    // 0x1000000-2000000
+
+    // initialize the mmio mapping
+    mem_mapping_add(&nv3->nvbase.mmio, 0, 0, 
+    nv3_mmio_read8,
+    nv3_mmio_read16,
+    nv3_mmio_read32,
+    nv3_mmio_write8,
+    nv3_mmio_write16,
+    nv3_mmio_write32,
+    NULL,
+    MEM_MAPPING_EXTERNAL,
+    nv3);
+}
+
+void nv3_init_mappings_svga()
+{
+    nv_log("NV3: Initialising SVGA core memory mapping\n");
+
+    // setup the svga mappings
+    mem_mapping_set(&nv3->nvbase.svga_mapping, 0, 0,
+        svga_read_linear,
+        svga_readw_linear,
+        svga_readl_linear,
+        svga_write_linear,
+        svga_writew_linear,
+        svga_writel_linear,
+        NULL, 0, &nv3->nvbase.svga);
+
+    io_sethandler(0x03c0, 0x0020, 
+    nv3_svga_in, NULL, NULL, 
+    nv3_svga_out, NULL, NULL, 
+    nv3);
+}
+
+void nv3_shutdown_mappings_mmio()
+{
+    mem_mapping_disable(&nv3->nvbase.mmio);
+}
+
+void nv3_shutdown_mappings_svga()
+{
+    mem_mapping_disable(&nv3->nvbase.svga_mapping);
+    io_removehandler(0x03c0, 0x0020, 
+    nv3_svga_in, NULL, NULL, 
+    nv3_svga_out, NULL, NULL, 
+    nv3);
+}
+
+void nv3_init_mappings()
+{
+    nv3_init_mappings_mmio();
+    nv3_init_mappings_svga();
 }
 
 // 
@@ -413,21 +474,9 @@ void* nv3_init(const device_t *info)
         nv3_recalc_timings, nv3_svga_in, nv3_svga_out, nv3_draw_cursor, NULL);
     }
 
-    nv_log("NV3: Initialising SVGA core memory mapping\n");
 
-    mem_mapping_set(&nv3->nvbase.svga_mapping, 0, 0,
-        svga_read_linear,
-        svga_readw_linear,
-        svga_readl_linear,
-        svga_write_linear,
-        svga_writew_linear,
-        svga_writel_linear,
-        NULL, 0, &nv3->nvbase.svga);
 
-    io_sethandler(0x03c0, 0x0020, 
-    nv3_svga_in, NULL, NULL, 
-    nv3_svga_out, NULL, NULL, 
-    nv3);
+    nv3_init_mappings();
 
     // svga is done, so now initialise the real gpu
     nv_log("NV3: Initialising GPU core...\n");
