@@ -7,7 +7,8 @@
  *          This file is part of the 86Box distribution.
  *
  *          The insane NV3 MMIO write arbiter.
- *          Writes to ALL sections of the GPU based on the start position.
+ *          Writes to ALL sections of the GPU based on the write position
+ *          All writes are internally considered to be 32-bit! Be careful...
  *
  *          
  *
@@ -15,3 +16,8 @@
  *
  *          Copyright 2024 starfrost
  */
+
+void nv3_mmio_arbitrate_write()
+{
+
+}

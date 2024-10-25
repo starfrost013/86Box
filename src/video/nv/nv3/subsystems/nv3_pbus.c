@@ -40,6 +40,18 @@ uint8_t nv3_pbus_rma_read(uint16_t addr)
 
     switch (addr)
     {
+        case 0x00:
+            ret = NV3_RMA_SIGNATURE_MSB;
+            break;
+        case 0x01:
+            ret = NV3_RMA_SIGNATURE_BYTE2;
+            break;
+        case 0x02:
+            ret = NV3_RMA_SIGNATURE_BYTE1;
+            break;       
+        case 0x03:
+            ret = NV3_RMA_SIGNATURE_LSB;
+            break;
         default:
             // reads must be dword aligned
             real_final_address = nv3->pbus.rma.addr + (addr & 0x03) & (NV3_MMIO_SIZE - 1);
@@ -52,8 +64,10 @@ uint8_t nv3_pbus_rma_read(uint16_t addr)
             nv_log("NV3: MMIO Real Mode Access read, initial address=0x%04x final RMA MMIO address=0x%08x data=0x%08x\n",
                 addr,  nv3->pbus.rma.addr, ret);
 
-            return ret; 
+            break;
     }
+
+    return ret; 
 }
 
 // Implements a 32-bit write using 16 bit port number
