@@ -63,7 +63,7 @@
 #define NV3_PGRAPH_CLASS18_BETA_START           0x410000    // Beta blending factor
 #define NV3_PGRAPH_CLASS18_BETA_END             0x411FFF  
 #define NV3_PGRAPH_CLASS20_ROP_START            0x420000    // Blending render operation used at final pixel/fragment generation stage
-#define NV3_PGRAPH_CLASS20_ROP_START            0x421FFF
+#define NV3_PGRAPH_CLASS20_ROP_END              0x421FFF
 #define NV3_PGRAPH_CLASS21_COLORKEY_START       0x430000    // Color key for image
 #define NV3_PGRAPH_CLASS21_COLORKEY_END         0x431FFF      
 #define NV3_PGRAPH_CLASS22_PLANEMASK_START      0x440000
