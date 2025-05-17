@@ -278,6 +278,15 @@ fdc_is_mfm(fdc_t *fdc)
     return fdc->mfm ? 1 : 0;
 }
 
+int
+fdc_is_dma(fdc_t *fdc)
+{
+    if ((fdc->flags & FDC_FLAG_PCJR) || !fdc->dma)
+        return 0;
+    else
+        return 1;
+}
+
 void
 fdc_request_next_sector_id(fdc_t *fdc)
 {
@@ -393,6 +402,20 @@ fdc_update_rwc(fdc_t *fdc, int drive, int rwc)
     fdc_log("FDD %c: New RWC is %i\n", 0x41 + drive, rwc);
     fdc->rwc[drive] = rwc;
     fdc_rate(fdc, drive);
+}
+
+uint8_t
+fdc_get_media_id(fdc_t *fdc, int id)
+{
+    uint8_t ret = fdc->media_id & (1 << id);
+
+    return ret;
+}
+
+void
+fdc_set_media_id(fdc_t *fdc, int id, int set)
+{
+    fdc->media_id = (fdc->media_id & ~(1 << id)) | (set << id);
 }
 
 int
@@ -1369,7 +1392,7 @@ fdc_read(uint16_t addr, void *priv)
             } else if (!fdc->enh_mode)
                 ret = 0x20;
             else
-                ret = fdc->rwc[drive] << 4;
+                ret = (fdc->rwc[drive] << 4) | (fdc->media_id << 6);
             break;
         case 4: /*Status*/
             ret = fdc->stat;
@@ -2352,6 +2375,8 @@ fdc_reset(void *priv)
     }
 
     fdc->power_down = 0;
+
+    fdc->media_id   = 0;
 }
 
 static void

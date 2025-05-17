@@ -510,9 +510,6 @@ kbc_scan_kbd_at(atkbc_t *dev)
 }
 
 static void
-write_p2(atkbc_t *dev, uint8_t val);
-
-static void
 kbc_at_poll_at(atkbc_t *dev)
 {
     switch (dev->state) {
@@ -778,6 +775,7 @@ static void
 write_p2(atkbc_t *dev, uint8_t val)
 {
     uint8_t old = dev->p2;
+
     kbc_at_log("ATkbc: write P2: %02X (old: %02X)\n", val, dev->p2);
 
     uint8_t kbc_ven = dev->flags & KBC_VEN_MASK;
@@ -849,6 +847,25 @@ write_p2(atkbc_t *dev, uint8_t val)
             resetx86();
         }
     }
+}
+
+uint8_t
+kbc_at_read_p(void *priv, uint8_t port, uint8_t mask)
+{
+    atkbc_t *dev = (atkbc_t *) priv;
+    uint8_t *p   = (port == 2) ? &dev->p2 : &dev->p1;
+    uint8_t  ret = *p & mask;
+
+    return ret;
+}
+
+void
+kbc_at_write_p(void *priv, uint8_t port, uint8_t mask, uint8_t val)
+{
+    atkbc_t *dev = (atkbc_t *) priv;
+    uint8_t *p   = (port == 2) ? &dev->p2 : &dev->p1;
+
+    *p = (*p & mask) | val;
 }
 
 static void
@@ -1319,7 +1336,10 @@ write64_ami(void *priv, uint8_t val)
             kbc_at_log("ATkbc: set KBC lines P22-P23 (P2 bits 2-3) low\n");
             if (!(dev->flags & DEVICE_PCI))
                 write_p2(dev, dev->p2 & ~(4 << (val & 0x01)));
-            kbc_delay_to_ob(dev, dev->ob, 0, 0x00);
+            if (strstr(machine_get_internal_name(), "sb486pv") != NULL)
+                kbc_delay_to_ob(dev, 0x03, 0, 0x00);
+            else
+                kbc_delay_to_ob(dev, dev->ob, 0, 0x00);
             dev->pending++;
             return 0;
 
@@ -2132,6 +2152,12 @@ kbc_at_write(uint16_t port, uint8_t val, void *priv)
 
                 dev->wantdata  = 0;
                 dev->state     = STATE_MAIN_IBF;
+
+                /*
+                   Explicitly clear IBF so that any preceding
+                   command is not executed.
+                 */
+                dev->status   &= ~STAT_IFULL;
                 return;
             }
             break;
@@ -2143,11 +2169,36 @@ kbc_at_write(uint16_t port, uint8_t val, void *priv)
                 dev->wantdata  = 1;
                 dev->state     = STATE_KBC_PARAM;
                 dev->command = 0xd1;
+
+                /*
+                   Explicitly clear IBF so that any preceding
+                   command is not executed.
+                 */
+                dev->status   &= ~STAT_IFULL;
                 return;
             } else if (fast_reset && ((val & 0xf0) == 0xf0)) {
                 pulse_output(dev, val & 0x0f);
 
                 dev->state     = STATE_MAIN_IBF;
+
+                /*
+                   Explicitly clear IBF so that any preceding
+                   command is not executed.
+                 */
+                dev->status   &= ~STAT_IFULL;
+                return;
+            } else if (val == 0xad) {
+                /* Fast track it because of the Bochs BIOS. */
+                kbc_at_log("ATkbc: disable keyboard\n");
+                set_enable_kbd(dev, 0);
+
+                dev->state     = STATE_MAIN_IBF;
+
+                /*
+                   Explicitly clear IBF so that any preceding
+                   command is not executed.
+                 */
+                dev->status   &= ~STAT_IFULL;
                 return;
             } else if (val == 0xae) {
                 /* Fast track it because of the LG MultiNet. */
@@ -2155,6 +2206,12 @@ kbc_at_write(uint16_t port, uint8_t val, void *priv)
                 set_enable_kbd(dev, 1);
 
                 dev->state     = STATE_MAIN_IBF;
+
+                /*
+                   Explicitly clear IBF so that any preceding
+                   command is not executed.
+                 */
+                dev->status   &= ~STAT_IFULL;
                 return;
             }
             break;
