@@ -908,9 +908,9 @@ ibm8514_accel_in(uint16_t port, svga_t *svga)
 
     switch (port) {
         case 0x2e8:
-            if (dev->vc == dev->vsyncstart)
-                temp |= 0x02;
 
+            if (dev->vc == dev->vsyncstart && dev->accel.advfunc_cntl & 0x04)
+                temp |= 0x02;
             ibm8514_log("Read: Display Status1=%02x.\n", temp);
             break;
 
@@ -3792,10 +3792,18 @@ ibm8514_recalctimings(svga_t *svga)
                 dev->vdisp_vga += 2;
 
             dev->vtotal_8514 = dev->vtotal_reg + 1;
+            if (dev->vtotal_8514 == 1)
+                dev->vtotal_8514 = 0x0669;
+          
+
             if (dev->interlace)
                 dev->vtotal_8514 >>= 1;
 
             dev->vsyncstart++;
+
+            dev->vsyncstart_8514 = dev-vsyncstart_8514 + 1;
+            if (dev->vsyncstart_8514 == 1)
+                dev->vsyncstart_8514 = 0x0601;
 
             if (dev->interlace)
                 dev->vsyncstart >>= 1;
@@ -3814,6 +3822,7 @@ ibm8514_recalctimings(svga_t *svga)
 
             dev->hdisp_8514 = dev->hdisp_vga;
             dev->dispend = dev->vdisp_vga;
+ 
 
             if (dev->accel.advfunc_cntl & 0x04)
                 svga->clock_8514 = (cpuclock * (double) (1ULL << 32)) / 44900000.0;

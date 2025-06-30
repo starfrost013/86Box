@@ -723,6 +723,17 @@ et4000_recalctimings(svga_t *svga)
         svga->rowoffset <<= 1;
         svga->render = svga_render_8bpp_highres;
     }
+
+    if (svga->render == svga_render_4bpp_highres)
+        svga->render = svga_render_4bpp_tseng_highres;
+
+    if (dev->type == ET4000_TYPE_TC6058AF) {
+        if (svga->render == svga_render_8bpp_lowres)
+            svga->render = svga_render_8bpp_tseng_lowres;
+
+        else if (svga->render == svga_render_8bpp_highres)
+            svga->render = svga_render_8bpp_tseng_highres;
+    }
 }
 
 static void
@@ -880,6 +891,9 @@ et4000_init(const device_t *info)
 
     if (dev->type >= ET4000_TYPE_ISA)
         dev->svga.ramdac = device_add(&sc1502x_ramdac_device);
+
+    if (dev->type == ET4000_TYPE_TC6058AF)
+        dev->svga.adv_flags |= FLAG_PRECISETIME;
 
     dev->vram_mask = dev->vram_size - 1;
 
