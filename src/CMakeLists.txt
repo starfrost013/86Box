@@ -100,7 +100,7 @@ if(INSTRUMENT)
 endif()
 
 target_link_libraries(86Box cpu chipset mch dev mem fdd game cdrom rdisk mo hdd
-    net print scsi sio snd utils vid voodoo plat ui)
+    net print scsi sio snd utils vid video2 voodoo plat ui)
 
 if(HAIKU)
     target_link_libraries(86Box be)
@@ -252,6 +252,7 @@ add_subdirectory(scsi)
 add_subdirectory(sound)
 add_subdirectory(utils)
 add_subdirectory(video)
+add_subdirectory(video2)
 
 if (APPLE)
     add_subdirectory(mac)
