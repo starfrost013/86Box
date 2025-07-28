@@ -107,6 +107,7 @@
 #include <86box/apm.h>
 #include <86box/acpi.h>
 #include <86box/nv/vid_nv_rivatimer.h>
+#include <86box/video2/video.h>
 
 // Disable c99-designator to avoid the warnings about int ng
 #ifdef __clang__
@@ -224,6 +225,8 @@ int      other_scsi_present = 0;                                  /* SCSI contro
                                                                      present */
 
 int      is_pcjr = 0;                                             /* The current machine is PCjr. */
+
+bool     temp_v2_enabled = false;                                  /* Video 2.0 Engine enabled */
 
 // Accelerator key array
 struct accelKey acc_keys[NUM_ACCELS];
@@ -1250,7 +1253,12 @@ pc_init_modules(void)
     keyboard_init();
     joystick_init();
 
-    video_init();
+    temp_v2_enabled = config_get_int("Debug", "video2_enabled", 0);
+    
+    if (temp_v2_enabled)
+        Video_Init();
+    else   
+        video_init();
 
     fdd_init();
 
@@ -1648,7 +1656,10 @@ pc_close(UNUSED(thread_t *ptr))
         dumpregs(0);
 #endif
 
-    video_close();
+    if (temp_v2_enabled)
+        Video_Shutdown();
+    else
+        video_close();
 
     device_close_all();
 

@@ -26,11 +26,15 @@
  */
 
 #pragma once
+#include <86box/86box.h>
+#include <86box/device.h>
+#include <86box/timer.h>
 #include <stdint.h>
 
 // Windows 98 supports a maximum of 9 monitors.
 // This should not be practically filled up by 86Box, but cards like the STB MVP Pro-128 (NV3/Riva128) use 4. 
 #define MAX_MONITORS        9
+#define MAX_DEVICES         2
 
 #define PALETTE_SIZE        256
 
@@ -41,6 +45,14 @@ typedef enum video_monitor_blit_frequency_e
     blit_on_line_clock = 1,
     blit_on_vblank = 2,
 } video_monitor_blit_frequency;
+
+typedef struct video_device_s
+{
+    device_t* device; 
+    timer_t blit_timer;     
+    uint64_t pixel_clock;
+
+} video_device_t;
 
 typedef struct video_monitor_settings_s
 {    
@@ -53,7 +65,7 @@ typedef struct video_monitor_settings_s
     // Characters per clock for blit_character_clock mode
     uint32_t characters_per_clock;
 
-    uint64_t pixel_clock;
+
 
     video_monitor_blit_frequency blit_frequency;
 
@@ -65,17 +77,20 @@ typedef struct video_monitor_s
 
     double scale_factor; 
 
-    uint32_t palette_indexed_4bpp[PALETTE_SIZE];
+    uint32_t palette_indexed_4bpp[PALETTE_SIZE];            
     uint32_t palette_indexed_8bpp[PALETTE_SIZE];            // I8
     uint32_t palette_indexed_16bpp[PALETTE_SIZE];           // I16 (Riva 128, ???????)
 
 } video_monitor_t; 
 
 extern video_monitor_t monitors[MAX_MONITORS];
+extern video_device_t devices[MAX_DEVICES];
 extern uint32_t num_monitors;
+extern uint32_t num_devices;
 
 // Functions
 void Video_Init();
+void Video_AddDevice(device_t* video);
 video_monitor_t* Video_AddMonitor(video_monitor_settings_t settings);
 void Video_SetMonitorSize(uint32_t size_x, uint32_t size_y);
 void Video_SetBPP(uint32_t bpp);

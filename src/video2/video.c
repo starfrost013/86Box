@@ -1,7 +1,9 @@
 #include <86box/video2/video.h>
 
 video_monitor_t monitors[MAX_MONITORS] = {0};
+video_device_t devices[MAX_DEVICES] = {0};
 uint32_t num_monitors;
+uint32_t num_devices;
 
 #ifdef ENABLE_VIDEO_LOG
 int video_do_log = ENABLE_VIDEO_LOG;
