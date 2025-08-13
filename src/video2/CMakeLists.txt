@@ -14,5 +14,6 @@
 #
 
 add_library(video2 OBJECT
-    video.c
+    video_conversion.c
+    video_core.c
 )

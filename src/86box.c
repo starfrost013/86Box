@@ -1266,7 +1266,10 @@ pc_init_modules(void)
 
     hdc_init();
 
-    video_reset_close();
+    if (temp_v2_enabled)
+        Video_Reset();
+    else 
+        video_reset_close();
 
     machine_status_init();
 

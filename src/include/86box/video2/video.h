@@ -26,10 +26,14 @@
  */
 
 #pragma once
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <86box/86box.h>
 #include <86box/device.h>
 #include <86box/timer.h>
-#include <stdint.h>
+
 
 // Windows 98 supports a maximum of 9 monitors.
 // This should not be practically filled up by 86Box, but cards like the STB MVP Pro-128 (NV3/Riva128) use 4. 
@@ -39,17 +43,50 @@
 #define PALETTE_SIZE        256
 
 // Defines blit modes
-typedef enum video_monitor_blit_frequency_e
+typedef struct video_blit_info_s
 {
-    blit_on_character_clock = 0,
-    blit_on_line_clock = 1,
-    blit_on_vblank = 2,
-} video_monitor_blit_frequency;
+    uint32_t buffer_start;
+    uint32_t buffer_pitch;
+    uint32_t start_x;
+    uint32_t start_y;
+
+    uint32_t size_x;
+    uint32_t size_y; 
+} video_blit_info_t;
+
+// Enumerates possible memory to memory blit modes.
+// (More nvidia stuff)
+typedef enum mem2mem_blit_mode_e
+{
+    buffer0_to_buffer1_pitch = 0,
+    buffer0_to_buffer0_pitch = 1,
+    buffer1_to_buffer0_pitch = 2,
+    buffer1_to_buffer1_pitch = 3,
+} mem2mem_blit_mode; 
+
+typedef struct mem2mem_blit_info_s
+{
+    uint32_t buffer0_start;
+    uint32_t buffer0_pitch;
+    uint32_t buffer1_start;
+    uint32_t buffer1_pitch; 
+
+    uint32_t buffer0_start_x;
+    uint32_t buffer0_start_y;
+    uint32_t buffer1_start_x;
+    uint32_t buffer1_start_y;
+
+    // TODO: Allow stretching by specifying different swizes
+
+    uint32_t size_x;
+    uint32_t size_y; 
+
+    mem2mem_blit_mode mode;
+} mem2mem_blit_info_t;
 
 typedef struct video_device_s
 {
-    device_t* device; 
-    timer_t blit_timer;     
+    device_t* device;  
     uint64_t pixel_clock;
 
 } video_device_t;
@@ -65,15 +102,13 @@ typedef struct video_monitor_settings_s
     // Characters per clock for blit_character_clock mode
     uint32_t characters_per_clock;
 
-
-
-    video_monitor_blit_frequency blit_frequency;
-
 } video_monitor_settings_t; 
 
 typedef struct video_monitor_s
 {
     video_monitor_settings_t settings; 
+
+    event_t blit_event; 
 
     double scale_factor; 
 
@@ -83,8 +118,8 @@ typedef struct video_monitor_s
 
 } video_monitor_t; 
 
-extern video_monitor_t monitors[MAX_MONITORS];
-extern video_device_t devices[MAX_DEVICES];
+extern video_monitor_t video_monitors[MAX_MONITORS];
+extern video_device_t video_devices[MAX_DEVICES];
 extern uint32_t num_monitors;
 extern uint32_t num_devices;
 
@@ -92,11 +127,22 @@ extern uint32_t num_devices;
 void Video_Init();
 void Video_AddDevice(device_t* video);
 video_monitor_t* Video_AddMonitor(video_monitor_settings_t settings);
-void Video_SetMonitorSize(uint32_t size_x, uint32_t size_y);
-void Video_SetBPP(uint32_t bpp);
-void Video_SetRefreshRate(uint32_t hz);
+void Video_SetMonitorSize(video_monitor_t* monitor, uint32_t size_x, uint32_t size_y);
+void Video_SetBPP(video_monitor_t* monitor, uint32_t bpp);
+void Video_SetRefreshRate(video_monitor_t* monitor, uint32_t hz);
 void Video_DestroyMonitor(video_monitor_t* monitor);
 
-uint32_t Video_Default8to32(uint8_t colour);
-uint32_t Video_Default15to32(uint16_t colour);
-uint32_t Video_Default16to32(uint16_t colour);
+void Video_Blit_MemToScreen(video_blit_info_t blit_info);
+void Video_Blit_MemToMem(mem2mem_blit_info_t blit_info);
+
+void Video_Reset();
+void Video_Shutdown();
+
+uint32_t Video_DefaultConvert8to32(uint8_t colour);
+uint32_t Video_DefaultConvert15to32(uint16_t colour);
+uint32_t Video_DefaultConvert16to32(uint16_t colour);
+
+int32_t Video_Calc6to8(int32_t c);
+int32_t Video_Calc8to32(int32_t c);
+int32_t Video_Calc15to32(int32_t c);
+int32_t Video_Calc16to32(int32_t c);
