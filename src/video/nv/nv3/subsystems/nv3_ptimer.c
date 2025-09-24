@@ -51,7 +51,7 @@ void nv3_ptimer_init(void)
 // Handles the PTIMER alarm interrupt
 void nv3_ptimer_interrupt(uint32_t num)
 {
-    nv3->ptimer.interrupt_status |= (1 << num);
+    nv3->ptimer.intr |= (1 << num);
 
     nv3_pmc_handle_interrupts(true);
 }
@@ -116,10 +116,10 @@ uint32_t nv3_ptimer_read(uint32_t address)
             switch (reg->address)
             {
                 case NV3_PTIMER_INTR:
-                    ret = nv3->ptimer.interrupt_status;
+                    ret = nv3->ptimer.intr;
                     break;
                 case NV3_PTIMER_INTR_EN:
-                    ret = nv3->ptimer.interrupt_enable;
+                    ret = nv3->ptimer.intr_en;
                     break;
                 case NV3_PTIMER_NUMERATOR:
                     ret = nv3->ptimer.clock_numerator; // 15:0
@@ -186,13 +186,13 @@ void nv3_ptimer_write(uint32_t address, uint32_t value)
                 // Bit 0 - Alarm
 
                 case NV3_PTIMER_INTR:
-                    nv3->ptimer.interrupt_status &= ~value;
+                    nv3->ptimer.intr &= ~value;
                     nv3_pmc_clear_interrupts();
                     break;
 
                 // Interrupt enablement state
                 case NV3_PTIMER_INTR_EN:
-                    nv3->ptimer.interrupt_enable = value & 0x1;
+                    nv3->ptimer.intr_en = value & 0x1;
                     break;
                 // nUMERATOR
                 case NV3_PTIMER_NUMERATOR:

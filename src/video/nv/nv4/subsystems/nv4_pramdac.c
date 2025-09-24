@@ -76,9 +76,25 @@ uint32_t nv4_pramdac_read(uint32_t address)
             break;
         
     }
+
+    nv_log_verbose_only("PRAMDAC Read %08x <- %08x", address, ret);
 }
 
-void nv4_pramdac_write(uint32_t address, uint32_t data)
+void nv4_pramdac_write(uint32_t address, uint32_t val)
 {
 
+    switch (address)
+    {
+        case NV4_PRAMDAC_VPLL_COEFF:
+            nv4->pramdac.vclk = val; 
+            break;
+        case NV4_PRAMDAC_NVPLL_COEFF:
+            nv4->pramdac.nvclk = val;
+            break;
+        case NV4_PRAMDAC_MPLL_COEFF:
+            nv4->pramdac.mclk = val;
+            break;
+    }
+
+    nv_log_verbose_only("PRAMDAC Write 0x%08x -> 0x%08x", address, val);
 }

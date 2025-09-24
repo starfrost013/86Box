@@ -196,7 +196,7 @@ void nv3_ramin_write32(uint32_t addr, uint32_t val, void* priv)
 
 void nv3_pfifo_interrupt(uint32_t id, bool fire_now)
 {
-    nv3->pfifo.interrupt_status |= (1 << id);
+    nv3->pfifo.intr |= (1 << id);
     nv3_pmc_handle_interrupts(fire_now);
 }
 

@@ -68,10 +68,10 @@ uint32_t nv3_pme_read(uint32_t address)
             switch (reg->address)
             {
                 case NV3_PME_INTR:
-                    ret = nv3->pme.interrupt_status;
+                    ret = nv3->pme.intr;
                     break;
                 case NV3_PME_INTR_EN:
-                    ret = nv3->pme.interrupt_enable;
+                    ret = nv3->pme.intr_en;
                     break;
             }
         }
@@ -118,11 +118,11 @@ void nv3_pme_write(uint32_t address, uint32_t value)
                 // Bit 16 - VMI Notifer
 
                 case NV3_PME_INTR:
-                    nv3->pme.interrupt_status &= ~value;
+                    nv3->pme.intr &= ~value;
                     nv3_pmc_clear_interrupts();
                     break;
                 case NV3_PME_INTR_EN:
-                    nv3->pme.interrupt_enable = value & 0x00001111;
+                    nv3->pme.intr_en = value & 0x00001111;
                     break;
             }
         }

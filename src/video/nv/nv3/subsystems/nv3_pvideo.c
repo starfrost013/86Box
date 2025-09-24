@@ -76,10 +76,10 @@ uint32_t nv3_pvideo_read(uint32_t address)
             switch (reg->address)
             {
                 case NV3_PVIDEO_INTR:
-                    ret = nv3->pvideo.interrupt_status;
+                    ret = nv3->pvideo.intr;
                     break;
                 case NV3_PVIDEO_INTR_EN:
-                    ret = nv3->pvideo.interrupt_enable;
+                    ret = nv3->pvideo.intr_en;
                     break;
                 case NV3_PVIDEO_FIFO_THRESHOLD:
                     ret = nv3->pvideo.fifo_threshold;
@@ -133,11 +133,11 @@ void nv3_pvideo_write(uint32_t address, uint32_t value)
                 // Bit 0 - Notifier
 
                 case NV3_PVIDEO_INTR:
-                    nv3->pvideo.interrupt_status &= ~value;
+                    nv3->pvideo.intr &= ~value;
                     nv3_pmc_clear_interrupts();
                     break;
                 case NV3_PVIDEO_INTR_EN:
-                    nv3->pvideo.interrupt_enable = value & 0x00000001;
+                    nv3->pvideo.intr_en = value & 0x00000001;
                     break;
                 case NV3_PVIDEO_FIFO_THRESHOLD:
                     // only bits 6:3 matter

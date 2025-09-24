@@ -121,10 +121,10 @@ uint32_t nv3_pfifo_read(uint32_t address)
             switch (reg->address)
             {
                 case NV3_PFIFO_INTR:
-                    ret = nv3->pfifo.interrupt_status;
+                    ret = nv3->pfifo.intr;
                     break;
                 case NV3_PFIFO_INTR_EN:
-                    ret = nv3->pfifo.interrupt_enable;
+                    ret = nv3->pfifo.intr_en;
                     break;
                 case NV3_PFIFO_DELAY_0:
                     ret = nv3->pfifo.dma_delay_retry;
@@ -423,15 +423,15 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
                 // Bit 12 - DMA Pusher 
                 // Bit 16 - DMA Page Table Entry (pagefault?)
                 case NV3_PFIFO_INTR:
-                    nv3->pfifo.interrupt_status &= ~val;
+                    nv3->pfifo.intr &= ~val;
                     nv3_pmc_clear_interrupts();
 
                     // update the internal cache error state
-                    if (!nv3->pfifo.interrupt_status & NV3_PFIFO_INTR_CACHE_ERROR)
+                    if (!nv3->pfifo.intr & NV3_PFIFO_INTR_CACHE_ERROR)
                         nv3->pfifo.debug_0 &= ~NV3_PFIFO_INTR_CACHE_ERROR;
                     break;
                 case NV3_PFIFO_INTR_EN:
-                    nv3->pfifo.interrupt_enable = val & 0x00011111;
+                    nv3->pfifo.intr_en = val & 0x00011111;
                     nv3_pmc_handle_interrupts(true);
                     break;
                 case NV3_PFIFO_DELAY_0:

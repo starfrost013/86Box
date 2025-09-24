@@ -70,10 +70,10 @@ uint32_t nv3_pbus_read(uint32_t address)
                     ret = nv3->pbus.debug_0;
                     break;
                 case NV3_PBUS_INTR:
-                    ret = nv3->pbus.interrupt_status;
+                    ret = nv3->pbus.intr;
                     break;
                 case NV3_PBUS_INTR_EN:
-                    ret = nv3->pbus.interrupt_enable;
+                    ret = nv3->pbus.intr_en;
                     break;
             }
         }
@@ -119,11 +119,11 @@ void nv3_pbus_write(uint32_t address, uint32_t value)
                 // Interrupt state:
                 // Bit 0 - PCI Bus Error
                 case NV3_PBUS_INTR:
-                    nv3->pbus.interrupt_status &= ~value;
+                    nv3->pbus.intr &= ~value;
                     nv3_pmc_clear_interrupts();
                     break;
                 case NV3_PBUS_INTR_EN:
-                    nv3->pbus.interrupt_enable = value & 0x00000001;
+                    nv3->pbus.intr_en = value & 0x00000001;
                     break;
             }
 

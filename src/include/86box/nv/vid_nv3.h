@@ -217,7 +217,7 @@ extern const device_config_t nv3t_config[];                             // Confi
 
 #define NV3_PMC_BOOT                                    0x0         // Boot Configuration
 
-#define NV3_PMC_INTERRUPT_STATUS                        0x100       // Interrupt Control
+#define NV3_PMC_INTR                        0x100       // Interrupt Control
 #define NV3_PMC_INTERRUPT_PAUDIO                        0           // Unused, NV3A only
 #define NV3_PMC_INTERRUPT_PAUDIO_PENDING                0x1         // Unused, NV3A only
 #define NV3_PMC_INTERRUPT_PMEDIA                        4
@@ -238,9 +238,9 @@ extern const device_config_t nv3t_config[];                             // Confi
 #define NV3_PMC_INTERRUPT_PBUS_PENDING                  0x1
 #define NV3_PMC_INTERRUPT_SOFTWARE                      31
 #define NV3_PMC_INTERRUPT_SOFTWARE_PENDING              0x1
-#define NV3_PMC_INTERRUPT_ENABLE                        0x140       // Controls global interrupt enable state
-#define NV3_PMC_INTERRUPT_ENABLE_HARDWARE               0x1         // Determines if hardware interrupts are enabled
-#define NV3_PMC_INTERRUPT_ENABLE_SOFTWARE               0x2         // Determinse if software interrupts were enabled
+#define NV3_PMC_INTR_EN                        0x140       // Controls global interrupt enable state
+#define NV3_PMC_INTR_EN_HARDWARE               0x1         // Determines if hardware interrupts are enabled
+#define NV3_PMC_INTR_EN_SOFTWARE               0x2         // Determinse if software interrupts were enabled
 #define NV3_PMC_ENABLE                                  0x200       // Determines which gpu subsystems were enabled
 #define NV3_PMC_ENABLE_PAUDIO                           0           // UNUSED - PAudio removed in NV3 Stepping B0 
 #define NV3_PMC_ENABLE_PAUDIO_ENABLED                   0x1         // UNUSED - PAudio removed in NV3 Stepping B0
@@ -1007,8 +1007,8 @@ typedef struct nv3_pmc_s
         write this later
     */
     int32_t boot;   
-    int32_t interrupt_status;   // Determines if interrupts are pending for specific subsystems.
-    int32_t interrupt_enable;   // Determines if interrupts are actually enabled.
+    int32_t intr;   // Determines if interrupts are pending for specific subsystems.
+    int32_t intr_en;   // Determines if interrupts are actually enabled.
     int32_t enable;             // Determines which subsystems are enabled.
 
 } nv3_pmc_t;
@@ -1082,8 +1082,8 @@ typedef struct nv3_pbus_rma_s
 typedef struct nv3_pbus_s
 {
     uint32_t debug_0;
-    uint32_t interrupt_status;          // Interrupt status
-    uint32_t interrupt_enable;          // Interrupt enable
+    uint32_t intr;          // Interrupt status
+    uint32_t intr_en;          // Interrupt enable
     nv3_pbus_rma_t rma;
 } nv3_pbus_t;
 
@@ -1129,8 +1129,8 @@ typedef struct nv3_pfifo_cache_entry_s
 // Command submission to PGRAPH
 typedef struct nv3_pfifo_s
 {
-    uint32_t interrupt_status;          // Interrupt status
-    uint32_t interrupt_enable;          // Interrupt enable
+    uint32_t intr;          // Interrupt status
+    uint32_t intr_en;          // Interrupt enable
     uint32_t dma_delay_retry;           // DMA Delay/Retry
     uint32_t debug_0;                   // Cache Debug register
     uint32_t config_0;
@@ -1290,12 +1290,12 @@ typedef struct nv3_pgraph_s
     uint32_t debug_1;
     uint32_t debug_2;
     uint32_t debug_3;
-    uint32_t interrupt_status_0;          // Interrupt status 0
-    uint32_t interrupt_enable_0;          // Interrupt enable 0 
-    uint32_t interrupt_status_1;          // Interrupt status 1
-    uint32_t interrupt_enable_1;          // Interrupt enable 1
-    uint32_t interrupt_status_dma;        // Interrupt status for DMA
-    uint32_t interrupt_enable_dma;        // Interrupt enable for DMA
+    uint32_t intr_0;          // Interrupt status 0
+    uint32_t intr_en_0;          // Interrupt enable 0 
+    uint32_t intr_1;          // Interrupt status 1
+    uint32_t intr_en_1;          // Interrupt enable 1
+    uint32_t intr_dma;        // Interrupt status for DMA
+    uint32_t intr_en_dma;        // Interrupt enable for DMA
 
     uint32_t context_switch;              // TODO: Make this a struct, it's just going to be enormous lol.
     nv3_pgraph_context_control_t context_control;
@@ -1435,8 +1435,8 @@ typedef struct nv3_pextdev_s
 
 typedef struct nv3_ptimer_s
 {
-    uint32_t interrupt_status;          // PTIMER Interrupt status
-    uint32_t interrupt_enable;          // PTIMER Interrupt enable
+    uint32_t intr;          // PTIMER Interrupt status
+    uint32_t intr_en;          // PTIMER Interrupt enable
     uint32_t clock_numerator;           // PTIMER (tick?) numerator
     uint32_t clock_denominator;         // PTIMER (tick?) denominator
     uint64_t time;                      // time
@@ -1519,8 +1519,8 @@ typedef struct nv3_ramin_s
 
 typedef struct nv3_pvideo_s
 {
-    uint32_t interrupt_status;          // Interrupt status
-    uint32_t interrupt_enable;          // Interrupt enable
+    uint32_t intr;          // Interrupt status
+    uint32_t intr_en;          // Interrupt enable
     uint32_t fifo_threshold;            // FIFO threshold
     uint32_t fifo_burst_size;           // FIFO burst size
     uint32_t overlay_settings;          // Overlay settings
@@ -1528,8 +1528,8 @@ typedef struct nv3_pvideo_s
 
 typedef struct nv3_pme_s                // Mediaport
 {
-    uint32_t interrupt_status;
-    uint32_t interrupt_enable;
+    uint32_t intr;
+    uint32_t intr_en;
 } nv3_pme_t;
 
 typedef struct nv3_s

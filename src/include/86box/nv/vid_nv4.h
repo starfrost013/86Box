@@ -39,26 +39,71 @@ typedef struct nv4_pbus_rma_s
 typedef struct nv4_pbus_s
 {
     uint32_t debug_0;
-    uint32_t interrupt_status;          // Interrupt status
-    uint32_t interrupt_enable;          // Interrupt enable
+    uint32_t intr;          // Interrupt status
+    uint32_t intr_en;          // Interrupt enable
     nv4_pbus_rma_t rma;
 } nv4_pbus_t;
 
+// PMC: Master Control
+typedef struct nv4_pmc_s
+{
+    uint32_t enable;                    // Global system enable
+    uint32_t intr;                      // Global system interrupt state
+    uint32_t intr_en;                   // Global system interrupt enablement
+    uint32_t intr_read;                 // Global system interrupt read
+} nv4_pmc_t;
+
+// PFIFO
+typedef struct nv4_pfifo_s
+{
+    uint32_t intr;                      // FIFO Interrupt State
+    uint32_t intr_en;                   // FIFO Interrupt Enabled
+} nv4_pfifo_t;
+
+// PGRAPH
+typedef struct nv4_pgraph_s
+{
+    uint32_t intr;                      // Graphics Engine Interrupt State
+    uint32_t intr_en;                   // Graphics Engine Interrupt Enabled
+} nv4_pgraph_t;
 
 // PTIMER
 typedef struct nv4_ptimer_s
 {
-    uint32_t interrupt_status;          // PTIMER Interrupt status
-    uint32_t interrupt_enable;          // PTIMER Interrupt enable
+    uint32_t intr;                      // PTIMER Interrupt status
+    uint32_t intr_en;                   // PTIMER Interrupt enable
     uint32_t clock_numerator;           // PTIMER (tick?) numerator
     uint32_t clock_denominator;         // PTIMER (tick?) denominator
     uint64_t time;                      // time
     uint32_t alarm;                     // The value of time when there should be an alarm
 } nv4_ptimer_t; 
 
+// PCRTC
+typedef struct nv4_pcrtc_s
+{
+    uint32_t intr;                      // VGA CRTC Interrupt State
+    uint32_t intr_en;                   // VGA CRTC Interrupt Enabled
+} nv4_pcrtc_t;
+
+// Mediaport (not emulated)
+typedef struct nv4_pme_s
+{
+    uint32_t intr;                      // VGA CRTC Interrupt State
+    uint32_t intr_en;                   // VGA CRTC Interrupt Enabled
+} nv4_pme_t;
+
+// PVIDEO (overlay etc)
+typedef struct nv4_pvideo_s
+{
+    uint32_t intr;                      // VGA CRTC Interrupt State
+    uint32_t intr_en;                   // VGA CRTC Interrupt Enabled
+} nv4_pvideo_t;
+
 // PRAMDAC
 typedef struct nv4_pramdac_s
 {
+    uint32_t intr;                      // RAMDAC Interrupt State
+    uint32_t intr_en;                   // RAMDAC Interrupt Enabled
     uint32_t mclk;
     uint32_t vclk;
     uint32_t nvclk;
@@ -69,11 +114,17 @@ typedef struct nv4_pramdac_s
 // Device Core
 typedef struct nv4_s
 {
-    nv_base_t nvbase;   // Base Nvidia structure
-    uint32_t straps;    // Straps. See defines
-    nv4_pbus_t pbus;
-    nv4_ptimer_t ptimer;
-    nv4_pramdac_t pramdac;
+    nv_base_t nvbase;                   // Base Nvidia structure
+    uint32_t straps;                    // Straps. See defines
+    nv4_pmc_t pmc;                      // Controls everything else
+    nv4_pbus_t pbus;                    // Bus
+    nv4_pfifo_t pfifo;                  // Timeslice scheduled FIFO
+    nv4_pgraph_t pgraph;                // Graphics engine
+    nv4_ptimer_t ptimer;                // Programmable interval timer
+    nv4_pcrtc_t pcrtc;                  // CRTC
+    nv4_pramdac_t pramdac;              // RAMDAC
+    nv4_pvideo_t pvideo;                // Video Engine
+    nv4_pme_t pme;                      // Mediaport
 } nv4_t;
 
 //
@@ -147,3 +198,7 @@ void        nv4_vclk_tick();
 // PTIMER
 uint32_t    nv4_ptimer_read(uint32_t address);
 void        nv4_ptimer_write(uint32_t address, uint32_t data);
+
+// PMC
+uint32_t    nv4_pmc_read(uint32_t address);
+void        nv4_pmc_write(uint32_t address, uint32_t data);

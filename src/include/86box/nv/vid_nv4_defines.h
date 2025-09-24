@@ -339,6 +339,7 @@
 #define NV4_PMC_BOOT_0_FOUNDRY_SGS                        		 0x0 
 #define NV4_PMC_BOOT_0_FOUNDRY_HELIOS                     		 0x1 
 #define NV4_PMC_BOOT_0_FOUNDRY_TSMC                       		 0x2 
+#define NV4_PMC_BOOT_0_GENERIC_VALUE                      0x20040001 // NV4 revision A5
 #define NV4_PMC_INTR_0                                         0x100 
 #define NV4_PMC_INTR_0_PMEDIA                                      4 
 #define NV4_PMC_INTR_0_PMEDIA_NOT_PENDING                 		 0x0 
