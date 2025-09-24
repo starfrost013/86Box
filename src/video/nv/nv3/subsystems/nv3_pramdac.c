@@ -74,7 +74,7 @@ void nv3_pramdac_pixel_clock_poll(double real_time)
 
 // Polls the memory clock.
 // This updates the 2D/3D engine PGRAPH, PTIMER and more 
-void nv3_pramdac_memory_clock_poll(double real_time)
+void nv3_pramdac_core_clock_poll(double real_time)
 {
     nv3_ptimer_tick(real_time);
 
@@ -144,7 +144,7 @@ void nv3_pramdac_set_core_clock(void)
     // Create and start if it it's not running.
     if (!nv3->nvbase.memory_clock_timer)
     {
-        nv3->nvbase.memory_clock_timer = rivatimer_create(time, nv3_pramdac_memory_clock_poll);
+        nv3->nvbase.memory_clock_timer = rivatimer_create(time, nv3_pramdac_core_clock_poll);
         rivatimer_start(nv3->nvbase.memory_clock_timer);
     }
 

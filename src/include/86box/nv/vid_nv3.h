@@ -1623,7 +1623,7 @@ void        nv3_pramdac_init(void);
 void        nv3_pramdac_set_core_clock(void);
 void        nv3_pramdac_set_pixel_clock(void);
 void        nv3_pramdac_pixel_clock_poll(double real_time);
-void        nv3_pramdac_memory_clock_poll(double real_time);
+void        nv3_pramdac_core_clock_poll(double real_time);
 
 // NV3 PTIMER
 void        nv3_ptimer_init(void);

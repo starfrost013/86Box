@@ -117,11 +117,11 @@ uint32_t nv3_mmio_arbitrate_read(uint32_t addr)
         if (reg->on_read)
             ret = reg->on_read();
         
-        nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)", ret, addr, reg->friendly_name);
+        nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)\n", ret, addr, reg->friendly_name);
     }
     else
     {
-        nv_log_verbose_only("Unknown register read 0x%08x", addr);
+        nv_log_verbose_only("Unknown register read 0x%08x\n", addr);
     }
 
     #endif 
@@ -191,11 +191,11 @@ void nv3_mmio_arbitrate_write(uint32_t addr, uint32_t val)
         if (reg->on_write)
             reg->on_write(val);
         
-        nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)", addr, val, reg->friendly_name);   
+        nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)\n", addr, val, reg->friendly_name);   
     }
     else   
     {
-        nv_log_verbose_only("Unknown register write 0x%08x -> 0x%08x", val, addr);
+        nv_log_verbose_only("Unknown register write 0x%08x -> 0x%08x\n", val, addr);
     }
     #endif 
 }
