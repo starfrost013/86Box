@@ -81,13 +81,6 @@ uint32_t nv3_ptimer_read(uint32_t address)
 
     uint32_t ret = 0x00;
 
-    // Only log these when tehy actually tick
-    if (address != NV3_PTIMER_TIME_0_NSEC
-    && address != NV3_PTIMER_TIME_1_NSEC)
-    {
-        nv_log_verbose_only("PTIMER Read from 0x%08x", address);
-    }
-
     switch (address)
     {
         case NV3_PTIMER_INTR:
@@ -122,8 +115,6 @@ uint32_t nv3_ptimer_read(uint32_t address)
 void nv3_ptimer_write(uint32_t address, uint32_t value) 
 {
     // before doing anything, check the subsystem enablement
-
-    nv_log_verbose_only("PTIMER Write 0x%08x -> 0x%08x", value, address);
 
     switch (address)
     {

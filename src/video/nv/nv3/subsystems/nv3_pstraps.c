@@ -72,27 +72,11 @@ void nv3_pstraps_init(void)
 
 uint32_t nv3_pstraps_read(uint32_t address) 
 { 
-    uint32_t ret = 0x00;
-
-    // special consideration for straps
-    
-    nv_log_verbose_only("Straps Read (current val=0x%08x)\n", nv3->straps);
-
-
-    switch (address)
-    {
-        case NV3_PSTRAPS:
-            ret = nv3->straps;
-            break;
-    }
-
-    return ret; 
+    return nv3->straps;
 }
 
 void nv3_pstraps_write(uint32_t address, uint32_t val) 
 {
-    nv_log_verbose_only("PSTRAPS Write 0x%08x -> 0x%08x\n", val, address);
-
     /* For some reason, all RIVA 128 ZX VBIOSes try to write to the straps. So only indicate this as a problem and return on Rev A/B */
     if (nv3->nvbase.gpu_revision != NV3_PCI_CFG_REVISION_C00)
     {

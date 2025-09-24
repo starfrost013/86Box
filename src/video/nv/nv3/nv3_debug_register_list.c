@@ -13,8 +13,21 @@
  *
  *          Copyright 2024-2025 starfrost
  */
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <86box/86box.h>
+#include <86box/device.h>
+#include <86box/mem.h>
+#include <86box/io.h>
+#include <86box/pci.h>
+#include <86box/rom.h> 
+#include <86box/video.h>
+#include <86box/nv/vid_nv.h>
+#include <86box/nv/vid_nv3.h>
 
-#ifdef NV_LOG 
+#ifdef ENABLE_NV_LOG 
 nv_register_t nv3_registers[] = {
     { NV3_PBUS_DEBUG_0, "PBUS - Debug Register", NULL, NULL},
     { NV3_PBUS_INTR, "PBUS - Interrupt Status", NULL, NULL},
@@ -119,7 +132,7 @@ nv_register_t nv3_registers[] = {
     { NV3_PME_INTR_EN, "PME - Interrupt Enable", NULL, NULL,},
     { NV3_PRAMDAC_CURSOR_START, "PRAMDAC - Cursor Start Position"},
     { NV3_PRAMDAC_CLOCK_PIXEL, "PRAMDAC - NV3 GPU Core - Pixel clock", nv3_pramdac_get_pixel_clock_register, nv3_pramdac_set_pixel_clock_register },
-    { NV3_PRAMDAC_CLOCK_MEMORY, "PRAMDAC - NV3 GPU Core - Memory clock", nv3_pramdac_get_vram_clock_register, nv3_pramdac_set_vram_clock_register },
+    { NV3_PRAMDAC_CLOCK_MEMORY, "PRAMDAC - NV3 GPU Core - Memory clock", nv3_pramdac_get_core_clock_register, nv3_pramdac_set_core_clock_register },
     { NV3_PRAMDAC_COEFF_SELECT, "PRAMDAC - PLL Clock Coefficient Select", NULL, NULL},
     { NV3_PRAMDAC_GENERAL_CONTROL, "PRAMDAC - General Control", NULL, NULL },
     { NV3_PRAMDAC_VSERR_WIDTH, "PRAMDAC - Vertical Sync Error Width", NULL, NULL},

@@ -28,8 +28,7 @@
 #include <86box/nv/vid_nv.h>
 #include <86box/nv/vid_nv3.h>
 
-// Functions only used in this translation unit
-void nv3_pfb_config0_write(uint32_t val);
+
 
 void nv3_pfb_init(void)
 {  
@@ -60,8 +59,6 @@ uint32_t nv3_pfb_read(uint32_t address)
     uint32_t ret = 0x00;
 
     // todo: friendly logging
-
-    nv_log_verbose_only("PFB Read from 0x%08x", address);
 
     switch (address)
     {
@@ -95,8 +92,6 @@ uint32_t nv3_pfb_read(uint32_t address)
 
 void nv3_pfb_write(uint32_t address, uint32_t value) 
 {
-    nv_log_verbose_only("PFB Write 0x%08x -> 0x%08x", value, address);
-
     switch (address)
     {
         // Boot is read only

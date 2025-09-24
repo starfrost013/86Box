@@ -135,11 +135,9 @@ extern const device_config_t nv4_config[];
 
 extern nv4_t* nv4;                                                      // Allocated at device startup
 
-#ifdef NV_LOG
-
+#ifdef ENABLE_NV_LOG
 // Debug register list
 extern nv_register_t nv4_registers[];
-
 #endif
 
 //

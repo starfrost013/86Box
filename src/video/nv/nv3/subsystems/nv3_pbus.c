@@ -43,8 +43,6 @@ uint32_t nv3_pbus_read(uint32_t address)
 { 
     uint32_t ret = 0x00; 
 
-    nv_log_verbose_only("PBUS Read 0x%08x <- 0x%08x\n", ret, address);
-
     switch (address)
     {
         case NV3_PBUS_DEBUG_0:
@@ -64,8 +62,6 @@ uint32_t nv3_pbus_read(uint32_t address)
 
 void nv3_pbus_write(uint32_t address, uint32_t val) 
 {
-    nv_log_verbose_only("PBUS Write 0x%08x -> 0x%08x\n", val, address);
-
     switch (address)
     {
         case NV3_PBUS_DEBUG_0:

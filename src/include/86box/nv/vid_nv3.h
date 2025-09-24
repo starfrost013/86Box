@@ -1444,6 +1444,10 @@ typedef struct nv3_s
 // device object
 extern nv3_t* nv3;
 
+#ifdef ENABLE_NV_LOG
+extern nv_register_t nv3_registers[];
+#endif
+
 /*
     *FUNCTIONS* for the GPU core start here
     Functions for PGRAPH objects are in vid_nv3_classes.h
@@ -1513,12 +1517,11 @@ uint32_t    nv3_pmc_read(uint32_t address);
 void        nv3_pmc_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pbus_read(uint32_t address);
 void        nv3_pbus_write(uint32_t address, uint32_t value);
-uint32_t    nv3_prmio_read(uint32_t address);
-void        nv3_prmio_write(uint32_t address, uint32_t value);
 uint32_t    nv3_ptimer_read(uint32_t address);
 void        nv3_ptimer_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pfb_read(uint32_t address);
 void        nv3_pfb_write(uint32_t address, uint32_t value);
+void        nv3_pfb_config0_write(uint32_t val);
 uint32_t    nv3_pstraps_read(uint32_t address);
 void        nv3_pstraps_write(uint32_t address, uint32_t value);
 
@@ -1534,6 +1537,10 @@ uint32_t    nv3_pvideo_read(uint32_t address);
 void        nv3_pvideo_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pramdac_read(uint32_t address);
 void        nv3_pramdac_write(uint32_t address, uint32_t value);
+uint32_t    nv3_pramdac_get_pixel_clock_register(void);
+uint32_t    nv3_pramdac_get_core_clock_register(void);
+void        nv3_pramdac_set_pixel_clock_register(uint32_t value);
+void        nv3_pramdac_set_core_clock_register(uint32_t value);
 
 uint32_t    nv3_user_read(uint32_t address);
 void        nv3_user_write(uint32_t address, uint32_t value);
@@ -1613,7 +1620,7 @@ void        nv3_pbus_rma_write(uint16_t addr, uint8_t val);
 
 // NV3 PRAMDAC (Final presentation)
 void        nv3_pramdac_init(void);
-void        nv3_pramdac_set_vram_clock(void);
+void        nv3_pramdac_set_core_clock(void);
 void        nv3_pramdac_set_pixel_clock(void);
 void        nv3_pramdac_pixel_clock_poll(double real_time);
 void        nv3_pramdac_memory_clock_poll(double real_time);

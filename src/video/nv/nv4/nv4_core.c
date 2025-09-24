@@ -359,7 +359,7 @@ void nv4_recalc_timings(svga_t* svga)
     {
         // set clocks
         //nv4_pramdac_set_pixel_clock();
-        //nv4_pramdac_set_vram_clock();
+        //nv4_pramdac_set_core_clock();
     }
 }
 

@@ -137,6 +137,7 @@ uint32_t nv3_mmio_read32(uint32_t addr, void* priv)
 
         return ret; 
     }
+
     ret = nv3_mmio_arbitrate_read(addr);
     return ret; 
 
@@ -642,7 +643,7 @@ void nv3_recalc_timings(svga_t* svga)
     {
         // set clocks
         nv3_pramdac_set_pixel_clock();
-        nv3_pramdac_set_vram_clock();
+        nv3_pramdac_set_core_clock();
     }
 }
 

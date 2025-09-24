@@ -27,7 +27,7 @@
 #include <86box/nv/vid_nv.h>
 #include <86box/nv/vid_nv4.h>
 
-#ifdef NV_LOG
+#ifdef ENABLE_NV_LOG
 
 nv_register_t nv4_registers[] = {
     { NV4_PTIMER_INTR, "NV4 PTIMER - Interrupt Status", NULL, NULL},

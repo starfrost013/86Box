@@ -53,8 +53,6 @@ uint32_t nv3_pgraph_read(uint32_t address)
 
     // todo: friendly logging
     
-    nv_log_verbose_only("PGRAPH Read from 0x%08x", address);
-
     switch (address)
     {
         case NV3_PGRAPH_DEBUG_0:
@@ -219,9 +217,6 @@ void nv3_pgraph_write(uint32_t address, uint32_t value)
         nv_log("Repressing PGRAPH write. The subsystem is disabled according to pmc_enable\n");
         return;
     }
-
-
-    nv_log_verbose_only("PGRAPH Write 0x%08x -> 0x%08x\n", value, address);
 
     switch (address)
     {

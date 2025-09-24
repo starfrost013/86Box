@@ -43,7 +43,7 @@ void nv3_pramdac_init(void)
     nv3->pramdac.memory_clock_p = nv3->pramdac.pixel_clock_p = 0x0c;
 
     nv3_pramdac_set_pixel_clock();
-    nv3_pramdac_set_vram_clock();
+    nv3_pramdac_set_core_clock();
 
     nv_log("Initialising PRAMDAC: Done\n");
 }
@@ -84,7 +84,7 @@ void nv3_pramdac_memory_clock_poll(double real_time)
 }
 
 // Gets the vram clock register.
-uint32_t nv3_pramdac_get_vram_clock_register(void)
+uint32_t nv3_pramdac_get_core_clock_register(void)
 {
     // the clock format is packed into 19 bits
     // M divisor            [7-0]
@@ -102,13 +102,13 @@ uint32_t nv3_pramdac_get_pixel_clock_register(void)
     + (nv3->pramdac.pixel_clock_p << 16); // 0-3
 }
 
-void nv3_pramdac_set_vram_clock_register(uint32_t value)
+void nv3_pramdac_set_core_clock_register(uint32_t value)
 {
     nv3->pramdac.memory_clock_m = value & 0xFF;
     nv3->pramdac.memory_clock_n = (value >> 8) & 0xFF;
     nv3->pramdac.memory_clock_p = (value >> 16) & 0x07;
     
-    nv3_pramdac_set_vram_clock();
+    nv3_pramdac_set_core_clock();
 }
 
 void nv3_pramdac_set_pixel_clock_register(uint32_t value)
@@ -120,7 +120,7 @@ void nv3_pramdac_set_pixel_clock_register(uint32_t value)
     nv3_pramdac_set_pixel_clock();
 }
 
-void nv3_pramdac_set_vram_clock(void)
+void nv3_pramdac_set_core_clock(void)
 {
     // from driver and vbios source
     float frequency = 13500000.0f;
@@ -207,7 +207,6 @@ uint32_t nv3_pramdac_read(uint32_t address)
 
     // todo: friendly logging
 
-    nv_log_verbose_only("PRAMDAC Read from 0x%08x\n", address);
 
     //s hould be pretty easy to understand
     switch (address)
@@ -285,9 +284,8 @@ uint32_t nv3_pramdac_read(uint32_t address)
 
 void nv3_pramdac_write(uint32_t address, uint32_t value) 
 {
-    nv_log_verbose_only("PRAMDAC Write 0x%08x -> 0x%08x\n", value, address);
 
-        //s hould be pretty easy to understand
+    //s hould be pretty easy to understand
     // we also update the SVGA state here
     switch (address)
     {

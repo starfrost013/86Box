@@ -182,8 +182,6 @@ uint32_t nv3_pmc_read(uint32_t address)
 
 void nv3_pmc_write(uint32_t address, uint32_t value) 
 {
-    nv_log_verbose_only("PMC Write 0x%08x -> 0x%08x", value, address);
-
     switch (address)
     {
         case NV3_PMC_INTR:

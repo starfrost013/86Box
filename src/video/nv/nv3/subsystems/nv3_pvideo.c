@@ -40,10 +40,6 @@ uint32_t nv3_pvideo_read(uint32_t address)
 
     uint32_t ret = 0x00;
 
-    // todo: friendly logging
-    
-    nv_log_verbose_only("PVIDEO Read from 0x%08x", address);
-
     // Interrupt state:
     // Bit 0 - Notifier
 
@@ -73,8 +69,6 @@ uint32_t nv3_pvideo_read(uint32_t address)
 void nv3_pvideo_write(uint32_t address, uint32_t value) 
 {
     // before doing anything, check the subsystem enablement state for this subsystem
-
-    nv_log_verbose_only("PVIDEO Write 0x%08x -> 0x%08x\n", value, address);
 
     switch (address)
     {

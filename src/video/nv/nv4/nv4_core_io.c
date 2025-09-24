@@ -53,15 +53,15 @@ uint32_t nv4_mmio_arbitrate_read(uint32_t addr)
     else if (addr >= NV4_PRAMDAC_START && addr <= NV4_PRAMDAC_END)
         ret = nv4_pramdac_read(addr);
 
-#ifdef NV_LOG
-    nv_register_t reg = nv_get_register(addr, &nv4_registers, sizeof(nv4_registers)/sizeof(nv3_registers[0]));
+#ifdef ENABLE_NV_LOG
+    nv_register_t* reg = nv_get_register(addr, nv4_registers);
 
     if (reg)
     {
         if (reg->on_read)
             ret = reg->on_read();
         
-        nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)", addr, reg.friendly_name, ret);
+        nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)", addr, reg->friendly_name, ret);
     }
     else
     {
@@ -81,15 +81,15 @@ void nv4_mmio_arbitrate_write(uint32_t addr, uint32_t val)
     else if (addr >= NV4_PRAMDAC_START && addr <= NV4_PRAMDAC_END)
         nv4_pramdac_write(addr, val);
 
-    #ifdef NV_LOG
-    nv_register_t reg = nv_get_register(addr, &nv4_registers, sizeof(nv4_registers)/sizeof(nv3_registers[0]));
+    #ifdef ENABLE_NV_LOG
+    nv_register_t* reg = nv_get_register(addr, nv4_registers);
 
     if (reg)
     {
         if (reg->on_write)
             reg->on_write(val);
         
-        nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)", addr, val, reg.friendly_name);   
+        nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)", addr, val, reg->friendly_name);   
     }
     else   
     {

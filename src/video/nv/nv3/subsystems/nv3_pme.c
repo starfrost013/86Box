@@ -42,8 +42,6 @@ uint32_t nv3_pme_read(uint32_t address)
 
     // todo: friendly logging
 
-    nv_log_verbose_only("PME Read from 0x%08x", address);
-
     // Interrupt state:
     // Bit 0 - Image Notifier
     // Bit 4 - Vertical Blank Interval Notifier
@@ -65,8 +63,6 @@ uint32_t nv3_pme_read(uint32_t address)
 
 void nv3_pme_write(uint32_t address, uint32_t value) 
 {
-    nv_log_verbose_only("PME Write 0x%08x -> 0x%08x\n", value, address);
-
     switch (address)
     {
         // Interrupt state:
