@@ -103,6 +103,16 @@ if(VNC)
     endif()
 endif()
 
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    if(VFIO)
+        include(CheckIncludeFile)
+        check_include_file("linux/vfio.h" VFIO_AVAILABLE)
+        if(VFIO_AVAILABLE)
+            add_compile_definitions(USE_VFIO)
+        endif()
+    endif()
+endif()
+
 if(INSTRUMENT)
     add_compile_definitions(USE_INSTRUMENT)
 endif()
@@ -133,14 +143,6 @@ target_link_libraries(86Box
 
 if(HAIKU)
     target_link_libraries(86Box be)
-endif()
-
-if(WIN32 AND ARCH STREQUAL "i386")
-    if(MINGW)
-        target_link_options(86Box PRIVATE "LINKER:--large-address-aware")
-    else()
-        target_link_options(86Box PRIVATE "LINKER:/LARGEADDRESSAWARE")
-    endif()
 endif()
 
 if(STATIC_BUILD)

@@ -15,9 +15,12 @@
 
 #include "qt_vmmanager_protocol.hpp"
 
+extern QTimer discordupdate;
+
 // NON-modal dialogs
 #include "qt_gpudebug_vram.hpp"
 #include "qt_gpudebug_visualnv.hpp"
+
 
 class MediaMenu;
 class RendererStack;
