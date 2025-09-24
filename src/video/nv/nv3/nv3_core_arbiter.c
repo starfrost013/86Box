@@ -117,7 +117,7 @@ uint32_t nv3_mmio_arbitrate_read(uint32_t addr)
         if (reg->on_read)
             ret = reg->on_read();
         
-        nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)", addr, ret, reg->friendly_name);
+        nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)", ret, addr, reg->friendly_name);
     }
     else
     {
