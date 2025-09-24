@@ -119,7 +119,7 @@ extern const device_config_t nv1_config[];                              // Confi
 #define NV1_PFB_BOOT_0_RAM_AMOUNT_4MB               0x2
 
 //
-// PEXTDEV
+// PSTRAPS
 //
 
 #define NV1_STRAPS                                  0x608000

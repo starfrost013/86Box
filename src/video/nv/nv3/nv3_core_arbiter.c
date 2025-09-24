@@ -66,8 +66,6 @@ uint32_t nv3_mmio_arbitrate_read(uint32_t address)
     // gigantic set of if statements to send the write to the right subsystem
     if (address >= NV3_PMC_START && address <= NV3_PMC_END)
         ret = nv3_pmc_read(address);
-    else if (address >= NV3_CIO_START && address <= NV3_CIO_END)
-        ret = nv3_cio_read(address);
     else if (address >= NV3_PBUS_PCI_START && address <= NV3_PBUS_PCI_END)
         ret = nv3_pci_read(0x00, address & 0xFF, NULL);
     else if (address >= NV3_PBUS_START && address <= NV3_PBUS_END)
@@ -76,26 +74,18 @@ uint32_t nv3_mmio_arbitrate_read(uint32_t address)
         ret = nv3_pfifo_read(address);
     else if (address >= NV3_PFB_START && address <= NV3_PFB_END)
         ret = nv3_pfb_read(address);
-    else if (address >= NV3_PRM_START && address <= NV3_PRM_END)
-        ret = nv3_prm_read(address);
-    else if (address >= NV3_PRMIO_START && address <= NV3_PRMIO_END)
-        ret = nv3_prmio_read(address);
     else if (address >= NV3_PTIMER_START && address <= NV3_PTIMER_END)
         ret = nv3_ptimer_read(address);
     else if (address >= NV3_PFB_START && address <= NV3_PFB_END)
         ret = nv3_pfb_read(address);
-    else if (address >= NV3_PEXTDEV_START && address <= NV3_PEXTDEV_END)
-        ret = nv3_pextdev_read(address);
+    else if (address >= NV3_PSTRAPS_START && address <= NV3_PSTRAPS_END)
+        ret = nv3_pstraps_read(address);
     else if (address >= NV3_PROM_START && address <= NV3_PROM_END)
         ret = nv3_prom_read(address);
-    else if (address >= NV3_PALT_START && address <= NV3_PALT_END)
-        ret = nv3_palt_read(address);
     else if (address >= NV3_PME_START && address <= NV3_PME_END)
         ret = nv3_pme_read(address);
     else if (address >= NV3_PGRAPH_START && address <= NV3_PGRAPH_REAL_END) // what we're actually doing here determined by nv3_pgraph_* func
         ret = nv3_pgraph_read(address);
-    else if (address >= NV3_PRMCIO_START && address <= NV3_PRMCIO_END)
-        ret = nv3_prmcio_read(address);    
     else if (address >= NV3_PVIDEO_START && address <= NV3_PVIDEO_END)
         ret = nv3_pvideo_read(address);
     else if ((address >= NV3_PRAMDAC_START && address <= NV3_PRAMDAC_END)
@@ -107,16 +97,28 @@ uint32_t nv3_mmio_arbitrate_read(uint32_t address)
         ret = nv3_user_read(address);
     else 
     {
-        //nvplay stuff
-        //#ifdef ENABLE_NV_LOG_ULTRA
-        //warning("MMIO read arbitration failed, INVALID address NOT mapped to any GPU subsystem 0x%08x [returning unmapped pattern]\n", address);
-        //#else 
         nv_log("MMIO read arbitration failed, INVALID address NOT mapped to any GPU subsystem 0x%08x [returning unmapped pattern]\n", address);
-        //#endif
 
         // The real hardware returns a garbage pattern
-        return 0x00;
+        ret = 0x00;
     }
+
+    #ifdef NV_LOG
+    nv_register_t reg = nv_get_register(addr, &nv3_registers, sizeof(nv3_registers)/sizeof(nv3_registers[0]));
+
+    if (reg)
+    {
+        if (reg->on_read)
+            ret = reg->on_read();
+        
+        nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)", addr, reg.friendly_name, ret);
+    }
+    else
+    {
+        nv_log_verbose_only("Unknown register read 0x%08x", addr);
+    }
+
+    #endif 
 
     return ret;
 }
@@ -140,34 +142,24 @@ void nv3_mmio_arbitrate_write(uint32_t address, uint32_t value)
     // gigantic set of if statements to send the write to the right subsystem
     if (address >= NV3_PMC_START && address <= NV3_PMC_END)
         nv3_pmc_write(address, value);
-    else if (address >= NV3_CIO_START && address <= NV3_CIO_END)
-        nv3_cio_write(address, value);
     else if (address >= NV3_PBUS_PCI_START && address <= NV3_PBUS_PCI_END)              // PCI mirrored at 0x1800 in MMIO
         nv3_pci_write(0x00, address & 0xFF, value, NULL); // priv does not matter
     else if (address >= NV3_PBUS_START && address <= NV3_PBUS_END)
         nv3_pbus_write(address, value);
     else if (address >= NV3_PFIFO_START && address <= NV3_PFIFO_END)
         nv3_pfifo_write(address, value);
-    else if (address >= NV3_PRM_START && address <= NV3_PRM_END)
-        nv3_prm_write(address, value);
-    else if (address >= NV3_PRMIO_START && address <= NV3_PRMIO_END)
-        nv3_prmio_write(address, value);
     else if (address >= NV3_PTIMER_START && address <= NV3_PTIMER_END)
         nv3_ptimer_write(address, value);
     else if (address >= NV3_PFB_START && address <= NV3_PFB_END)
         nv3_pfb_write(address, value);
-    else if (address >= NV3_PEXTDEV_START && address <= NV3_PEXTDEV_END)
-        nv3_pextdev_write(address, value);
+    else if (address >= NV3_PSTRAPS_START && address <= NV3_PSTRAPS_END)
+        nv3_pstraps_write(address, value);
     else if (address >= NV3_PROM_START && address <= NV3_PROM_END)
         nv3_prom_write(address, value);
-    else if (address >= NV3_PALT_START && address <= NV3_PALT_END)
-        nv3_palt_write(address, value);
     else if (address >= NV3_PME_START && address <= NV3_PME_END)
         nv3_pme_write(address, value);
     else if (address >= NV3_PGRAPH_START && address <= NV3_PGRAPH_REAL_END) // what we're actually doing here is determined by the nv3_pgraph_* functions
         nv3_pgraph_write(address, value);
-    else if (address >= NV3_PRMCIO_START && address <= NV3_PRMCIO_END)
-        nv3_prmcio_write(address, value);
     else if (address >= NV3_PVIDEO_START && address <= NV3_PVIDEO_END)
         nv3_pvideo_write(address, value);
     else if ((address >= NV3_PRAMDAC_START && address <= NV3_PRAMDAC_END)
@@ -180,34 +172,24 @@ void nv3_mmio_arbitrate_write(uint32_t address, uint32_t value)
     //RAMIN is its own thing
     else 
     {
-        //nvplay stuff
-        //#ifdef ENABLE_NV_LOG_ULTRA
-        //warning("MMIO write arbitration failed, INVALID address NOT mapped to any GPU subsystem 0x%08x [returning 0x00]\n", address);
-        //#else 
         nv_log("MMIO write arbitration failed, INVALID address NOT mapped to any GPU subsystem 0x%08x [returning 0x00]\n", address);
-        //#endif
 
         return;
     }
+
+    #ifdef NV_LOG
+    nv_register_t reg = nv_get_register(addr, &nv3_registers, sizeof(nv3_registers)/sizeof(nv3_registers[0]));
+
+    if (reg)
+    {
+        if (reg->on_write)
+            reg->on_write(val);
+        
+        nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)", addr, val, reg.friendly_name);   
+    }
+    else   
+    {
+        nv_log_verbose_only("Unknown register write 0x%08x -> 0x%08x", val, addr);
+    }
+    #endif 
 }
-
-
-//                                                              //
-// ******* DUMMY FUNCTIONS FOR UNIMPLEMENTED SUBSYSTEMS ******* //
-//                                                              //
-
-// Read and Write functions for GPU subsystems
-// Remove the ones that aren't used here eventually, have all of htem for now
-uint32_t    nv3_cio_read(uint32_t address) { return 0; };
-void        nv3_cio_write(uint32_t address, uint32_t value) {};
-uint32_t    nv3_prm_read(uint32_t address) { return 0; };
-void        nv3_prm_write(uint32_t address, uint32_t value) {};
-uint32_t    nv3_prmio_read(uint32_t address) { return 0; };
-void        nv3_prmio_write(uint32_t address, uint32_t value) {};
-
-uint32_t    nv3_palt_read(uint32_t address) { return 0; };
-void        nv3_palt_write(uint32_t address, uint32_t value) {};
-
-// TODO: PGRAPH class registers
-uint32_t    nv3_prmcio_read(uint32_t address) { return 0; };
-void        nv3_prmcio_write(uint32_t address, uint32_t value) {};

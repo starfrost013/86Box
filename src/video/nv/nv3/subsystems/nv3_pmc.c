@@ -44,18 +44,6 @@ void nv3_pmc_init(void)
     nv_log("Initialising PMC: Done\n");
 }
 
-//
-// ****** PMC register list START ******
-//
-
-nv_register_t pmc_registers[] = {
-    { NV3_PMC_BOOT, "PMC: Boot Manufacturing Information", NULL, NULL },
-    { NV3_PMC_INTR, "PMC: Current Pending Subsystem Interrupts", NULL, NULL},
-    { NV3_PMC_INTR_EN, "PMC: Global Interrupt Enable", NULL, NULL,},
-    { NV3_PMC_ENABLE, "PMC: Global Subsystem Enable", NULL, NULL },
-    { NV_REG_LIST_END, NULL, NULL, NULL}, // sentinel value 
-};
-
 void nv3_pmc_clear_interrupts(void)
 {
     nv_log_verbose_only("Clearing IRQs\n");
@@ -167,51 +155,26 @@ uint32_t nv3_pmc_handle_interrupts(bool send_now)
 
 uint32_t nv3_pmc_read(uint32_t address) 
 { 
-    nv_register_t* reg = nv_get_register(address, pmc_registers, sizeof(pmc_registers)/sizeof(pmc_registers[0]));
-
     uint32_t ret = 0x00;
 
-    // todo: friendly logging
-    nv_log_verbose_only("PMC Read from 0x%08x", address);
-
-    // if the register actually exists
-    if (reg)
+    switch (address)
     {
-        // on-read function
-        if (reg->on_read)
-            ret = reg->on_read();
-        else
-        {
-            switch (reg->address)
-            {
-                case NV3_PMC_BOOT:          
-                    ret = nv3->pmc.boot;
-                    break;
-                case NV3_PMC_INTR:
-                    nv_log_verbose_only("\n"); // clear_interrupts logs
-                    nv3_pmc_clear_interrupts();
+        case NV3_PMC_BOOT:          
+            ret = nv3->pmc.boot;
+            break;
+        case NV3_PMC_INTR:
+            nv_log_verbose_only("\n"); // clear_interrupts logs
+            nv3_pmc_clear_interrupts();
 
-                    ret = nv3_pmc_handle_interrupts(false);
-                    break;
-                case NV3_PMC_INTR_EN:
-                    //TODO: ACTUALLY CHANGE THE INTERRUPT STATE
-                    ret = nv3->pmc.intr_en;
-                    break;
-                case NV3_PMC_ENABLE:
-                    ret = nv3->pmc.enable;
-                    break;
-
-            }
-        }
-
-        if (reg->friendly_name)
-            nv_log_verbose_only(": 0x%08x <- %s\n", ret, reg->friendly_name);
-        else   
-            nv_log_verbose_only("\n");
-    }
-    else
-    {
-        nv_log(": Unknown register read (address=0x%08x), returning 0x00\n", address);
+            ret = nv3_pmc_handle_interrupts(false);
+            break;
+        case NV3_PMC_INTR_EN:
+            //TODO: ACTUALLY CHANGE THE INTERRUPT STATE
+            ret = nv3->pmc.intr_en;
+            break;
+        case NV3_PMC_ENABLE:
+            ret = nv3->pmc.enable;
+            break;
     }
 
     return ret; 
@@ -219,52 +182,28 @@ uint32_t nv3_pmc_read(uint32_t address)
 
 void nv3_pmc_write(uint32_t address, uint32_t value) 
 {
-    nv_register_t* reg = nv_get_register(address, pmc_registers, sizeof(pmc_registers)/sizeof(pmc_registers[0]));
-
     nv_log_verbose_only("PMC Write 0x%08x -> 0x%08x", value, address);
 
-    // if the register actually exists...
-    if (reg)
+    switch (address)
     {
-
-        // ... call its on-write function
-        if (reg->on_write)
-            reg->on_write(value);
-        else
-        {
-            // if it doesn't have one fallback to a switch statement
-            switch (reg->address)
+        case NV3_PMC_INTR:
+            // This can only be done by software interrupts...
+            if (!(nv3->pmc.intr & 0x7FFFFFFF))
             {
-                case NV3_PMC_INTR:
-                    // This can only be done by software interrupts...
-                    if (!(nv3->pmc.intr & 0x7FFFFFFF))
-                    {
-                        warning("Huh? This is a hardware interrupt...Please use the INTR_EN registers of the GPU subsystem you want to trigger "
-                        " an interrupt on, rather than writing to NV3_PMC_INTR (Or this is a bug)...NV3_PMC_INTR=0x%08x)\n", nv3->pmc.intr_en);
-                        return; 
-                    }
-                    
-                    nv3_pmc_handle_interrupts(true);
-                    nv3->pmc.intr = value;
-                    break;
-                case NV3_PMC_INTR_EN:
-                    nv3->pmc.intr_en = value & 0x03;
-                    nv3_pmc_handle_interrupts(value != 0);
-                    break;
-                case NV3_PMC_ENABLE:
-                    nv3->pmc.enable = value;
-                    break;
+                warning("Huh? This is a hardware interrupt...Please use the INTR_EN registers of the GPU subsystem you want to trigger "
+                " an interrupt on, rather than writing to NV3_PMC_INTR (Or this is a bug)...NV3_PMC_INTR=0x%08x)\n", nv3->pmc.intr_en);
+                return; 
             }
-        }
-
-        if (reg->friendly_name)
-            nv_log_verbose_only(": %s\n", reg->friendly_name);
-        else   
-            nv_log_verbose_only("\n");
-
-    }
-    else /* Completely unknown */
-    {
-        nv_log(": Unknown register write (address=0x%08x)\n", address);
+            
+            nv3_pmc_handle_interrupts(true);
+            nv3->pmc.intr = value;
+            break;
+        case NV3_PMC_INTR_EN:
+            nv3->pmc.intr_en = value & 0x03;
+            nv3_pmc_handle_interrupts(value != 0);
+            break;
+        case NV3_PMC_ENABLE:
+            nv3->pmc.enable = value;
+            break;
     }
 }

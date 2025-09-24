@@ -3980,7 +3980,7 @@
 
 // DFB is in BAR1. Access it as VRAM
 
-#define NV4_PEXTDEV_BOOT_0                                  0x101000
+#define NV4_pstraps_BOOT_0                                  0x101000
 #define NV4_STRAP_BUS_SPEED                                        0
 #define NV4_STRAP_BUS_SPEED_33MHZ          		                 0x0
 #define NV4_STRAP_BUS_SPEED_66MHZ          		                 0x1

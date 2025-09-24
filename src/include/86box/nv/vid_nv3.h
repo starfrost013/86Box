@@ -396,7 +396,6 @@ extern const device_config_t nv3t_config[];                             // Confi
 #define NV3_PFIFO_CACHE1_METHOD_ADDRESS                 2           // 12:2
 #define NV3_PFIFO_CACHE1_METHOD_SUBCHANNEL              13          // 15:13
 
-
 #define NV3_PFIFO_END                                   0x3FFF
 #define NV3_PRM_START                                   0x4000      // Real-Mode Device Support Subsystem
 #define NV3_PRM_INTR                                    0x4100
@@ -477,7 +476,7 @@ extern const device_config_t nv3t_config[];                             // Confi
 
 #define NV3_PFB_CONFIG_1                                0x100204    // Framebuffer interface config register 1
 #define NV3_PFB_END                                     0x100FFF
-#define NV3_PEXTDEV_START                               0x101000    // External Devices
+#define NV3_PSTRAPS_START                               0x101000    // External Devices
 #define NV3_PSTRAPS                                     0x101000    // Straps Bits
 #define NV3_PSTRAPS_BUS_SPEED                           0           // Configured bus speed
 #define NV3_PSTRAPS_BUS_SPEED_33MHZ                     0x0
@@ -512,7 +511,7 @@ extern const device_config_t nv3t_config[];                             // Confi
 #define NV3_PSTRAPS_OVERWRITE                           11
 #define NV3_PSTRAPS_OVERWRITE_DISABLED                  0x0
 #define NV3_PSTRAPS_OVERWRITE_ENABLED                   0x1
-#define NV3_PEXTDEV_END                                 0x101FFF
+#define NV3_PSTRAPS_END                                 0x101FFF
 #define NV3_PROM_START                                  0x110000    // VBIOS?
 #define NV3_PROM_END                                    0x11FFFF
 #define NV3_PALT_START                                  0x120000    // ??? but it exists
@@ -716,70 +715,15 @@ extern const device_config_t nv3t_config[];                             // Confi
 #define NV3_PGRAPH_DMA_INTR_NOTIFY                      16
 #define NV3_PGRAPH_DMA_INTR_EN_0                        0x401140    // PGRAPH DMA Interrupt Enable 0
 
-#define NV3_PGRAPH_DPRAM_SIZE                           12288       // Size of the internal texture cache
+#define NV3_PGRAPH_CACHE_SIZE                           12288       // Size of the internal texture cache
 
-// not sure about the class ids
-// these are NOT what each class is, just uSed to manipulate it (there isn't a one to one class->reg mapping anyway)
-#define NV3_PGRAPH_CLASS01_BETA_START                   0x410000    // Beta blending factor
-#define NV3_PGRAPH_CLASS01_BETA_END                     0x411FFF  
-#define NV3_PGRAPH_CLASS02_ROP_START                    0x420000    // Blending render operation used at final pixel/fragment generation stage
-#define NV3_PGRAPH_CLASS02_ROP_END                      0x421FFF
-#define NV3_PGRAPH_CLASS03_COLORKEY_START               0x430000    // Color key for image
-#define NV3_PGRAPH_CLASS03_COLORKEY_END                 0x431FFF      
-#define NV3_PGRAPH_CLASS04_PLANEMASK_START              0x440000    // Plane mask (for clipping?)
-#define NV3_PGRAPH_CLASS04_PLANEMASK_END                0x441FFF
-#define NV3_PGRAPH_CLASS05_CLIP_START                   0x450000    // clipping, probably class 23
-#define NV3_PGRAPH_CLASS05_CLIP_END                     0x451FFF
-#define NV3_PGRAPH_CLASS06_PATTERN_START                0x460000    // presumably a blend pattern 
-#define NV3_PGRAPH_CLASS06_PATTERN_END                  0x461FFF
-#define NV3_PGRAPH_CLASS07_RECTANGLE_START              0x470000    // also class 25 - that's black [NV1]
-#define NV3_PGRAPH_CLASS07_RECTANGLE_END                0x471FFF    // also class 25 - that's black [NV1]
-#define NV3_PGRAPH_CLASS08_POINT_START                  0x480000    // A single point
-#define NV3_PGRAPH_CLASS08_POINT_END                    0x481FFF
-#define NV3_PGRAPH_CLASS09_LINE_START                   0x490000    // A line
-#define NV3_PGRAPH_CLASS09_LINE_END                     0x491FFF       
-#define NV3_PGRAPH_CLASS0A_LIN_START                    0x4A0000    // A lin - a line without its starting or ending pixels
-#define NV3_PGRAPH_CLASS0A_LIN_END                      0x4A1FFF
-#define NV3_PGRAPH_CLASS0B_TRIANGLE_START               0x4B0000    // A triangle [NV1 variant] - in NV1 this was converted to a quad patch
-#define NV3_PGRAPH_CLASS0B_TRIANGLE_END                 0x4B1FFF   
-#define NV3_PGRAPH_CLASS0C_GDITEXT_START                0x4C0000    // Windows 95/NT GDI text acceleration
-#define NV3_PGRAPH_CLASS0C_GDITEXT_END                  0x4C1FFF    
-
-#define NV3_PGRAPH_CLASS0D_MEM2MEM_XFER_START           0x4D0000    // memory to memory transfer (not sure about which class this is)
-#define NV3_PGRAPH_CLASS0D_MEM2MEM_XFER_END             0x4D1FFF    
-#define NV3_PGRAPH_CLASS0E_IMAGE2MEM_XFER_SCALED_START  0x4E0000    // class 55, 56
-#define NV3_PGRAPH_CLASS0F_IMAGE2MEM_XFER_SCALED_END    0x4E1FFF
-
-#define NV3_PGRAPH_CLASS10_BLIT_START                   0x500000    // Blit 2d image from memory
-#define NV3_PGRAPH_CLASS10_BLIT_END                     0x501FFF      
-
-#define NV3_PGRAPH_CLASS11_CPU2MEM_IMAGE_START          0x510000    // Used for class 33, 34, 54
-#define NV3_PGRAPH_CLASS11_CPU2MEM_IMAGE_END            0x511FFF    
-#define NV3_PGRAPH_CLASS12_CPU2MEM_BITMAP_START         0x520000    // not sure, might depend on format
-#define NV3_PGRAPH_CLASS12_CPU2MEM_BITMAP_END           0x521FFF    
-
-#define NV3_PGRAPH_CLASS14_IMAGE2MEM_XFER_START         0x540000    // send image to vram, not sure what class 
-#define NV3_PGRAPH_CLASS14_IMAGE2MEM_XFER_END           0x541FFF    
-#define NV3_PGRAPH_CLASS15_CPU2MEM_STRETCHED_START      0x550000    // stretched cpu->vram transfer, 54
-#define NV3_PGRAPH_CLASS15_CPU2MEM_STRETCHED_END        0x551FFF  
-
-#define NV3_PGRAPH_CLASS17_D3D5TRI_ZETA_START           0x570000    // [NV3] Copy a direct3d 5.0 accelerated triangle to the zeta buffer
-#define NV3_PGRAPH_CLASS17_D3D5TRI_ZETA_END             0x571FFF    
-#define NV3_PGRAPH_CLASS18_POINTZETA_START              0x580000    // possibly class 69
-#define NV3_PGRAPH_CLASS18_POINTZETA_END                0x581FFF
-
-#define NV3_PGRAPH_CLASS1C_MEM2IMAGE_START              0x5C0000    // class 55, 56, 62, 63?
-#define NV3_PGRAPH_CLASS1C_MEM2IMAGE_END                0x5C1FFF    
-
+// U* registers are not needed
 
 #define NV3_PGRAPH_REGISTER_END                         0x401FFF    // end of pgraph registers
 #define NV3_PGRAPH_REAL_END                             0x5C1FFF
 
 // PRMCIO is redirected to SVGA subsystem
 #define NV3_PRMCIO_START                                0x601000
-
-
-
 #define NV3_PRMCIO_END                                  0x601FFF
 
 #define NV3_PDAC_START                                  0x680000    // OPTIONAL external DAC
@@ -1027,7 +971,7 @@ typedef struct nv3_pfb_s
     uint32_t debug_0;                   // debug stuff
     uint32_t config_0;                  // Framebuffer width, etc.
     uint32_t config_1;
-    uint32_t green;
+    uint32_t green;                     // does not seem to do anything
     uint32_t delay;
     uint32_t rtl;                       // Part of the memory timings
 } nv3_pfb_t;
@@ -1056,8 +1000,6 @@ typedef struct nv3_pfb_s
 #define NV3_NOTIFICATION_PAGE_ACCESS_READ       0x0     // If this is set, the page is read only
 #define NV3_NOTIFICATION_PAGE_ACCESS_READ_WRITE 0x1     // If this is set, the page is read/write
 #define NV3_NOTIFICATION_PAGE_FRAME_ADDRESS     12      // The pageframe to use 
-
-
 
 // Core notification structure
 typedef struct nv3_notification_s
@@ -1123,7 +1065,6 @@ typedef struct nv3_pfifo_cache_entry_s
     uint16_t method;                    // method id depending on class (offset from entry channel start in ramin)
     uint8_t subchannel;
     uint32_t data;                      // is this the context
-
 } nv3_pfifo_cache_entry_t; 
 
 // Command submission to PGRAPH
@@ -1190,12 +1131,6 @@ typedef struct nv3_pramdac_s
     uint32_t cursor_address;    // cursor address start
     nv3_coord_16_t cursor_start; 
 } nv3_pramdac_t;
-
-/* Holds DMA channel context information */
-typedef struct NV3_PGRAPH_CTX_SWITCH_s
-{
-    /* TODO */
-} NV3_PGRAPH_CTX_SWITCH_t;
 
 typedef struct nv3_pgraph_context_control_s
 {
@@ -1299,8 +1234,8 @@ typedef struct nv3_pgraph_s
 
     uint32_t context_switch;              // TODO: Make this a struct, it's just going to be enormous lol.
     nv3_pgraph_context_control_t context_control;
-    NV3_PGRAPH_CTX_SWITCH_t context_user_submit;
     nv3_pgraph_context_user_t context_user;
+
     uint32_t context_cache[NV3_PGRAPH_CONTEXT_CACHE_SIZE];  // DMA context cache (nv3_pgraph_context_user_t array?)
 
     // UCLIP stuff
@@ -1347,7 +1282,7 @@ typedef struct nv3_pgraph_s
     uint32_t trapped_data;
     uint32_t instance;                                      // no idea what this is but possibly an object context
     uint32_t trapped_instance;
-    uint8_t dpram[NV3_PGRAPH_DPRAM_SIZE];                   // Internal vertex/texturea cache.
+    uint8_t cache[NV3_PGRAPH_CACHE_SIZE];                   // Internal vertex/texturea cache.
 
     /*  This area is used for holding universal representations of the U* registers, which are actually mapped into MMIO */
     struct nv3_object_class_001 beta_factor_class;
@@ -1377,61 +1312,6 @@ typedef struct nv3_pgraph_s
     struct nv3_object_class_018 point_zeta_buffer;
     struct nv3_object_class_01C image_in_memory;
 } nv3_pgraph_t;
-
-
-// GPU Manufacturing Configuration (again)
-// In the future this will be configurable
-typedef struct nv3_pextdev_s
-{
-    /*
-    // Disabled     33Mhz
-    // Enabled      66Mhz
-    bool bus_speed;
-    
-    // Disabled     No BIOS
-    // Enabled      BIOS
-    bool bios;
-
-    // RAM Type #1
-    // Disabled     16Mbit (2MB) module size
-    // Enabled      8Mbit (1MB) module size
-    bool ram_type_1;
-
-    // NEC Mode
-    bool nec_mode;
-
-    // Disabled     64-bit
-    // Enabled      128-bit
-    bool bus_width;
-
-    // Disabled     PCI
-    // Enabled      AGP
-    bool bus_type;
-
-    // Disabled     13500
-    // Enabled      14318180
-    bool crystal;
-
-    // TV Mode
-    // 0 - SECAM, 1 - NTSC, 2 - PAL, 3 - none
-    uint8_t tv_mode;
-
-    // AGP 2X mode
-    // Disabled     AGP 1X
-    // Enabled      AGP 2X
-    bool agp_is_2x; 
-    
-    bool unused;
-
-    // Overwrite enable
-    bool overwrite;
-
-    See defines in vid_nv3.h
-    */
-    uint32_t straps;
-    
-    // more ram type stuff here but not used?
-} nv3_pextdev_t;
 
 typedef struct nv3_ptimer_s
 {
@@ -1463,23 +1343,6 @@ typedef struct nv3_ramin_context_s
     };
 } nv3_ramin_context_t;
 
-// Graphics object hashtable for specific DMA [channel, subchannel] pair
-typedef struct nv3_ramin_ramht_subchannel_s
-{
-    uint32_t           name;                      // must be >4096
-
-    // Contextual information.
-    // See the above union.
-    nv3_ramin_context_t context;                       
-} nv3_ramin_ramht_subchannel_t;
-
-// Graphics object hashtable
-typedef struct nv3_ramin_ramht_s
-{
-    nv3_ramin_ramht_subchannel_t subchannels[NV3_DMA_CHANNELS][NV3_DMA_SUBCHANNELS_PER_CHANNEL];
-} nv3_ramin_ramht_t;
-
-
 typedef enum nv3_ramin_ramro_reason_e
 {
     nv3_runout_reason_illegal_access = 0,
@@ -1504,12 +1367,6 @@ typedef struct nv3_ramin_ramfc_s
 {
 
 } nv3_ramin_ramfc_t;
-
-// RAM for AUDIO - RevisionA ONLY
-typedef struct nv_ramin_ramau_s
-{
-
-} nv3_ramin_ramau_t;
 
 typedef struct nv3_ramin_s
 {
@@ -1537,7 +1394,34 @@ typedef struct nv3_s
     nv_base_t nvbase;   // Base Nvidia structure
     
     // Config
-    nv3_straps_t straps;            // OEM Configuration
+    /*
+    // PCI bus speed - disabled is 33, enabled is 66Mhz. Irrelevant in AGP
+    bool bus_speed;
+    // Disabled     No BIOS
+    // Enabled      BIOS
+    bool bios;
+    // RAM Type #1 - Disabled is 16Mbit (2MB) module size, enabled is 8Mbit (1MB) module ize
+    bool ram_type;
+    // NEC PC98 Mode
+    bool nec_mode;
+    // Disabled     64-bit
+    // Enabled      128-bit
+    bool bus_width;
+    // Bus type: Disabled - PCI; Enabled - AGP
+    bool bus_type;
+    // Crystal type: Disabled - 13.5Mhz, enabled = 14.31818Mhz
+    bool crystal;
+    // TV Mode:  0 - SECAM, 1 - NTSC, 2 - PAL, 3 - none
+    uint8_t tv_mode;
+    // AGP 2X mode:  Disabled - AGP 1X, enabled - AGP 2X
+    bool agp_is_2x; 
+    bool unused;
+    // Strap overwrite by Video BIOS enable
+    bool overwrite;
+
+    See defines in vid_nv3.h
+    */
+    uint32_t straps;
 
     // Subsystems
     nv3_pmc_t pmc;                  // Master Control
@@ -1547,12 +1431,9 @@ typedef struct nv3_s
 
     nv3_pramdac_t pramdac;          // RAMDAC (CLUT etc)
     nv3_pgraph_t pgraph;            // 2D/3D Graphics
-    nv3_pextdev_t pextdev;          // Chip configuration
     nv3_ptimer_t ptimer;            // programmable interval timer
-    nv3_ramin_ramht_t ramht;        // hashtable for PGRAPH objects
     // (ramro does not need a struct)
     nv3_ramin_ramfc_t ramfc;        // context for unused channels
-    nv3_ramin_ramau_t ramau;        // auxillary weirdnes
     nv3_ramin_t pramin;             // INstance memory for graphics objects. Very important!
     nv3_pvideo_t pvideo;            // Video overlay
     nv3_pme_t pme;                  // Mediaport - external MPEG decoder and video interface
@@ -1619,11 +1500,10 @@ uint32_t    nv3_ramfc_read(uint32_t address);
 void        nv3_ramfc_write(uint32_t address, uint32_t value);
 uint32_t    nv3_ramro_read(uint32_t address);
 void        nv3_ramro_write(uint32_t address, uint32_t value);
-uint32_t    nv3_ramht_read(uint32_t address);
-void        nv3_ramht_write(uint32_t address, uint32_t value);
+//RAMHT just uses RAMIN function
 
 // MMIO Arbitration
-// Determine where the hell in this mess our reads or writes are going
+// Determine where our reads or writes are going
 uint32_t    nv3_mmio_arbitrate_read(uint32_t address);
 void        nv3_mmio_arbitrate_write(uint32_t address, uint32_t value);
 
@@ -1631,37 +1511,25 @@ void        nv3_mmio_arbitrate_write(uint32_t address, uint32_t value);
 // Remove the ones that aren't used here eventually, have all of htem for now
 uint32_t    nv3_pmc_read(uint32_t address);
 void        nv3_pmc_write(uint32_t address, uint32_t value);
-uint32_t    nv3_cio_read(uint32_t address);
-void        nv3_cio_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pbus_read(uint32_t address);
 void        nv3_pbus_write(uint32_t address, uint32_t value);
-uint32_t    nv3_prm_read(uint32_t address);
-void        nv3_prm_write(uint32_t address, uint32_t value);
 uint32_t    nv3_prmio_read(uint32_t address);
 void        nv3_prmio_write(uint32_t address, uint32_t value);
 uint32_t    nv3_ptimer_read(uint32_t address);
 void        nv3_ptimer_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pfb_read(uint32_t address);
 void        nv3_pfb_write(uint32_t address, uint32_t value);
-uint32_t    nv3_pextdev_read(uint32_t address);
-void        nv3_pextdev_write(uint32_t address, uint32_t value);
-
-// Special consideration for straps
-#define nv3_pstraps_read nv3_pextdev_read(NV3_PSTRAPS)
-#define nv3_pstraps_write(x) nv3_pextdev_write(NV3_PSTRAPS, x)
+uint32_t    nv3_pstraps_read(uint32_t address);
+void        nv3_pstraps_write(uint32_t address, uint32_t value);
 
 // Reads from vbios are 8bit
 uint8_t     nv3_prom_read(uint32_t address);
 void        nv3_prom_write(uint32_t address, uint32_t value);
-uint32_t    nv3_palt_read(uint32_t address);
-void        nv3_palt_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pme_read(uint32_t address);
 void        nv3_pme_write(uint32_t address, uint32_t value);
 
 // TODO: PGRAPH class registers
 
-uint32_t    nv3_prmcio_read(uint32_t address);
-void        nv3_prmcio_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pvideo_read(uint32_t address);
 void        nv3_pvideo_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pramdac_read(uint32_t address);
@@ -1669,9 +1537,6 @@ void        nv3_pramdac_write(uint32_t address, uint32_t value);
 
 uint32_t    nv3_user_read(uint32_t address);
 void        nv3_user_write(uint32_t address, uint32_t value);
-#define nv3_object_submit_start nv3_user_read
-#define nv3_object_submit_end nv3_user_write
-// TODO: RAMHT, RAMFC...or maybe handle it inside of nv3_ramin_*
 
 // GPU subsystems
 
@@ -1736,8 +1601,8 @@ uint32_t    nv3_pfifo_cache1_num_free_spaces(void);
 // NV3 PFB
 void        nv3_pfb_init(void);
 
-// NV3 PEXTDEV/PSTRAPS
-void        nv3_pextdev_init(void);
+// NV3 pstraps/PSTRAPS
+void        nv3_pstraps_init(void);
 
 // NV3 PBUS
 void        nv3_pbus_init(void);

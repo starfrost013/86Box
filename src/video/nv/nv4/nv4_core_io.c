@@ -46,43 +46,54 @@ uint32_t nv4_mmio_arbitrate_read(uint32_t addr)
 {
     uint32_t ret = 0x00;
 
-    if (addr >= NV4_PTIMER_START && addr <= NV4_PTIMER_END)
+    if (addr >= NV4_PMC_START && addr <= NV4_PMC_END)
+        ret = nv4_pmc_read(addr);
+    else if (addr >= NV4_PTIMER_START && addr <= NV4_PTIMER_END)
         ret = nv4_ptimer_read(addr);
     else if (addr >= NV4_PRAMDAC_START && addr <= NV4_PRAMDAC_END)
         ret = nv4_pramdac_read(addr);
 
-    #ifdef NV_LOG
-    nv_register_t reg = nv_get_register(addr, &nv4_registers, sizeof(nv4_registers)/sizeof(nv4_registers[0]));
+#ifdef NV_LOG
+    nv_register_t reg = nv_get_register(addr, &nv4_registers, sizeof(nv4_registers)/sizeof(nv3_registers[0]));
 
     if (reg)
     {
         if (reg->on_read)
             ret = reg->on_read();
         
-        nv_log_verbose_only("Register read from 0x%08x value=%08x", addr, ret);
-        
+        nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)", addr, reg.friendly_name, ret);
     }
-    #endif 
+    else
+    {
+        nv_log_verbose_only("Unknown register read 0x%08x", addr);
+    }
+#endif
 
 }
 
 void nv4_mmio_arbitrate_write(uint32_t addr, uint32_t val)
 {
-    if (addr >= NV4_PTIMER_START && addr <= NV4_PTIMER_END)
+
+    if (addr >= NV4_PMC_START && addr <= NV4_PMC_END)
+        nv4_pmc_write(addr, val);
+    else if (addr >= NV4_PTIMER_START && addr <= NV4_PTIMER_END)
         nv4_ptimer_write(addr, val);
     else if (addr >= NV4_PRAMDAC_START && addr <= NV4_PRAMDAC_END)
         nv4_pramdac_write(addr, val);
 
     #ifdef NV_LOG
-    nv_register_t reg = nv_get_register(addr, &nv4_registers, sizeof(nv4_registers)/sizeof(nv4_registers[0]));
+    nv_register_t reg = nv_get_register(addr, &nv4_registers, sizeof(nv4_registers)/sizeof(nv3_registers[0]));
 
     if (reg)
     {
         if (reg->on_write)
             reg->on_write(val);
         
-        nv_log_verbose_only("Register write from 0x%08x value=%08x", addr, val);
-        
+        nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)", addr, val, reg.friendly_name);   
+    }
+    else   
+    {
+        nv_log_verbose_only("Unknown register write 0x%08x -> 0x%08x", val, addr);
     }
     #endif 
 }
