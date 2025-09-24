@@ -98,32 +98,10 @@ const device_config_t nv3_config[] =
         }
 
     },
-    {
-        .name = "chip_revision",
-        .description = "Chip Revision",
-        .type = CONFIG_SELECTION,
-        .default_int = NV3_PCI_CFG_REVISION_B00,
-        .selection = 
-        {
-            {
-               .description = "RIVA 128 Prototype (Revision A; January 1997)",
-               .value = NV3_PCI_CFG_REVISION_A00,
-            },
-            {
-               .description = "RIVA 128 (Revision B)",
-               .value = NV3_PCI_CFG_REVISION_B00,
-            },
-        }
-    },
     // Multithreading configuration
     {
-
         .name = "pgraph_threads",
-#ifndef RELEASE_BUILD
-        .description = "PFIFO/PGRAPH - Number of threads to split large object method execution into",
-#else
-        .description = "Render threads",
-#endif 
+        .description = "Render threads (PFIFO/PGRAPH)", 
         .type = CONFIG_SELECTION,
         .default_int = 1, // todo: change later
         .selection = 
@@ -199,11 +177,7 @@ const device_config_t nv3t_config[] =
     {
 
         .name = "pgraph_threads",
-#ifndef RELEASE_BUILD
         .description = "PFIFO/PGRAPH - Number of threads to split large object method execution into",
-#else
-        .description = "Render threads",
-#endif 
         .type = CONFIG_SELECTION,
         .default_int = 1, // todo: change later
         .selection = 
