@@ -2156,7 +2156,6 @@ uint8_t mach64_ext_readb(uint32_t addr, void *priv)
                         svga_in(0x3c8 + (addr & 3), svga);
                     else
                         svga_in(0x3c4 + (addr & 3), svga);
-                }
                 break;
             case 0x31:
                 READ8(addr, mach64->dac_cntl);
@@ -2710,20 +2709,10 @@ uint8_t mach64_ext_inb(uint16_t port, void *priv)
             if (mach64->type == MACH64_GX)
                 ret = ati68860_ramdac_in((port & 3) | ((mach64->dac_cntl & 3) << 2), 0, mach64->svga.ramdac, &mach64->svga);
             else {
-                switch (port & 3) {
-                    case 0:
-                        ret = svga_in(0x3c8, svga);
-                        break;
-                    case 1:
-                        ret = svga_in(0x3c9, svga);
-                        break;
-                    case 2:
-                        ret = svga_in(0x3c6, svga);
-                        break;
-                    case 3:
-                        ret = svga_in(0x3c7, svga);
-                        break;
-                }
+                if (port & 0x08)
+                    svga_in(0x3c8 + (port & 3), svga);
+                else
+                    svga_in(0x3c4 + (port & 3), svga);
             }
         }
         else if (port_high < 0x22)
@@ -2837,20 +2826,10 @@ void mach64_ext_outb(uint16_t port, uint8_t val, void *priv)
             if (mach64->type == MACH64_GX)
                 ati68860_ramdac_out((port & 3) | ((mach64->dac_cntl & 3) << 2), val, 0, svga->ramdac, svga);
             else {
-                switch (port & 3) {
-                    case 0:
-                        svga_out(0x3c8, val, svga);
-                        break;
-                    case 1:
-                        svga_out(0x3c9, val, svga);
-                        break;
-                    case 2:
-                        svga_out(0x3c6, val, svga);
-                        break;
-                    case 3:
-                        svga_out(0x3c7, val, svga);
-                        break;
-                }
+                if (port & 0x08)
+                    svga_out(0x3c8 + (port & 3), val, svga);
+                else
+                    svga_out(0x3c4 + (port & 3), val, svga);
             }
         }
         else if (port_high < 0x22)
@@ -2868,11 +2847,9 @@ void mach64_ext_outb(uint16_t port, uint8_t val, void *priv)
   // these don't seem to follow any rhyme or reason
             switch (port_high) 
             {
-            
                 case 0x52:
                     or2 = 0xB0;
                     break;
-
                 case 0x56:
                     if (port_low == 0xEC)
                         or2 = 0xB4;
@@ -2889,7 +2866,6 @@ void mach64_ext_outb(uint16_t port, uint8_t val, void *priv)
 
                     mach64_ext_writeb(0x400 | or2, val, priv);
                     break;
-
                 default:
                     break;
                 }
