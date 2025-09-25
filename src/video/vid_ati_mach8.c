@@ -40,6 +40,7 @@
 #include <86box/vid_xga.h>
 #include <86box/vid_svga.h>
 #include <86box/vid_svga_render.h>
+#include <86box/vid_ati_common.h>
 #include <86box/vid_ati_eeprom.h>
 #include <86box/vid_ati_mach8.h>
 
@@ -7094,10 +7095,10 @@ mach32_pci_read(UNUSED(int func), int addr, void *priv)
 
     switch (addr) {
         case 0x00:
-            ret = 0x02; /*ATI*/
+            ret = ATI_PCI_VENDOR_ID & 0xFF; 
             break;
         case 0x01:
-            ret = 0x10;
+            ret = ATI_PCI_VENDOR_ID >> 8;
             break;
 
         case 0x02:
@@ -7134,28 +7135,20 @@ mach32_pci_read(UNUSED(int func), int addr, void *priv)
         case 0x13:
             ret = mach->linear_base >> 24;
             break;
-
         case 0x30:
             ret = (mach->pci_regs[0x30] & 0x01); /*BIOS ROM address*/
             break;
         case 0x31:
             ret = 0x00;
             break;
-        case 0x32:
-            ret = mach->pci_regs[0x32];
-            break;
-        case 0x33:
-            ret = mach->pci_regs[0x33];
-            break;
-
         case 0x3c:
             ret = mach->int_line;
             break;
         case 0x3d:
             ret = PCI_INTA;
             break;
-
         default:
+            ret = mach->pci_regs[addr];
             break;
     }
 
