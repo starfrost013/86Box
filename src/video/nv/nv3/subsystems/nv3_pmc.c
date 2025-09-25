@@ -60,7 +60,6 @@ uint32_t nv3_pmc_handle_interrupts(bool send_now)
 
     uint32_t new_intr_value = 0x00;
 
-
     // set the new interrupt value
     
     // the registers are designed to line up so you can enable specific interrupts
@@ -119,7 +118,7 @@ uint32_t nv3_pmc_handle_interrupts(bool send_now)
     {
         // no interrupts to send
         if (!(nv3->pmc.intr)
-         || !(nv3->pmc.intr - 0x80000000))
+         || nv3->pmc.intr & 0x80000000) // software interrupt
         {
             nv3_pmc_clear_interrupts();
             return nv3->pmc.intr;

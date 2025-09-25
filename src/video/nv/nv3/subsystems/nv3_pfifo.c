@@ -219,7 +219,7 @@ uint32_t nv3_pfifo_read(uint32_t address)
     }
 
     /* Handle some special memory areas */
-    if (address >= NV3_PFIFO_CACHE1_CTX_START && address <= NV3_PFIFO_CACHE1_CTX_END)
+    if (address >= NV3_PFIFO_CACHE1_CTX_START && address < NV3_PFIFO_CACHE1_CTX_END)
     {
         uint32_t ctx_entry_id = ((address - NV3_PFIFO_CACHE1_CTX_START) / 16) % 8;
         ret = nv3->pfifo.cache1_settings.context[ctx_entry_id];
@@ -235,16 +235,16 @@ uint32_t nv3_pfifo_read(uint32_t address)
         if (address & 4)
         {
             nv_log_verbose_only("Data=0x%08x\n", nv3->pfifo.cache0_entry.data);
-            return nv3->pfifo.cache0_entry.data;
+            ret = nv3->pfifo.cache0_entry.data;
         }
         else
         {
             uint32_t final = nv3->pfifo.cache0_entry.method | (nv3->pfifo.cache0_entry.subchannel << NV3_PFIFO_CACHE1_METHOD_SUBCHANNEL);
             nv_log_verbose_only("Param (subchannel=15:13, method=12:2)=0x%08x\n", final);
-            return final;
+            ret = final;
         }
     }
-    else if (address >= NV3_PFIFO_CACHE1_METHOD_START && address <= NV3_PFIFO_CACHE1_METHOD_END)
+    else if (address >= NV3_PFIFO_CACHE1_METHOD_START && address < NV3_PFIFO_CACHE1_METHOD_END)
     {       
         // Not sure if REV C changes this. It should...
         uint32_t slot = 0;
@@ -261,13 +261,13 @@ uint32_t nv3_pfifo_read(uint32_t address)
         if (address & 4)
         {
             nv_log_verbose_only("Data=0x%08x\n", nv3->pfifo.cache1_entries[slot].data);
-            return nv3->pfifo.cache1_entries[slot].data;
+            ret = nv3->pfifo.cache1_entries[slot].data;
         }
         else
         {
             uint32_t final = nv3->pfifo.cache1_entries[slot].method | (nv3->pfifo.cache1_entries[slot].subchannel << NV3_PFIFO_CACHE1_METHOD_SUBCHANNEL);
             nv_log_verbose_only("Param (subchannel=15:13, method=12:2)=0x%08x\n", final);
-            return final;
+            ret = final;
         }
             
     }

@@ -98,7 +98,7 @@ uint32_t nv4_pmc_handle_interrupts(bool send_now)
     {
         // no interrupts to send
         if (!(nv4->pmc.intr)
-         || !(nv4->pmc.intr & 0x80000000))
+         || nv4->pmc.intr & 0x80000000)
         {
             nv4_pmc_clear_interrupts();
             return nv4->pmc.intr;
