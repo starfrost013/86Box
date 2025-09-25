@@ -66,6 +66,15 @@ uint32_t nv3_pfifo_read(uint32_t address)
         // Debug
         case NV3_PFIFO_DEBUG_0:
             ret = nv3->pfifo.debug_0;
+
+            // update the internal cache error state since the cache_error interrupt was serviced by the Resource Manager.
+            // Do thi seven if this interrupt is disabled
+            if (nv3->pfifo.intr & NV3_PFIFO_INTR_CACHE_ERROR)
+            {
+                nv3->pfifo.debug_0 &= ~(1 << NV3_PFIFO_CACHE0_ERROR_PENDING);
+                nv3->pfifo.debug_0 &= ~(1 << NV3_PFIFO_CACHE1_ERROR_PENDING);
+            }
+    
             break;
         case NV3_PFIFO_CONFIG_0:
             ret = nv3->pfifo.config_0;
@@ -218,7 +227,7 @@ uint32_t nv3_pfifo_read(uint32_t address)
         nv_log_verbose_only("PFIFO Cache1 CTX Read Entry=%d Value=0x%04x\n", ctx_entry_id, ret);
     }
     /* Direct cache read  stuff */
-    else if (address >= NV3_PFIFO_CACHE0_METHOD_START && address <= NV3_PFIFO_CACHE0_METHOD_END)
+    else if (address >= NV3_PFIFO_CACHE0_METHOD_START && address < NV3_PFIFO_CACHE0_METHOD_END)
     {
         nv_log_verbose_only("PFIFO Cache0 Read\n");
 
@@ -329,9 +338,7 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
             nv3->pfifo.intr &= ~val;
             nv3_pmc_clear_interrupts();
 
-            // update the internal cache error state
-            if (!nv3->pfifo.intr & NV3_PFIFO_INTR_CACHE_ERROR)
-                nv3->pfifo.debug_0 &= ~(1 << NV3_PFIFO_INTR_CACHE_ERROR);
+
             break;
         case NV3_PFIFO_INTR_EN:
             nv3->pfifo.intr_en = val & 0x00011111;
