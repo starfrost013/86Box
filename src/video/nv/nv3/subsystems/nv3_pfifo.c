@@ -51,8 +51,6 @@ uint32_t nv3_pfifo_read(uint32_t address)
     uint32_t ret = 0x00;
 
     // todo: friendly logging
-    
-    nv_log_verbose_only("PFIFO Read from 0x%08x", address);
 
     switch (address)
     {
@@ -319,8 +317,6 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
         return;
     }
 
-    nv_log_verbose_only("PFIFO Write 0x%08x -> 0x%08x", val, address);
-
     switch (address)
     {
         // Interrupt state:
@@ -335,7 +331,7 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
 
             // update the internal cache error state
             if (!nv3->pfifo.intr & NV3_PFIFO_INTR_CACHE_ERROR)
-                nv3->pfifo.debug_0 &= ~NV3_PFIFO_INTR_CACHE_ERROR;
+                nv3->pfifo.debug_0 &= ~(1 << NV3_PFIFO_INTR_CACHE_ERROR);
             break;
         case NV3_PFIFO_INTR_EN:
             nv3->pfifo.intr_en = val & 0x00011111;
@@ -544,10 +540,6 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
         nv3->pfifo.cache1_settings.context[ctx_entry_id] = val;
 
         nv_log_verbose_only("PFIFO Cache1 CTX Write Entry=%d value=0x%04x\n", ctx_entry_id, val);
-    }
-    else /* Completely unknown */
-    {
-        nv_log(": Unknown register write (address=0x%08x)\n", address);
     }
 
     /* Trigger DMA for notifications if we need to */

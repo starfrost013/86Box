@@ -57,7 +57,7 @@ nv_register_t nv3_registers[] = {
     { NV3_PFIFO_CACHE1_PUSH_ENABLED, "PFIFO - Cache1 Access", NULL, NULL, },
     { NV3_PFIFO_CACHE0_PUSH_CHANNEL_ID, "PFIFO - Cache0 Push Channel ID", NULL, NULL, },
     { NV3_PFIFO_CACHE1_PUSH_CHANNEL_ID, "PFIFO - Cache1 Push Channel ID", NULL, NULL, },
-    { NV3_PFIFO_CACHE0_ERROR_PENDING, "PFIFO - Cache0 DMA Error Pending?", NULL, NULL, },
+    { NV3_PFIFO_DEBUG_0, "PFIFO - Cache0/1 DMA Error Pending?", NULL, NULL, },
     { NV3_PFIFO_CACHE0_STATUS, "PFIFO - Cache0 Status", NULL, NULL},
     { NV3_PFIFO_CACHE1_STATUS, "PFIFO - Cache1 Status", NULL, NULL}, 
     { NV3_PFIFO_CACHE0_GET, "PFIFO - Cache0 Get", NULL, NULL },

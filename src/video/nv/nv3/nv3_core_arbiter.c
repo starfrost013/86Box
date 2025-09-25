@@ -110,6 +110,12 @@ uint32_t nv3_mmio_arbitrate_read(uint32_t addr)
     }
 
     #ifdef ENABLE_NV_LOG
+
+    // Don't bother logging these registers, far too slow!
+    if (addr == NV3_PTIMER_TIME_0_NSEC
+    || addr == NV3_PTIMER_TIME_1_NSEC)
+        return ret;
+
     nv_register_t* reg = nv_get_register(addr, nv3_registers);
 
     if (reg)
@@ -184,6 +190,12 @@ void nv3_mmio_arbitrate_write(uint32_t addr, uint32_t val)
     }
 
     #ifdef ENABLE_NV_LOG
+
+    // Don't bother logging these registers
+    if (addr == NV3_PTIMER_TIME_0_NSEC
+    || addr == NV3_PTIMER_TIME_1_NSEC)
+        return;
+
     nv_register_t* reg = nv_get_register(addr, nv3_registers);
 
     if (reg)
@@ -191,7 +203,7 @@ void nv3_mmio_arbitrate_write(uint32_t addr, uint32_t val)
         if (reg->on_write)
             reg->on_write(val);
         
-        nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)\n", addr, val, reg->friendly_name);   
+        nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)\n", val, addr, reg->friendly_name);   
     }
     else   
     {
