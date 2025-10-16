@@ -14,6 +14,7 @@
 
 
 add_library(video2 OBJECT
+    agpgart.c
     video_core.c 
     video_table.c
 )
