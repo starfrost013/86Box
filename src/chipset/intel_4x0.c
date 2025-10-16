@@ -30,7 +30,11 @@
 #include <86box/chipset.h>
 #include <86box/spd.h>
 #include <86box/machine.h>
+#ifndef USE_VIDEO2
 #include <86box/agpgart.h>
+#else
+#include <86box/video2/agpgart.h>
+#endif
 
 enum {
     INTEL_420TX,

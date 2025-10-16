@@ -138,6 +138,7 @@ option(DEV_BRANCH   "Development branch"                                        
 option(DISCORD      "Discord Rich Presence support"                              ON)
 option(DEBUGREGS486 "Enable debug register opeartion on 486+ CPUs"               OFF)
 option(LIBASAN      "Enable compilation with the addresss sanitizer"             OFF)
+option(VIDEO2       "Next-generation video system"                               ON)
 
 if((ARCH STREQUAL "arm64"))
     set(NEW_DYNAREC ON)

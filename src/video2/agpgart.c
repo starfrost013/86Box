@@ -158,7 +158,7 @@ agpgart_close(void *priv)
 }
 
 const device_t agpgart_device = {
-    .name          = "AGP Graphics Address Remapping Table (New Video)",
+    .name          = "AGP Graphics Address Remapping Table",
     .internal_name = "agpgart",
     .flags         = DEVICE_PCI,
     .local         = 0,

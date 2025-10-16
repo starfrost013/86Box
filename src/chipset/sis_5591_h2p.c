@@ -47,7 +47,11 @@
 #include <86box/sis_55xx.h>
 #include <86box/chipset.h>
 #include <86box/usb.h>
+#ifndef USE_VIDEO2
 #include <86box/agpgart.h>
+#else
+#include <86box/video2/agpgart.h>
+#endif
 
 #ifdef ENABLE_SIS_5591_HOST_TO_PCI_LOG
 int sis_5591_host_to_pci_do_log = ENABLE_SIS_5591_HOST_TO_PCI_LOG;

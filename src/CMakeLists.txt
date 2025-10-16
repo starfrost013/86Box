@@ -14,7 +14,7 @@
 #          Copyright 2020-2022 David Hrdlička.
 #          Copyright 2021      dob205.
 #          Copyright 2024      Jasmine Iwanek.
-#
+#          Copyright 2025      Connor Hyde (starfrost)
 
 if(NOT CMAKE_TOP_LEVEL_PROCESSED)
     message(FATAL_ERROR "Incorrect source directory specified. Delete your build directory and retry with the top-level directory instead")
@@ -135,11 +135,18 @@ target_link_libraries(86Box
     sio
     snd
     utils
-    vid
     voodoo
     plat
     ui
 )
+
+if(VIDEO2)
+    add_compile_definitions(USE_VIDEO2)
+    target_link_libraries(86Box video2)
+else()
+    target_link_libraries(86Box vid)
+    target_link_libraries(86Box voodoo)
+endif()
 
 if(HAIKU)
     target_link_libraries(86Box be)
@@ -273,6 +280,12 @@ add_subdirectory(scsi)
 add_subdirectory(sound)
 add_subdirectory(utils)
 add_subdirectory(video)
+
+if (VIDEO2)
+    add_subdirectory(video2)
+else()
+    add_subdirectory(video)
+endif()
 
 if (APPLE)
     add_subdirectory(mac)

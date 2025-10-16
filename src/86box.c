@@ -92,13 +92,18 @@
 #include <86box/rdisk.h>
 #include <86box/mo.h>
 #include <86box/scsi_disk.h>
-#include <86box/cdrom_image.h>
+#include <86box/cdrom_image.h>  
 #include <86box/thread.h>
 #include <86box/network.h>
 #include <86box/sound.h>
 #include <86box/midi.h>
 #include <86box/snd_speaker.h>
+#ifdef USE_VIDEO2
+#include <86box/video2/video.h>
+#else
 #include <86box/video.h>
+#endif
+
 #include <86box/ui.h>
 #include <86box/path.h>
 #include <86box/plat.h>
@@ -109,6 +114,7 @@
 #include <86box/acpi.h>
 #include <86box/nv/vid_nv_rivatimer.h>
 #include <86box/vfio.h>
+#include <86box/log.h>
 
 // Disable c99-designator to avoid the warnings about int ng
 #ifdef __clang__
@@ -1268,6 +1274,24 @@ pc_init_roms(void)
         }
 
         c = m = 0;
+
+// Todo: Unify with above!
+#ifdef USE_VIDEO2
+        // Check which video card exists
+        while (video_devices[c] != NULL)
+        {
+            const device_t* current_device = video_devices[c];
+
+            memset(tempc, 0x00, sizeof(tempc));
+            device_get_name(current_device, 0, tempc); 
+
+            if (!current_device->available())
+                log_out(video_engine.log, "Missing video card: %s", tempc); //todo: IF log blah blah
+
+            c++;
+        }
+#else
+
         while (video_get_internal_name(c) != NULL) {
             memset(tempc, 0, sizeof(tempc));
             device_get_name(video_card_getdevice(c), 0, tempc);
@@ -1278,6 +1302,7 @@ pc_init_roms(void)
                 pclog("Missing video card: %s\n", tempc);
             c++;
         }
+#endif
     }
 
     pc_log("Scanning for ROM images:\n");
@@ -1322,6 +1347,7 @@ pc_init_modules(void)
         }
     }
 
+#ifndef USE_VIDEO2 // TODO
     /* Make sure we have a usable video card. */
     if (!video_card_available(gfxcard[0])) {
         memset(tempc, 0, sizeof(tempc));
@@ -1354,7 +1380,7 @@ pc_init_modules(void)
             gfxcard[i] = 0;
         }
     }
-
+#endif
     atfullspeed = 0;
 
     random_init();
@@ -1391,7 +1417,11 @@ pc_init_modules(void)
 
     hdc_init();
 
+#ifndef USE_VIDEO2
     video_reset_close();
+#else
+    video_reset();
+#endif
 
     machine_status_init();
 
@@ -1537,7 +1567,11 @@ pc_reset_hard_close(void)
 
     closeal();
 
+#ifndef USE_VIDEO2
     video_reset_close();
+#else
+    video_reset();
+#endif
 
     cpu_close();
 
@@ -1650,9 +1684,11 @@ pc_reset_hard_init(void)
     /* Reset any ISA RTC cards. */
     isartc_reset();
 
+#ifndef USE_VIDEO2
     /* Initialize the Voodoo cards here inorder to minimize
        the chances of the SCSI controller ending up on the bridge. */
     video_voodoo_init();
+#endif
 
 #if defined(USE_VFIO) && defined(__linux__)
     /* Initialize VFIO */
@@ -1873,7 +1909,9 @@ pc_run(void)
     framecount++;
     if (++framecountx >= (force_10ms ? 100 : 1000)) {
         framecountx = 0;
+#ifndef USE_VIDEO2
         frames      = 0;
+#endif    
     }
 
     if (title_update) {
@@ -1905,13 +1943,16 @@ pc_onesec(void)
     title_update = 1;
 }
 
-void
-set_screen_size_monitor(int x, int y, int monitor_index)
+void set_screen_size_video2(int32_t x, int32_t y, int32_t monitor_index)
 {
-    int    temp_overscan_x = monitors[monitor_index].mon_overscan_x;
-    int    temp_overscan_y = monitors[monitor_index].mon_overscan_y;
-    int    is_svga         = (video_get_type_monitor(monitor_index) == VIDEO_FLAG_TYPE_SPECIAL) ||
-                             (video_get_type_monitor(monitor_index) == VIDEO_FLAG_TYPE_8514);
+    video_monitor_t* monitor = video_get_monitor_by_index(monitor_index);
+
+    // TODO: REWRITE THIS ENTIRE FUNCTION AND GET RID OF THESE TEMPORARY VALUES!!
+    int    temp_overscan_x = monitor->size_x_overscan;
+    int    temp_overscan_y = monitor->size_y_overscan;
+    int    is_svga         = 0; // Only CGA supported rn
+
+
     double dx;
     double dy;
     double dtx;
@@ -1931,8 +1972,133 @@ set_screen_size_monitor(int x, int y, int monitor_index)
         y = 2048;
 
     /* Save the new values as "real" (unscaled) resolution. */
+
+    monitor->size_x = x;
+    monitor->size_y = y;
+
+    if (suppress_overscan)
+        temp_overscan_x = temp_overscan_y = 0;
+
+    if (force_43) {
+        dx  = (double) x;
+        dtx = (double) temp_overscan_x;
+
+        dy  = (double) y;
+        dty = (double) temp_overscan_y;
+
+        /* Account for possible overscan. */
+        if (!is_svga && (temp_overscan_y == 16)) {
+            /* CGA */
+            dy = (((dx - dtx) / 4.0) * 3.0) + dty;
+        } else if (!is_svga && (temp_overscan_y < 16)) {
+            /* MDA/Hercules */
+            dy = (dx / 4.0) * 3.0;
+        } else {
+            if (enable_overscan) {
+                /* EGA/(S)VGA with overscan */
+                dy = (((dx - dtx) / 4.0) * 3.0) + dty;
+            } else {
+                /* EGA/(S)VGA without overscan */
+                dy = (dx / 4.0) * 3.0;
+            }
+        }
+        monitor->size_y = (int32_t) dy;
+    } //else
+        //monitor->size_y = monitors[monitor_index].mon_efscrnsz_y;
+
+    switch (scale) {
+        case 0: /* 50% */
+            monitor->size_x_scaled = (monitor->size_x >> 1);
+            monitor->size_y_scaled = (monitor->size_y >> 1);
+            break;
+
+        case 1: /* 100% */
+            monitor->size_x_scaled = monitor->size_x;
+            monitor->size_y_scaled = monitor->size_y;
+            break;
+
+        case 2: /* 150% */
+            monitor->size_x_scaled = ((monitor->size_x * 3) >> 1);
+            monitor->size_y_scaled = ((monitor->size_y * 3) >> 1);
+            break;
+
+        case 3: /* 200% */
+            monitor->size_x_scaled = (monitor->size_x << 1);
+            monitor->size_y_scaled = (monitor->size_y << 1);
+            break;
+
+        case 4: /* 300% */
+            monitor->size_x_scaled = (monitor->size_x * 3);
+            monitor->size_y_scaled = (monitor->size_y * 3);
+            break;
+
+        case 5: /* 400% */
+            monitor->size_x_scaled = (monitor->size_x << 2);
+            monitor->size_y_scaled = (monitor->size_y << 2);
+            break;
+
+        case 6: /* 500% */
+            monitor->size_x_scaled = (monitor->size_x * 5);
+            monitor->size_y_scaled = (monitor->size_y * 5);
+            break;
+
+        case 7: /* 600% */
+            monitor->size_x_scaled = (monitor->size_x * 6);
+            monitor->size_y_scaled = (monitor->size_y * 6);
+            break;
+
+        case 8: /* 700% */
+            monitor->size_x_scaled = (monitor->size_x * 7);
+            monitor->size_y_scaled = (monitor->size_y * 7);
+            break;
+
+        case 9: /* 800% */
+            monitor->size_x_scaled = (monitor->size_x << 3);
+            monitor->size_y_scaled = (monitor->size_y << 3);
+            break;
+
+        default:
+            break;
+    }
+
+    plat_resize_request(monitor->size_x_scaled, monitor->size_y_scaled, monitor_index);
+}
+
+void
+set_screen_size_monitor(int x, int y, int monitor_index)
+{
+#ifdef USE_VIDEO2
+    set_screen_size_video2(x, y, monitor_index);
+    return;
+#else 
+    int    temp_overscan_x = monitors[monitor_index].mon_overscan_x;
+    int    temp_overscan_y = monitors[monitor_index].mon_overscan_y;
+    int    is_svga         = (video_get_type_monitor(monitor_index) == VIDEO_FLAG_TYPE_SPECIAL) ||
+                             (video_get_type_monitor(monitor_index) == VIDEO_FLAG_TYPE_8514);
+
+    double dx;
+    double dy;
+    double dtx;
+    double dty;
+
+    /* Make sure we keep usable values. */
+#if 0
+    pc_log("SetScreenSize(%d, %d) resize=%d\n", x, y, vid_resize);
+#endif
+    if (x < 320)
+        x = 320;
+    if (y < 200)
+        y = 200;
+    if (x > 2048)
+        x = 2048;
+    if (y > 2048)
+        y = 2048;
+
+    /* Save the new values as "real" (unscaled) resolution. */
+
     monitors[monitor_index].mon_unscaled_size_x = x;
     monitors[monitor_index].mon_efscrnsz_y      = y;
+
 
     if (suppress_overscan)
         temp_overscan_x = temp_overscan_y = 0;
@@ -2020,34 +2186,39 @@ set_screen_size_monitor(int x, int y, int monitor_index)
     }
 
     plat_resize_request(monitors[monitor_index].mon_scrnsz_x, monitors[monitor_index].mon_scrnsz_y, monitor_index);
+#endif
 }
 
+#ifndef USE_VIDEO2
 void
 set_screen_size(int x, int y)
 {
     set_screen_size_monitor(x, y, monitor_index_global);
 }
+#endif
 
 void
 reset_screen_size_monitor(int monitor_index)
 {
+    #ifndef USE_VIDEO2
     set_screen_size(monitors[monitor_index].mon_unscaled_size_x, monitors[monitor_index].mon_efscrnsz_y);
+    #else
+    video_monitor_t* monitor = video_get_monitor_by_index(monitor_index);
+    set_screen_size(monitor->size_x, monitor->size_y);
+    #endif
 }
 
 void
 reset_screen_size(void)
 {
-    for (uint8_t i = 0; i < MONITORS_NUM; i++)
-        set_screen_size(monitors[i].mon_unscaled_size_x, monitors[i].mon_efscrnsz_y);
+    for (uint8_t i = 0; i < video_engine.num_monitors; i++)
+    {
+        video_monitor_t* monitor = video_get_monitor_by_index(i);
+        set_screen_size(monitor->size_x, monitor->size_y);
+    }
 }
 
-void
-set_screen_size_natural(void)
-{
-    for (uint8_t i = 0; i < MONITORS_NUM; i++)
-        set_screen_size(monitors[i].mon_unscaled_size_x, monitors[i].mon_unscaled_size_y);
-}
-
+#ifndef USE_VIDEO2
 int
 get_actual_size_x(void)
 {
@@ -2059,6 +2230,7 @@ get_actual_size_y(void)
 {
     return (efscrnsz_y);
 }
+#endif
 
 void
 do_pause(int p)
