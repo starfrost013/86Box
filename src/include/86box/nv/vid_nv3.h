@@ -279,6 +279,9 @@ extern const device_config_t nv3t_config[];                             // Confi
 #define NV3_PFIFO_CACHE0_ERROR_PENDING                  0
 #define NV3_PFIFO_CACHE1_ERROR_PENDING                  4
 
+#define NV3_PFIFO_CACHE1_ACCEL_INDEX_COUNT              NV3_PFIFO_FIRST_ACCEL_OBJECT
+#define NV3_PFIFO_CACHE1_PGRAPH_CACHE_FETCH_SIZE        717
+
 #define NV3_PFIFO_INTR                                  0x2100      // FIFO - Interrupt Status
 #define NV3_PFIFO_INTR_EN                               0x2140      // FIFO - Interrupt Enable
 
@@ -395,6 +398,8 @@ extern const device_config_t nv3t_config[];                             // Confi
 #define NV3_PFIFO_CACHE1_METHOD_END                     0x3400
 #define NV3_PFIFO_CACHE1_METHOD_ADDRESS                 2           // 12:2
 #define NV3_PFIFO_CACHE1_METHOD_SUBCHANNEL              13          // 15:13
+
+#define NV3_PFIFO_FIRST_ACCEL_OBJECT                    VMM_PATH_WINDOWS
 
 #define NV3_PFIFO_END                                   0x3FFF
 #define NV3_PRM_START                                   0x4000      // Real-Mode Device Support Subsystem
@@ -840,6 +845,7 @@ extern const device_config_t nv3t_config[];                             // Confi
 
 // CRTC/CIO (0x3b0-0x3df)
 
+
 #define NV3_CRTC_REGISTER_INDEX_MONO                    0x3B4    
 #define NV3_CRTC_REGISTER_MONO                          0x3B5    // Currently Selected CRTC Register - Monochrome 
 
@@ -1059,6 +1065,8 @@ typedef struct nv3_pfifo_cache_s
 
     /* TODO */
 } nv3_pfifo_cache_t;
+
+extern uint8_t nv3_pfifo_cache1_gray_code_table[];
 
 typedef struct nv3_pfifo_cache_entry_s
 {

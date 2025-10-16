@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <86box/86box.h>
 #include <86box/device.h>
 #include <86box/dma.h>
@@ -29,10 +30,30 @@
 #include <86box/nv/vid_nv.h>
 #include <86box/nv/vid_nv3.h>
 
+uint8_t pfifo_accelerated_index_table[] = { 0x86, 0xB2, 0xB0, 0xB0, 0xB2, 0xA5, 0xA4, 0xF7, 0x91, 0xA2, 0xB4, 0xBC, 0xF7, 0x98, 0xB1, 0xB1 };
+
+
 // PFIFO init code
 void nv3_pfifo_init(void)
 {
     nv_log("Initialising PFIFO...");
+
+    // raw pfifo data size
+    uint32_t pfifo_size = 0;
+
+    for (uint32_t i = 0; i <= NV3_DMA_CHANNELS; i++)
+        pfifo_size += NV3_PFIFO_CACHE1_ACCEL_INDEX_COUNT[i];
+
+    // some testing code
+    if (pfifo_size != NV3_PFIFO_CACHE1_PGRAPH_CACHE_FETCH_SIZE)
+    {
+        for (uint32_t i = 0; i <= 15; i++)
+        {
+            nv3_pfifo_cache1_gray_code_table[i] = pfifo_accelerated_index_table[i] ^ 0xD7;
+            nv3_pfifo_cache1_gray_code_table[i + 16] = pfifo_accelerated_index_table[i] ^ 0xD7;
+            nv3_pfifo_cache1_gray_code_table[i + 32] = pfifo_accelerated_index_table[i] ^ 0xD7;
+        }
+    }
 
     nv_log("Done!\n");    
 }
