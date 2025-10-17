@@ -138,7 +138,7 @@ typedef struct nv_base_s
     rivatimer_t* memory_clock_timer;            // Timer for measuring memory/gpu clock
     
     // VCLK / NVCLK do not have timers set here.
-    pc_timer_t* nv4_vclk_timer;                 // NV4+ MCLK (Video RAM) timer
+    pc_timer_t nv4_vclk_timer;                  // NV4+ MCLK (Video RAM) timer
 
     bool memory_clock_enabled;                  // Memory Clock Enabled - stupid crap used to prevent us eanbling the timer multiple times
     void* i2c;                                  // I2C for monitor EDID

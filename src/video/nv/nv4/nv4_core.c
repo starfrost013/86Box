@@ -238,7 +238,7 @@ bool nv4_init()
     nv4->pramdac.mclk = 0x1a30a;
     nv4->pramdac.vclk = 0x1400c;
 
-    timer_add(nv4->nvbase.nv4_vclk_timer, nv4_vclk_tick, nv4, true);
+    timer_add(&nv4->nvbase.nv4_vclk_timer, nv4_vclk_tick, nv4, true);
 
     nv4_init_mappings();
     //nv4_update_mappings();
