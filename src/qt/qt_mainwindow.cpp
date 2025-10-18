@@ -2068,9 +2068,13 @@ void
 MainWindow::on_actionChange_contrast_for_monochrome_display_triggered()
 {
     startblit();
+#ifndef USE_VIDEO2
     vid_cga_contrast ^= 1;
     for (int i = 0; i < MONITORS_NUM; i++)
         cgapal_rebuild_monitor(i);
+#else 
+    warning("Video System 2.0: This feature isn't implemented yet, tell starfrost");
+#endif
     config_save();
     endblit();
 }

@@ -101,10 +101,11 @@ machine_init_ex(int m)
 
         cart_reset();
 
+#ifndef USE_VIDEO2
         /* Prepare some video-related things if we're using internal
            or no video. */
         video_pre_reset(gfxcard[0]);
-
+#endif
         /* Reset any ISA memory cards. */
         isamem_reset();
 

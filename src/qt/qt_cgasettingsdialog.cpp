@@ -14,6 +14,11 @@ CGASettingsDialog::CGASettingsDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::CGASettingsDialog)
 {
+#ifdef USE_VIDEO2
+    warning("Video System 2.0: This feature isn't implemented yet, tell starfrost");
+    return;
+#endif
+
     ui->setupUi(this);
 
     cga_hue = vid_cga_comp_hue;
@@ -57,7 +62,9 @@ void CGASettingsDialog::updateDisplay()
     auto temp_cga_comp_brightness = ui->horizontalSliderBrightness->value();
     auto temp_cga_comp_contrast   = ui->horizontalSliderContrast->value();
     auto temp_cga_comp_sharpness  = ui->horizontalSliderSharpness->value();
+    #ifndef USE_VIDEO2
     cga_comp_reload(temp_cga_comp_brightness, temp_cga_comp_saturation, temp_cga_comp_sharpness, temp_cga_comp_hue, temp_cga_comp_contrast);
+    #endif
 }
 
 void CGASettingsDialog::applySettings()
@@ -67,7 +74,9 @@ void CGASettingsDialog::applySettings()
     vid_cga_comp_brightness = ui->horizontalSliderBrightness->value();
     vid_cga_comp_contrast   = ui->horizontalSliderContrast->value();
     vid_cga_comp_sharpness  = ui->horizontalSliderSharpness->value();
+    #ifndef USE_VIDEO2
     cga_comp_reload(vid_cga_comp_brightness, vid_cga_comp_saturation, vid_cga_comp_sharpness, vid_cga_comp_hue, vid_cga_comp_contrast);
+    #endif
 
     cga_hue = vid_cga_comp_hue;
     cga_saturation = vid_cga_comp_saturation;
@@ -89,6 +98,9 @@ void CGASettingsDialog::on_buttonBox_rejected()
     vid_cga_comp_contrast = cga_contrast;
     vid_cga_comp_sharpness = cga_sharpness;
 
+    #ifndef USE_VIDEO2
     cga_comp_reload(vid_cga_comp_brightness, vid_cga_comp_saturation, vid_cga_comp_sharpness, vid_cga_comp_hue, vid_cga_comp_contrast);
+    #endif
+
 }
 

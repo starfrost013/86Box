@@ -11,10 +11,8 @@
  * Authors: Sarah Walker, <https://pcem-emulator.co.uk/>
  *          Miran Grca, <mgrca8@gmail.com>
  *          Fred N. van Kempen, <decwiz@yahoo.com>
+ *          Connor Hyde, <mario64crashed@gmail.com>
  *
- *          Copyright 2008-2019 Sarah Walker.
- *          Copyright 2016-2019 Miran Grca.
- *          Copyright 2017-2019 Fred N. van Kempen.
  *          Copyright 2025 Connor Hyde.
  */
 
@@ -28,6 +26,7 @@
 #include <86box/device.h>
 #include <86box/timer.h>
 
+#define VIDEO_MAX_DEVICES           3       // 2xSLI + 1 card
 
 // Enumerates OpenGL input scale mode types
 typedef enum gl_input_scale_mode_type_e 
@@ -105,9 +104,29 @@ typedef struct video_font_s
     struct video_monitor_s* next;
 } video_font_t;
 
-// This basically contains everything
-typedef struct video_engine_s
+// Some motherboards need this but the video engine doesn't care
+typedef enum video_card_flags_s
 {
+    VIDEO_CARD_FLAG_MDA = 1 << 0,           // This graphics hardware supports MDA features.
+    VIDEO_CARD_FLAG_CGA = 1 << 1,           // This graphics hardware supports CGA features.
+    VIDEO_CARD_FLAG_EGA = 1 << 2,           // This graphics hardware supports EGA features.
+    VIDEO_CARD_FLAG_PGC = 1 << 3,           // This graphics hardware supports PGC/IM1024 features.
+    VIDEO_CARD_FLAG_VGA = 1 << 4,           // This graphics hardware supports VGA features.
+    VIDEO_CARD_FLAG_SVGA = 1 << 5,          // This graphics hardware supports some kind of "above VGA features"
+    VIDEO_CARD_FLAG_8514 = 1 << 6,          // This graphics hardware supports IBM 8514/A features.
+    VIDEO_CARD_FLAG_XGA = 1 << 7,           // This graphics hardware supports XGA features.
+    VIDEO_CARD_FLAG_ACCEL = 1 << 8,         // This graphics hardware supports 2D GUI acceleration features beyond XGA level.
+    VIDEO_CARD_FLAG_3D = 1 << 9,            // This graphics hardware supports 3D acceleration
+
+    // Special flags
+    VIDEO_CARD_FLAG_NV1 = 1 << 29,          // This graphics hardware supports 3D acceleration, but uses quadlilaterals or quadratic texture mapping (QTM) features. (i.e. It is an Nvidia NV1)
+    VIDEO_CARD_FLAG_NVIDIA = 1 << 30,       // This graphics hardware uses the NVIDIA object-oriented architecture (therefore, bypass as much of SVGA as possible for perf).
+    VIDEO_CARD_FLAG_VOODOO = 1 << 31,       // This graphics hardware requires piping into a second GPU using a passthrough cable.
+} video_card_flags_t;
+
+typedef struct video_engine_device_s
+{
+    device_t* device;
     video_monitor_t* monitor_head;
     video_monitor_t* monitor_tail;
     video_palette_t* palette_head;
@@ -115,8 +134,15 @@ typedef struct video_engine_s
     video_font_t* font_head;
     video_font_t* font_tail;
     video_engine_settings_t settings;
-    uint32_t num_monitors;                                              // Required for QT.
-    device_t* video_device; 
+    uint32_t num_monitors;                   // Required for QT.
+} video_engine_device_t;
+
+// This basically contains everything
+typedef struct video_engine_s
+{
+    video_engine_device_t device[VIDEO_MAX_DEVICES];
+    device_t* video_device;                  // Easy way to access the primary device
+    video_card_flags_t flags;                // Flags
     void* log;
 } video_engine_t;
 
@@ -144,3 +170,21 @@ void video_blit_screen_region(video_blit_rect_t rect);                  // Blit 
 // Automatically removes any added palettes or monitors.
 void video_reset(void);                                                 // Not sure if we need this. Just put it in for 86box.c for now
 void video_close(void);
+
+// Other
+void video_screenshot(video_monitor_t* monitor);                        // Take a screenshot of a certain monitor.
+
+// Utility functions (TODO: Remove and replace with flag check)
+bool video_is_mda();
+bool video_is_cga();
+bool video_is_ega();
+bool video_is_pgc();
+bool video_is_vga();
+bool video_is_svga();
+bool video_is_8514();
+bool video_is_xga();
+bool video_is_accel();
+bool video_is_3d();
+bool video_is_nv1();
+bool video_is_nvidia();
+bool video_is_voodoo();

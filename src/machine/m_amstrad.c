@@ -1699,6 +1699,7 @@ vid_poll_200(void *priv)
 static void
 vid_init_200(amstrad_t *ams)
 {
+#ifdef USE_VIDEO2
     amsvid_t *vid;
     cga_t    *cga;
     mda_t    *mda;
@@ -1810,11 +1811,17 @@ vid_init_200(amstrad_t *ams)
         timer_enable(&vid->timer);
 
     ams->vid = vid;
+#else
+    warning("Video System 2.0: This feature isn't implemented yet, tell starfrost");
+#endif
+
+   
 }
 
 static void
 vid_close_200(void *priv)
 {
+#ifndef USE_VIDEO2
     amsvid_t *vid = (amsvid_t *) priv;
 
     if (vid->cga.vram != vid->mda.vram) {
@@ -1826,6 +1833,7 @@ vid_close_200(void *priv)
     vid->cga.vram = vid->mda.vram = NULL;
 
     free(vid);
+#endif
 }
 
 const device_config_t vid_200_config[] = {

@@ -135,7 +135,6 @@ target_link_libraries(86Box
     sio
     snd
     utils
-    voodoo
     plat
     ui
 )
