@@ -393,9 +393,6 @@ machine_at_tc430hx_init(const machine_t *model)
     pci_register_slot(0x10, PCI_CARD_NORMAL,      4, 1, 2, 3);
     pci_register_slot(0x07, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 0);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     if (sound_card_current[0] == SOUND_INTERNAL)
         machine_snd = device_add(machine_get_snd_device(machine));
 
@@ -738,8 +735,6 @@ machine_at_presario2240_init(const machine_t *model)
     pci_register_slot(0x14, PCI_CARD_VIDEO,       3, 0, 0, 0);
     pci_register_slot(0x13, PCI_CARD_NORMAL,      1, 2, 3, 4);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&s3_trio64v2_dx_onboard_pci_device);
 
     device_add(&i430vx_device);
     device_add(&piix3_device);
@@ -768,8 +763,6 @@ machine_at_presario4500_init(const machine_t *model)
     pci_register_slot(0x14, PCI_CARD_VIDEO,       3, 0, 0, 0);
     pci_register_slot(0x13, PCI_CARD_NORMAL,      1, 2, 3, 4);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&s3_trio64v2_dx_onboard_pci_device);
 
     device_add(&i430vx_device);
     device_add(&piix3_device);
@@ -1053,9 +1046,6 @@ machine_at_pb680_init(const machine_t *model)
     pci_register_slot(0x0B, PCI_CARD_NORMAL,      3, 4, 1, 2);
     pci_register_slot(0x07, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 0);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     device_add(&i430vx_device);
     device_add(&piix3_device);
     device_add_params(&pc87306_device, (void *) PCX730X_AMI);
@@ -1179,9 +1169,6 @@ machine_at_nupro592_init(const machine_t *model)
     pci_register_slot(0x14, PCI_CARD_NORMAL,      2, 3, 4, 1);
     pci_register_slot(0x07, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 4); /* PIIX4 */
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     device_add(&i430tx_device);
     device_add(&piix4_device);
     device_add_params(&w83977_device, (void *) (W83977EF | W83977_AMI | W83977_NO_NVR));
@@ -1267,9 +1254,6 @@ machine_at_optiplexgn_init(const machine_t *model)
     pci_register_slot(0x11, PCI_CARD_NETWORK,     4, 0, 0, 0); /* 3C905, not yet emulated */
     pci_register_slot(0x07, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 4);
     pci_register_slot(0x0F, PCI_CARD_BRIDGE,      0, 0, 0, 0);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     if ((sound_card_current[0] == SOUND_INTERNAL) && machine_get_snd_device(machine)->available())
         machine_snd = device_add(machine_get_snd_device(machine));

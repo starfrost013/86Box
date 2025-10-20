@@ -24,3 +24,5 @@ typedef struct cga_s
     uint8_t crtc[CRTC_NUM_REGISTERS];
     pc_timer_t character_clock_timer;
 } cga_t;
+
+extern device_t cga_device;

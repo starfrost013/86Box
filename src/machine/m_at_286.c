@@ -303,9 +303,6 @@ machine_at_portableiii_init(const machine_t *model)
     if (hdc_current[0] == HDC_INTERNAL)
         device_add(&ide_isa_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&compaq_plasma_device);
-
     device_add(&compaq_device);
 
     machine_at_common_init(model);
@@ -915,9 +912,6 @@ machine_at_3302_init(const machine_t *model)
     if (fdc_current[0] == FDC_INTERNAL)
         device_add(&fdc_at_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
 
     return ret;
@@ -936,9 +930,6 @@ machine_at_pc7286_init(const machine_t *model)
         return ret;
 
     machine_at_common_init_ex(model, 2);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&gd5401_onboard_device);
 
     device_add_params(&dw90c50_device, (void *) DW90C50_IDE);
     device_add(&vl82c113_device); /* The keyboard controller is part of the VL82c113. */
@@ -1083,9 +1074,6 @@ machine_at_drsm35286_init(const machine_t *model)
 
     machine_at_scat_init(model, 1, 0);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     return ret;
 }
 
@@ -1159,9 +1147,6 @@ machine_at_spc4620p_init(const machine_t *model)
 
     if (bios_only || !ret)
         return ret;
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&ati28800k_spc4620p_device);
 
     machine_at_scat_init(model, 1, 1);
 

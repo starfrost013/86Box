@@ -119,7 +119,7 @@ void video_remove_monitor(video_monitor_t* monitor)
 
 void video_set_device(device_t* device)
 {
-    video_engine.video_device = device;
+    video_engine.device_current = device;
 }
 
 void video_blit_screen(void)
@@ -149,16 +149,30 @@ void video_close(void)
 
 // Utility functions for old code
 
-bool video_is_mda() { return (video_engine.flags & VIDEO_CARD_FLAG_MDA); };
-bool video_is_cga() { return (video_engine.flags & VIDEO_CARD_FLAG_CGA); };
-bool video_is_ega() { return (video_engine.flags & VIDEO_CARD_FLAG_EGA); };
-bool video_is_pgc() { return (video_engine.flags & VIDEO_CARD_FLAG_PGC); };
-bool video_is_vga() { return (video_engine.flags & VIDEO_CARD_FLAG_VGA); };
-bool video_is_svga() { return (video_engine.flags & VIDEO_CARD_FLAG_SVGA); };
-bool video_is_8514() { return (video_engine.flags & VIDEO_CARD_FLAG_8514); };
-bool video_is_xga() { return (video_engine.flags & VIDEO_CARD_FLAG_XGA); };
-bool video_is_accel() { return (video_engine.flags & VIDEO_CARD_FLAG_ACCEL); };
-bool video_is_3d() { return (video_engine.flags & VIDEO_CARD_FLAG_3D); };
-bool video_is_nv1() { return (video_engine.flags & VIDEO_CARD_FLAG_NV1); };
-bool video_is_nvidia() { return (video_engine.flags & VIDEO_CARD_FLAG_NVIDIA); };
-bool video_is_voodoo() { return (video_engine.flags & VIDEO_CARD_FLAG_VOODOO); };
+// Strategu
+bool video_card_index_is_available(uint32_t index)
+{
+    if (index < 0
+    || index > VIDEO_MAX_DEVICES)
+        return false; 
+
+    // If we don't need ROMs, return true
+    if (!video_engine.devices[index].device->available)
+        return true; 
+
+    return video_engine.devices[index].device->available;
+}
+
+bool video_is_mda() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_MDA); };
+bool video_is_cga() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_CGA); };
+bool video_is_ega() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_EGA); };
+bool video_is_pgc() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_PGC); };
+bool video_is_vga() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_VGA); };
+bool video_is_svga() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_SVGA); };
+bool video_is_8514() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_8514); };
+bool video_is_xga() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_XGA); };
+bool video_is_accel() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_ACCEL); };
+bool video_is_3d() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_3D); };
+bool video_is_nv1() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_NV1); };
+bool video_is_nvidia() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_NVIDIA); };
+bool video_is_voodoo() { return (video_engine.device_current->flags & VIDEO_CARD_FLAG_VOODOO); };

@@ -1276,7 +1276,6 @@ pc_init_roms(void)
         c = m = 0;
 
 // Todo: Unify with above!
-#ifdef USE_VIDEO2
         // Check which video card exists
         while (video_devices[c] != NULL)
         {
@@ -1290,19 +1289,6 @@ pc_init_roms(void)
 
             c++;
         }
-#else
-
-        while (video_get_internal_name(c) != NULL) {
-            memset(tempc, 0, sizeof(tempc));
-            device_get_name(video_card_getdevice(c), 0, tempc);
-            if ((c > 1) && !(tempc[0]))
-                break;
-            m = video_card_available(c);
-            if (!m)
-                pclog("Missing video card: %s\n", tempc);
-            c++;
-        }
-#endif
     }
 
     pc_log("Scanning for ROM images:\n");
@@ -1380,6 +1366,55 @@ pc_init_modules(void)
             gfxcard[i] = 0;
         }
     }
+#else
+    uint32_t num_available_video_cards = 0;
+
+    for (uint8_t i = 0; i < GFXCARD_MAX; i++) {
+        if (!video_card_index_is_available(i)) {
+            char tempc[512] = { 0 };
+            device_get_name(video_engine.devices[i].device, 0, tempc);
+            swprintf(temp, sizeof_w(temp), plat_get_string(STRING_HW_NOT_AVAILABLE_VIDEO2), tempc);
+            ui_msgbox_header(MBX_INFO, plat_get_string(STRING_HW_NOT_AVAILABLE_TITLE), temp);
+            gfxcard[i] = 0;
+        }
+        else
+            num_available_video_cards++;
+    }
+
+    /* Make sure we have a usable video card. */
+    if (num_available_video_cards == 0) 
+    {
+        for (uint8_t i = 0; i < GFXCARD_MAX; i++) 
+        {
+            memset(tempc, 0, sizeof(tempc));
+            device_get_name(video_engine.devices[0].device, 0, tempc);
+            swprintf(temp, sizeof_w(temp), plat_get_string(STRING_HW_NOT_AVAILABLE_VIDEO), tempc);
+        }
+
+        while (video_devices[c] != NULL) 
+        {
+            if (video_devices[c]->available()) 
+            {
+                num_available_video_cards++;
+                ui_msgbox_header(MBX_INFO, plat_get_string(STRING_HW_NOT_AVAILABLE_TITLE), temp);
+                video_engine.devices[0].device = video_devices[c];
+                config_save();
+                break;
+            }
+
+            c++;
+        }
+        
+        // still nothing
+        if (num_available_video_cards == 0) {
+            fatal("No available video cards\n");
+            exit(-1);
+        }
+    }
+
+    // TODO
+
+
 #endif
     atfullspeed = 0;
 
@@ -1952,7 +1987,6 @@ void set_screen_size_video2(int32_t x, int32_t y, int32_t monitor_index)
     int    temp_overscan_y = monitor->size_y_overscan;
     int    is_svga         = 0; // Only CGA supported rn
 
-
     double dx;
     double dy;
     double dtx;
@@ -2189,13 +2223,16 @@ set_screen_size_monitor(int x, int y, int monitor_index)
 #endif
 }
 
-#ifndef USE_VIDEO2
 void
 set_screen_size(int x, int y)
 {
+    #ifndef USE_VIDEO2
     set_screen_size_monitor(x, y, monitor_index_global);
+    #else
+    set_screen_size_monitor(x, y, 0); //TEMP
+    #endif 
+
 }
-#endif
 
 void
 reset_screen_size_monitor(int monitor_index)

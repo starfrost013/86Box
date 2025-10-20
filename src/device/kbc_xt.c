@@ -175,6 +175,7 @@ kbd_poll(void *priv)
 static void
 kbd_adddata(uint16_t val)
 {
+    #ifndef USE_VIDEO2
     /* Test for T1000 'Fn' key (Right Alt / Right Ctrl) */
     if (is_t1x00) {
         if (keyboard_recv(0x138) || keyboard_recv(0x11d)) { /* 'Fn' pressed */
@@ -208,7 +209,8 @@ kbd_adddata(uint16_t val)
         } else
             t1000_syskey(0x04, 0x00, 0x00); /* Reset 'Fn' indicator */
     }
-
+    #endif 
+    
     key_queue[key_queue_end] = val;
     kbd_log("XTkbd: %02X added to key queue at %i\n",
             val, key_queue_end);

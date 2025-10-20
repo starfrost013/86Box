@@ -6,7 +6,7 @@
  *
  *          This file is part of the 86Box distribution.
  *
- *          Base include file for known video devices. ONLY include from video_devices.c!
+ *          Base include file for known video devices. ONLY include from video_table.c!
  *
  * Authors: Sarah Walker, <https://pcem-emulator.co.uk/>
  *          Miran Grca, <mgrca8@gmail.com>
@@ -31,3 +31,4 @@
 #include <86box/timer.h>
 
 #include <86box/video2/cga/cga.h>
+

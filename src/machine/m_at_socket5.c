@@ -412,9 +412,6 @@ machine_at_optiplexgxl_init(const machine_t *model)
     pci_register_slot(0x10, PCI_CARD_VIDEO,       0, 0, 0, 0);
     pci_register_slot(0x07, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 0);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     if (sound_card_current[0] == SOUND_INTERNAL)
         machine_snd = device_add(machine_get_snd_device(machine));
 
@@ -512,9 +509,7 @@ machine_at_pc330_65x6_init(const machine_t *model)
     device_add(&piix_device);
     device_add_params(&pc87306_device, (void *) PCX730X_AMI);
     device_add(&intel_flash_bxt_ami_device);
-	
-	if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
+
 
     return ret;
 }
@@ -1056,8 +1051,6 @@ machine_at_torino_init(const machine_t *model)
     pci_register_slot(0x0A, PCI_CARD_NORMAL,      4, 1, 2, 3);
     pci_register_slot(0x0B, PCI_CARD_NORMAL,      3, 4, 1, 2);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     device_add(&sis_550x_85c503_device);
     device_add(&ide_um8673f_device);
@@ -1130,9 +1123,6 @@ machine_at_bravoms586_init(const machine_t *model)
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
     device_add_params(&fdc37c6xx_device, (void *) (FDC37C665 | FDC37C6XX_IDE_SEC));
     device_add(&ide_cmd640_pci_single_channel_device);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     device_add(&ast_readout_device); /* AST custom jumper readout */
     device_add(&ast_nvr_device);     /* AST custom secondary NVR device */
@@ -1230,9 +1220,6 @@ machine_at_pb600_init(const machine_t *model)
     device_add(&phoenix_486_jumper_pci_pb600_device);
     device_add(&ide_cmd640_pci_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     return ret;
 }
 
@@ -1264,9 +1251,6 @@ machine_at_globalyst620_init(const machine_t *model)
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
     device_add(&ide_cmd640_pci_single_channel_legacy_only_device);
     device_add_params(&fdc37c6xx_device, (void *) (FDC37C665 | FDC37C6XX_IDE_SEC));
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     return ret;
 }

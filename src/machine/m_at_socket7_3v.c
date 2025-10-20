@@ -178,8 +178,6 @@ machine_at_vectra54_init(const machine_t *model)
     pci_register_slot(0x07, PCI_CARD_NORMAL,      2, 3, 4, 1);
     pci_register_slot(0x08, PCI_CARD_NORMAL,      3, 4, 1, 2);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&s3_phoenix_trio64_onboard_pci_device);
 
     device_add(&i430fx_device);
     device_add(&piix_device);
@@ -524,8 +522,6 @@ machine_at_endeavor_init(const machine_t *model)
     pci_register_slot(0x10, PCI_CARD_NORMAL,      4, 1, 2, 3);
     pci_register_slot(0x07, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 0);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     if (sound_card_current[0] == SOUND_INTERNAL)
         machine_snd = device_add(machine_get_snd_device(machine));
@@ -560,9 +556,6 @@ machine_at_atlantis_init(const machine_t *model)
     pci_register_slot(0x0E, PCI_CARD_NORMAL,      2, 3, 4, 1);
     pci_register_slot(0x0F, PCI_CARD_NORMAL,      3, 4, 1, 2);
     pci_register_slot(0x10, PCI_CARD_NORMAL,      4, 1, 2, 3);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     if (sound_card_current[0] == SOUND_INTERNAL)
         machine_snd = device_add(machine_get_snd_device(machine));
@@ -652,9 +645,6 @@ machine_at_monaco_init(const machine_t *model)
     pci_register_slot(0x0B, PCI_CARD_VIDEO,       1, 2, 3, 4);
     pci_register_slot(0x11, PCI_CARD_NORMAL,      1, 3, 2, 4);
     pci_register_slot(0x13, PCI_CARD_NORMAL,      2, 1, 3, 4);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     if (sound_card_current[0] == SOUND_INTERNAL)
         machine_snd = device_add(machine_get_snd_device(machine));
@@ -809,8 +799,6 @@ machine_at_pb640_init(const machine_t *model)
     device_add(&i430fx_rev02_device);
     device_add(&piix_rev02_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     device_add_params(&pc87306_device, (void *) PCX730X_AMI);
     device_add(&intel_flash_bxt_ami_device);
@@ -1127,9 +1115,6 @@ machine_at_d943_init(const machine_t *model)
     device_add(&intel_flash_bxt_device);
     spd_register(SPD_TYPE_EDO, 0x7, 256);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     if (sound_card_current[0] == SOUND_INTERNAL)
         machine_snd = device_add(machine_get_snd_device(machine));
 
@@ -1411,9 +1396,6 @@ machine_at_pc140_6260_init(const machine_t *model)
     pci_register_slot(0x0E, PCI_CARD_NORMAL,      1, 2, 3, 4);
     pci_register_slot(0x0F, PCI_CARD_NORMAL,      2, 3, 4, 1);
     pci_register_slot(0x14, PCI_CARD_VIDEO,       0, 0, 0, 0); /* Onboard video */
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&gd5436_onboard_pci_device);
 
     device_add(&sis_5511_device);
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);

@@ -318,7 +318,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &pcjr_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -1307,7 +1307,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &m19_vid_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -1737,7 +1737,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &tandy_1000_video_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -1780,7 +1780,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &tandy_1000hx_video_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -1823,7 +1823,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &t1000_video_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2124,7 +2124,7 @@ const machine_t machines[] = {
         .kbd_device               = &keyboard_pc_xt_device,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &cga_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2298,7 +2298,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &vid_1512_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2341,7 +2341,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &vid_1640_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2384,7 +2384,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &vid_pc2086_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2427,7 +2427,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &vid_pc3086_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2513,7 +2513,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &vid_200_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2556,7 +2556,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &vid_ppc512_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2727,7 +2727,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &ogc_m24_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2857,7 +2857,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &tandy_1000sl_video_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -2900,7 +2900,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &t1200_video_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -3297,7 +3297,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &compaq_plasma_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -4355,7 +4355,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &paradise_pvga1a_ncr3302_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -4664,7 +4664,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5401_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -5153,7 +5153,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &oti037_pbl300sx_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -5330,7 +5330,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &tvga8900d_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -5375,7 +5375,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &oti077_acer100t_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -5421,7 +5421,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &oti067_ama932j_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -5775,7 +5775,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5402_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -5866,7 +5866,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5420_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -5911,7 +5911,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &ati28800k_spc6033p_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -6314,7 +6314,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &compaq_plasma_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -7513,7 +7513,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5424_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -7649,7 +7649,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL, /*Has SIO (sorta): VLSI VL82C113A SCAMP Combination I/O*/
-        .vid_device               = &gd5428_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -7693,7 +7693,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5428_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -7737,7 +7737,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &oti077_pcs44c_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -7781,7 +7781,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL, /*Has SIO (sorta): VLSI VL82C113A SCAMP Combination I/O*/
-        .vid_device               = &gd5426_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -7960,7 +7960,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &ht216_32_pb410a_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -8004,7 +8004,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5428_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -8225,7 +8225,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5428_vlb_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -8313,7 +8313,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_86c805_onboard_vlb_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -8357,7 +8357,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5428_onboard_vlb_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -8981,7 +8981,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_phoenix_trio32_onboard_vlb_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -9293,7 +9293,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &tgui9440_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -9967,7 +9967,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5436_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -10055,7 +10055,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5430_onboard_vlb_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -10099,7 +10099,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5428_vlb_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -10143,7 +10143,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5434_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -10588,7 +10588,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5430_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &ess_1688_device,
         .net_device               = NULL
     },
@@ -10676,7 +10676,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &tgui9440_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -10721,7 +10721,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5430_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -11486,7 +11486,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &mach32_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -11662,7 +11662,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5434_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -12026,7 +12026,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_phoenix_vision864_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -12383,7 +12383,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_phoenix_trio64vplus_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &sb_vibra16s_onboard_device,
         .net_device               = NULL /* not yet emulated */
     },
@@ -12470,7 +12470,7 @@ const machine_t machines[] = {
 		.kbd_device = NULL,
         .fdc_device = NULL,
         .sio_device = NULL,
-        .vid_device = &s3_phoenix_trio64_onboard_pci_device,
+        .vid_device = NULL,
         .snd_device = NULL,
         .net_device = NULL
     },
@@ -12965,7 +12965,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &tgui9660_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -13058,7 +13058,7 @@ const machine_t machines[] = {
         .kbd_device = NULL,
         .fdc_device = NULL,
         .sio_device = NULL,
-        .vid_device = &gd5434_onboard_pci_device,
+        .vid_device = NULL,
         .snd_device = NULL,
         .net_device = NULL
     },
@@ -13191,7 +13191,7 @@ const machine_t machines[] = {
         .kbd_device = NULL,
         .fdc_device = NULL,
         .sio_device = NULL,
-        .vid_device = &gd5430_onboard_pci_device,
+        .vid_device = NULL,
         .snd_device = NULL,
         .net_device = NULL
     },
@@ -13237,7 +13237,7 @@ const machine_t machines[] = {
         .kbd_device = NULL,
         .fdc_device = NULL,
         .sio_device = NULL,
-        .vid_device = &s3_phoenix_trio64_onboard_pci_device,
+        .vid_device = NULL,
         .snd_device = NULL,
         .net_device = NULL
     },
@@ -13374,7 +13374,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_phoenix_trio64_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -13420,7 +13420,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &mach64ct_device_onboard,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -13466,7 +13466,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_phoenix_trio64vplus_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -13512,7 +13512,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_phoenix_trio64_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &sb_vibra16s_onboard_device,
         .net_device               = NULL
     },
@@ -13558,7 +13558,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &mach64ct_device_onboard,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -13647,7 +13647,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5440_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -13915,7 +13915,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5436_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &sb_vibra16c_onboard_device,
         .net_device               = NULL
     },
@@ -14142,7 +14142,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &gd5436_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -14595,7 +14595,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_virge_375_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &ymf701_device,
         .net_device               = NULL
     },
@@ -15001,7 +15001,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_trio64v2_dx_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -15046,7 +15046,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_trio64v2_dx_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -15363,7 +15363,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_phoenix_trio64vplus_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -15544,7 +15544,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &chips_69000_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },
@@ -15642,7 +15642,7 @@ const machine_t machines[] = {
         .fdc_device               = NULL,
         .sio_device               = NULL,
         /* Stop-gap measure until the Trio64V2/GX is emulated, as both use the same VBIOS. */
-        .vid_device               = &s3_trio64v2_dx_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &sb_vibra16xv_onboard_device,
         .net_device               = NULL
     },
@@ -15686,7 +15686,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_trio64v2_dx_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &cs4236b_device,
         .net_device               = &pcnet_am79c973_onboard_device
     },
@@ -17359,7 +17359,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &s3_virge_325_onboard_pci_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &cs4236b_onboard_device,
         .net_device               = NULL
     },
@@ -18491,7 +18491,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &voodoo_3_2000_agp_onboard_8m_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &es1373_onboard_device,
         .net_device               = NULL
     },
@@ -18536,7 +18536,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &voodoo_3_2000_agp_onboard_8m_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = &es1373_onboard_device,
         .net_device               = NULL
     },
@@ -19230,7 +19230,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .sio_device               = NULL,
-        .vid_device               = &chips_69000_onboard_device,
+        .vid_device               = NULL, //INTERNAL VIDEO was removed here for video rewrite,
         .snd_device               = NULL,
         .net_device               = NULL
     },

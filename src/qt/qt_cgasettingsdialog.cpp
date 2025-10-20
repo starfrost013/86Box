@@ -57,32 +57,33 @@ CGASettingsDialog::~CGASettingsDialog()
 
 void CGASettingsDialog::updateDisplay()
 {
+    #ifndef USE_VIDEO2
     auto temp_cga_comp_hue        = ui->horizontalSliderHue->value();
     auto temp_cga_comp_saturation = ui->horizontalSliderSaturation->value();
     auto temp_cga_comp_brightness = ui->horizontalSliderBrightness->value();
     auto temp_cga_comp_contrast   = ui->horizontalSliderContrast->value();
     auto temp_cga_comp_sharpness  = ui->horizontalSliderSharpness->value();
-    #ifndef USE_VIDEO2
     cga_comp_reload(temp_cga_comp_brightness, temp_cga_comp_saturation, temp_cga_comp_sharpness, temp_cga_comp_hue, temp_cga_comp_contrast);
     #endif
 }
 
 void CGASettingsDialog::applySettings()
 {
+    #ifndef USE_VIDEO2
     vid_cga_comp_hue        = ui->horizontalSliderHue->value();
     vid_cga_comp_saturation = ui->horizontalSliderSaturation->value();
     vid_cga_comp_brightness = ui->horizontalSliderBrightness->value();
     vid_cga_comp_contrast   = ui->horizontalSliderContrast->value();
     vid_cga_comp_sharpness  = ui->horizontalSliderSharpness->value();
-    #ifndef USE_VIDEO2
     cga_comp_reload(vid_cga_comp_brightness, vid_cga_comp_saturation, vid_cga_comp_sharpness, vid_cga_comp_hue, vid_cga_comp_contrast);
-    #endif
 
     cga_hue = vid_cga_comp_hue;
     cga_saturation = vid_cga_comp_saturation;
     cga_brightness = vid_cga_comp_brightness;
     cga_contrast = vid_cga_comp_contrast;
     cga_sharpness = vid_cga_comp_sharpness;
+    #endif
+
 }
 
 void CGASettingsDialog::on_buttonBox_accepted()
@@ -92,15 +93,14 @@ void CGASettingsDialog::on_buttonBox_accepted()
 
 void CGASettingsDialog::on_buttonBox_rejected()
 {
+    #ifndef USE_VIDEO2
     vid_cga_comp_hue = cga_hue;
     vid_cga_comp_saturation = cga_saturation;
     vid_cga_comp_brightness = cga_brightness;
     vid_cga_comp_contrast = cga_contrast;
     vid_cga_comp_sharpness = cga_sharpness;
 
-    #ifndef USE_VIDEO2
     cga_comp_reload(vid_cga_comp_brightness, vid_cga_comp_saturation, vid_cga_comp_sharpness, vid_cga_comp_hue, vid_cga_comp_contrast);
     #endif
-
 }
 

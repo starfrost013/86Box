@@ -906,9 +906,6 @@ machine_xt_t1000_init(const machine_t *model)
     t1000_nvr_load();
     nvr_set_ven_save(t1000_nvr_save);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&t1000_video_device);
-
     return ret;
 }
 
@@ -964,8 +961,6 @@ machine_xt_t1200_init(const machine_t *model)
     t1200_nvr_load();
     nvr_set_ven_save(t1200_nvr_save);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&t1200_video_device);
 
     if (hdc_current[0] <= HDC_INTERNAL)
         device_add(&st506_xt_toshiba_t1200_device);

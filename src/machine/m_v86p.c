@@ -91,8 +91,6 @@ machine_v86p_init(const machine_t *model)
     if (fdc_current[0] == FDC_INTERNAL)
         device_add(&fdc_xt_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&f82c425_video_device);
 
     if (hdc_current[0] <= HDC_INTERNAL)
         device_add(&st506_xt_victor_v86p_device);

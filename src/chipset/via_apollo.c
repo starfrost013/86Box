@@ -33,7 +33,7 @@
 #ifndef USE_VIDEO2
 #include <86box/agpgart.h>
 #else
-#include <86box/video2/agpgart.h>
+#include <86box/video2/base/agpgart.h>
 #endif
 
 #define VIA_585  0x05851000

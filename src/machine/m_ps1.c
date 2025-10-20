@@ -436,10 +436,6 @@ ps1_setup(int model)
                  "roms/machines/ibmps1_2121/FC0000.BIN",
                  0xfc0000, 0x40000, 0x3ffff, 0, MEM_MAPPING_EXTERNAL);
 
-        /* Initialize the video controller. */
-        if (gfxcard[0] == VID_INTERNAL)
-            device_add(&ibm_ps1_2121_device);
-
         device_add(&ide_isa_device);
 
         device_add(&ps1snd_device);

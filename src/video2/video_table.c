@@ -15,9 +15,9 @@
 
 #include <86box/video2/video_devices.h>
 
-const device_t* video_devices[] =
+device_t* video_devices[] =
 {   
     // The list of video devices.
-
+    &cga_device,
     NULL,                           // End of list sentinel
 };

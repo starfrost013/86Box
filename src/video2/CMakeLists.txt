@@ -16,5 +16,10 @@
 add_library(video2 OBJECT
     agpgart.c
     video_core.c 
+    video_core_ddc.c
+    video_core_ddc_edid_custom.c
     video_table.c
+
+    # CGA
+    cga/cga.c
 )

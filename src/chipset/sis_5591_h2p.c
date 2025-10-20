@@ -50,7 +50,7 @@
 #ifndef USE_VIDEO2
 #include <86box/agpgart.h>
 #else
-#include <86box/video2/agpgart.h>
+#include <86box/video2/base/agpgart.h>
 #endif
 
 #ifdef ENABLE_SIS_5591_HOST_TO_PCI_LOG

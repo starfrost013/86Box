@@ -102,8 +102,6 @@ machine_at_awo671r_init(const machine_t *model)
     device_add_inst_params(&w83977_device, 1, (void *) (W83977EF | W83977_AMI | W83977_NO_NVR));
     device_add_inst_params(&w83977_device, 2, (void *) (W83977EF | W83977_AMI | W83977_NO_NVR));
     device_add(&sst_flash_39sf020_device);
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
     spd_register(SPD_TYPE_SDRAM, 0x3, 256);
 
     return ret;

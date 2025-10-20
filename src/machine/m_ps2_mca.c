@@ -1191,8 +1191,6 @@ ps2_mca_board_model_50_init(void)
         ps2_mca_mem_fffc_init(2);
     }
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&ps1vga_mca_device);
 }
 
 static void
@@ -1240,8 +1238,6 @@ ps2_mca_board_model_60_init(void)
 
     device_add(&ps2_nvr_55ls_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&ps1vga_mca_device);
 }
 
 static void
@@ -1294,9 +1290,6 @@ ps2_mca_board_model_55sx_init(int has_sec_nvram, int slots)
 
     ps2.planar_read  = model_55sx_read;
     ps2.planar_write = model_55sx_write;
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&ps1vga_mca_device);
 
     model_55sx_mem_recalc();
 }
@@ -1547,8 +1540,6 @@ ps2_mca_board_model_70_type34_init(int is_type4, int slots)
         }
     }
 
-    if (gfxcard[0] == VID_INTERNAL)
-        ps2.mb_vga = device_add(&ps1vga_mca_device);
 }
 
 static void
@@ -1619,9 +1610,6 @@ ps2_mca_board_model_80_type2_init(void)
             ps2_mca_mem_fffc_init(4);
         }
     }
-
-    if (gfxcard[0] == VID_INTERNAL)
-        ps2.mb_vga = device_add(&ps1vga_mca_device);
 
     ps2.split_size = 0;
 }
@@ -1934,8 +1922,6 @@ ps55_mca_board_model_50t_init(void)
         ps2_mca_mem_fffc_init(8);
     }
 
-    if (gfxcard[0] == VID_INTERNAL)
-        ps2.mb_vga = (vga_t *) device_add(&ps1vga_mca_device);
 }
 
 static void
@@ -1991,8 +1977,6 @@ ps55_mca_board_model_50v_init(void)
     if (mem_size > 8192)
         ps2_mca_mem_fffc_init(8);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        ps2.mb_vga = (vga_t *) device_add(&ps1vga_mca_device);
 }
 
 int

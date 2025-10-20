@@ -69,9 +69,6 @@ machine_at_pb410a_init(const machine_t *model)
 
     device_add(&phoenix_486_jumper_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     return ret;
 }
 
@@ -89,9 +86,6 @@ machine_at_acera1g_init(const machine_t *model)
 
     machine_at_common_init(model);
     device_add(&ali1429g_device);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&gd5428_onboard_device);
 
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
 
@@ -238,9 +232,6 @@ machine_at_cobalt_init(const machine_t *model)
 
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     return ret;
 }
 
@@ -285,9 +276,6 @@ machine_at_decpclpv_init(const machine_t *model)
 
     device_add(&sis_85c461_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
 
     device_add(&ide_isa_2ch_device);
@@ -310,12 +298,9 @@ machine_at_dell466np_init(const machine_t *model)
     machine_at_common_init(model);
     device_add(&sis_85c461_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-    else {
-        for (uint16_t i = 0; i < 32768; i++)
-            rom[i] = mem_readb_phys(0x000c0000 + i);
-    }
+    for (uint16_t i = 0; i < 32768; i++)
+        rom[i] = mem_readb_phys(0x000c0000 + i);
+
     mem_mapping_set_addr(&bios_mapping, 0x0c0000, 0x40000);
     mem_mapping_set_exec(&bios_mapping, rom);
 
@@ -340,8 +325,6 @@ machine_at_valuepoint433_init(const machine_t *model) // hangs without the PS/2 
 
     machine_at_common_ide_init(model);
     device_add(&sis_85c461_device);
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&et4000w32_onboard_device);
 
     device_add_params(&fdc37c6xx_device, (void *) (FDC37C661 | FDC37C6XX_IDE_PRI));
 

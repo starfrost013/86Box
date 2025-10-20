@@ -26,7 +26,8 @@
 #include <86box/device.h>
 #include <86box/timer.h>
 
-#define VIDEO_MAX_DEVICES           3       // 2xSLI + 1 card
+#define VIDEO_MAX_DEVICES           2       // 2 for old code. Later 3- 2xSLI + 1 card
+#define VIDEO_MAX_MONITORS          9       // Not a strict limitaiton but e.g. Win98 supports a max of 9.
 
 // Enumerates OpenGL input scale mode types
 typedef enum gl_input_scale_mode_type_e 
@@ -68,6 +69,9 @@ typedef struct video_engine_settings_s
 // Defines a monitor.
 typedef struct video_monitor_s
 {
+    uint32_t position_x;                    // ignored if is_maximised
+    uint32_t position_y;                    // ignored if is_maximised
+
     uint32_t size_x;
     uint32_t size_y;
     
@@ -82,6 +86,8 @@ typedef struct video_monitor_s
     uint32_t* buffer32;
     struct video_monitor_s* prev;
     struct video_monitor_s* next;
+
+    bool is_maximised;                      // config
 } video_monitor_t;
 
 // Defines a blit region
@@ -127,22 +133,23 @@ typedef enum video_card_flags_s
 typedef struct video_engine_device_s
 {
     device_t* device;
+    video_card_flags_t flags;                // Flags
+
+    video_engine_settings_t device_settings;
+} video_engine_device_t;
+
+// This basically contains everything
+typedef struct video_engine_s
+{
+    video_engine_device_t devices[VIDEO_MAX_DEVICES];
+    device_t* device_current;                // Easy way to access the CURRENTLY selected device
     video_monitor_t* monitor_head;
     video_monitor_t* monitor_tail;
     video_palette_t* palette_head;
     video_palette_t* palette_tail;
     video_font_t* font_head;
     video_font_t* font_tail;
-    video_engine_settings_t settings;
     uint32_t num_monitors;                   // Required for QT.
-} video_engine_device_t;
-
-// This basically contains everything
-typedef struct video_engine_s
-{
-    video_engine_device_t device[VIDEO_MAX_DEVICES];
-    device_t* video_device;                  // Easy way to access the primary device
-    video_card_flags_t flags;                // Flags
     void* log;
 } video_engine_t;
 
@@ -151,7 +158,7 @@ typedef struct video_engine_s
 //
 
 extern video_engine_t video_engine;
-extern const device_t* video_devices[];                                 // The list of video devices.
+extern device_t* video_devices[];                                 // The list of video devices.
 //
 // Functions
 //
@@ -171,10 +178,12 @@ void video_blit_screen_region(video_blit_rect_t rect);                  // Blit 
 void video_reset(void);                                                 // Not sure if we need this. Just put it in for 86box.c for now
 void video_close(void);
 
+
 // Other
 void video_screenshot(video_monitor_t* monitor);                        // Take a screenshot of a certain monitor.
 
 // Utility functions (TODO: Remove and replace with flag check)
+bool video_card_index_is_available(uint32_t index);                     // Determines if video card is enabled
 bool video_is_mda();
 bool video_is_cga();
 bool video_is_ega();

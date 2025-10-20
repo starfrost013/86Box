@@ -180,12 +180,6 @@ machine_elt_init(const machine_t *model)
     if (fdc_current[0] == FDC_INTERNAL)
         device_add(&fdc_xt_device);
 
-    if (gfxcard[0] == VID_INTERNAL) {
-        cga = device_add(&cga_device);
-        io_removehandler(0x03d0, 0x0010, cga_in, NULL, NULL, cga_out, NULL, NULL, cga);
-        io_sethandler(0x03d0, 0x0010, elt_vid_in, NULL, NULL, elt_vid_out, NULL, NULL, cga);
-    }
-
     /* Keyboard goes after the video, because on XT compatibles it's dealt
      * with by the same PPI as the config switches and we need them to
      * indicate the correct display type */

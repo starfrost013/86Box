@@ -2065,8 +2065,10 @@ machine_xt_pc5086_init(const machine_t *model)
 
 int
 machine_xt_maz1016_init(const machine_t *model)
-{
+{    
     int ret;
+
+    #ifndef USE_VIDEO2
 
     ret = bios_load_interleaved("roms/machines/maz1016/e1.bin",
                                 "roms/machines/maz1016/e4.bin",
@@ -2089,6 +2091,7 @@ machine_xt_maz1016_init(const machine_t *model)
 
     machine_xt_clone_init(model, 0);
 
+    #endif
     return ret;
 }
 

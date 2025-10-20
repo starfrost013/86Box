@@ -21,7 +21,7 @@
 #include <86box/86box.h>
 #include <86box/device.h>
 #include <86box/mem.h>
-#include <86box/agpgart.h>
+#include <86box/video2/base/agpgart.h>
 #include <86box/plat_unused.h>
 
 #ifdef ENABLE_AGPGART_LOG

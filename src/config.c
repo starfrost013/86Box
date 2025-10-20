@@ -7,6 +7,7 @@
  *          This file is part of the 86Box distribution.
  *
  *          Configuration file handler.
+ *          TODO: MOVE ALL VIDEO SPECIFIC STUFF TO VIDEO!
  *
  * Authors: Sarah Walker, <https://pcem-emulator.co.uk/>
  *          Miran Grca, <mgrca8@gmail.com>
@@ -72,7 +73,11 @@
 #include <86box/sound.h>
 #include <86box/midi.h>
 #include <86box/snd_mpu401.h>
+#ifndef USE_VIDEO2
 #include <86box/video.h>
+#else
+#include <86box/video2/video.h>
+#endif
 #include <86box/path.h>
 #include <86box/plat.h>
 #include <86box/plat_dir.h>
@@ -80,16 +85,18 @@
 #include <86box/snd_opl.h>
 #include <86box/version.h>
 
+#define CONFIG_GENERIC_BUFFER_SIZE      512
+
 #ifndef USE_SDL_UI
 /* Deliberate to not make the 86box.h header kitchen-sink. */
 #include <86box/qt-glsl.h>
-extern char gl3_shader_file[MAX_USER_SHADERS][512];
+extern char gl3_shader_file[MAX_USER_SHADERS][CONFIG_GENERIC_BUFFER_SIZE];
 #endif
 
-static int   cx;
-static int   cy;
-static int   cw;
-static int   ch;
+static int32_t   cx;
+static int32_t   cy;
+static int32_t   cw;
+static int32_t   ch;
 static ini_t config;
 static ini_t global;
 
@@ -160,7 +167,7 @@ static void
 load_scan_code_mappings(void)
 {
     ini_section_t cat = ini_find_section(config, "Scan code mappings");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
 
     for (int c = 0; c < 768; c++) {
         sprintf(temp, "%03X", c);
@@ -179,7 +186,7 @@ static void
 load_general(void)
 {
     ini_section_t cat = ini_find_section(config, "General");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
     char         *p;
 
     vid_resize = ini_section_get_int(cat, "vid_resize", 0);
@@ -280,24 +287,34 @@ static void
 load_monitor(int monitor_index)
 {
     ini_section_t       cat;
-    char                name[512];
-    char                temp[512];
+    char                name[CONFIG_GENERIC_BUFFER_SIZE];
+    char                temp[CONFIG_GENERIC_BUFFER_SIZE];
     const char   *      p         = NULL;
-    monitor_settings_t *ms        = &monitor_settings[monitor_index];
+
 
     sprintf(name, "Monitor #%i", monitor_index + 1);
     sprintf(temp, "%i, %i, %i, %i", cx, cy, cw, ch);
 
     cat = ini_find_section(config, name);
 
+    // do not load if the section doesn't exist
+    if (!cat)
+        return;
+    
+    // add monitors
+    if (video_engine.num_monitors < monitor_index)
+        video_add_monitor(cw, ch);
+
+    video_monitor_t* monitor = video_get_monitor_by_index(monitor_index);
+
     p = ini_section_get_string(cat, "window_coordinates", temp);
 
     if (window_remember) {
-        sscanf(p, "%i, %i, %i, %i", &ms->mon_window_x, &ms->mon_window_y,
-               &ms->mon_window_w, &ms->mon_window_h);
-        ms->mon_window_maximized = !!ini_section_get_int(cat, "window_maximized", 0);
+        sscanf(p, "%i, %i, %i, %i", &monitor->position_x, &monitor->position_y,
+               &monitor->size_x, &monitor->size_y); // load any scale that may exist
+        monitor->is_maximised = !!ini_section_get_int(cat, "window_maximized", 0);
     } else
-        ms->mon_window_maximized = 0;
+        monitor->is_maximised = false; 
 }
 
 /* Load "Machine" section. */
@@ -572,7 +589,7 @@ static void
 load_input_devices(void)
 {
     ini_section_t cat = ini_find_section(config, "Input devices");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
     char         *p;
 
     p = ini_section_get_string(cat, "keyboard_type", NULL);
@@ -676,7 +693,7 @@ static void
 load_sound(void)
 {
     ini_section_t cat = ini_find_section(config, "Sound");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
     char         *p;
 
     p = ini_section_get_string(cat, "sndcard", NULL);
@@ -760,7 +777,7 @@ load_network(void)
 {
     ini_section_t   cat       = ini_find_section(config, "Network");
     char         *  p;
-    char            temp[512];
+    char            temp[CONFIG_GENERIC_BUFFER_SIZE];
     uint16_t        c         = 0;
     uint16_t        min       = 0;
     netcard_conf_t *nc        = &net_cards_conf[c];
@@ -884,7 +901,7 @@ load_ports(void)
 {
     ini_section_t cat = ini_find_section(config, "Ports (COM & LPT)");
     char         *p;
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
     memset(temp, 0, sizeof(temp));
 
     int           has_jumpers = machine_has_jumpered_ecp_dma(machine, DMA_ANY);
@@ -980,7 +997,7 @@ load_storage_controllers(void)
     ini_section_t cat = ini_find_section(config, "Storage controllers");
     ini_section_t migration_cat;
     char         *p;
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
     int           min = 0;
 
     for (int c = min; c < SCSI_CARD_MAX; c++) {
@@ -1175,9 +1192,9 @@ static void
 load_hard_disks(void)
 {
     ini_section_t cat = ini_find_section(config, "Hard disks");
-    char          temp[512];
-    char          tmp2[512];
-    char          s[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
+    char          tmp2[CONFIG_GENERIC_BUFFER_SIZE];
+    char          s[CONFIG_GENERIC_BUFFER_SIZE];
     char         *p;
     uint32_t      max_spt;
     uint32_t      max_hpc;
@@ -1377,10 +1394,10 @@ static void
 load_floppy_and_cdrom_drives(void)
 {
     ini_section_t cat = ini_find_section(config, "Floppy and CD-ROM drives");
-    char          temp[512];
-    char          tmp2[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
+    char          tmp2[CONFIG_GENERIC_BUFFER_SIZE];
     char         *p;
-    char          s[512];
+    char          s[CONFIG_GENERIC_BUFFER_SIZE];
     unsigned int  board = 0;
     unsigned int  dev = 0;
     int           c;
@@ -1645,10 +1662,10 @@ static void
 load_other_removable_devices(void)
 {
     ini_section_t cat = ini_find_section(config, "Other removable devices");
-    char          temp[512];
-    char          tmp2[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
+    char          tmp2[CONFIG_GENERIC_BUFFER_SIZE];
     char         *p;
-    char          s[512];
+    char          s[CONFIG_GENERIC_BUFFER_SIZE];
     unsigned int  board = 0;
     unsigned int  dev = 0;
     int           c;
@@ -1974,7 +1991,7 @@ load_other_peripherals(void)
 {
     ini_section_t cat = ini_find_section(config, "Other peripherals");
     char         *p;
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
 
     bugger_enabled         = !!ini_section_get_int(cat, "bugger_enabled", 0);
     postcard_enabled       = !!ini_section_get_int(cat, "postcard_enabled", 0);
@@ -2040,7 +2057,7 @@ load_gl3_shaders(void)
 {
     ini_section_t cat = ini_find_section(config, "GL3 Shaders");
     char         *p;
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
     int           i = 0, shaders = 0;
     memset(temp, 0, sizeof(temp));
     memset(gl3_shader_file, 0, sizeof(gl3_shader_file));
@@ -2084,7 +2101,7 @@ load_keybinds(void)
 {
     ini_section_t cat = ini_find_section(config, "Keybinds");
     char         *p;
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
     memset(temp, 0, sizeof(temp));
 
     /* Now load values from config */
@@ -2217,7 +2234,7 @@ config_load(void)
         config_log("VM config file not present or invalid!\n");
     } else {
         load_general();                 /* General */
-        for (i = 0; i < MONITORS_NUM; i++)
+        for (i = 0; i < VIDEO_MAX_MONITORS; i++)
             load_monitor(i);            /* Monitors */
         load_scan_code_mappings();      /* Scan code mappings */
         load_machine();                 /* Machine */
@@ -2267,7 +2284,7 @@ static void
 save_global(void)
 {
     ini_section_t cat = ini_find_or_create_section(global, "");
-    char          buffer[512] = { 0 };
+    char          buffer[CONFIG_GENERIC_BUFFER_SIZE] = { 0 };
 
     if (lang_id == plat_language_code(DEFAULT_LANGUAGE))
         ini_section_delete_var(cat, "language");
@@ -2333,7 +2350,7 @@ static void
 save_scan_code_mappings(void)
 {
     ini_section_t cat = ini_find_section(config, "Scan code mappings");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
 
     for (int c = 0; c < 768; c++) {
         sprintf(temp, "%03X", c);
@@ -2352,7 +2369,7 @@ static void
 save_general(void)
 {
     ini_section_t cat = ini_find_or_create_section(config, "General");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
 
     const char *va_name;
 
@@ -2525,31 +2542,36 @@ save_general(void)
 
 /* Save monitor section. */
 static void
-save_monitor(int monitor_index)
+save_monitors()
 {
     ini_section_t       cat;
     char                name[sizeof("Monitor #") + 12] = { [0] = 0 };
-    char                temp[512];
-    monitor_settings_t *ms        = &monitor_settings[monitor_index];
+    char                temp[CONFIG_GENERIC_BUFFER_SIZE];
+    video_monitor_t*    current_monitor; 
 
-    snprintf(name, sizeof(name), "Monitor #%i", monitor_index + 1);
-    cat = ini_find_or_create_section(config, name);
+    for (uint32_t monitor_index = 0; monitor_index < video_engine.num_monitors; monitor_index++)
+    {
+        current_monitor = video_get_monitor_by_index(monitor_index);
+        
+        snprintf(name, sizeof(name), "Monitor #%i", monitor_index + 1);
+        cat = ini_find_or_create_section(config, name);
 
-    if (window_remember) {
-        sprintf(temp, "%i, %i, %i, %i", ms->mon_window_x, ms->mon_window_y,
-                ms->mon_window_w, ms->mon_window_h);
+        if (window_remember) {
+            sprintf(temp, "%i, %i, %i, %i", current_monitor->position_x, current_monitor->position_y,
+                    current_monitor->size_x, current_monitor->size_y);
 
-        ini_section_set_string(cat, "window_coordinates", temp);
-        if (ms->mon_window_maximized != 0)
-            ini_section_set_int(cat, "window_maximized", ms->mon_window_maximized);
-        else
+            ini_section_set_string(cat, "window_coordinates", temp);
+            if (ms->mon_window_maximized != 0)
+                ini_section_set_int(cat, "window_maximized", ms->mon_window_maximized);
+            else
+                ini_section_delete_var(cat, "window_maximized");
+        } else {
+            ini_section_delete_var(cat, "window_coordinates");
             ini_section_delete_var(cat, "window_maximized");
-    } else {
-        ini_section_delete_var(cat, "window_coordinates");
-        ini_section_delete_var(cat, "window_maximized");
-    }
+        }
 
-    ini_delete_section_if_empty(config, cat);
+        ini_delete_section_if_empty(config, cat);     
+    }
 }
 
 /* Save "Machine" section. */
@@ -2705,8 +2727,8 @@ static void
 save_input_devices(void)
 {
     ini_section_t cat = ini_find_or_create_section(config, "Input devices");
-    char          temp[512];
-    char          tmp2[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
+    char          tmp2[CONFIG_GENERIC_BUFFER_SIZE];
 
     ini_section_set_string(cat, "keyboard_type", keyboard_get_internal_name(keyboard_type));
 
@@ -2849,7 +2871,7 @@ save_sound(void)
 static void
 save_network(void)
 {
-    char            temp[512];
+    char            temp[CONFIG_GENERIC_BUFFER_SIZE];
     ini_section_t   cat       = ini_find_or_create_section(config, "Network");
     netcard_conf_t *nc;
 
@@ -2941,7 +2963,7 @@ static void
 save_ports(void)
 {
     ini_section_t cat = ini_find_or_create_section(config, "Ports (COM & LPT)");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
 
     int           has_jumpers = machine_has_jumpered_ecp_dma(machine, DMA_ANY);
     int           def_jumper  = machine_get_default_jumpered_ecp_dma(machine);
@@ -3060,7 +3082,7 @@ static void
 save_storage_controllers(void)
 {
     ini_section_t cat = ini_find_or_create_section(config, "Storage controllers");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
     int           c;
     char          *def_hdc;
 
@@ -3216,7 +3238,7 @@ static void
 save_other_peripherals(void)
 {
     ini_section_t cat = ini_find_or_create_section(config, "Other peripherals");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
 
     if (bugger_enabled == 0)
         ini_section_delete_var(cat, "bugger_enabled");
@@ -3273,7 +3295,7 @@ static void
 save_gl3_shaders(void)
 {
     ini_section_t cat = ini_find_or_create_section(config, "GL3 Shaders");
-    char          temp[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
     int shaders = 0, i = 0;
 
     for (i = 0; i < MAX_USER_SHADERS; i++) {
@@ -3307,7 +3329,7 @@ save_hard_disks(void)
 {
     ini_section_t cat = ini_find_or_create_section(config, "Hard disks");
     char          temp[32];
-    char          tmp2[512];
+    char          tmp2[CONFIG_GENERIC_BUFFER_SIZE];
     char         *p;
 
     memset(temp, 0x00, sizeof(temp));
@@ -3400,8 +3422,8 @@ static void
 save_floppy_and_cdrom_drives(void)
 {
     ini_section_t cat = ini_find_or_create_section(config, "Floppy and CD-ROM drives");
-    char          temp[512];
-    char          tmp2[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
+    char          tmp2[CONFIG_GENERIC_BUFFER_SIZE];
     int           c;
 
     for (c = 0; c < FDD_NUM; c++) {
@@ -3558,8 +3580,8 @@ static void
 save_other_removable_devices(void)
 {
     ini_section_t cat = ini_find_or_create_section(config, "Other removable devices");
-    char          temp[512];
-    char          tmp2[512];
+    char          temp[CONFIG_GENERIC_BUFFER_SIZE];
+    char          tmp2[CONFIG_GENERIC_BUFFER_SIZE];
     int           c;
 
     for (c = 0; c < RDISK_NUM; c++) {
@@ -3675,8 +3697,7 @@ void
 config_save(void)
 {
     save_general();                 /* General */
-    for (uint8_t i = 0; i < MONITORS_NUM; i++)
-        save_monitor(i);            /* Monitors */
+    save_monitors();            /* Monitors */
     save_scan_code_mappings();      /* Scan code mappings */
     save_machine();                 /* Machine */
     save_video();                   /* Video */

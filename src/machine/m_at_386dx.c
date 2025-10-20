@@ -155,9 +155,6 @@ machine_at_portableiii386_init(const machine_t *model)
     if (hdc_current[0] == HDC_INTERNAL)
         device_add(&ide_isa_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&compaq_plasma_device);
-
     device_add(&compaq_386_device);
 
     machine_at_common_init(model);

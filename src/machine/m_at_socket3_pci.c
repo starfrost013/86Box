@@ -136,9 +136,6 @@ machine_at_sbc490_init(const machine_t *model)
     pci_register_slot(0x0C, PCI_CARD_NORMAL,      1, 2, 3, 4);
     pci_register_slot(0x01, PCI_CARD_VIDEO,       4, 1, 2, 3);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     device_add(&ali1489_device);
     device_add_params(&fdc37c6xx_device, (void *) FDC37C665);
 
@@ -363,9 +360,6 @@ machine_at_pc330_6573_init(const machine_t *model)
        certain until we obtain PCI readouts from the real machine. */
     pci_register_slot(0x0E, PCI_CARD_VIDEO,       13, 14, 15, 16);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     device_add(&opti602_device);
     device_add(&opti802g_device);
     device_add(&opti822_device);
@@ -465,9 +459,6 @@ machine_at_pb450_init(const machine_t *model)
     pci_register_slot(0x10, PCI_CARD_NORTHBRIDGE, 0, 0, 0, 0);
     pci_register_slot(0x11, PCI_CARD_NORMAL,      1, 2, 3, 4);
     pci_register_slot(0x12, PCI_CARD_NORMAL,      5, 6, 7, 8);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     device_add(&opti895_device);
     device_add(&opti602_device);
@@ -852,9 +843,6 @@ machine_at_sb486pv_init(const machine_t *model)
     pci_register_slot(0x0f, PCI_CARD_VIDEO,       1, 2, 3, 4);
     pci_register_slot(0x02, PCI_CARD_SOUTHBRIDGE, 0, 0, 0, 0);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
     device_add(&sio_zb_device);
     device_add(&ide_rz1000_pci_single_channel_device);
@@ -943,9 +931,6 @@ machine_at_acerp3_init(const machine_t *model)
     device_add_params(&fdc37c6xx_device, (void *) (FDC37C665 | FDC37C6XX_IDE_PRI));
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
     device_add(&ide_cmd640_pci_legacy_only_device);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&gd5434_onboard_pci_device);
 
     device_add(&intel_flash_bxt_device);
 
@@ -1233,9 +1218,6 @@ machine_at_pl4600c_init(const machine_t *model)
     device_add(&sst_flash_29ee010_device);
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&gd5430_onboard_pci_device);
-
     if (sound_card_current[0] == SOUND_INTERNAL)
         device_add(&ess_1688_device);
 
@@ -1307,9 +1289,6 @@ machine_at_actionpc2600_init(const machine_t *model)
 
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
-
     return ret;
 }
 
@@ -1340,9 +1319,6 @@ machine_at_actiontower8400_init(const machine_t *model)
     device_add(&intel_flash_bxt_device); // The ActionPC 2600 has this so I'm gonna assume this does too.
 
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(machine_get_vid_device(machine));
 
     return ret;
 }

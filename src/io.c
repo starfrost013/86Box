@@ -376,6 +376,7 @@ inb(uint16_t port)
         }
     }
 
+#ifndef USE_VIDEO2
     if (amstrad_latch & 0x80000000) {
         if (port & 0x80)
             amstrad_latch = AMSTRAD_NOLATCH | 0x80000000;
@@ -393,6 +394,7 @@ inb(uint16_t port)
     if (port == 0x1ed)
         ret = 0xfe;
 #endif
+#endif 
 
     io_log("[%04X:%08X] (%i, %i, %04i) in b(%04X) = %02X\n", CS, cpu_state.pc, in_smm, found, qfound, port, ret);
 

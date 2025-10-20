@@ -1190,9 +1190,6 @@ machine_at_ms6168_common_init(const machine_t *model)
     device_add(&i440zx_device);
     device_add(&piix4e_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&voodoo_3_2000_agp_onboard_8m_device);
-
     device_add_params(&w83977_device, (void *) (W83977EF | W83977_AMI | W83977_NO_NVR));
     device_add(&intel_flash_bxt_device);
     spd_register(SPD_TYPE_SDRAM, 0x3, 256);

@@ -346,9 +346,6 @@ machine_at_valuepointp60_init(const machine_t *model)
 
     device_add(&i430lx_device);
 
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&mach32_onboard_pci_device);
-
     return ret;
 }
 
@@ -561,9 +558,6 @@ machine_at_pb520r_init(const machine_t *model)
 
     device_add(&i430lx_device);
     device_add(&ide_cmd640_pci_single_channel_device);
-
-    if (gfxcard[0] == VID_INTERNAL)
-        device_add(&gd5434_onboard_pci_device);
 
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
     device_add(&sio_zb_device);

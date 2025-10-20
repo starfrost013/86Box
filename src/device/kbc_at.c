@@ -279,6 +279,7 @@ kbc_translate(atkbc_t *dev, uint8_t val)
     if (dev->sc_or == 0x80)
         dev->sc_or = 0;
 
+#ifndef USE_VIDEO2
     /* Test for T3100E 'Fn' key (Right Alt / Right Ctrl) */
     if ((dev != NULL) && (kbc_ven == KBC_VEN_TOSHIBA) &&
         (keyboard_recv(0x138) || keyboard_recv(0x11d)))  switch (ret) {
@@ -327,10 +328,11 @@ kbc_translate(atkbc_t *dev, uint8_t val)
         case 0x4d:
             t3100e_notify_set(0x0f);
             break; /* Right */
+
         default:
             break;
     }
-
+#endif
     return ret;
 }
 
@@ -2096,10 +2098,11 @@ write_cmd_data_toshiba(void *priv, uint8_t val)
 {
     const atkbc_t *dev = (atkbc_t *) priv;
     uint8_t        ret = 1;
-
+    #ifndef USE_VIDEO2
     switch (dev->command) {
         default:
             break;
+
 
         case 0xb6: /* T3100e - set color/mono switch */
             kbc_at_log("ATkbc: T3100e - set color/mono switch\n");
@@ -2107,16 +2110,18 @@ write_cmd_data_toshiba(void *priv, uint8_t val)
             ret = 0;
             break;
     }
+    #endif
 
     return ret;
 }
 
-static uint8_t
+uint8_t
 write_cmd_toshiba(void *priv, uint8_t val)
 {
     atkbc_t *dev = (atkbc_t *) priv;
     uint8_t  ret = 1;
 
+    #ifndef USE_VIDEO2
     switch (val) {
         default:
             break;
@@ -2124,6 +2129,7 @@ write_cmd_toshiba(void *priv, uint8_t val)
         case 0xaf:
             kbc_at_log("ATkbc: bad KBC command AF\n");
             break;
+
 
         case 0xb0: /* T3100e: Turbo on */
             kbc_at_log("ATkbc: T3100e: Turbo on\n");
@@ -2202,17 +2208,19 @@ write_cmd_toshiba(void *priv, uint8_t val)
             ret = 0;
             break;
 
+
         case 0xc0: /* Read P1 */
             kbc_at_log("ATkbc: read P1\n");
 
             /* The T3100e returns all bits set except bit 6 which
              * is set by t3100e_mono_set() */
+
             dev->p1 = (t3100e_mono_get() & 1) ? 0xff : 0xbf;
             kbc_delay_to_ob(dev, dev->p1, 0, 0x00);
             ret = 0;
             break;
     }
-
+    #endif 
     return ret;
 }
 

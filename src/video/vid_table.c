@@ -388,9 +388,7 @@ void
 video_post_reset(void)
 {
     int ibm8514_has_vga = 0;
-    if (gfxcard[0] == VID_INTERNAL)
-        ibm8514_has_vga = (video_get_type_monitor(0) == VIDEO_FLAG_TYPE_8514);
-    else if (gfxcard[0] != VID_NONE)
+    if (gfxcard[0] != VID_NONE)
         ibm8514_has_vga = (video_card_get_flags(gfxcard[0]) == VIDEO_FLAG_TYPE_8514);
     else
         ibm8514_has_vga = 0;
