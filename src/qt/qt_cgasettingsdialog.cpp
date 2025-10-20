@@ -14,7 +14,7 @@ CGASettingsDialog::CGASettingsDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::CGASettingsDialog)
 {
-#ifdef USE_VIDEO2
+#ifdef VIDEO2_OLD_CODE
     warning("Video System 2.0: This feature isn't implemented yet, tell starfrost");
     return;
 #endif
@@ -57,7 +57,7 @@ CGASettingsDialog::~CGASettingsDialog()
 
 void CGASettingsDialog::updateDisplay()
 {
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     auto temp_cga_comp_hue        = ui->horizontalSliderHue->value();
     auto temp_cga_comp_saturation = ui->horizontalSliderSaturation->value();
     auto temp_cga_comp_brightness = ui->horizontalSliderBrightness->value();
@@ -69,7 +69,7 @@ void CGASettingsDialog::updateDisplay()
 
 void CGASettingsDialog::applySettings()
 {
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     vid_cga_comp_hue        = ui->horizontalSliderHue->value();
     vid_cga_comp_saturation = ui->horizontalSliderSaturation->value();
     vid_cga_comp_brightness = ui->horizontalSliderBrightness->value();
@@ -93,7 +93,7 @@ void CGASettingsDialog::on_buttonBox_accepted()
 
 void CGASettingsDialog::on_buttonBox_rejected()
 {
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     vid_cga_comp_hue = cga_hue;
     vid_cga_comp_saturation = cga_saturation;
     vid_cga_comp_brightness = cga_brightness;

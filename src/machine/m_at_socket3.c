@@ -464,10 +464,9 @@ machine_at_tg486g_init(const machine_t *model)
 
     device_add_params(machine_get_kbc_device(machine), (void *) model->kbc_params);
 
-    if (gfxcard[0] != VID_INTERNAL) {
-        for (uint16_t i = 0; i < 32768; i++)
-            rom[i] = mem_readb_phys(0x000c0000 + i);
-    }
+    for (uint16_t i = 0; i < 32768; i++)
+        rom[i] = mem_readb_phys(0x000c0000 + i);
+
     mem_mapping_set_addr(&bios_mapping, 0x0c0000, 0x40000);
     mem_mapping_set_exec(&bios_mapping, rom);
 

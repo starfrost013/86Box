@@ -43,7 +43,11 @@ extern "C" {
 #   include <86box/discord.h>
 #endif
 #include <86box/device.h>
+#ifndef VIDEO2_OLD_CODE
 #include <86box/video.h>
+#else
+#include <86box/video2/video.h>
+#endif
 #include <86box/mouse.h>
 #include <86box/machine.h>
 #include <86box/vid_ega.h>
@@ -444,7 +448,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionHiDPI_scaling->setChecked(dpi_scale);
     ui->actionHide_status_bar->setChecked(hide_status_bar);
     ui->actionHide_tool_bar->setChecked(hide_tool_bar);
-    ui->actionShow_non_primary_monitors->setChecked(show_second_monitors);
     ui->actionUpdate_status_bar_icons->setChecked(update_icons);
     ui->actionEnable_Discord_integration->setChecked(enable_discord);
     ui->actionApply_fullscreen_stretch_mode_when_maximized->setChecked(video_fullscreen_scale_maximized);
@@ -2068,7 +2071,7 @@ void
 MainWindow::on_actionChange_contrast_for_monochrome_display_triggered()
 {
     startblit();
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
     vid_cga_contrast ^= 1;
     for (int i = 0; i < MONITORS_NUM; i++)
         cgapal_rebuild_monitor(i);
@@ -2342,25 +2345,22 @@ MainWindow::on_actionRenderer_options_triggered()
         if (dlg->exec() == QDialog::Accepted) {
             if (ui->stackedWidget->reloadRendererOption()) {
                 ui->stackedWidget->switchRenderer(static_cast<RendererStack::Renderer>(vid_api));
-                if (show_second_monitors) {
-                    for (int i = 1; i < MONITORS_NUM; i++) {
-                        if (renderers[i] && renderers[i]->reloadRendererOption() && renderers[i]->hasOptions()) {
-                            ui->stackedWidget->switchRenderer(static_cast<RendererStack::Renderer>(vid_api));
-                        }
+                for (int32_t i = 0; i < video_engine.num_monitors; i++) {
+                    if (renderers[i] && renderers[i]->reloadRendererOption() && renderers[i]->hasOptions()) {
+                        ui->stackedWidget->switchRenderer(static_cast<RendererStack::Renderer>(vid_api));
                     }
                 }
-            } else for (int i = 1; i < MONITORS_NUM; i++) {
+
+            } else for (int32_t i = 0; i < video_engine.num_monitors; i++) {
                 if (renderers[i] && renderers[i]->hasOptions())
                     renderers[i]->reloadOptions();
             }
         } else if (reload_renderers && ui->stackedWidget->reloadRendererOption()) {
             reload_renderers = false;
             ui->stackedWidget->switchRenderer(static_cast<RendererStack::Renderer>(vid_api));
-            if (show_second_monitors) {
-                for (int i = 1; i < MONITORS_NUM; i++) {
-                    if (renderers[i]) {
-                        renderers[i]->switchRenderer(static_cast<RendererStack::Renderer>(vid_api));
-                    }
+            for (int32_t i = 0; i < video_engine.num_monitors; i++) {
+                if (renderers[i]) {
+                    renderers[i]->switchRenderer(static_cast<RendererStack::Renderer>(vid_api));
                 }
             }
         }
@@ -2372,42 +2372,6 @@ MainWindow::on_actionMCA_devices_triggered()
 {
     if (const auto dlg = new MCADeviceList(this))
         dlg->exec();
-}
-
-void
-MainWindow::on_actionShow_non_primary_monitors_triggered()
-{
-    show_second_monitors = static_cast<int>(ui->actionShow_non_primary_monitors->isChecked());
-
-    if (show_second_monitors) {
-        for (int monitor_index = 1; monitor_index < MONITORS_NUM; monitor_index++) {
-            const auto &secondaryRenderer = renderers[monitor_index];
-            if (!renderers[monitor_index])
-                continue;
-            secondaryRenderer->show();
-            if (window_remember) {
-                secondaryRenderer->setGeometry(monitor_settings[monitor_index].mon_window_x < 120 ? 120 : monitor_settings[monitor_index].mon_window_x,
-                                               monitor_settings[monitor_index].mon_window_y < 120 ? 120 : monitor_settings[monitor_index].mon_window_y,
-                                               monitor_settings[monitor_index].mon_window_w > 2048 ? 2048 : monitor_settings[monitor_index].mon_window_w,
-                                               monitor_settings[monitor_index].mon_window_h > 2048 ? 2048 : monitor_settings[monitor_index].mon_window_h);
-            }
-            secondaryRenderer->switchRenderer(static_cast<RendererStack::Renderer>(vid_api));
-            ui->stackedWidget->switchRenderer(static_cast<RendererStack::Renderer>(vid_api));
-        }
-    } else {
-        for (int monitor_index = 1; monitor_index < MONITORS_NUM; monitor_index++) {
-            auto &secondaryRenderer = renderers[monitor_index];
-            if (!renderers[monitor_index])
-                continue;
-            secondaryRenderer->hide();
-            if (window_remember && renderers[monitor_index]) {
-                monitor_settings[monitor_index].mon_window_w = renderers[monitor_index]->geometry().width();
-                monitor_settings[monitor_index].mon_window_h = renderers[monitor_index]->geometry().height();
-                monitor_settings[monitor_index].mon_window_x = renderers[monitor_index]->geometry().x();
-                monitor_settings[monitor_index].mon_window_y = renderers[monitor_index]->geometry().y();
-            }
-        }
-    }
 }
 
 void

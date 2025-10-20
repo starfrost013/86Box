@@ -27,7 +27,7 @@ extern "C" {
 #include <86box/86box.h>
 #include <86box/device.h>
 #include <86box/machine.h>
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
 #include <86box/video.h>
 #include <86box/vid_8514a_device.h>
 #include <86box/vid_xga_device.h>
@@ -158,7 +158,7 @@ SettingsDisplay::on_pushButtonConfigureVideo_clicked()
 void
 SettingsDisplay::on_pushButtonConfigureVoodoo_clicked()
 {
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     DeviceConfig::ConfigureDevice(&voodoo_device);
     #else
     warning("Video System 2.0: This feature isn't implemented yet, tell starfrost");
@@ -168,7 +168,7 @@ SettingsDisplay::on_pushButtonConfigureVoodoo_clicked()
 void
 SettingsDisplay::on_pushButtonConfigure8514_clicked()
 {
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     if (machine_has_bus(machineId, MACHINE_BUS_MCA) > 0) {
         DeviceConfig::ConfigureDevice(&ibm8514_mca_device);
     } else {
@@ -183,7 +183,7 @@ SettingsDisplay::on_pushButtonConfigure8514_clicked()
 void
 SettingsDisplay::on_pushButtonConfigureXga_clicked()
 {
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     if (machine_has_bus(machineId, MACHINE_BUS_MCA) > 0)
         DeviceConfig::ConfigureDevice(&xga_device);
     #else
@@ -194,7 +194,7 @@ SettingsDisplay::on_pushButtonConfigureXga_clicked()
 void
 SettingsDisplay::on_pushButtonConfigureDa2_clicked()
 {
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     DeviceConfig::ConfigureDevice(&ps55da2_device);
     #else
     warning("Video System 2.0: This feature isn't implemented yet, tell starfrost");

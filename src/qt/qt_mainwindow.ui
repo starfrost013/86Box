@@ -214,7 +214,6 @@
     <addaction name="actionHide_tool_bar"/>
     <addaction name="actionHide_status_bar"/>
     <addaction name="separator"/>
-    <addaction name="actionShow_non_primary_monitors"/>
     <addaction name="actionResizable_window"/>
     <addaction name="actionRemember_size_and_position"/>
     <addaction name="separator"/>
@@ -861,14 +860,6 @@
   <action name="actionMCA_devices">
    <property name="text">
     <string>&amp;MCA devices...</string>
-   </property>
-  </action>
-  <action name="actionShow_non_primary_monitors">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show non-&amp;primary monitors</string>
    </property>
   </action>
   <action name="actionVNC">

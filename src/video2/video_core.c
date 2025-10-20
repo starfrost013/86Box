@@ -38,10 +38,13 @@
 #include <86box/video2/video.h>
 #include <86box/log.h>
 
+
 /* Functions only used in this translation unit */
 void video_clear(void);
 
-/* Globals only used in this translation unit 1*/
+/* Globals only used in this translation unit */
+// ****TEMPORARY - DEPRECATED***
+int          video_grayscale = 0, video_graytype = 0;
 
 void video_init(void)
 {

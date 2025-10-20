@@ -48,7 +48,7 @@
 #include <86box/sis_55xx.h>
 #include <86box/chipset.h>
 #include <86box/usb.h>
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
 #include <86box/agpgart.h>
 #else
 #include <86box/video2/base/agpgart.h>

@@ -1699,7 +1699,7 @@ vid_poll_200(void *priv)
 static void
 vid_init_200(amstrad_t *ams)
 {
-#ifdef USE_VIDEO2
+#ifdef VIDEO2_OLD_CODE
     amsvid_t *vid;
     cga_t    *cga;
     mda_t    *mda;
@@ -1821,7 +1821,7 @@ vid_init_200(amstrad_t *ams)
 static void
 vid_close_200(void *priv)
 {
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
     amsvid_t *vid = (amsvid_t *) priv;
 
     if (vid->cga.vram != vid->mda.vram) {
@@ -3025,6 +3025,7 @@ machine_amstrad_init(const machine_t *model, int type)
 
     video_reset(gfxcard[0]);
 
+#ifndef VIDEO2_OLD_CODE
     if (gfxcard[0] == VID_INTERNAL)
         switch (type) {
             case AMS_PC1512:
@@ -3084,6 +3085,12 @@ machine_amstrad_init(const machine_t *model, int type)
     else if ((type == AMS_PC200) || (type == AMS_PPC512))
         io_sethandler(0x03de, 1,
                       ams_read, NULL, NULL, ams_write, NULL, NULL, ams);
+#else 
+    if ((type == AMS_PC200) || (type == AMS_PPC512))
+        io_sethandler(0x03de, 1,
+                      ams_read, NULL, NULL, ams_write, NULL, NULL, ams);
+#endif
+            
 
     /* Initialize the (custom) keyboard/mouse interface. */
     ams->wantirq = 0;

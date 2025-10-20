@@ -73,7 +73,7 @@
 #include <86box/sound.h>
 #include <86box/midi.h>
 #include <86box/snd_mpu401.h>
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
 #include <86box/video.h>
 #else
 #include <86box/video2/video.h>
@@ -519,35 +519,31 @@ load_video(void)
 {
     ini_section_t cat = ini_find_section(config, "Video");
     char         *p;
-    int           free_p = 0;
+    int32_t      free_p = 0;
 
-    if (machine_has_flags(machine, MACHINE_VIDEO_ONLY)) {
-        ini_section_delete_var(cat, "gfxcard");
-        gfxcard[0] = VID_INTERNAL;
-    } else {
-        p = ini_section_get_string(cat, "gfxcard", NULL);
-        if (p == NULL) {
-            if (machine_has_flags(machine, MACHINE_VIDEO)) {
-                p = (char *) malloc((strlen("internal") + 1) * sizeof(char));
-                strcpy(p, "internal");
-            } else {
-                p = (char *) malloc((strlen("none") + 1) * sizeof(char));
-                strcpy(p, "none");
-            }
-            free_p = 1;
-        } else if (!strcmp(p, "c&t_69000")) {
-            p = (char *) malloc((strlen("chips_69000") + 1) * sizeof(char));
-            strcpy(p, "chips_69000");
-            free_p = 1;
+    p = ini_section_get_string(cat, "gfxcard", NULL);
+    if (p == NULL) {
+        if (machine_has_flags(machine, MACHINE_VIDEO)) {
+            p = (char *) malloc((strlen("internal") + 1) * sizeof(char));
+            strcpy(p, "internal");
+        } else {
+            p = (char *) malloc((strlen("none") + 1) * sizeof(char));
+            strcpy(p, "none");
         }
-        gfxcard[0] = video_get_video_from_internal_name(p);
-        if (free_p) {
-            free(p);
-            p = NULL;
-        }
+        free_p = 1;
+    } else if (!strcmp(p, "c&t_69000")) {
+        p = (char *) malloc((strlen("chips_69000") + 1) * sizeof(char));
+        strcpy(p, "chips_69000");
+        free_p = 1;
+    }
+    gfxcard[0] = video_get_video_from_internal_name(p);
+    if (free_p) {
+        free(p);
+        p = NULL;
+
     }
 
-#ifdef USE_VIDEO2
+#ifdef VIDEO2_OLD_CODE
     if (((gfxcard[0] == VID_INTERNAL) && machine_has_flags(machine, MACHINE_VIDEO_8514A)) ||
         video_card_get_flags(gfxcard[0]) == VIDEO_FLAG_TYPE_8514)
                 ini_section_delete_var(cat, "8514a");
@@ -561,7 +557,6 @@ load_video(void)
     xga_standalone_enabled           = !!ini_section_get_int(cat, "xga", 0);
     xga_active                       = xga_standalone_enabled;
     da2_standalone_enabled           = !!ini_section_get_int(cat, "da2", 0);
-    show_second_monitors             = !!ini_section_get_int(cat, "show_second_monitors", 1);
     video_fullscreen_scale_maximized = !!ini_section_get_int(cat, "video_fullscreen_scale_maximized", 0);
 
     vid_cga_comp_brightness = ini_section_get_int(cat, "vid_cga_comp_brightness", 0);
@@ -2644,7 +2639,7 @@ save_video(void)
     ini_section_t cat = ini_find_or_create_section(config, "Video");
 
     ini_section_set_string(cat, "gfxcard",
-                           video_get_internal_name(gfxcard[0]));
+        video_engine.devices[0].device->internal_name);
 
     if (monitor_edid)
         ini_section_set_int(cat, "monitor_edid", monitor_edid);

@@ -1297,10 +1297,7 @@ machine_at_tomahawk_init(const machine_t *model)
     spd_register(SPD_TYPE_SDRAM, 0x3, 128);
     device_add(&lm78_device);      /* fans: Thermal, CPU, Chassis; temperature: unused */
     device_add(&lm75_1_4a_device); /* temperature: CPU */
-
-    if ((gfxcard[0] == VID_INTERNAL) && machine_get_vid_device(machine))
-        device_add(machine_get_vid_device(machine));
-
+    
     if ((sound_card_current[0] == SOUND_INTERNAL) && machine_get_snd_device(machine))
         device_add(machine_get_snd_device(machine));
 

@@ -101,7 +101,7 @@ machine_init_ex(int m)
 
         cart_reset();
 
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
         /* Prepare some video-related things if we're using internal
            or no video. */
         video_pre_reset(gfxcard[0]);

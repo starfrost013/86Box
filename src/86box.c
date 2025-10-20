@@ -98,7 +98,7 @@
 #include <86box/sound.h>
 #include <86box/midi.h>
 #include <86box/snd_speaker.h>
-#ifdef USE_VIDEO2
+#ifdef VIDEO2_OLD_CODE
 #include <86box/video2/video.h>
 #else
 #include <86box/video.h>
@@ -1333,40 +1333,6 @@ pc_init_modules(void)
         }
     }
 
-#ifndef USE_VIDEO2 // TODO
-    /* Make sure we have a usable video card. */
-    if (!video_card_available(gfxcard[0])) {
-        memset(tempc, 0, sizeof(tempc));
-        device_get_name(video_card_getdevice(gfxcard[0]), 0, tempc);
-        swprintf(temp, sizeof_w(temp), plat_get_string(STRING_HW_NOT_AVAILABLE_VIDEO), tempc);
-        c = 0;
-        while (video_get_internal_name(c) != NULL) {
-            gfxcard[0] = -1;
-            if (video_card_available(c)) {
-                ui_msgbox_header(MBX_INFO, plat_get_string(STRING_HW_NOT_AVAILABLE_TITLE), temp);
-                gfxcard[0] = c;
-                config_save();
-                break;
-            }
-            c++;
-        }
-        if (gfxcard[0] == -1) {
-            fatal("No available video cards\n");
-            exit(-1);
-        }
-    }
-
-    // TODO
-    for (uint8_t i = 1; i < GFXCARD_MAX; i ++) {
-        if (!video_card_available(gfxcard[i])) {
-            char tempc[512] = { 0 };
-            device_get_name(video_card_getdevice(gfxcard[i]), 0, tempc);
-            swprintf(temp, sizeof_w(temp), plat_get_string(STRING_HW_NOT_AVAILABLE_VIDEO2), tempc);
-            ui_msgbox_header(MBX_INFO, plat_get_string(STRING_HW_NOT_AVAILABLE_TITLE), temp);
-            gfxcard[i] = 0;
-        }
-    }
-#else
     uint32_t num_available_video_cards = 0;
 
     for (uint8_t i = 0; i < GFXCARD_MAX; i++) {
@@ -1414,8 +1380,6 @@ pc_init_modules(void)
 
     // TODO
 
-
-#endif
     atfullspeed = 0;
 
     random_init();
@@ -1452,11 +1416,7 @@ pc_init_modules(void)
 
     hdc_init();
 
-#ifndef USE_VIDEO2
-    video_reset_close();
-#else
     video_reset();
-#endif
 
     machine_status_init();
 
@@ -1602,7 +1562,7 @@ pc_reset_hard_close(void)
 
     closeal();
 
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
     video_reset_close();
 #else
     video_reset();
@@ -1719,7 +1679,7 @@ pc_reset_hard_init(void)
     /* Reset any ISA RTC cards. */
     isartc_reset();
 
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
     /* Initialize the Voodoo cards here inorder to minimize
        the chances of the SCSI controller ending up on the bridge. */
     video_voodoo_init();
@@ -1944,7 +1904,7 @@ pc_run(void)
     framecount++;
     if (++framecountx >= (force_10ms ? 100 : 1000)) {
         framecountx = 0;
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
         frames      = 0;
 #endif    
     }
@@ -2101,7 +2061,7 @@ void set_screen_size_video2(int32_t x, int32_t y, int32_t monitor_index)
 void
 set_screen_size_monitor(int x, int y, int monitor_index)
 {
-#ifdef USE_VIDEO2
+#ifdef VIDEO2_OLD_CODE
     set_screen_size_video2(x, y, monitor_index);
     return;
 #else 
@@ -2226,7 +2186,7 @@ set_screen_size_monitor(int x, int y, int monitor_index)
 void
 set_screen_size(int x, int y)
 {
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     set_screen_size_monitor(x, y, monitor_index_global);
     #else
     set_screen_size_monitor(x, y, 0); //TEMP
@@ -2237,7 +2197,7 @@ set_screen_size(int x, int y)
 void
 reset_screen_size_monitor(int monitor_index)
 {
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     set_screen_size(monitors[monitor_index].mon_unscaled_size_x, monitors[monitor_index].mon_efscrnsz_y);
     #else
     video_monitor_t* monitor = video_get_monitor_by_index(monitor_index);
@@ -2255,7 +2215,7 @@ reset_screen_size(void)
     }
 }
 
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
 int
 get_actual_size_x(void)
 {

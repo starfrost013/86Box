@@ -30,11 +30,7 @@
 #include <86box/pci.h>
 #include <86box/chipset.h>
 #include <86box/spd.h>
-#ifndef USE_VIDEO2
-#include <86box/agpgart.h>
-#else
 #include <86box/video2/base/agpgart.h>
-#endif
 
 #define VIA_585  0x05851000
 #define VIA_595  0x05950000

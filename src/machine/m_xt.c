@@ -2068,7 +2068,7 @@ machine_xt_maz1016_init(const machine_t *model)
 {    
     int ret;
 
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
 
     ret = bios_load_interleaved("roms/machines/maz1016/e1.bin",
                                 "roms/machines/maz1016/e4.bin",

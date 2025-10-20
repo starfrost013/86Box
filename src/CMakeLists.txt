@@ -140,7 +140,7 @@ target_link_libraries(86Box
 )
 
 if(VIDEO2)
-    add_compile_definitions(USE_VIDEO2)
+    add_compile_definitions(VIDEO2_OLD_CODE)
     target_link_libraries(86Box video2)
 else()
     target_link_libraries(86Box vid)

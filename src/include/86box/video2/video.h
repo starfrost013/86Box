@@ -29,6 +29,11 @@
 #define VIDEO_MAX_DEVICES           2       // 2 for old code. Later 3- 2xSLI + 1 card
 #define VIDEO_MAX_MONITORS          9       // Not a strict limitaiton but e.g. Win98 supports a max of 9.
 
+// ****TEMPORARY - DEPRECATED***
+extern int          video_grayscale;
+extern int          video_graytype;
+
+
 // Enumerates OpenGL input scale mode types
 typedef enum gl_input_scale_mode_type_e 
 {

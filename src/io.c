@@ -376,7 +376,7 @@ inb(uint16_t port)
         }
     }
 
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
     if (amstrad_latch & 0x80000000) {
         if (port & 0x80)
             amstrad_latch = AMSTRAD_NOLATCH | 0x80000000;

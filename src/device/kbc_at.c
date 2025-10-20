@@ -279,7 +279,7 @@ kbc_translate(atkbc_t *dev, uint8_t val)
     if (dev->sc_or == 0x80)
         dev->sc_or = 0;
 
-#ifndef USE_VIDEO2
+#ifndef VIDEO2_OLD_CODE
     /* Test for T3100E 'Fn' key (Right Alt / Right Ctrl) */
     if ((dev != NULL) && (kbc_ven == KBC_VEN_TOSHIBA) &&
         (keyboard_recv(0x138) || keyboard_recv(0x11d)))  switch (ret) {
@@ -2098,7 +2098,7 @@ write_cmd_data_toshiba(void *priv, uint8_t val)
 {
     const atkbc_t *dev = (atkbc_t *) priv;
     uint8_t        ret = 1;
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     switch (dev->command) {
         default:
             break;
@@ -2121,7 +2121,7 @@ write_cmd_toshiba(void *priv, uint8_t val)
     atkbc_t *dev = (atkbc_t *) priv;
     uint8_t  ret = 1;
 
-    #ifndef USE_VIDEO2
+    #ifndef VIDEO2_OLD_CODE
     switch (val) {
         default:
             break;

@@ -163,8 +163,6 @@ private slots:
     void on_actionACPI_Shutdown_triggered();
 
 private slots:
-    void on_actionShow_non_primary_monitors_triggered();
-
     void on_actionOpen_screenshots_folder_triggered();
 
     void on_actionOpen_printer_tray_triggered();
