@@ -305,7 +305,7 @@ video_update_framerates(void* priv)
 void
 video_reset_close(void)
 {
-    for (int i = 1; i < MONITORS_NUM; i++)
+    for (int i = 1; i < VIDEO_MAX_MONITORS; i++)
         video_monitor_close(i);
 
     monitor_index_global = 0;
@@ -325,7 +325,7 @@ video_prepare(void)
     /* Reset the blend. */
     herc_blend = 0;
 
-    for (int i = 0; i < MONITORS_NUM; i++) {
+    for (int i = 0; i < VIDEO_MAX_MONITORS; i++) {
         /* Reset the CGA palette. */
         if (monitors[i].mon_cga_palette)
             *monitors[i].mon_cga_palette = 0;

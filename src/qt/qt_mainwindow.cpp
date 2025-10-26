@@ -303,7 +303,7 @@ MainWindow::MainWindow(QWidget *parent)
 #endif
 
         bool enable_comp_option = false;
-        for (int i = 0; i < MONITORS_NUM; i++) {
+        for (int32_t i = 0; i < video_engine.num_monitors; i++) {
             if (monitors[i].mon_composite) { enable_comp_option = true; break; }
         }
 
@@ -539,7 +539,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->menuOpenGL_input_stretch_mode->setEnabled(newVidApi == RendererStack::Renderer::OpenGL3);
         if (!show_second_monitors)
             return;
-        for (int i = 1; i < MONITORS_NUM; i++) {
+        for (int32_t i = 1; i < video_engine.num_monitors; i++) {
             if (renderers[i])
                 renderers[i]->switchRenderer(newVidApi);
         }
@@ -932,21 +932,21 @@ MainWindow::closeEvent(QCloseEvent *event)
         }
     }
     if (window_remember) {
-        window_w = ui->stackedWidget->width();
-        window_h = ui->stackedWidget->height();
+        video_engine.monitor_primary->size_x = ui->stackedWidget->width();
+        video_engine.monitor_primary->size_y = ui->stackedWidget->height();
         if (!QApplication::platformName().contains("wayland")) {
-            window_x = this->geometry().x();
-            window_y = this->geometry().y();
+            video_engine.monitor_primary->position_x = this->geometry().x();
+            video_engine.monitor_primary->position_y = this->geometry().y();
         }
-        for (int i = 1; i < MONITORS_NUM; i++) {
-            if (renderers[i]) {
-                monitor_settings[i].mon_window_w = renderers[i]->geometry().width();
-                monitor_settings[i].mon_window_h = renderers[i]->geometry().height();
-                if (QApplication::platformName().contains("wayland"))
-                    continue;
-                monitor_settings[i].mon_window_x = renderers[i]->geometry().x();
-                monitor_settings[i].mon_window_y = renderers[i]->geometry().y();
-            }
+        for (int32_t i = 1; i < video_engine.num_monitors; i++) {
+            video_monitor_t* new_monitor = video_get_monitor_by_index(i);
+
+            new_monitor->size_x = renderers[i]->geometry().width();
+            new_monitor->size_y = renderers[i]->geometry().height();
+            if (QApplication::platformName().contains("wayland"))
+                continue;
+            new_monitor->size_x = renderers[i]->geometry().x();
+            new_monitor->size_y = renderers[i]->geometry().y();
         }
     }
 
@@ -954,7 +954,7 @@ MainWindow::closeEvent(QCloseEvent *event)
         ui->stackedWidget->mouse_exit_func();
 
     ui->stackedWidget->switchRenderer(RendererStack::Renderer::Software);
-    for (int i = 1; i < MONITORS_NUM; i++) {
+    for (int32_t i = 1; i < video_engine.num_monitors; i++) {
         if (renderers[i] && renderers[i]->isHidden()) {
             renderers[i]->show();
             QApplication::processEvents();
@@ -1050,6 +1050,8 @@ MainWindow::resizeEvent(QResizeEvent *event)
 void
 MainWindow::initRendererMonitorSlot(int monitor_index)
 {
+    video_monitor_t* video_monitor = video_get_monitor_by_index(monitor_index);
+
     auto &secondaryRenderer = this->renderers[monitor_index];
     secondaryRenderer = std::make_unique<RendererStack>(nullptr, monitor_index);
     if (secondaryRenderer) {
@@ -1060,7 +1062,7 @@ MainWindow::initRendererMonitorSlot(int monitor_index)
         secondaryRenderer->setWindowTitle(QObject::tr("86Box Monitor #") + QString::number(monitor_index + 1));
         secondaryRenderer->setContextMenuPolicy(Qt::PreventContextMenu);
 
-        for (int i = 0; i < this->actions().size(); i++) {
+        for (int32_t i = 0; i < this->actions().size(); i++) {
             secondaryRenderer->addAction(this->actions()[i]);
         }
 
@@ -1073,17 +1075,17 @@ MainWindow::initRendererMonitorSlot(int monitor_index)
         if (show_second_monitors) {
             secondaryRenderer->show();
             if (window_remember) {
-                secondaryRenderer->setGeometry(monitor_settings[monitor_index].mon_window_x < 120 ? 120 : monitor_settings[monitor_index].mon_window_x,
-                                               monitor_settings[monitor_index].mon_window_y < 120 ? 120 : monitor_settings[monitor_index].mon_window_y,
-                                               monitor_settings[monitor_index].mon_window_w > 2048 ? 2048 : monitor_settings[monitor_index].mon_window_w,
-                                               monitor_settings[monitor_index].mon_window_h > 2048 ? 2048 : monitor_settings[monitor_index].mon_window_h);
+                secondaryRenderer->setGeometry(video_monitor->position_x < 120 ? 120 : video_monitor->position_x,
+                                               video_monitor->position_y < 120 ? 120 : video_monitor->position_y,
+                                               video_monitor->size_x > 2048 ? 2048 : video_monitor->size_x,
+                                               video_monitor->size_y > 2048 ? 2048 : video_monitor->size_y);
             }
-            if (monitor_settings[monitor_index].mon_window_maximized)
+            if (video_monitor->is_maximised)
                 secondaryRenderer->showMaximized();
             secondaryRenderer->switchRenderer((RendererStack::Renderer) vid_api);
             secondaryRenderer->setMouseTracking(true);
 
-            if (monitor_settings[monitor_index].mon_window_maximized) {
+            if (video_monitor->is_maximised) {
                 if (renderers[monitor_index])
                     renderers[monitor_index]->onResize(renderers[monitor_index]->width(),
                     renderers[monitor_index]->height());
@@ -1099,10 +1101,12 @@ MainWindow::destroyRendererMonitorSlot(int monitor_index)
 {
     if (this->renderers[monitor_index]) {
         if (window_remember) {
-            monitor_settings[monitor_index].mon_window_w = renderers[monitor_index]->geometry().width();
-            monitor_settings[monitor_index].mon_window_h = renderers[monitor_index]->geometry().height();
-            monitor_settings[monitor_index].mon_window_x = renderers[monitor_index]->geometry().x();
-            monitor_settings[monitor_index].mon_window_y = renderers[monitor_index]->geometry().y();
+            video_monitor_t* monitor = video_get_monitor_by_index(monitor_index);
+
+            monitor->size_x = renderers[monitor_index]->geometry().width();
+            monitor->size_y = renderers[monitor_index]->geometry().height();
+            monitor->position_x = renderers[monitor_index]->geometry().x();
+            monitor->position_y = renderers[monitor_index]->geometry().y();
         }
         config_save();
         this->renderers[monitor_index].release()->deleteLater();
@@ -1122,23 +1126,24 @@ MainWindow::showEvent(QShowEvent *event)
         return;
     shownonce = true;
     if (window_remember) {
-        if (window_w == 0)
-            window_w = 320;
-        if (window_h == 0)
-            window_h = 200;
+        if (video_engine.monitor_primary->size_x == 0)
+            video_engine.monitor_primary->size_x = 320;
+        if (video_engine.monitor_primary->size_y == 0)
+            video_engine.monitor_primary->size_y = 200;
     }
 
     if (window_remember && !QApplication::platformName().contains("wayland")) {
-        setGeometry(window_x, window_y, window_w, window_h + menuBar()->height() + (hide_status_bar ? 0 : statusBar()->height()) + (hide_tool_bar ? 0 : ui->toolBar->height()));
+        setGeometry(video_engine.monitor_primary->size_x, video_engine.monitor_primary->size_y,
+             video_engine.monitor_primary->position_x, video_engine.monitor_primary->position_y + menuBar()->height() + (hide_status_bar ? 0 : statusBar()->height()) + (hide_tool_bar ? 0 : ui->toolBar->height()));
     }
     if (vid_resize == 2) {
         setFixedSize(fixed_size_x, fixed_size_y + menuBar()->height() + (hide_status_bar ? 0 : statusBar()->height()) + (hide_tool_bar ? 0 : ui->toolBar->height()));
 
-        monitors[0].mon_scrnsz_x = fixed_size_x;
-        monitors[0].mon_scrnsz_y = fixed_size_y;
+        video_engine.monitor_primary->size_x = fixed_size_x;
+        video_engine.monitor_primary->size_y = fixed_size_y;
     }
     if (window_remember && vid_resize == 1) {
-        ui->stackedWidget->setFixedSize(window_w, window_h);
+        ui->stackedWidget->setFixedSize(video_engine.monitor_primary->size_x, video_engine.monitor_primary->size_y);
 #ifndef Q_OS_MACOS
         QApplication::processEvents();
 #endif
@@ -1453,7 +1458,7 @@ MainWindow::on_actionFullscreen_triggered()
             ui->toolBar->show();
         video_fullscreen = 0;
         if (vid_resize != 1) {
-            emit resizeContents(vid_resize == 2 ? fixed_size_x : monitors[0].mon_scrnsz_x, vid_resize == 2 ? fixed_size_y : monitors[0].mon_scrnsz_y);
+            emit resizeContents(vid_resize == 2 ? fixed_size_x : video_engine.monitor_primary->size_x, vid_resize == 2 ? fixed_size_y : video_engine.monitor_primary->size_y);
         }
     } else {
         video_fullscreen = 1;
@@ -1625,7 +1630,7 @@ MainWindow::refreshMediaMenu()
     kana_label->setVisible(ext_ax_kbd || int_ax_kbd);
 
     bool enable_comp_option = false;
-    for (int i = 0; i < MONITORS_NUM; i++) {
+    for (int32_t i = 0; i < video_engine.num_monitors; i++) {
         if (monitors[i].mon_composite) { enable_comp_option = true; break; }
     }
 
@@ -1745,8 +1750,9 @@ MainWindow::on_actionResizable_window_triggered(bool checked)
         setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
         setWindowFlag(Qt::MSWindowsFixedSizeDialogHint, false);
         setWindowFlag(Qt::WindowMaximizeButtonHint, true);
-        for (int i = 1; i < MONITORS_NUM; i++) {
-            if (monitors[i].target_buffer) {
+        for (int32_t i = 1; i < video_engine.num_monitors; i++) {
+            video_monitor_t* video_monitor = video_get_monitor_by_index(i);
+            if (video_monitor->buffer32) {
                 renderers[i]->setWindowFlag(Qt::WindowMaximizeButtonHint, true);
                 renderers[i]->setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
             }
@@ -1755,8 +1761,10 @@ MainWindow::on_actionResizable_window_triggered(bool checked)
         vid_resize = 0;
         setWindowFlag(Qt::WindowMaximizeButtonHint, false);
         setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
-        for (int i = 1; i < MONITORS_NUM; i++) {
-            if (monitors[i].target_buffer) {
+        for (int32_t i = 1; i < video_engine.num_monitors; i++) {
+            video_monitor_t* video_monitor = video_get_monitor_by_index(i);
+
+            if (video_monitor->buffer32) {
                 renderers[i]->setWindowFlag(Qt::WindowMaximizeButtonHint, false);
                 emit resizeContentsMonitor(monitors[i].mon_scrnsz_x, monitors[i].mon_scrnsz_y, i);
             }
@@ -1764,10 +1772,10 @@ MainWindow::on_actionResizable_window_triggered(bool checked)
     }
     show();
     ui->menuWindow_scale_factor->setEnabled(!checked);
-    emit resizeContents(monitors[0].mon_scrnsz_x, monitors[0].mon_scrnsz_y);
+    emit resizeContents(video_engine.monitor_primary->size_x, video_engine.monitor_primary->size_y);
     ui->stackedWidget->switchRenderer((RendererStack::Renderer) vid_api);
-    for (int i = 1; i < MONITORS_NUM; i++) {
-        if (monitors[i].target_buffer && show_second_monitors) {
+    for (int32_t i = 1; i < video_engine.num_monitors; i++) {
+        if (video_monitor->buffer32 && show_second_monitors) {
             renderers[i]->show();
             renderers[i]->switchRenderer((RendererStack::Renderer) vid_api);
             QApplication::processEvents();
@@ -1780,16 +1788,20 @@ video_toggle_option(QAction *action, int *val)
 {
     startblit();
     *val ^= 1;
-    video_copy = (video_grayscale || invert_display) ? video_transform_copy : memcpy;
+    //video_copy = (video_grayscale || invert_display) ? video_transform_copy : memcpy; TODO
     action->setChecked(*val > 0 ? true : false);
     endblit();
     config_save();
     reset_screen_size();
     device_force_redraw();
-    for (int i = 0; i < MONITORS_NUM; i++) {
-        if (monitors[i].target_buffer)
-            video_force_resize_set_monitor(1, i);
-    }
+
+    //TODO
+    //for (int32_t i = 0; i < video_engine.num_monitors; i++) {
+    //    video_monitor_t* video_monitor = video_get_monitor_by_index(i);
+    //
+    //   if (video_monitor->buffer32) TODO
+    //        video_force_resize_set_monitor(1, i);
+    //}
 }
 
 void
@@ -1814,8 +1826,9 @@ update_scaled_checkboxes(Ui::MainWindow *ui, QAction *selected)
 
     reset_screen_size();
     device_force_redraw();
-    for (int i = 0; i < MONITORS_NUM; i++) {
-        if (monitors[i].target_buffer)
+    for (int32_t i = 0; i < video_engine.num_monitors; i++) {
+        video_monitor_t* video_monitor = video_get_monitor_by_index(i);
+        if (video_monitor->buffer32)
             video_force_resize_set_monitor(1, i);
     }
     config_save();
@@ -1913,13 +1926,12 @@ update_fullscreen_scale_checkboxes(Ui::MainWindow *ui, QAction *selected)
     ui->actionFullScreen_keepRatio->setChecked(selected == ui->actionFullScreen_keepRatio);
     ui->actionFullScreen_int->setChecked(selected == ui->actionFullScreen_int);
     ui->actionFullScreen_int43->setChecked(selected == ui->actionFullScreen_int43);
-
     {
         auto widget = ui->stackedWidget->currentWidget();
         ui->stackedWidget->onResize(widget->width(), widget->height());
     }
 
-    for (int i = 1; i < MONITORS_NUM; i++) {
+    for (int32_t i = 1; i < video_engine.num_monitors; i++) {
         if (main_window->renderers[i])
             main_window->renderers[i]->onResize(main_window->renderers[i]->width(),
                                                 main_window->renderers[i]->height());
@@ -1975,7 +1987,8 @@ update_greyscale_checkboxes(Ui::MainWindow *ui, QAction *selected, int value)
 
     startblit();
     video_grayscale = value;
-    video_copy      = (video_grayscale || invert_display) ? video_transform_copy : memcpy;
+    //video_copy      = (video_grayscale || invert_display) ? video_transform_copy : memcpy; TODO
+
     endblit();
     device_force_redraw();
     config_save();
@@ -2073,7 +2086,7 @@ MainWindow::on_actionChange_contrast_for_monochrome_display_triggered()
     startblit();
 #ifndef VIDEO2_OLD_CODE
     vid_cga_contrast ^= 1;
-    for (int i = 0; i < MONITORS_NUM; i++)
+    for (int32_t i = 0; i < video_engine.num_monitors; i++)
         cgapal_rebuild_monitor(i);
 #else 
     warning("Video System 2.0: This feature isn't implemented yet, tell starfrost");
@@ -2090,7 +2103,7 @@ MainWindow::on_actionForce_4_3_display_ratio_triggered()
         const auto widget = ui->stackedWidget->currentWidget();
         ui->stackedWidget->onResize(widget->width(), widget->height());
 
-        for (int i = 1; i < MONITORS_NUM; i++) {
+        for (int32_t i = 1; i < video_engine.num_monitors; i++) {
             if (renderers[i])
                 renderers[i]->onResize(renderers[i]->width(), renderers[i]->height());
         }
@@ -2119,18 +2132,19 @@ MainWindow::on_actionRemember_size_and_position_triggered()
 {
     window_remember ^= 1;
     if (!video_fullscreen) {
-        window_w = ui->stackedWidget->width();
-        window_h = ui->stackedWidget->height();
+        video_engine.monitor_primary->size_x = ui->stackedWidget->width();
+        video_engine.monitor_primary->size_y = ui->stackedWidget->height();
         if (!QApplication::platformName().contains("wayland")) {
-            window_x = geometry().x();
-            window_y = geometry().y();
+            video_engine.monitor_primary->position_x = geometry().x();
+            video_engine.monitor_primary->position_y = geometry().y();
         }
-        for (int i = 1; i < MONITORS_NUM; i++) {
+        for (int32_t i = 1; i < video_engine.num_monitors; i++) {
+            video_monitor_t* video_monitor = video_get_monitor_by_index(i);
             if (window_remember && renderers[i]) {
-                monitor_settings[i].mon_window_w = renderers[i]->geometry().width();
-                monitor_settings[i].mon_window_h = renderers[i]->geometry().height();
-                monitor_settings[i].mon_window_x = renderers[i]->geometry().x();
-                monitor_settings[i].mon_window_y = renderers[i]->geometry().y();
+                video_monitor->size_x = renderers[i]->geometry().width();
+                video_monitor->size_y = renderers[i]->geometry().height();
+                video_monitor->position_x = renderers[i]->geometry().x();
+                video_monitor->position_y = renderers[i]->geometry().y();
             }
         }
     }
@@ -2150,10 +2164,21 @@ MainWindow::on_actionHiDPI_scaling_triggered()
 {
     dpi_scale ^= 1;
     ui->actionHiDPI_scaling->setChecked(dpi_scale);
-    emit resizeContents(monitors[0].mon_scrnsz_x, monitors[0].mon_scrnsz_y);
-    for (int i = 1; i < MONITORS_NUM; i++) {
+
+    video_monitor_t* monitor = video_engine.monitor_primary;
+
+    // why are resizeContents and resizeContentsMonitor be different?
+    emit resizeContents(video_engine.monitor_primary->size_x, video_engine.monitor_primary->size_y);
+
+    // start at 1
+
+    monitor = monitor->next;
+    for (int32_t i = 1; i < video_engine.num_monitors; i++) {
+
         if (renderers[i])
-            emit resizeContentsMonitor(monitors[i].mon_scrnsz_x, monitors[i].mon_scrnsz_y, i);
+            emit resizeContentsMonitor(video_engine.monitor_primary->size_x, video_engine.monitor_primary->size_y, i);
+
+        monitor = monitor->next; 
     }
 }
 
@@ -2174,7 +2199,7 @@ MainWindow::on_actionHide_status_bar_triggered()
     } else {
         int vid_resize_orig = vid_resize;
         vid_resize          = 0;
-        emit resizeContents(vid_resize_orig ? w : monitors[0].mon_scrnsz_x, vid_resize_orig ? h : monitors[0].mon_scrnsz_y);
+        emit resizeContents(vid_resize_orig ? w : video_engine.monitor_primary->size_x, vid_resize_orig ? h : video_engine.monitor_primary->size_y);
         vid_resize = vid_resize_orig;
         if (vid_resize == 1)
             setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
@@ -2195,7 +2220,7 @@ MainWindow::on_actionHide_tool_bar_triggered()
     } else {
         int vid_resize_orig = vid_resize;
         vid_resize          = 0;
-        emit resizeContents(vid_resize_orig ? w : monitors[0].mon_scrnsz_x, vid_resize_orig ? h : monitors[0].mon_scrnsz_y);
+        emit resizeContents(vid_resize_orig ? w : video_engine.monitor_primary->size_x, vid_resize_orig ? h : video_engine.monitor_primary->size_y);
         vid_resize = vid_resize_orig;
         if (vid_resize == 1)
             setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
@@ -2216,8 +2241,9 @@ void
 MainWindow::on_actionTake_screenshot_triggered()
 {
     startblit();
-    for (auto & monitor : monitors)
-        ++monitor.mon_screenshots;
+
+    mon_screenshots = video_engine.num_monitors;
+
     endblit();
     device_force_redraw();
 }
@@ -2327,7 +2353,7 @@ MainWindow::changeEvent(QEvent *event)
 #endif
     QWidget::changeEvent(event);
     if (isVisible()) {
-        monitor_settings[0].mon_window_maximized = isMaximized();
+        video_engine.monitor_primary->is_maximised = isMaximized();
         config_save();
     }
 }
@@ -2391,12 +2417,12 @@ MainWindow::on_actionOpen_printer_tray_triggered()
 void
 MainWindow::on_actionApply_fullscreen_stretch_mode_when_maximized_triggered(bool checked)
 {
-    video_fullscreen_scale_maximized = checked;
+    //video_fullscreen_scale_maximized = checked;   TODO
 
     const auto widget = ui->stackedWidget->currentWidget();
     ui->stackedWidget->onResize(widget->width(), widget->height());
 
-    for (int i = 1; i < MONITORS_NUM; i++) {
+    for (int32_t i = 1; i < video_engine.num_monitors; i++) {
         if (renderers[i])
             renderers[i]->onResize(renderers[i]->width(), renderers[i]->height());
     }

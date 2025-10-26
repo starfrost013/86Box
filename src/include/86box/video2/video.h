@@ -30,8 +30,9 @@
 #define VIDEO_MAX_MONITORS          9       // Not a strict limitaiton but e.g. Win98 supports a max of 9.
 
 // ****TEMPORARY - DEPRECATED***
-extern int          video_grayscale;
-extern int          video_graytype;
+extern int32_t          video_grayscale;
+extern int32_t          video_graytype;
+extern int32_t          show_second_monitors;
 
 
 // Enumerates OpenGL input scale mode types
@@ -143,12 +144,20 @@ typedef struct video_engine_device_s
     video_engine_settings_t device_settings;
 } video_engine_device_t;
 
+typedef enum video_window_state_e
+{
+    WINDOW_STATE_MINIMISED,
+    WINDOW_STATE_MAXIMISED,
+    WINDOW_STATE_FULLSCREEN,
+} video_window_state;
+ 
 // This basically contains everything
 typedef struct video_engine_s
 {
     video_engine_device_t devices[VIDEO_MAX_DEVICES];
     device_t* device_current;                // Easy way to access the CURRENTLY selected device
     video_monitor_t* monitor_head;
+    video_monitor_t* monitor_primary;        // pointer to monitor_0
     video_monitor_t* monitor_tail;
     video_palette_t* palette_head;
     video_palette_t* palette_tail;
@@ -182,7 +191,6 @@ void video_blit_screen_region(video_blit_rect_t rect);                  // Blit 
 // Automatically removes any added palettes or monitors.
 void video_reset(void);                                                 // Not sure if we need this. Just put it in for 86box.c for now
 void video_close(void);
-
 
 // Other
 void video_screenshot(video_monitor_t* monitor);                        // Take a screenshot of a certain monitor.

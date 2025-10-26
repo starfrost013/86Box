@@ -347,7 +347,7 @@ selectDarkMode()
             main_window->resizeContents(monitors[0].mon_scrnsz_x,
                                         monitors[0].mon_scrnsz_y);
 
-            for (int i = 1; i < MONITORS_NUM; i++) {
+            for (int i = 1; i < VIDEO_MAX_MONITORS; i++) {
                 auto mon = &(monitors[i]);
 
                 if ((main_window->renderers[i] != nullptr) && !main_window->renderers[i]->isHidden())
@@ -423,7 +423,7 @@ WindowsRawInputFilter::nativeEventFilter(const QByteArray &eventType, void *mess
                         window->resizeContents(monitors[0].mon_scrnsz_x,
                                                monitors[0].mon_scrnsz_y);
 
-                        for (int i = 1; i < MONITORS_NUM; i++) {
+                        for (int i = 1; i < VIDEO_MAX_MONITORS; i++) {
                             auto           mon = &(monitors[i]);
 
                             if ((window->renderers[i] != nullptr) &&

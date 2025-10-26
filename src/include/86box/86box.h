@@ -125,10 +125,6 @@ extern uint8_t  instru_enabled;
 extern uint64_t instru_run_ms;
 #endif
 
-#define window_x monitor_settings[0].mon_window_x
-#define window_y monitor_settings[0].mon_window_y
-#define window_w monitor_settings[0].mon_window_w
-#define window_h monitor_settings[0].mon_window_h
 extern int      inhibit_multimedia_keys;    /* (G) Inhibit multimedia keys on Windows. */
 extern int      window_remember;
 extern int      vid_resize;                 /* (C) allow resizing */

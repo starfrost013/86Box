@@ -310,7 +310,7 @@ unittester_write(uint16_t port, uint8_t val, UNUSED(void *priv))
                     unittester.snap_img_yoffs       = 0;
                     unittester.snap_overscan_width  = 0;
                     unittester.snap_overscan_height = 0;
-                    if (unittester.snap_monitor < 0x01 || (unittester.snap_monitor - 1) > MONITORS_NUM) {
+                    if (unittester.snap_monitor < 0x01 || (unittester.snap_monitor - 1) > VIDEO_MAX_MONITORS) {
                         /* No monitor here - clear snapshot */
                         unittester.snap_monitor = 0x00;
                     } else if (video_get_type_monitor(unittester.snap_monitor - 1) == VIDEO_FLAG_TYPE_NONE) {

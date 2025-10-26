@@ -149,10 +149,10 @@ typedef struct monitor_settings_t {
     int mon_window_maximized;
 } monitor_settings_t;
 
-#define MONITORS_NUM 2
-extern monitor_t          monitors[MONITORS_NUM];
-extern monitor_settings_t monitor_settings[MONITORS_NUM];
-extern atomic_bool        doresize_monitors[MONITORS_NUM];
+#define VIDEO_MAX_MONITORS 2
+extern monitor_t          monitors[VIDEO_MAX_MONITORS];
+extern monitor_settings_t monitor_settings[VIDEO_MAX_MONITORS];
+extern atomic_bool        doresize_monitors[VIDEO_MAX_MONITORS];
 extern int                monitor_index_global;
 extern int                show_second_monitors;
 extern int                video_fullscreen_scale_maximized;

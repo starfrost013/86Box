@@ -97,9 +97,9 @@ uint32_t    *video_8togs          = NULL;
 uint32_t    *video_8to32          = NULL;
 uint32_t    *video_15to32         = NULL;
 uint32_t    *video_16to32         = NULL;
-monitor_t          monitors[MONITORS_NUM];
-monitor_settings_t monitor_settings[MONITORS_NUM];
-atomic_bool        doresize_monitors[MONITORS_NUM];
+monitor_t          monitors[VIDEO_MAX_MONITORS];
+monitor_settings_t monitor_settings[VIDEO_MAX_MONITORS];
+atomic_bool        doresize_monitors[VIDEO_MAX_MONITORS];
 
 #ifdef _WIN32
 void * (*__cdecl video_copy)(void *_Dst, const void *_Src, size_t _Size) = memcpy;
@@ -302,8 +302,8 @@ video_wait_for_buffer_monitor(int monitor_index)
     thread_reset_event(blit_data_ptr->buffer_not_in_use);
 }
 
-static png_structp png_ptr[MONITORS_NUM];
-static png_infop   info_ptr[MONITORS_NUM];
+static png_structp png_ptr[VIDEO_MAX_MONITORS];
+static png_infop   info_ptr[VIDEO_MAX_MONITORS];
 
 static void
 video_take_screenshot_monitor(const char *fn, uint32_t *buf, int start_x, int start_y, int row_len, int monitor_index)
@@ -648,7 +648,7 @@ video_update_timing(void)
     int                   *vid_timing_write_l  = NULL;
     int                   *vid_timing_write_w  = NULL;
 
-    for (uint8_t i = 0; i < MONITORS_NUM; i++) {
+    for (uint8_t i = 0; i < VIDEO_MAX_MONITORS; i++) {
         monitor_vid_timings = monitors[i].mon_vid_timings;
         if (!monitor_vid_timings)
             continue;

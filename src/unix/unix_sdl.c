@@ -230,9 +230,9 @@ sdl_destroy_window(void)
 {
     if (sdl_win != NULL) {
         if (window_remember) {
-            SDL_GetWindowSize(sdl_win, &window_w, &window_h);
+            SDL_GetWindowSize(sdl_win, &video_engine.monitor_primary->size_x, &video_engine.monitor_primary->size_y);
             if (strncasecmp(SDL_GetCurrentVideoDriver(), "wayland", 7) != 0) {
-                SDL_GetWindowPosition(sdl_win, &window_x, &window_y);
+                SDL_GetWindowPosition(sdl_win, &window_x, &video_engine.monitor_primary->position_y);
             }
         }
         SDL_DestroyWindow(sdl_win);
@@ -420,7 +420,7 @@ sdl_init_common(int flags)
     }
 
     sdl_mutex = SDL_CreateMutex();
-    sdl_win   = SDL_CreateWindow("86Box", strncasecmp(SDL_GetCurrentVideoDriver(), "wayland", 7) != 0 && window_remember ? window_x : SDL_WINDOWPOS_CENTERED, strncasecmp(SDL_GetCurrentVideoDriver(), "wayland", 7) != 0 && window_remember ? window_y : SDL_WINDOWPOS_CENTERED, scrnsz_x, scrnsz_y, SDL_WINDOW_OPENGL | (vid_resize & 1 ? SDL_WINDOW_RESIZABLE : 0));
+    sdl_win   = SDL_CreateWindow("86Box", strncasecmp(SDL_GetCurrentVideoDriver(), "wayland", 7) != 0 && window_remember ? window_x : SDL_WINDOWPOS_CENTERED, strncasecmp(SDL_GetCurrentVideoDriver(), "wayland", 7) != 0 && window_remember ? video_engine.monitor_primary->position_y : SDL_WINDOWPOS_CENTERED, scrnsz_x, scrnsz_y, SDL_WINDOW_OPENGL | (vid_resize & 1 ? SDL_WINDOW_RESIZABLE : 0));
     sdl_set_fs(video_fullscreen);
     if (!(video_fullscreen & 1)) {
         if (vid_resize & 2)
@@ -429,7 +429,7 @@ sdl_init_common(int flags)
             plat_resize(scrnsz_x, scrnsz_y, 0);
     }
     if ((vid_resize < 2) && window_remember) {
-        SDL_SetWindowSize(sdl_win, window_w, window_h);
+        SDL_SetWindowSize(sdl_win, video_engine.monitor_primary->size_x, video_engine.monitor_primary->size_y);
     }
 
     /* Make sure we get a clean exit. */

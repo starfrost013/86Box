@@ -29,7 +29,7 @@ extern "C" {
 #include <86box/86box.h>
 #include <86box/plat.h>
 #include <86box/ui.h>
-#include <86box/video.h>
+#include <86box/video2/video.h>
 }
 
 extern MainWindow *main_window;
@@ -71,7 +71,7 @@ SpecifyDimensions::on_SpecifyDimensions_accepted()
 
         emit main_window->updateMenuResizeOptions();
         main_window->show();
-        for (int i = 1; i < MONITORS_NUM; i++) {
+        for (int i = 1; i < VIDEO_MAX_MONITORS; i++) {
             if (main_window->renderers[i]) {
                 main_window->renderers[i]->setWindowFlag(Qt::WindowMaximizeButtonHint, false);
                 main_window->renderers[i]->setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
@@ -89,11 +89,11 @@ SpecifyDimensions::on_SpecifyDimensions_accepted()
         vid_resize = 0;
         main_window->ui->actionResizable_window->trigger();
         window_remember = 1;
-        window_w        = ui->spinBoxWidth->value();
-        window_h        = ui->spinBoxHeight->value();
+        video_engine.monitor_primary->size_x        = ui->spinBoxWidth->value();
+        video_engine.monitor_primary->size_y        = ui->spinBoxHeight->value();
         main_window->setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
         emit main_window->resizeContents(ui->spinBoxWidth->value(), ui->spinBoxHeight->value());
-        for (int i = 1; i < MONITORS_NUM; i++) {
+        for (int i = 1; i < VIDEO_MAX_MONITORS; i++) {
             if (main_window->renderers[i]) {
                 main_window->renderers[i]->setWindowFlag(Qt::WindowMaximizeButtonHint);
                 main_window->renderers[i]->setWindowFlag(Qt::MSWindowsFixedSizeDialogHint, false);
@@ -116,7 +116,7 @@ SpecifyDimensions::on_SpecifyDimensions_accepted()
                 + main_window->menuBar()->height()
                 + (main_window->statusBar()->height() * !hide_status_bar)
                 + (main_window->ui->toolBar->height() * !hide_tool_bar));
-        window_w = ui->spinBoxWidth->value();
-        window_h = ui->spinBoxHeight->value();
+        video_engine.monitor_primary->size_x = ui->spinBoxWidth->value();
+        video_engine.monitor_primary->size_y = ui->spinBoxHeight->value();
     }
 }

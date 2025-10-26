@@ -48,7 +48,7 @@ extern "C" {
 #include <86box/config.h>
 #include <86box/plat.h>
 #include <86box/ui.h>
-#include <86box/video.h>
+#include <86box/video2/video.h>
 #ifdef DISCORD
 #   include <86box/discord.h>
 #endif
@@ -218,7 +218,7 @@ emu_LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 
     static int        last      = 0;
 
-    if (show_second_monitors)  for (int monitor_index = 1; monitor_index < MONITORS_NUM; monitor_index++) {
+    if (show_second_monitors)  for (int monitor_index = 1; monitor_index < VIDEO_MAX_MONITORS; monitor_index++) {
         const auto &secondaryRenderer = main_window->renderers[monitor_index];
         is_over_window = is_over_window || ((secondaryRenderer != nullptr) &&
                          (GetForegroundWindow() == ((HWND) secondaryRenderer->winId())));
@@ -621,7 +621,7 @@ main(int argc, char *argv[])
 #endif
     app.setStyle(new StyleOverride());
 
-    bool startMaximized = window_remember && monitor_settings[0].mon_window_maximized;
+    bool startMaximized = window_remember && video_engine.monitor_primary->is_maximised;
     fprintf(stderr, "Qt: version %s, platform \"%s\"\n", qVersion(), QApplication::platformName().toUtf8().data());
     ProgSettings::loadTranslators(&app);
 #ifdef Q_OS_WINDOWS

@@ -65,10 +65,9 @@
 #endif
 
 extern "C" {
-#include <86box/86box.h>
 #include <86box/config.h>
 #include <86box/plat.h>
-#include <86box/video.h>
+#include <86box/video2/video.h>
 #include <86box/mouse.h>
 }
 
@@ -506,8 +505,10 @@ RendererStack::closeEvent(QCloseEvent *event)
 void
 RendererStack::changeEvent(QEvent *event)
 {
+    video_monitor_t* video_monitor = video_get_monitor_by_index(m_monitor_index);
+
     if (m_monitor_index != 0 && isVisible()) {
-        monitor_settings[m_monitor_index].mon_window_maximized = isMaximized();
+        video_monitor->is_maximised; = isMaximized();
         config_save();
     }
 }

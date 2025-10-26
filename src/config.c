@@ -224,7 +224,7 @@ load_general(void)
     window_remember = ini_section_get_int(cat, "window_remember", 0);
 
     if (!window_remember && !(vid_resize & 2))
-        window_w = window_h = window_x = window_y = 0;
+        video_engine.monitor_primary->size_x = video_engine.monitor_primary->size_y = window_x = video_engine.monitor_primary->position_y = 0;
 
     if (vid_resize & 2) {
         p = ini_section_get_string(cat, "window_fixed_res", NULL);
@@ -2271,7 +2271,7 @@ config_load(void)
     /* Mark the configuration as changed. */
     config_changed = 1;
 
-    video_copy = (video_grayscale || invert_display) ? video_transform_copy : memcpy;
+    //video_copy = (video_grayscale || invert_display) ? video_transform_copy : memcpy; TODO
 }
 
 /* Save global configuration */
@@ -2556,7 +2556,7 @@ save_monitors()
                     current_monitor->size_x, current_monitor->size_y);
 
             ini_section_set_string(cat, "window_coordinates", temp);
-            if (ms->mon_window_maximized != 0)
+            if (current_monitor->is_maximised)
                 ini_section_set_int(cat, "window_maximized", ms->mon_window_maximized);
             else
                 ini_section_delete_var(cat, "window_maximized");

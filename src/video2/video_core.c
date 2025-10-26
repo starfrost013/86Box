@@ -95,6 +95,10 @@ void video_add_monitor(uint32_t size_x, uint32_t size_y)
         video_engine.monitor_tail->next = monitor; 
     }
 
+    // set a pointer to the first monitor
+    if (video_engine.num_monitors == 0)
+        video_engine.monitor_primary = video_engine.monitor_head;
+
     video_engine.num_monitors++;
 
     //log_out(video_engine.log, "Added monitor of size %dx%d", size_x, size_y);
@@ -107,6 +111,7 @@ video_monitor_t* video_get_monitor_by_index(uint32_t index)
     || index > video_engine.num_monitors)
     {
         //log_out(video_engine.log, "Tried to get invalid monitor index %d", index);
+        return NULL; 
     }
 
     video_monitor_t* monitor = video_engine.monitor_head;
