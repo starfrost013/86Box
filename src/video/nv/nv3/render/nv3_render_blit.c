@@ -12,7 +12,7 @@
 * 
 * Authors: Connor Hyde, <mario64crashed@gmail.com> I need a better email address ;^)
 *
-*          Copyright 2024-2026 Connor Hyde
+*          Copyright 2024-2025 Connor Hyde
 */
 
 #include <stdlib.h>
@@ -151,7 +151,7 @@ void nv3_render_blit_screen2screen_for_buffer(nv3_grobj_t grobj, uint32_t dst_bu
         
     for (int32_t y = 0; y < nv3->pgraph.blit.size.y; y++)
     {
-        buf_position = (nv3->pgraph.blit.size.x * y);
+        buf_position = (size_x * y);
         /* shouldn't matter in non-wtf mode */
         vram_position = nv3_render_get_vram_address_for_buffer(in_position, src_buffer);
 
@@ -163,7 +163,7 @@ void nv3_render_blit_screen2screen_for_buffer(nv3_grobj_t grobj, uint32_t dst_bu
     /* simply write it all back to vram */
     for (int32_t y = 0; y < nv3->pgraph.blit.size.y; y++)
     {        
-        buf_position = (nv3->pgraph.blit.size.x * y);
+        buf_position = (size_x * y);
         vram_position = nv3_render_get_vram_address_for_buffer(out_position, dst_buffer);
 
         memcpy(&nv3->nvbase.svga.vram[vram_position], &nv3_s2sb_line_buffer[buf_position], size_x);

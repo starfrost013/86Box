@@ -1452,9 +1452,9 @@ typedef struct nv3_s
 // device object
 extern nv3_t* nv3;
 
-#ifdef ENABLE_NV_LOG
+//#ifdef ENABLE_NV_LOG
 extern nv_register_t nv3_registers[];
-#endif
+//#endif
 
 /*
     *FUNCTIONS* for the GPU core start here

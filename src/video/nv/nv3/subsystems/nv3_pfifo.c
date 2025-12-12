@@ -38,6 +38,7 @@ void nv3_pfifo_init(void)
 {
     nv_log("Initialising PFIFO...");
 
+    /*
     // raw pfifo data size
     uint32_t pfifo_size = 0;
 
@@ -54,7 +55,7 @@ void nv3_pfifo_init(void)
             nv3_pfifo_cache1_gray_code_table[i + 32] = pfifo_accelerated_index_table[i] ^ 0xD7;
         }
     }
-
+*/
     nv_log("Done!\n");    
 }
 
@@ -375,7 +376,7 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
         case NV3_PFIFO_CONFIG_RAMHT:
             nv3->pfifo.ramht_config = val;
 // This code sucks a bit fix it later
-#ifdef ENABLE_NV_LOG
+//#ifdef ENABLE_NV_LOG
             uint32_t new_size_ramht = ((val >> 16) & 0x03);
 
             if (new_size_ramht == 0)
@@ -390,7 +391,7 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
             nv_log("RAMHT Reconfiguration\n"
             "Base Address in RAMIN: %d\n"
             "Size: 0x%08x bytes\n", ((nv3->pfifo.ramht_config >> NV3_PFIFO_CONFIG_RAMHT_BASE_ADDRESS) & 0x0F) << 12, new_size_ramht); 
-#endif
+//#endif
             break;
         case NV3_PFIFO_CONFIG_RAMFC:
             nv3->pfifo.ramfc_config = val;

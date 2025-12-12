@@ -1297,10 +1297,10 @@ void* nv3_init(const device_t *info)
     else
         nv3->nvbase.log = log_open_cyclic(log_device_name);
 
-#ifdef ENABLE_NV_LOG
+//#ifdef ENABLE_NV_LOG
     // Allows nv_log to be used for multiple nvidia devices
     nv_log_set_device(nv3->nvbase.log); 
-#endif   
+//#endif   
     nv_log("Initialising core\n");
 
     // this will only be logged if ENABLE_NV_LOG_ULTRA is defined
@@ -1465,9 +1465,9 @@ void nv3_close(void* priv)
 {
     // Shut down logging
     log_close(nv3->nvbase.log);
-#ifdef ENABLE_NV_LOG
+//#ifdef ENABLE_NV_LOG
     nv_log_set_device(NULL);
-#endif
+//#endif
 
     // Shut down I2C and the DDC
     ddc_close(nv3->nvbase.ddc);

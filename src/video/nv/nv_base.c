@@ -27,10 +27,10 @@
 #endif
 #include <86box/log.h>
 
-
 // Common logging
-#ifdef ENABLE_NV_LOG
-int nv_do_log = ENABLE_NV_LOG;
+//#ifdef ENABLE_NV_LOG
+//int nv_do_log = ENABLE_NV_LOG;
+int nv_do_log = true;
 
 // A bit of kludge so that in the future we can abstract this function acorss multiple generations of Nvidia GPUs
 void* nv_log_device;
@@ -77,7 +77,7 @@ void nv_log(const char *fmt, ...)
 
 void nv_log_verbose_only(const char *fmt, ...)
 {
-    #ifdef ENABLE_NV_LOG_ULTRA
+    //#ifdef ENABLE_NV_LOG_ULTRA
     va_list arg; 
 
     if (!nv_do_log)
@@ -86,9 +86,9 @@ void nv_log_verbose_only(const char *fmt, ...)
     va_start(arg, fmt);
     nv_log_internal(fmt, arg);
     va_end(arg);
-    #endif
+    //#endif
 }
-
+/*
 #else
 void nv_log(const char *fmt, ...)
 {
@@ -104,4 +104,4 @@ void nv_log_set_device(void* device)
 {
 
 }
-#endif
+#endif*/

@@ -27,7 +27,7 @@
 #include <86box/nv/vid_nv.h>
 #include <86box/nv/vid_nv3.h>
 
-#ifdef ENABLE_NV_LOG 
+//#ifdef ENABLE_NV_LOG 
 nv_register_t nv3_registers[] = {
     { NV3_PBUS_DEBUG_0, "PBUS - Debug Register", NULL, NULL},
     { NV3_PBUS_INTR, "PBUS - Interrupt Status", NULL, NULL},
@@ -170,4 +170,4 @@ nv_register_t nv3_registers[] = {
     { NV3_PVIDEO_OVERLAY, "PVIDEO - Overlay Info (Bit0 = Video On, Bit4 = Key On, Bit8 = Format, 0=CCIR, 1=YUV2)", NULL, NULL },   
     { NV_REG_LIST_END, NULL, NULL, NULL}, // sentinel value 
 };
-#endif
+//#endif
