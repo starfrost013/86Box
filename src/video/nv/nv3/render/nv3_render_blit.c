@@ -169,53 +169,12 @@ void nv3_render_blit_screen2screen_for_buffer(nv3_grobj_t grobj, uint32_t dst_bu
         memcpy(&nv3->nvbase.svga.vram[vram_position], &nv3_s2sb_line_buffer[buf_position], size_x);
         out_position.y++;
     }
-
-    /*
-    //32bit only as a test
-    uint32_t* vram_32 = (uint32_t*)nv3->nvbase.svga.vram;
-
-    if (nv3->pgraph.boffset[src_buffer] != nv3->pgraph.boffset[dst_buffer])
-    {
-        // stretch out the position to the new one
-
-        nv3_coord_16_t current_pos_in;
-        nv3_coord_16_t current_pos_out;
-
-        current_pos_in.x = nv3->pgraph.blit.point_in.x; 
-        current_pos_in.y = nv3->pgraph.blit.point_in.y; 
-        current_pos_out.x = nv3->pgraph.blit.point_out.x; 
-        current_pos_out.y = nv3->pgraph.blit.point_out.y; 
-
-        for (uint32_t y = 0; y < nv3->pgraph.blit.size.y; y++)
-        {
-            current_pos_in.y = nv3->pgraph.blit.point_in.y + y; 
-            current_pos_out.y = nv3->pgraph.blit.point_out.y + y; 
-
-            for (uint32_t x = 0; x <  nv3->pgraph.blit.size.x; x++)
-            {
-                current_pos_in.x = nv3->pgraph.blit.point_in.x + x;
-                current_pos_out.x = nv3->pgraph.blit.point_out.x + x; 
-
-                uint32_t index = nv3_render_get_vram_address_for_buffer(current_pos_in, dst_buffer) >> 2;
-                uint32_t index_dst = nv3_render_get_vram_address_for_buffer(current_pos_out, src_buffer) >> 2;
-
-                vram_32[index_dst] = vram_32[index];
-
-                //nv3_render_write_pixel(current_pos, vram_32[index], grobj);
-            }
-
-            current_pos_in.x = nv3->pgraph.blit.point_in.x;
-            current_pos_out.x = nv3->pgraph.blit.point_out.x; 
-
-        }
-    }
-        */
 }
 
 void nv3_render_blit_screen2screen(nv3_grobj_t grobj)
 {
     uint32_t dst_buffer = (nv3_pgraph_destination_buffer)grobj.grobj_0; // 5 = just use the source buffer
-
+    
     if (dst_buffer & pgraph_dest_buffer0)
         nv3_render_blit_screen2screen_for_buffer(grobj, 0);
     if (dst_buffer & pgraph_dest_buffer1)

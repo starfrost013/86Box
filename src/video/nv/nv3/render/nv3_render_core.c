@@ -286,8 +286,8 @@ uint32_t nv3_render_get_vram_address_for_buffer(nv3_coord_16_t position, uint32_
             vram_x = position.x << 2;
             break;
     }
-
-    uint32_t pixel_addr_vram = vram_x + (nv3->pgraph.bpitch[buffer] * vram_y) + nv3->pgraph.boffset[buffer];
+    
+    uint32_t pixel_addr_vram = (vram_x + (nv3->pgraph.bpitch[buffer] * vram_y) + nv3->pgraph.boffset[buffer]) + (1920000 * buffer);
 
     pixel_addr_vram &= nv3->nvbase.svga.vram_mask;
 

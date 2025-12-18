@@ -77,7 +77,7 @@ void nv_log(const char *fmt, ...)
 
 void nv_log_verbose_only(const char *fmt, ...)
 {
-    //#ifdef ENABLE_NV_LOG_ULTRA
+    #ifdef ENABLE_NV_LOG_ULTRA
     va_list arg; 
 
     if (!nv_do_log)
@@ -86,7 +86,7 @@ void nv_log_verbose_only(const char *fmt, ...)
     va_start(arg, fmt);
     nv_log_internal(fmt, arg);
     va_end(arg);
-    //#endif
+    #endif
 }
 /*
 #else
