@@ -831,8 +831,8 @@ uint8_t nv3_render_translate_nvrop(nv3_grobj_t grobj, uint32_t rop)
 		swizzle[0] = 1, swizzle[1] = 2, swizzle[2] = 0;
 	} else if (patch_config_rop == NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_DST_SRC_PAT) {
 		swizzle[0] = 2, swizzle[1] = 1, swizzle[2] = 0;
-	} else {
-        warning("NV3 ROP: Invalid patch configuration %02x!", rop);
+	} else if (patch_config_rop > NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_LAST){ // 0x16-0x1F almost certainly wrong
+        warning("NV3 ROP: Invalid patch configuration %02x!", patch_config_rop);
 	}
 	if (patch_config_rop == 0) {
 		if (rop & 0x01)

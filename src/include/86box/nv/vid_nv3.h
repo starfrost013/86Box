@@ -660,7 +660,9 @@ extern const device_config_t nv3t_config[];                             // Confi
 #define NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_BLEND_RSVD2  0x1C 
 #define NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_BLEND_SRC    0x1D 
 #define NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_BLEND_RSVD3  0x1E 
-#define NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_BLEND_RSVD4  0x1F        
+#define NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_BLEND_RSVD4  0x1F       
+
+#define NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_LAST         0x1F
 
 #define NV3_PGRAPH_CTX_SWITCH_VOLATILE                  31          // HUH
 
