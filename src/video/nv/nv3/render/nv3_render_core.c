@@ -497,11 +497,11 @@ void nv3_render_write_pixel(nv3_coord_16_t position, uint32_t color, nv3_grobj_t
 
     if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 0);
-    if (grobj.grobj_1 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
+    if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER1_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 1);
-    if (grobj.grobj_2 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
+    if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER2_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 2);
-    if (grobj.grobj_3 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
+    if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER3_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 3);
 
 }
