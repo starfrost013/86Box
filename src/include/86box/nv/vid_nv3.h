@@ -598,6 +598,7 @@ extern const device_config_t nv3t_config[];                             // Confi
 
 // Interrupt stuff
 #define NV3_PGRAPH_INTR_0                               0x400100
+#define NV3_PGRAPH_INTR_0_CONTEXT_SWITCH                4           // Channel switch ocured
 #define NV3_PGRAPH_INTR_0_VBLANK                        8           // Fired every frame
 #define NV3_PGRAPH_INTR_0_VBLANK_ENABLED                0x1         // Is the vblank interrupt enabled?
 #define NV3_PGRAPH_INTR_0_SOFTWARE_NOTIFY               28          // Fired on software notification
@@ -668,6 +669,11 @@ extern const device_config_t nv3t_config[];                             // Confi
 
 #define NV3_PGRAPH_CONTEXT_CONTROL                      0x400190    // DMA context control
 #define NV3_PGRAPH_CONTEXT_USER                         0x400194    // Current DMA context state, may rename
+
+#define NV3_PGRAPH_CONTEXT_USER_SUBCHANNEL              13
+#define NV3_PGRAPH_CONTEXT_USER_CLASS                   16
+#define NV3_PGRAPH_CONTEXT_USER_CHANNEL                 24
+
 #define NV3_PGRAPH_CONTEXT_CACHE(i)                     0x4001A0+(i*4)  // Context Cache
 #define NV3_PGRAPH_CONTEXT_CACHE_SIZE                   8
 // TODO: CLIP0/CLIP1 (8 clips min/max in 32bits)
@@ -1145,28 +1151,7 @@ typedef struct nv3_pramdac_s
 typedef struct nv3_pgraph_context_control_s
 {
     /* TODO */
-} nv3_pgraph_context_control_t;
-
-/* DMA object context info 
-   Context uploaded from CACHE0/CACHE1 by DMA Puller
-*/
-typedef struct nv3_pgraph_context_user_s
-{
-    union
-    {
-        uint32_t value;
-
-        struct
-        {
-            bool reserved3 : 1;
-            uint8_t channel : 7;
-            uint8_t reserved2 : 3;
-            uint8_t class_id : 5;
-            uint8_t subchannel : 3;
-            uint16_t reserved : 13;
-        };
-    };
-} nv3_pgraph_context_user_t; 
+} nv3_pgraph_context_control_t; 
 
 typedef struct nv3_pgraph_dma_settings_s
 {
@@ -1236,7 +1221,7 @@ typedef struct nv3_pgraph_s
 
     uint32_t context_switch;              // TODO: Make this a struct, it's just going to be enormous lol.
     nv3_pgraph_context_control_t context_control;
-    nv3_pgraph_context_user_t context_user;
+    uint32_t context_user;
 
     uint32_t context_cache[NV3_PGRAPH_CONTEXT_CACHE_SIZE];  // DMA context cache (nv3_pgraph_context_user_t array?)
 

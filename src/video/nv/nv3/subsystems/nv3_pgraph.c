@@ -97,7 +97,7 @@ uint32_t nv3_pgraph_read(uint32_t address)
             ret = *(uint32_t*)&nv3->pgraph.context_control;
             break;
         case NV3_PGRAPH_CONTEXT_USER:
-            ret = *(uint32_t*)&nv3->pgraph.context_user;
+            ret = nv3->pgraph.context_user;
             break;
         // Clip
         case NV3_PGRAPH_ABS_UCLIP_XMIN:
@@ -275,7 +275,7 @@ void nv3_pgraph_write(uint32_t address, uint32_t value)
             *(uint32_t*)&nv3->pgraph.context_control = value;
             break;
         case NV3_PGRAPH_CONTEXT_USER:
-            *(uint32_t*)&nv3->pgraph.context_user = value;
+            nv3->pgraph.context_user = value;
             break;
         // Clip
         case NV3_PGRAPH_ABS_UCLIP_XMIN:
@@ -408,11 +408,30 @@ void nv3_pgraph_vblank_start(svga_t* svga)
 }
 
 /* Arbitrates graphics object submission to the right object types */
-void nv3_pgraph_submit(uint32_t param, uint16_t method, uint8_t channel, uint8_t subchannel, uint8_t class_id, nv3_ramin_context_t  context)
+void nv3_pgraph_submit(uint32_t param, uint16_t method, uint8_t channel, uint8_t subchannel, uint8_t class_id, nv3_ramin_context_t context)
 {
+    // can't use that
+    if (!nv3->pgraph.fifo_access)
+        return;
+    
+    // extract the channel id so we can see if we need to context switch
+
+    uint8_t old_channel_id = (nv3->pgraph.context_user >> NV3_PGRAPH_CONTEXT_USER_CHANNEL) & 0x7F;
+
+    if (old_channel_id != channel)
+    {
+        nv3_pgraph_interrupt_valid(NV3_PGRAPH_INTR_0_CONTEXT_SWITCH);
+        return; 
+    }
+
+    // set ctx_user for the drivers
+    nv3->pgraph.context_user = (context.context & 0x1F0000) 
+    | ((uint32_t)subchannel << NV3_PGRAPH_CONTEXT_USER_SUBCHANNEL) 
+    | ((uint32_t)channel << NV3_PGRAPH_CONTEXT_USER_CHANNEL);
+
     // class id can be derived from the context but we debug log it before we get here
-    // Do we need to read grobj here?
-    /* Obtain the grobj information from the context in ramin */
+    // Obtain the grobj information from the context in ramin
+
     nv3_grobj_t grobj = {0};
 
     // we need to shift left by 4 to get the real address, something to do with the 16 byte unit of reversal 

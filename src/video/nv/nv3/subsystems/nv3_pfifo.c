@@ -634,6 +634,7 @@ NV_USER writes always go to CACHE1
 // Pulls graphics objects OUT of cache0
 void nv3_pfifo_cache0_pull(void)
 {
+
     // Do nothing if PFIFO CACHE0 is disabled
     if (!nv3->pfifo.cache0_settings.pull0 & (1 >> NV3_PFIFO_CACHE0_PULL0_ENABLED))
         return; 
@@ -716,7 +717,6 @@ void nv3_pfifo_cache1_push(uint32_t addr, uint32_t param)
         oh_shit = true; 
         oh_shit_reason = nv3_runout_reason_no_cache_available;
         new_address |= (nv3_runout_reason_no_cache_available << NV3_PFIFO_RUNOUT_RAMIN_ERR);
-
     }
     
     // Check if runout is full

@@ -197,6 +197,7 @@ void nv3_render_blit_screen2screen(nv3_grobj_t grobj)
             uint32_t destination_format = (nv3->pgraph.bpixel[src_buffer]) & 0x03;
             uint32_t in_pixel;
 
+            // todo: improve
             switch (destination_format)
             {
                 case bpixel_fmt_8bit:
