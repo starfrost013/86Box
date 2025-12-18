@@ -407,9 +407,11 @@ void nv3_pgraph_vblank_start(svga_t* svga)
     nv3_pgraph_interrupt_valid(NV3_PGRAPH_INTR_0_VBLANK);
 }
 
-/* Sends off method execution to the right class */
-void nv3_pgraph_arbitrate_method(uint32_t param, uint16_t method, uint8_t channel, uint8_t subchannel, uint8_t class_id, nv3_ramin_context_t context)
+/* Arbitrates graphics object submission to the right object types */
+void nv3_pgraph_submit(uint32_t param, uint16_t method, uint8_t channel, uint8_t subchannel, uint8_t class_id, nv3_ramin_context_t  context)
 {
+    // class id can be derived from the context but we debug log it before we get here
+    // Do we need to read grobj here?
     /* Obtain the grobj information from the context in ramin */
     nv3_grobj_t grobj = {0};
 
@@ -503,25 +505,10 @@ void nv3_pgraph_arbitrate_method(uint32_t param, uint16_t method, uint8_t channe
                 nv3_class_01c_method(param, method, context, grobj);
                 break;             
             default:
-                fatal("NV3 (nv3_pgraph_arbitrate_method): Attempted to execute method on invalid, or unimplemented, class ID %s", nv3_class_names[class_id]);
+                fatal("NV3 (nv3_pgraph_submit): Attempted to execute method on invalid, or unimplemented, class ID %s", nv3_class_names[class_id]);
                 return;
         }
     }
 
     nv3_notify_if_needed(param, method, context, grobj);
-}
-
-/* Arbitrates graphics object submission to the right object types */
-void nv3_pgraph_submit(uint32_t param, uint16_t method, uint8_t channel, uint8_t subchannel, uint8_t class_id, nv3_ramin_context_t  context)
-{
-    // class id can be derived from the context but we debug log it before we get here
-    // Do we need to read grobj here?
-    
-    switch (method)
-    {
-        default:
-            // Object Method arbitration
-            nv3_pgraph_arbitrate_method(param, method, channel, subchannel, class_id, context);
-            break;
-    }
 }

@@ -197,6 +197,16 @@ typedef enum nv3_pgraph_class_e
 #define NV3_W95TXT_E_CLIP_CLIPRECT_SIZE                 128     // Number of rects
 #define NV3_W95TXT_E_CLIP_CLIPRECT_END                  0x15FF
 
+// Stretched image from CPU
+#define NV3_STRETCH_SIZE_IN                             0x0304
+#define NV3_STRETCH_SIZE_DELTA_DX_DU                    0x0308
+#define NV3_STRETCH_SIZE_DELTA_DY_DV                    0x030C
+#define NV3_STRETCH_SIZE_CLIP_0                         0x0310  // Top Left, Y = 31:16, X = 15:0
+#define NV3_STRETCH_SIZE_CLIP_1                         0x0314  // Size, Y = 31:16, X = 15:0
+#define NV3_STRETCH_SIZE_POINT12D4                      0x0318
+#define NV3_STRETCH_SIZE_COLOUR_START                   0x0400
+#define NV3_STRETCH_SIZE_COLOUR_END                     0x2000
+
 
 /* Class context switch method */
 typedef struct nv3_class_ctx_switch_method_s
@@ -722,6 +732,7 @@ typedef struct nv3_object_class_015
     nv3_coord_16_t clip_0;
     nv3_coord_16_t clip_1;
     uint32_t point12d4; /* todo: fraction struct */
+    uint32_t pixels[1792];
     // no reserve needed
 } nv3_stretched_image_from_cpu_t; 
 

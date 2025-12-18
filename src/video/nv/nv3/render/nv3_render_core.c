@@ -150,11 +150,14 @@ uint32_t nv3_render_downconvert_color(nv3_grobj_t grobj, nv3_color_expanded_t co
         case nv3_pgraph_pixel_format_y8: /* i think this is just indexed mode. since r=g=b we can just take the indexed from the r */
             packed_color = nv3_render_get_palette_index((color.r >> 2) & 0xFF);
             break;
+        case nv3_pgraph_pixel_format_v8y8u8y18:
+            nv_log("nv3_render_downconvert_color: V8Y8U8Y18 not implemented");          // todo
+            break;
         case nv3_pgraph_pixel_format_y16:
-            warning("nv3_render_downconvert_color: Y16 not implemented");
+            nv_log("nv3_render_downconvert_color: Y16 not implemented");                // todo
             break;
         case nv3_pgraph_pixel_format_y420:
-            warning("nv3_render_downconvert_color: YUV420 not implemented\n");
+            nv_log("nv3_render_downconvert_color: YUV420 not implemented\n");
             break; 
         default:
             warning("nv3_render_downconvert_color unknown format %d", format);
@@ -495,6 +498,7 @@ void nv3_render_write_pixel(nv3_coord_16_t position, uint32_t color, nv3_grobj_t
     // PFB_0 is often set to hardcoded "NO_TILING" value of 0x1114.
     // It seems, you are meant to use the CRTC to set mode
 
+    /*
     if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 0);
     if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER1_ENABLED)
@@ -503,7 +507,17 @@ void nv3_render_write_pixel(nv3_coord_16_t position, uint32_t color, nv3_grobj_t
         nv3_render_write_pixel_to_buffer(position, color, grobj, 2);
     if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER3_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 3);
+*/
 
+    // The above is correct, but fucks up everything and crashes. Why?
+    if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
+        nv3_render_write_pixel_to_buffer(position, color, grobj, 0);
+    else if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER1_ENABLED)
+        nv3_render_write_pixel_to_buffer(position, color, grobj, 1);
+    else if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER2_ENABLED)
+        nv3_render_write_pixel_to_buffer(position, color, grobj, 2);
+    else if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER3_ENABLED)
+        nv3_render_write_pixel_to_buffer(position, color, grobj, 3);
 }
 
 /* Ensure the correct monitor size */
@@ -831,9 +845,10 @@ uint8_t nv3_render_translate_nvrop(nv3_grobj_t grobj, uint32_t rop)
 		swizzle[0] = 1, swizzle[1] = 2, swizzle[2] = 0;
 	} else if (patch_config_rop == NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_DST_SRC_PAT) {
 		swizzle[0] = 2, swizzle[1] = 1, swizzle[2] = 0;
-	} else if (patch_config_rop > NV3_PGRAPH_CTX_SWITCH_PATCH_CONFIG_LAST){ // 0x16-0x1F almost certainly wrong
-        warning("NV3 ROP: Invalid patch configuration %02x!", patch_config_rop);
-	}
+	} else { // 0x16-0x1F should be blended. I'm not sure what these do..
+        //warning("NV3 ROP: Invalid patch configuration %02x!", patch_config_rop);
+        return VIDEO_ROP_SRC_COPY;
+    }
 	if (patch_config_rop == 0) {
 		if (rop & 0x01)
 			res |= 0x11;
