@@ -175,7 +175,9 @@ uint32_t nv3_pgraph_read(uint32_t address)
         case NV3_PGRAPH_CLIP_MISC:
             ret = *(uint32_t*)&nv3->pgraph.clip_misc_settings;
             break;
-        
+        case NV3_PGRAPH_FIFO_ACCESS:
+            ret = nv3->pgraph.fifo_access;
+            break;
         // Overall Status
         case NV3_PGRAPH_STATUS:
             ret = *(uint32_t*)&nv3->pgraph.status;
@@ -352,6 +354,9 @@ void nv3_pgraph_write(uint32_t address, uint32_t value)
             break;
         case NV3_PGRAPH_CLIP_MISC:
             *(uint32_t*)&nv3->pgraph.clip_misc_settings = value;
+            break;
+        case NV3_PGRAPH_FIFO_ACCESS:
+            nv3->pgraph.fifo_access = value;
             break;
         // Overall Status
         case NV3_PGRAPH_STATUS:
