@@ -101,23 +101,20 @@ uint32_t nv3_ramin_read32(uint32_t addr, void* priv)
     if (!nv3) 
         return 0x00;
 
+    // we need this for 2mb+8mb cards
     addr &= (nv3->nvbase.svga.vram_max - 1);
 
     // why does this not work in one line
     uint32_t* vram_32bit = (uint32_t*)nv3->nvbase.svga.vram;
     uint32_t raw_addr = addr; // saved after and logged
 
-    addr ^= (nv3->nvbase.svga.vram_max - 0x10);
-    addr >>= 2; // what
+    uint32_t ramin_addr = (addr ^ nv3->nvbase.svga.vram_max - 0x10) >> 2;
 
-    uint32_t val = 0x00;
+    uint32_t val = vram_32bit[ramin_addr];
+    nv_log_verbose_only("Read dword from PRAMIN 0x%08x <- 0x%08x (raw address=0x%08x)\n", val, addr, raw_addr);
 
-    if (!nv3_ramin_arbitrate_read(addr, &val))
-    {
-        val = vram_32bit[addr];
+    //if (!nv3_ramin_arbitrate_read(addr, &val))
 
-        nv_log_verbose_only("Read dword from PRAMIN 0x%08x <- 0x%08x (raw address=0x%08x)\n", val, addr, raw_addr);
-    }
 
     return val;
 }
@@ -183,14 +180,10 @@ void nv3_ramin_write32(uint32_t addr, uint32_t val, void* priv)
     uint32_t* vram_32bit = (uint32_t*)svga->vram;
     uint32_t raw_addr = addr; // saved after and
 
-    addr ^= (nv3->nvbase.svga.vram_max - 0x10);
-    addr >>= 2; // what
+    uint32_t ramin_addr = (addr ^ nv3->nvbase.svga.vram_max - 0x10) >> 2;
+    vram_32bit[ramin_addr] = val;
 
-    if (!nv3_ramin_arbitrate_write(addr, val))
-    {
-        vram_32bit[addr] = val;
-        nv_log_verbose_only("Write dword to PRAMIN addr=0x%08x val=0x%08x (raw address=0x%08x)\n", addr, val, raw_addr);
-    }
+    nv_log_verbose_only("Write dword to PRAMIN addr=0x%08x val=0x%08x (raw address=0x%08x)\n", addr, val, raw_addr);
 
 }
 
@@ -353,6 +346,13 @@ bool nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t channel, u
             && obj_context_struct.channel == channel)
         {
             found_object = true;
+                
+            // This bit fucked me for an extremely long time
+            if (!cache_num)
+                nv3->pfifo.cache0_settings.context[0] = obj_context;
+            else
+                nv3->pfifo.cache1_settings.context[subchannel] = obj_context;
+    
             break;
         }
     }
@@ -445,7 +445,7 @@ bool nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t channel, u
         else   
             nv3->pfifo.cache1_settings.pull0 &= ~NV3_PFIFO_CACHE1_PULL0_SOFTWARE_METHOD;
     }
-    
+
     // Ok we found it. Lol
     return true; 
     

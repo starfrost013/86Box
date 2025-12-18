@@ -345,7 +345,7 @@ uint16_t nv3_render_read_pixel_16(nv3_coord_16_t position, nv3_grobj_t grobj)
     return vram_16[vram_address];
 }
 
-/* Read an 16bpp pixel from the framebuffer. */
+/* Read an 32bpp pixel from the framebuffer. */
 uint32_t nv3_render_read_pixel_32(nv3_coord_16_t position, nv3_grobj_t grobj)
 { 
     // hope you call it with the right bit
@@ -492,19 +492,18 @@ void nv3_render_write_pixel_to_buffer(nv3_coord_16_t position, uint32_t color, n
 /* Plots a pixel. */
 void nv3_render_write_pixel(nv3_coord_16_t position, uint32_t color, nv3_grobj_t grobj)
 {
-    // PFB_0 is always set to hardcoded "NO_TILING" value of 0x1114.
-    // It seems, you are meant to use the CRTC
+    // PFB_0 is often set to hardcoded "NO_TILING" value of 0x1114.
+    // It seems, you are meant to use the CRTC to set mode
 
-    nv3_pgraph_destination_buffer dst_buffer = (nv3_pgraph_destination_buffer)grobj.grobj_0;
-
-    if (dst_buffer & (pgraph_dest_buffer0))
+    if (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 0);
-    if (dst_buffer & (pgraph_dest_buffer1))
+    if (grobj.grobj_1 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 1);
-    if (dst_buffer & (pgraph_dest_buffer2))
+    if (grobj.grobj_2 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 2);
-    if (dst_buffer & (pgraph_dest_buffer3))
+    if (grobj.grobj_3 >> NV3_PGRAPH_CTX_SWITCH_DST_BUFFER0_ENABLED)
         nv3_render_write_pixel_to_buffer(position, color, grobj, 3);
+
 }
 
 /* Ensure the correct monitor size */

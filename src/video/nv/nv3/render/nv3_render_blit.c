@@ -121,17 +121,23 @@ uint32_t nv3_s2sb_line_buffer[NV3_MAX_HORIZONTAL_SIZE*NV3_MAX_VERTICAL_SIZE] = {
 
 void nv3_render_blit_screen2screen_for_buffer(nv3_grobj_t grobj, uint32_t dst_buffer)
 {
+
+}
+
+void nv3_render_blit_screen2screen(nv3_grobj_t grobj)
+{
+    /* 
     if (nv3->pgraph.blit.size.x < NV3_MAX_HORIZONTAL_SIZE
     && nv3->pgraph.blit.size.y < NV3_MAX_VERTICAL_SIZE)
         memset(&nv3_s2sb_line_buffer, 0x00, (sizeof(uint32_t) * nv3->pgraph.blit.size.y) * (sizeof(uint32_t) * nv3->pgraph.blit.size.x));
 
-    /* First calculate our source and destination buffer */
+    First calculate our source and destination buffer 
     uint32_t src_buffer = (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_SRC_BUFFER) & 0x03;
 
     nv3_coord_16_t in_position = nv3->pgraph.blit.point_in;
     nv3_coord_16_t out_position = nv3->pgraph.blit.point_out;
 
-    /* Coordinates for copying an entire line at a time */
+    /* Coordinates for copying an entire line at a time 
     uint32_t buf_position = 0, vram_position = 0, size_x = nv3->pgraph.blit.size.x;
 
     /* 
@@ -141,48 +147,51 @@ void nv3_render_blit_screen2screen_for_buffer(nv3_grobj_t grobj, uint32_t dst_bu
         8/16 bits at a time.
 
         TODO: CHECK FOR PACKED FORMAT!!!!!
-    */
+    
 
     if (nv3->nvbase.svga.bpp == 15
     || nv3->nvbase.svga.bpp == 16)
         size_x <<= 1;
     else if (nv3->nvbase.svga.bpp == 32)
         size_x <<= 2;
-        
+
     for (int32_t y = 0; y < nv3->pgraph.blit.size.y; y++)
     {
         buf_position = (size_x * y);
-        /* shouldn't matter in non-wtf mode */
         vram_position = nv3_render_get_vram_address_for_buffer(in_position, src_buffer);
 
         memcpy(&nv3_s2sb_line_buffer[buf_position], &nv3->nvbase.svga.vram[vram_position], size_x);
         in_position.y++;
-        /* 32bit buffer */
+        /* 32bit buffer 
     }
     
-    /* simply write it all back to vram */
+    // we can use 1 since it is always set to 0. TODO: HACK
+    uint32_t pixel_addr_vram = (out_position.x + (nv3->pgraph.bpitch[1] * out_position.y));
+
+    /* simply write it all back to vram 
     for (int32_t y = 0; y < nv3->pgraph.blit.size.y; y++)
     {        
         buf_position = (size_x * y);
-        vram_position = nv3_render_get_vram_address_for_buffer(out_position, dst_buffer);
-
         memcpy(&nv3->nvbase.svga.vram[vram_position], &nv3_s2sb_line_buffer[buf_position], size_x);
+
         out_position.y++;
     }
-}
+    */
+    
+    for (int32_t x = 0; x < nv3->pgraph.blit.size.x; x++)
+    {
+        for (int32_t y = 0; y < nv3->pgraph.blit.size.y; y++)
+        {
+            nv3_coord_16_t in = { nv3->pgraph.blit.point_in.x + x, nv3->pgraph.blit.point_in.y + y }; 
+            nv3_coord_16_t out = { nv3->pgraph.blit.point_out.x + x, nv3->pgraph.blit.point_out.y + y }; 
 
-void nv3_render_blit_screen2screen(nv3_grobj_t grobj)
-{
-    uint32_t dst_buffer = (nv3_pgraph_destination_buffer)grobj.grobj_0; // 5 = just use the source buffer
-    
-    if (dst_buffer & pgraph_dest_buffer0)
-        nv3_render_blit_screen2screen_for_buffer(grobj, 0);
-    if (dst_buffer & pgraph_dest_buffer1)
-        nv3_render_blit_screen2screen_for_buffer(grobj, 1);
-    if (dst_buffer & pgraph_dest_buffer2)
-        nv3_render_blit_screen2screen_for_buffer(grobj, 2);
-    if (dst_buffer & pgraph_dest_buffer3)
-        nv3_render_blit_screen2screen_for_buffer(grobj, 3);
-    
+            // calculate address 
+            uint32_t pixel_addr_vram = out.x + ((out.x << 2) * out.y);
+
+            // test code iwth a fake grobj set to buffer 0
+
+            nv3_render_write_pixel(out, nv3_render_read_pixel_32(in, grobj), grobj);
+        }
+    }
 
 }

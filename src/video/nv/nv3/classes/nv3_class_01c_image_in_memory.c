@@ -32,8 +32,6 @@ void nv3_class_01c_method(uint32_t param, uint32_t method_id, nv3_ramin_context_
 {
     /* We need this for a lot of methods, so may as well store it here. */
     uint32_t src_buffer_id = (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_SRC_BUFFER) & 0x03;
-    
-
     switch (method_id)
     {
         /* Color format of the image */
@@ -81,9 +79,9 @@ void nv3_class_01c_method(uint32_t param, uint32_t method_id, nv3_ramin_context_
         /* Byte offset in GPU VRAM of top left pixel (22:0) */
         case NV3_IMAGE_IN_MEMORY_TOP_LEFT_OFFSET:
             if (nv3->nvbase.gpu_revision == NV3_PCI_CFG_REVISION_C00) // RIVA 128ZX
-                nv3->pgraph.boffset[src_buffer_id] = param & 0x7FFFFF;
+                nv3->pgraph.boffset[src_buffer_id] = param & 0x7FFFF0;
             else
-                nv3->pgraph.boffset[src_buffer_id] = param & 0x3FFFFF;
+                nv3->pgraph.boffset[src_buffer_id] = param & 0x3FFFF0;
                             
             nv_log("Method Execution: Image in Memory BUF%d TOP_LEFT_OFFSET=0x%08x\n", src_buffer_id, nv3->pgraph.boffset[src_buffer_id]);
             break;
