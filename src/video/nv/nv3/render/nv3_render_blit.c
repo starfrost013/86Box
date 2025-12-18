@@ -126,6 +126,9 @@ void nv3_render_blit_screen2screen_for_buffer(nv3_grobj_t grobj, uint32_t dst_bu
 
 void nv3_render_blit_screen2screen(nv3_grobj_t grobj)
 {
+
+    uint32_t src_buffer = (grobj.grobj_0 >> NV3_PGRAPH_CTX_SWITCH_SRC_BUFFER) & 0x03;
+
     /* 
     if (nv3->pgraph.blit.size.x < NV3_MAX_HORIZONTAL_SIZE
     && nv3->pgraph.blit.size.y < NV3_MAX_VERTICAL_SIZE)
@@ -191,7 +194,20 @@ void nv3_render_blit_screen2screen(nv3_grobj_t grobj)
 
             // test code iwth a fake grobj set to buffer 0
 
-            nv3_render_write_pixel(out, nv3_render_read_pixel_32(in, grobj), grobj);
+            uint32_t destination_format = (nv3->pgraph.bpixel[src_buffer]) & 0x03;
+            uint32_t in_pixel;
+
+            switch (destination_format)
+            {
+                case bpixel_fmt_8bit:
+                    in_pixel = nv3_render_read_pixel_8(in, grobj);
+                case bpixel_fmt_16bit:
+                    in_pixel = nv3_render_read_pixel_16(in, grobj);
+                case bpixel_fmt_32bit:
+                    in_pixel = nv3_render_read_pixel_32(in, grobj);
+                    break;
+            }
+            nv3_render_write_pixel(out, in_pixel, grobj);
         }
     }
 
