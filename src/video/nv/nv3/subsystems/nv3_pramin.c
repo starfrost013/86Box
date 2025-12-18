@@ -320,9 +320,8 @@ bool nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t channel, u
     // Calculate the address in the hashtable
     uint32_t ramht_base = ((nv3->pfifo.ramht_config >> NV3_PFIFO_CONFIG_RAMHT_BASE_ADDRESS) & 0x0F) << NV3_PFIFO_CONFIG_RAMHT_BASE_ADDRESS;
 
-    // This is certainly wrong. But the objects seem to be written to 4600? So I just multiply it by 80 to multiply the final address by 10.
-    // Why does this work?
-    uint32_t ramht_cur_address = ramht_base + (nv3_ramht_hash(name, channel) * bucket_entries * 8);
+    // stored liek this to optimise searches probably
+    uint32_t ramht_cur_address = ramht_base + (nv3_ramht_hash(name, channel) * bucket_entries << 3); 
 
     nv_log_verbose_only("Beginning search for graphics object at RAMHT base=0x%04x, name=0x%08x, Cache%d, channel=%d.%d)\n",
         ramht_cur_address, name, cache_num, channel, subchannel);
