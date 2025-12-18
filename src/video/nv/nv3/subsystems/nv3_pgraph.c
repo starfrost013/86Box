@@ -421,13 +421,13 @@ void nv3_pgraph_submit(uint32_t param, uint16_t method, uint8_t channel, uint8_t
     
     // extract the channel id so we can see if we need to context switch
 
-    uint8_t old_channel_id = (nv3->pgraph.context_user >> NV3_PGRAPH_CONTEXT_USER_CHANNEL) & 0x7F;
+    //uint8_t old_channel_id = (nv3->pgraph.context_user >> NV3_PGRAPH_CONTEXT_USER_CHANNEL) & 0x7F;
 
-    if (old_channel_id != channel)
-    {
-        nv3_pgraph_interrupt_valid(NV3_PGRAPH_INTR_0_CONTEXT_SWITCH);
-        return; 
-    }
+    //if (old_channel_id != channel)
+    //{
+    //    nv3_pgraph_interrupt_valid(NV3_PGRAPH_INTR_0_CONTEXT_SWITCH);
+    //    return; 
+    //}
 
     // set ctx_user for the drivers
     nv3->pgraph.context_user = (context.context & 0x1F0000) 
