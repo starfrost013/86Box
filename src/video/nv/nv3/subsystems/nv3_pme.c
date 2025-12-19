@@ -28,26 +28,14 @@
 #include <86box/nv/vid_nv.h>
 #include <86box/nv/vid_nv3.h>
 
-void nv3_pme_init(void)
-{  
-    nv_log("Initialising PME...");
-
-    nv_log("Done\n");
-}
+// NOTES:
+// Interrupts are notifiers.
+// Bit 0 - Image, Bit 4 - VBlank interval, Bit 8 - Video, Bit 12 - Audio, Bit 16 - VMI
 
 uint32_t nv3_pme_read(uint32_t address) 
 { 
-
     uint32_t ret = 0x00;
-
-    // todo: friendly logging
-
-    // Interrupt state:
-    // Bit 0 - Image Notifier
-    // Bit 4 - Vertical Blank Interval Notifier
-    // Bit 8 - Video Notifier
-    // Bit 12 - Audio Notifier
-    // Bit 16 - VMI Notifer
+    
     switch (address)
     {
         case NV3_PME_INTR:
@@ -65,13 +53,6 @@ void nv3_pme_write(uint32_t address, uint32_t value)
 {
     switch (address)
     {
-        // Interrupt state:
-        // Bit 0 - Image Notifier
-        // Bit 4 - Vertical Blank Interfal Notifier
-        // Bit 8 - Video Notifier
-        // Bit 12 - Audio Notifier
-        // Bit 16 - VMI Notifer
-
         case NV3_PME_INTR:
             nv3->pme.intr &= ~value;
             nv3_pmc_clear_interrupts();
@@ -80,5 +61,4 @@ void nv3_pme_write(uint32_t address, uint32_t value)
             nv3->pme.intr_en = value & 0x00001111;
             break;
     }
-
 }

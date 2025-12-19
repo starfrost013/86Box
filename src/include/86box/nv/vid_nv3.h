@@ -1586,6 +1586,3 @@ void        nv3_ptimer_tick(double real_time);
 // NV3 PVIDEO
 uint32_t    nv3_pvideo_read(uint32_t address);
 void        nv3_pvideo_write(uint32_t address, uint32_t value);
-
-// NV3 PME (Mediaport)
-void        nv3_pme_init(void); 

@@ -35,9 +35,7 @@ void nv3_class_003_method(uint32_t param, uint32_t method_id, nv3_ramin_context_
         case NV3_CHROMA_KEY:
         {
             nv3_color_expanded_t expanded_color = nv3_render_expand_color(param, grobj);
-            
             nv3->pgraph.chroma_key = nv3_render_to_chroma(expanded_color);
-            
             nv_log("Method Execution: Chroma = 0x%08x", nv3->pgraph.chroma_key);
             break;
         }

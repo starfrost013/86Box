@@ -32,7 +32,6 @@
 void nv3_ptimer_interrupt(uint32_t num)
 {
     nv3->ptimer.intr |= (1 << num);
-
     nv3_pmc_handle_interrupts(true);
 }
 
@@ -117,7 +116,6 @@ void nv3_ptimer_write(uint32_t address, uint32_t value)
             nv3->ptimer.intr &= ~value;
             nv3_pmc_clear_interrupts();
             break;
-
         // Interrupt enablement state
         case NV3_PTIMER_INTR_EN:
             nv3->ptimer.intr_en = value & 0x1;

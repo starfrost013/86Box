@@ -156,17 +156,12 @@ void nv3_pramdac_set_pixel_clock(void)
     // frequency divider algorithm from old varcem/86box/pcbox riva driver,
     // verified by reversing NT drivers v1.50e CalcMNP [symbols] function
 
-    // missing section
-    // not really needed.
+    // Technically some Rivas have 14.318mhz crystals so you should check the clock_crystal bits of pfb_boot:
     // if (nv3->pfb.boot.clock_crystal == CLOCK_CRYSTAL_13500)
-    // {
     //      freq = 13500000.0f;
-    // }
-    // else 
-    //
-    // {
-    //      freq = 14318000.0f;
-    // }
+    // else
+    //      freq = 14318000.0f
+    // but we really don't need to
 
     float frequency = 13500000.0f;
 
@@ -205,9 +200,7 @@ uint32_t nv3_pramdac_read(uint32_t address)
 { 
     uint32_t ret = 0x00;
 
-    // todo: friendly logging
-
-    //s hould be pretty easy to understand
+    // most of these just need to be read/written
     switch (address)
     {
         case NV3_PRAMDAC_COEFF_SELECT:
@@ -362,7 +355,6 @@ void nv3_pramdac_write(uint32_t address, uint32_t value)
             /* I doubt NV actually read this in their drivers, but it's worth doing anyway */
             /* Bit 1 is listed as "read or write mode" and 7:0 as "Write-only address", but NV only ever set this to 0 too, so i think this should be fine for now */
             nv3->pramdac.palette[nv3->pramdac.user_write_mode_address] = value;
-
             nv3->pramdac.user_write_mode_address++; 
             
             break;

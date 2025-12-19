@@ -31,22 +31,13 @@
 
 void nv3_pstraps_init(void)
 {
-    nv_log("Initialising PSTRAPS....\n");
+    nv_log("Initialising straps....\n");
 
-    // Set the chip straps
-    // Make these configurable in the future...
+    // Set the chip straps (Make these configurable in the future...)
+    // Current settings: AGP 2X disabled, TV Mode NTSC, Crystal 13.5Mhz, 128-bit bus width (cheaper models used 64bit buses), 
+    // BIOS present, 66Mhz bus speed (PCI)
 
-    // Current settings
-    // AGP2X            Disabled
-    // TV Mode          NTSC
-    // Crystal          13.5 Mhz
-    // Bus width        128-Bit (some gpus were sold as 64bit for cost reduction)
-    // 
-
-    nv_log("Initialising straps...\n");
-
-    nv3->straps =
-    (NV3_PSTRAPS_AGP2X_DISABLED << NV3_PSTRAPS_AGP2X) |
+    nv3->straps = (NV3_PSTRAPS_AGP2X_DISABLED << NV3_PSTRAPS_AGP2X) |
     (NV3_PSTRAPS_TVMODE_NTSC << NV3_PSTRAPS_TVMODE) |
     (NV3_PSTRAPS_CRYSTAL_13500K << NV3_PSTRAPS_CRYSTAL);
 
@@ -57,8 +48,7 @@ void nv3_pstraps_init(void)
         nv3->straps |= (NV3_PSTRAPS_BUS_TYPE_AGP << NV3_PSTRAPS_BUS_TYPE);
 
     // now the lower bits 
-    nv3->straps |=
-    (NV3_PSTRAPS_BUS_WIDTH_128BIT << NV3_PSTRAPS_BUS_WIDTH) |
+    nv3->straps |= (NV3_PSTRAPS_BUS_WIDTH_128BIT << NV3_PSTRAPS_BUS_WIDTH) |
     (NV3_PSTRAPS_BIOS_PRESENT << NV3_PSTRAPS_BIOS) |
     (NV3_PSTRAPS_BUS_SPEED_66MHZ << NV3_PSTRAPS_BUS_SPEED);
 

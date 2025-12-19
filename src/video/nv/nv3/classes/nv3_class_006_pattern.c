@@ -37,13 +37,9 @@ void nv3_class_006_method(uint32_t param, uint32_t method_id, nv3_ramin_context_
             nv3_pgraph_interrupt_invalid(NV3_PGRAPH_INTR_1_SOFTWARE_METHOD_PENDING);
             break; 
         case NV3_PATTERN_SHAPE:
-            /* If the shape is not valid, tell the software that it's invalid */
-
             /* 
             Technically you are meant to do this: 
 
-            But in practice, I don't know, because it always submits 0x20 or 0x40, which are valid when param & 0x03,
-            and appear to be deliberate behaviour in the drivers rather than bugs. What
             if (param > NV3_PATTERN_SHAPE_LAST_VALID)
             {
                 warning("NV3 class 0x06 (Pattern) invalid shape %d (This is a bug)", param);
@@ -51,13 +47,12 @@ void nv3_class_006_method(uint32_t param, uint32_t method_id, nv3_ramin_context_
                 return; 
             }
             
+            But in practice, the drivers always submit 0x20 or 0x40, which are valid when param & 0x03,
+            and appear to be deliberate behaviour in the drivers rather than bugs. What
+
             */
             nv3->pgraph.pattern_shape = param & 0x03;
 
-            break;
-        /* Seems to be "SetPatternSelect" on Riva TNT and later, but possibly called by accident on Riva 128. There is no hardware equivalent for this. So let's just suppress
-        the warnings. */
-        case NV3_PATTERN_UNUSED_DRIVER_BUG:
             break;
         case NV3_PATTERN_COLOR0:
         {

@@ -41,7 +41,6 @@ void nv3_class_010_method(uint32_t param, uint32_t method_id, nv3_ramin_context_
             nv3->pgraph.blit.point_out.x = (param & 0xFFFF);
             nv3->pgraph.blit.point_out.y = ((param >> 16) & 0xFFFF);
             nv_log("Method Execution: S2SB POINT_OUT %d,%d\n", nv3->pgraph.blit.point_out.x, nv3->pgraph.blit.point_out.y);
-
             break; 
         case NV3_BLIT_SIZE:
             /* This is the last one*/
@@ -50,7 +49,6 @@ void nv3_class_010_method(uint32_t param, uint32_t method_id, nv3_ramin_context_
             nv_log("Method Execution: S2SB Size %d,%d grobj_0=0x%08x\n", nv3->pgraph.blit.size.x, nv3->pgraph.blit.size.y, grobj.grobj_0);
 
             nv3_render_blit_screen2screen(grobj);
-
             break; 
         default:
             warning("%s: Invalid or unimplemented method 0x%04x\n", nv3_class_names[context.class_id & 0x1F], method_id);

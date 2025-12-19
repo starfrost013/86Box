@@ -1207,6 +1207,7 @@ void nv3_update_mappings(void)
 
     // 1MB was never used, 2MB only used once. Do we really need it?
 
+
     // 4MB VRAM memory map:
     // LFB_BASE+VRAM_SIZE=RAMIN Mirror(?)                                                   0x1400000 (VERIFY PCBOX)
     // LFB_BASE+VRAM_SIZE*2=LFB Mirror(?)                                                   0x1800000            
@@ -1214,7 +1215,7 @@ void nv3_update_mappings(void)
 
     // 8MB VRAM memory map:
     // LFB_BASE->LFB_BASE+VRAM_SIZE=LFB
-    // What is in 800000-c00000?
+    // What is in 800000-c00000? (Partial mirror )
     // LFB_BASE+0xC00000 = RAMIN
 
     if (nv3->nvbase.bar1_lfb_base)
@@ -1235,9 +1236,7 @@ void nv3_update_mappings(void)
             mem_mapping_set_addr(&nv3->nvbase.ramin_mapping, nv3->nvbase.bar1_lfb_base + NV3_LFB_RAMIN_START, NV3_LFB_MAPPING_SIZE);
         }
         else
-        {
             fatal("NV3 2MB not implemented yet"); 
-        }
     }
 
     // Did we change the banked SVGA mode?

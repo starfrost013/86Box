@@ -86,7 +86,6 @@ uint32_t nv3_pgraph_read(uint32_t address)
             break;
         // Some of this is a temporary implementation so that we can just debug what the current state looks like during the driver initialisation process            
         // In the future, these will most likely have their own functions...
-
         // Context Switching (THIS IS CONTROLLED BY PFIFO!)
         case NV3_PGRAPH_CTX_SWITCH:
             ret = nv3->pgraph.context_switch;
@@ -122,13 +121,13 @@ uint32_t nv3_pgraph_read(uint32_t address)
             ret = *(uint32_t*)&nv3->pgraph.pattern_color_0_rgb;
             break;
         case NV3_PGRAPH_PATTERN_COLOR_0_ALPHA:
-            ret = *(uint32_t*)&nv3->pgraph.pattern_color_0_alpha;
+            ret = nv3->pgraph.pattern_color_0_alpha;
             break;
         case NV3_PGRAPH_PATTERN_COLOR_1_RGB:
             ret = *(uint32_t*)&nv3->pgraph.pattern_color_1_rgb;
             break;
         case NV3_PGRAPH_PATTERN_COLOR_1_ALPHA:
-            ret = *(uint32_t*)&nv3->pgraph.pattern_color_1_alpha;
+            ret = nv3->pgraph.pattern_color_1_alpha;
             break;
         case NV3_PGRAPH_PATTERN_BITMAP_HIGH:
             ret = (nv3->pgraph.pattern_bitmap >> 32) & 0xFFFFFFFF;
@@ -155,7 +154,7 @@ uint32_t nv3_pgraph_read(uint32_t address)
             ret = nv3->pgraph.dma_settings;
             break;
         case NV3_PGRAPH_NOTIFY:
-            ret = *(uint32_t*)&nv3->pgraph.notifier;
+            ret = nv3->pgraph.notifier;
             break;
         // More clip
         case NV3_PGRAPH_CLIP0_MIN:
@@ -193,7 +192,6 @@ uint32_t nv3_pgraph_read(uint32_t address)
         case NV3_PGRAPH_TRAPPED_INSTANCE:
             ret = nv3->pgraph.trapped_instance;
             break;
-
     }
 
     /* Special exception for memory areas */
@@ -202,7 +200,6 @@ uint32_t nv3_pgraph_read(uint32_t address)
     {
         // Addresses should be aligned to 4 bytes.
         uint32_t entry = (address - NV3_PGRAPH_CONTEXT_CACHE(0));
-
         nv_log_verbose_only("PGRAPH Context Cache Read (Entry=%04x Value=%04x)\n", entry, nv3->pgraph.context_cache[entry]);
     }
 
@@ -302,13 +299,13 @@ void nv3_pgraph_write(uint32_t address, uint32_t value)
             *(uint32_t*)&nv3->pgraph.pattern_color_0_rgb = value;
             break;
         case NV3_PGRAPH_PATTERN_COLOR_0_ALPHA:
-            *(uint32_t*)&nv3->pgraph.pattern_color_0_alpha = value;
+            nv3->pgraph.pattern_color_0_alpha = value;
             break;
         case NV3_PGRAPH_PATTERN_COLOR_1_RGB:
             *(uint32_t*)&nv3->pgraph.pattern_color_1_rgb = value;
             break;
         case NV3_PGRAPH_PATTERN_COLOR_1_ALPHA:
-            *(uint32_t*)&nv3->pgraph.pattern_color_1_alpha = value;
+            nv3->pgraph.pattern_color_1_alpha = value;
             break;
         case NV3_PGRAPH_PATTERN_BITMAP_HIGH:
             nv3->pgraph.pattern_bitmap |= ((uint64_t)value << 32);
@@ -335,7 +332,7 @@ void nv3_pgraph_write(uint32_t address, uint32_t value)
             nv3->pgraph.dma_settings = value;
             break;
         case NV3_PGRAPH_NOTIFY:
-            *(uint32_t*)&nv3->pgraph.notifier = value;
+            nv3->pgraph.notifier = value;
             break;
         // More clip
         case NV3_PGRAPH_CLIP0_MIN:
