@@ -28,12 +28,6 @@
 #include <86box/nv/vid_nv.h>
 #include <86box/nv/vid_nv3.h>
 
-// pvideo init code
-void nv3_pvideo_init(void)
-{
-    nv_log("Initialising PVIDEO...Done!");
-}
-
 uint32_t nv3_pvideo_read(uint32_t address) 
 { 
     // before doing anything, check the subsystem enablement state for this subsystem

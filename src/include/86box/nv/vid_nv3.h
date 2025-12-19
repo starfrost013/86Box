@@ -1497,8 +1497,6 @@ void        nv3_pme_write(uint32_t address, uint32_t value);
 
 // TODO: PGRAPH class registers
 
-uint32_t    nv3_pvideo_read(uint32_t address);
-void        nv3_pvideo_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pramdac_read(uint32_t address);
 void        nv3_pramdac_write(uint32_t address, uint32_t value);
 uint32_t    nv3_pramdac_get_pixel_clock_register(void);
@@ -1575,10 +1573,7 @@ void        nv3_pfb_init(void);
 // NV3 pstraps/PSTRAPS
 void        nv3_pstraps_init(void);
 
-// NV3 PBUS
-void        nv3_pbus_init(void);
-
-// NV3 PBUS RMA - Real Mode Access for VBIOS
+// NV3 PBUS/RMA
 uint8_t     nv3_pbus_rma_read(uint16_t addr);
 void        nv3_pbus_rma_write(uint16_t addr, uint8_t val);
 
@@ -1590,11 +1585,11 @@ void        nv3_pramdac_pixel_clock_poll(double real_time);
 void        nv3_pramdac_core_clock_poll(double real_time);
 
 // NV3 PTIMER
-void        nv3_ptimer_init(void);
 void        nv3_ptimer_tick(double real_time);
 
 // NV3 PVIDEO
-void        nv3_pvideo_init(void);
+uint32_t    nv3_pvideo_read(uint32_t address);
+void        nv3_pvideo_write(uint32_t address, uint32_t value);
 
 // NV3 PME (Mediaport)
 void        nv3_pme_init(void); 

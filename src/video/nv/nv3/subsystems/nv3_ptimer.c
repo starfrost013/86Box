@@ -28,14 +28,6 @@
 #include <86box/nv/vid_nv.h>
 #include <86box/nv/vid_nv3.h>
 
-// ptimer init code
-void nv3_ptimer_init(void)
-{
-    nv_log("Initialising PTIMER...");
-
-    nv_log("Done!\n");    
-}
-
 // Handles the PTIMER alarm interrupt
 void nv3_ptimer_interrupt(uint32_t num)
 {

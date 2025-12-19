@@ -1373,13 +1373,10 @@ void* nv3_init(const device_t *info)
 
     nv3_pstraps_init();             // Initialise Straps
     nv3_pmc_init();                 // Initialise Master Control
-    nv3_pbus_init();                // Initialise Bus (the 128 part of riva)
     nv3_pfb_init();                 // Initialise Framebuffer Interface
     nv3_pramdac_init();             // Initialise RAMDAC (CLUT, final pixel presentation etc)
     nv3_pfifo_init();               // Initialise FIFO for graphics object submission
     nv3_pgraph_init();              // Initialise accelerated graphics engine
-    nv3_ptimer_init();              // Initialise programmable interval timer
-    nv3_pvideo_init();              // Initialise video overlay engine
 
     nv_log("Initialising I2C...");
     nv3->nvbase.i2c = i2c_gpio_init("nv3_i2c");

@@ -32,13 +32,6 @@
 // This basically works like a shifter, you write one byte at a time from [0x3d0...0x3d3] and it shifts it in to build a 32-bit MMIO address...
 // Putting this in pbus because imo it makes the most sense (related to memory access/memory interface)
 
-void nv3_pbus_init(void)
-{
-    nv_log("Initialising PBUS...");
-
-    nv_log("Done\n");    
-}
-
 uint32_t nv3_pbus_read(uint32_t address) 
 { 
     uint32_t ret = 0x00; 
