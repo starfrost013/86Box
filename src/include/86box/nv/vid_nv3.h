@@ -1078,7 +1078,7 @@ extern uint8_t nv3_pfifo_cache1_gray_code_table[];
 typedef struct nv3_pfifo_cache_entry_s
 {
     uint16_t method;                    // method id depending on class (offset from entry channel start in ramin)
-    uint8_t subchannel;
+    uint8_t subchannel;                 // subchannel
     uint32_t data;                      // is this the context
 } nv3_pfifo_cache_entry_t; 
 
@@ -1091,10 +1091,11 @@ typedef struct nv3_pfifo_s
     uint32_t debug_0;                   // Cache Debug register
     uint32_t config_0;
     uint32_t ramht_config;              // RAMHT config
+    uint32_t ramht_size;                // not a real register, used to store the size of ramht to reduce code duplication
     uint32_t ramfc_config;              // RAMFC config
     uint32_t ramro_config;              // RAMRO config
     uint32_t ramro_location;            // not a real register, used to store the location to reduce code duplication
-    uint32_t ramro_size;                // not a real register, used to store the size to reduce code duplicatio
+    uint32_t ramro_size;                // not a real register, used to store the size to reduce code duplication
 
     // Runout stuff
     uint32_t runout_put;                // 8:3 if RAMRO=512b, otherwise 12:3

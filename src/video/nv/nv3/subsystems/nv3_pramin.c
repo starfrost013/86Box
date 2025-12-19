@@ -158,34 +158,13 @@ void nv3_pfifo_interrupt(uint32_t id, bool fire_now)
 // THIS IS THE MOST IMPORTANT FUNCTION!
 bool nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t channel, uint8_t subchannel)
 {  
-    // TODO: WRITE IT!!!
-    // Set the number of entries to search based on the ramht size (2*(size+1))
-    // Not a switch statement in case newer gpus have larger ramins
+    // 4KB = 2, 8KB = 4, 16KB = 8, 32KB = 16. Newer GPUs may have more
+    uint32_t bucket_entries = nv3->pfifo.ramht_size >> 11;
 
-    uint32_t bucket_entries = 2;
-    uint8_t ramht_size = (nv3->pfifo.ramht_config >> NV3_PFIFO_CONFIG_RAMHT_SIZE) & 0x03;
-
-    switch (ramht_size)
-    {
-        case NV3_PFIFO_CONFIG_RAMHT_SIZE_4K:
-            // stays as is
-            break;
-        case NV3_PFIFO_CONFIG_RAMHT_SIZE_8K:
-            bucket_entries = 4; 
-            break;
-        case NV3_PFIFO_CONFIG_RAMHT_SIZE_16K:
-            bucket_entries = 8;
-            break;
-        case NV3_PFIFO_CONFIG_RAMHT_SIZE_32K:
-            bucket_entries = 16;
-            break;
-        
-    }
-    
     // Calculate the address in the hashtable
     uint32_t ramht_base = ((nv3->pfifo.ramht_config >> NV3_PFIFO_CONFIG_RAMHT_BASE_ADDRESS) & 0x0F) << NV3_PFIFO_CONFIG_RAMHT_BASE_ADDRESS;
 
-    // stored liek this to optimise searches probably
+    // stored like this to optimise searches probably
     uint32_t ramht_cur_address = ramht_base + (nv3_ramht_hash(name, channel) * bucket_entries << 3); 
 
     nv_log_verbose_only("Beginning search for graphics object at RAMHT base=0x%04x, name=0x%08x, Cache%d, channel=%d.%d)\n",

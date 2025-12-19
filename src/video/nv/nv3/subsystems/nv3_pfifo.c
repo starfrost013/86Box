@@ -377,20 +377,20 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
             nv3->pfifo.ramht_config = val;
 // This code sucks a bit fix it later
 //#ifdef ENABLE_NV_LOG
-            uint32_t new_size_ramht = ((val >> 16) & 0x03);
+            nv3->pfifo.ramht_size = ((val >> 16) & 0x03);
 
-            if (new_size_ramht == 0)
-                new_size_ramht = 0x1000;
-            else if (new_size_ramht == 1)
-                new_size_ramht = 0x2000;
-            else if (new_size_ramht == 2)
-                new_size_ramht = 0x4000;
-            else if (new_size_ramht == 3)
-                new_size_ramht = 0x8000;  
+            if (nv3->pfifo.ramht_size == 0)
+                nv3->pfifo.ramht_size = 0x1000;
+            else if (nv3->pfifo.ramht_size == 1)
+                nv3->pfifo.ramht_size = 0x2000;
+            else if (nv3->pfifo.ramht_size == 2)
+                nv3->pfifo.ramht_size = 0x4000;
+            else if (nv3->pfifo.ramht_size == 3)
+                nv3->pfifo.ramht_size = 0x8000;  
 
             nv_log("RAMHT Reconfiguration\n"
             "Base Address in RAMIN: %d\n"
-            "Size: 0x%08x bytes\n", ((nv3->pfifo.ramht_config >> NV3_PFIFO_CONFIG_RAMHT_BASE_ADDRESS) & 0x0F) << 12, new_size_ramht); 
+            "Size: 0x%08x bytes\n", ((nv3->pfifo.ramht_config >> NV3_PFIFO_CONFIG_RAMHT_BASE_ADDRESS) & 0x0F) << 12, nv3->pfifo.ramht_size); 
 //#endif
             break;
         case NV3_PFIFO_CONFIG_RAMFC:
