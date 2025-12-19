@@ -81,9 +81,7 @@ void nv3_render_gdi_transparent_bitmap_blit(bool bit, bool clip, uint32_t color,
         || nv3->pgraph.win95_gdi_text_current_position.x > nv3->pgraph.win95_gdi_text.clip_d.right
         || nv3->pgraph.win95_gdi_text_current_position.y < nv3->pgraph.win95_gdi_text.clip_d.top
         || nv3->pgraph.win95_gdi_text_current_position.y > nv3->pgraph.win95_gdi_text.clip_d.bottom)
-        {
             bit = false; 
-        }   
 
         /* 
            Also clip if we are outside of the SIZE_OUT range 
@@ -223,9 +221,7 @@ void nv3_render_gdi_1bpp_bitmap_blit(bool bit, uint32_t color0, uint32_t color1,
     || nv3->pgraph.win95_gdi_text_current_position.x > nv3->pgraph.win95_gdi_text.clip_e.right
     || nv3->pgraph.win95_gdi_text_current_position.y < nv3->pgraph.win95_gdi_text.clip_e.top
     || nv3->pgraph.win95_gdi_text_current_position.y > nv3->pgraph.win95_gdi_text.clip_e.bottom)
-    {
         skip = true; 
-    }   
 
     /* 
         Also clip if we are outside of the SIZE_OUT range 
@@ -246,7 +242,6 @@ void nv3_render_gdi_1bpp_bitmap_blit(bool bit, uint32_t color0, uint32_t color1,
         else 
             nv3_render_write_pixel(nv3->pgraph.win95_gdi_text_current_position, nv3->pgraph.win95_gdi_text.color0_e, grobj);
     }
-       
 
     /* 
        Check if we've reached the bottom, if so, advance to the next horizontal lin
@@ -269,8 +264,7 @@ void nv3_render_gdi_1bpp_bitmap_blit(bool bit, uint32_t color0, uint32_t color1,
 void nv3_render_gdi_1bpp_bitmap(uint32_t color0, uint32_t color1, uint32_t bitmap_data, nv3_grobj_t grobj)
 {
     /* 
-        First, we need to figure out how many bits we have left.
-        If we have less than 32, don't process all of the bits. 
+        First, we need to figure out how many bits we have left. If we have less than 32, don't process all of the bits. 
 
         Bits are processed in the following order: [7-0] [15-8] [23-16] [31-24]
         TODO: Store this somewhere, so it doesn't need to be recalculated.

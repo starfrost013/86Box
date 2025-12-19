@@ -13,8 +13,7 @@
  *          Notes specific to a subsystem in the header or c file for that subsystem
  *          Also check the doc folder for some more notres
  * 
- *          vid_nv3.h:      NV3 Architecture Hardware Reference (open-source)
- *          Last updated:   12 April 2025 (STILL WORKING ON IT!!!)
+ *          vid_nv3.h:      Defines a lot of shit
  *  
  * Authors: Connor Hyde <mario64crashed@gmail.com>
  *
@@ -1148,21 +1147,6 @@ typedef struct nv3_pramdac_s
     nv3_coord_16_t cursor_start; 
 } nv3_pramdac_t;
 
-typedef struct nv3_pgraph_context_control_s
-{
-    /* TODO */
-} nv3_pgraph_context_control_t; 
-
-typedef struct nv3_pgraph_dma_settings_s
-{
-    /* TODO */
-} nv3_pgraph_dma_settings_t;
-
-typedef struct nv3_pgraph_clip_misc_settings_s
-{
-    /* TODO */
-} nv3_pgraph_clip_misc_settings_t;
-
 typedef struct nv3_pgraph_status_s
 {
     bool overall_busy : 1;          // Is anything busy?
@@ -1220,7 +1204,7 @@ typedef struct nv3_pgraph_s
     uint32_t intr_en_dma;        // Interrupt enable for DMA
 
     uint32_t context_switch;              // TODO: Make this a struct, it's just going to be enormous lol.
-    nv3_pgraph_context_control_t context_control;
+    uint32_t context_control;
     uint32_t context_user;
 
     uint32_t context_cache[NV3_PGRAPH_CONTEXT_CACHE_SIZE];  // DMA context cache (nv3_pgraph_context_user_t array?)
@@ -1245,14 +1229,14 @@ typedef struct nv3_pgraph_s
     uint32_t plane_mask;                                    // only 7:0 relevant
     uint32_t chroma_key;                                    // color key
     uint32_t beta_factor;
-    nv3_pgraph_dma_settings_t dma_settings;
+    uint32_t dma_settings;
     uint8_t rop;                                            // Current GDI Ternary Render Operation
     // SURFACE STUFF - PGRAPH CAN OPERATE ON 4 SURFACES/BUFFERS AT A TIME
     uint32_t boffset[NV3_PGRAPH_MAX_BUFFERS];               // 22-bit linear VRAM offset for the start of a buffer.
     uint16_t bpitch[NV3_PGRAPH_MAX_BUFFERS];                // 12-bit linear VRAM offset for the pitch of a buffer
     uint32_t bpixel[NV3_PGRAPH_MAX_BUFFERS];                // Pixel format for each possible surfaces.
     // CLIP
-    nv3_pgraph_clip_misc_settings_t clip_misc_settings;
+    uint32_t clip_misc_settings;
     uint32_t notifier;
     bool notify_pending;                                    // Determines if a notification is pending.
     /* Are these even used */
@@ -1355,12 +1339,6 @@ typedef struct nv3_ramin_ramfc_s
 
 } nv3_ramin_ramfc_t;
 
-typedef struct nv3_ramin_s
-{
-
-} nv3_ramin_t;
-
-
 typedef struct nv3_pvideo_s
 {
     uint32_t intr;          // Interrupt status
@@ -1421,7 +1399,6 @@ typedef struct nv3_s
     nv3_ptimer_t ptimer;            // programmable interval timer
     // (ramro does not need a struct)
     nv3_ramin_ramfc_t ramfc;        // context for unused channels
-    nv3_ramin_t pramin;             // INstance memory for graphics objects. Very important!
     nv3_pvideo_t pvideo;            // Video overlay
     nv3_pme_t pme;                  // Mediaport - external MPEG decoder and video interface
     //more here

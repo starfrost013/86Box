@@ -207,7 +207,6 @@ uint32_t nv3_pramdac_read(uint32_t address)
 
     // todo: friendly logging
 
-
     //s hould be pretty easy to understand
     switch (address)
     {

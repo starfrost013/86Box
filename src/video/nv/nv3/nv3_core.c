@@ -585,7 +585,7 @@ void nv3_recalc_timings(svga_t* svga)
     /* Turn off override if we are in VGA mode */
     svga->override = !(pixel_mode == NV3_CRTC_REGISTER_PIXELMODE_VGA);
 
-    /* NOTE: The RIVA 128 draws in a way almost completely separate to any other 86Box GPU.
+    /* NOTE: I'm trying a new approach to see if we can get realistic-ish performance out of this.
     
     Basically, we only blit to buffer32 when something changes and we don't even bother using a timer. We only render when there is something to actually render.
 
@@ -670,7 +670,6 @@ void nv3_force_redraw(void* priv)
 // Read from SVGA core memory
 uint8_t nv3_svga_read(uint16_t addr, void* priv)
 {
-
     nv3_t* nv3 = (nv3_t*)priv;
 
     uint8_t ret = 0x00;
@@ -910,7 +909,6 @@ void nv3_dfb_write16(uint32_t addr, uint16_t val, void* priv)
     nv3->nvbase.svga.vram[addr] = (val) & 0xFF;
     nv3->nvbase.svga.changedvram[addr >> 12] = val;
     nv3_render_current_bpp_dfb_16(addr);
-
 }
 
 void nv3_dfb_write32(uint32_t addr, uint32_t val, void* priv)
@@ -921,9 +919,7 @@ void nv3_dfb_write32(uint32_t addr, uint32_t val, void* priv)
     nv3->nvbase.svga.vram[addr + 1] = (val >> 8) & 0xFF;
     nv3->nvbase.svga.vram[addr] = (val) & 0xFF;
     nv3->nvbase.svga.changedvram[addr >> 12] = val;
-
     nv3_render_current_bpp_dfb_32(addr);
-
 }
 
 /* Cursor shit */
@@ -1040,7 +1036,6 @@ void nv3_draw_cursor(svga_t* svga, int32_t drawline)
 
             start_position.x++; 
         }
-
 
         start_position.y++; 
         start_position.x = nv3->pramdac.cursor_start.x; 
@@ -1201,7 +1196,6 @@ void nv3_update_mappings(void)
     // Setup BAR0 (MMIO)
 
     nv_log("BAR0 (MMIO Base) = 0x%08x\n", nv3->nvbase.bar0_mmio_base);
-
     
     if (nv3->nvbase.bar0_mmio_base)
         mem_mapping_set_addr(&nv3->nvbase.mmio_mapping, nv3->nvbase.bar0_mmio_base, NV3_MMIO_SIZE);
@@ -1209,12 +1203,9 @@ void nv3_update_mappings(void)
     // if this breaks anything, remove it
     nv_log("BAR1 (Linear Framebuffer / NV_USER Base & RAMIN) = 0x%08x\n", nv3->nvbase.bar1_lfb_base);
 
-    // this is likely mirrored 
-    // 4x on 2mb cards
-    // 2x on 4mb cards
-    // and not at all on 8mb
+    // this is likely mirrored 4x on 2mb cards, 2x on 4mb cards, and not at all on 8mb cards
 
-    /* TODO: 2MB */
+    // 1MB was never used, 2MB only used once. Do we really need it?
 
     // 4MB VRAM memory map:
     // LFB_BASE+VRAM_SIZE=RAMIN Mirror(?)                                                   0x1400000 (VERIFY PCBOX)
@@ -1288,9 +1279,9 @@ void* nv3_init(const device_t *info)
 
     if (!nv3->nvbase.gpu_revision)
         nv3->nvbase.gpu_revision = device_get_config_int("chip_revision");
-    
+
     /* Set log device name based on card model */
-    const char* log_device_name = (nv3->nvbase.gpu_revision == NV3_PCI_CFG_REVISION_C00) ? "NV3T" : "NV3";
+    const char* log_device_name = "NV3";
 
     if (device_get_config_int("nv_debug_fulllog"))
         nv3->nvbase.log = log_open(log_device_name);
@@ -1306,26 +1297,43 @@ void* nv3_init(const device_t *info)
     // this will only be logged if ENABLE_NV_LOG_ULTRA is defined
     nv_log_verbose_only("ULTRA LOGGING enabled");
 
-    // Figure out which vbios the user selected
-    // This depends on the bus we are using and if the gpu is rev a/b or rev c
-    const char* vbios_id = device_get_config_bios("vbios");
-    const char* vbios_file = "";
+    const device_t* device_id = &nv3_device_pci;
+    static video_timings_t* timing_id = &timing_nv3_pci;
 
+    // RIVA 128ZX
     if (nv3->nvbase.gpu_revision == NV3_PCI_CFG_REVISION_C00)
     {
-        if (nv3->nvbase.bus_generation == nv_bus_pci)
-            vbios_file = device_get_bios_file(&nv3t_device_pci, vbios_id, 0);
-        else   
-            vbios_file = device_get_bios_file(&nv3t_device_agp, vbios_id, 0);
+        nv_log("Submodel: RIVA 128 ZX (NV3T)\n");
+
+        if (nv3->nvbase.bus_generation >= nv_bus_agp_1x)
+        {
+            device_id = &nv3t_device_agp; 
+            timing_id = &timing_nv3t_agp;
+        }
+        else
+        {
+            device_id = &nv3t_device_pci;
+            timing_id = &timing_nv3t_pci;
+        }
     }
     else
     {
-        if (nv3->nvbase.bus_generation == nv_bus_pci)
-            vbios_file = device_get_bios_file(&nv3_device_pci, vbios_id, 0);
-        else   
-            vbios_file = device_get_bios_file(&nv3_device_agp, vbios_id, 0);
+        nv_log("Submodel: RIVA 128 (NV3)\n");
+
+        // we don't need to check for pci as its the default value above
+        if (nv3->nvbase.bus_generation >= nv_bus_agp_1x)
+        {
+            device_id = &nv3_device_agp;   
+            timing_id = &timing_nv3_agp;
+        }
     }
 
+    (nv3->nvbase.bus_generation >= nv_bus_agp_1x) ? nv_log("AGP bus\n") : nv_log("PCI bus\n");
+
+    // Figure out which vbios the user selected
+    // This depends on the bus we are using and if the gpu is rev a/b or rev c
+    const char* vbios_id = device_get_config_bios("vbios");
+    const char* vbios_file = device_get_bios_file(device_id, vbios_id, 0);
 
     int32_t err = rom_init(&nv3->nvbase.vbios, vbios_file, 0xC0000, 0x8000, 0x7fff, 0, MEM_MAPPING_EXTERNAL);
     
@@ -1340,52 +1348,15 @@ void* nv3_init(const device_t *info)
 
     // set up the bus and start setting up SVGA core
     if (nv3->nvbase.bus_generation == nv_bus_pci)
-    {
-        nv_log("Using PCI bus\n");
-
         pci_add_card(PCI_ADD_NORMAL, nv3_pci_read, nv3_pci_write, NULL, &nv3->nvbase.pci_slot);
-
-        /* Initialise the right revision of the card */
-        if (nv3->nvbase.gpu_revision == NV3_PCI_CFG_REVISION_C00)
-        {
-            svga_init(&nv3t_device_pci, &nv3->nvbase.svga, nv3, nv3->nvbase.vram_amount, 
-                nv3_recalc_timings, nv3_svga_read, nv3_svga_write, nv3_draw_cursor, NULL);
-
-            video_inform(VIDEO_FLAG_TYPE_SPECIAL, &timing_nv3t_pci);
-        }
-        else
-        {
-            svga_init(&nv3_device_pci, &nv3->nvbase.svga, nv3, nv3->nvbase.vram_amount, 
-                nv3_recalc_timings, nv3_svga_read, nv3_svga_write, nv3_draw_cursor, NULL);
-
-            video_inform(VIDEO_FLAG_TYPE_SPECIAL, &timing_nv3_pci);
-        }
-
-    }
-    else if (nv3->nvbase.bus_generation == nv_bus_agp_1x
-    || nv3->nvbase.bus_generation == nv_bus_agp_2x)
-    {
-        nv_log("Using AGP 1X/2X bus\n");
-
+    else
         pci_add_card(PCI_ADD_AGP, nv3_pci_read, nv3_pci_write, NULL, &nv3->nvbase.pci_slot);
 
-        /* Initialise the right revision of the card */
-        if (nv3->nvbase.gpu_revision == NV3_PCI_CFG_REVISION_C00)
-        {
-            svga_init(&nv3t_device_agp, &nv3->nvbase.svga, nv3, nv3->nvbase.vram_amount, 
-                nv3_recalc_timings, nv3_svga_read, nv3_svga_write, nv3_draw_cursor, NULL);
+    svga_init(device_id, &nv3->nvbase.svga, nv3, nv3->nvbase.vram_amount, 
+        nv3_recalc_timings, nv3_svga_read, nv3_svga_write, nv3_draw_cursor, NULL);
 
-            video_inform(VIDEO_FLAG_TYPE_SPECIAL, &timing_nv3t_agp);
-        }
-        else
-        {
-            svga_init(&nv3_device_agp, &nv3->nvbase.svga, nv3, nv3->nvbase.vram_amount, 
-                nv3_recalc_timings, nv3_svga_read, nv3_svga_write, nv3_draw_cursor, NULL);
-
-            video_inform(VIDEO_FLAG_TYPE_SPECIAL, &timing_nv3_agp);
-        }
-    }
-
+    video_inform(VIDEO_FLAG_TYPE_SPECIAL, timing_id);
+    
     // set vram
     nv_log("VRAM=%d bytes\n", nv3->nvbase.svga.vram_max);
 

@@ -390,7 +390,6 @@ void nv3_render_write_pixel_to_buffer(nv3_coord_16_t position, uint32_t color, n
     /* Get our pattern data, may move to another function */
     switch (nv3->pgraph.pattern.shape)
     {
-
         /* This logic is from NV1 envytoos docs, but seems to be same on NV3*/
         case NV3_PATTERN_SHAPE_8X8:
             bit = (position.x & 7) | (position.y & 7) << 3;
@@ -469,9 +468,7 @@ void nv3_render_write_pixel_to_buffer(nv3_coord_16_t position, uint32_t color, n
             // convert to 15bpp or 16bpp based on if we are in 16bpp mode
 
             rop_dst = vram_16[pixel_addr_vram];
-
             vram_16[pixel_addr_vram] = video_rop_gdi_ternary(final_rop, rop_src, rop_dst, rop_pattern) & 0xFFFF;
-
             nv3->nvbase.svga.changedvram[pixel_addr_vram >> 11] = changeframecount;
 
             break;

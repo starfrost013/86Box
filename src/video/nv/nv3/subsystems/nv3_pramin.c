@@ -335,9 +335,8 @@ bool nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t channel, u
     for (uint32_t bucket_entry = 0; bucket_entry < bucket_entries; bucket_entry++)
     {
         found_obj_name = nv3_ramin_read32(ramht_cur_address, NULL);
-        ramht_cur_address += 0x04;
-        uint32_t obj_context = nv3_ramin_read32(ramht_cur_address, NULL);
-        ramht_cur_address += 0x04;
+        uint32_t obj_context = nv3_ramin_read32(ramht_cur_address + 4, NULL);
+        ramht_cur_address += 0x08;
         obj_context_struct = *(nv3_ramin_context_t*)&obj_context;
 
         // see if the object is in the right channel
