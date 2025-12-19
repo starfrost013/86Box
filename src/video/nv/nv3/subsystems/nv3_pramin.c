@@ -49,48 +49,33 @@ void nv3_debug_ramin_print_context_info(uint32_t name, nv3_ramin_context_t conte
 // Read 8-bit ramin
 uint8_t nv3_ramin_read8(uint32_t addr, void* priv)
 {
-    if (!nv3) 
-        return 0x00;
+    if (!nv3) return 0x00;
 
     addr &= (nv3->nvbase.svga.vram_max - 1);
-    uint32_t raw_addr = addr; // saved after and
 
-    addr ^= (nv3->nvbase.svga.vram_max - 0x10);
+    // why does this not work in one line
+    uint32_t ramin_addr = (addr ^ nv3->nvbase.svga.vram_max - 0x10);
+    uint8_t val = nv3->nvbase.svga.vram[ramin_addr];
+    
+    nv_log_verbose_only("Read word from PRAMIN 0x%08x <- 0x%08x (raw address=0x%08x)\n", ramin_addr, val, addr);
 
-    uint32_t val = 0x00;
-
-    if (!nv3_ramin_arbitrate_read(addr, &val)) // Oh well
-    {
-        val = (uint8_t)nv3->nvbase.svga.vram[addr];
-        nv_log_verbose_only("Read byte from PRAMIN addr=0x%08x (raw address=0x%08x)\n", addr, raw_addr);
-    }
-
-    return (uint8_t)val;
+    return val;
 }
 
 // Read 16-bit ramin
 uint16_t nv3_ramin_read16(uint32_t addr, void* priv)
 {
-    if (!nv3) 
-        return 0x00;
+    if (!nv3) return 0x00;
 
     addr &= (nv3->nvbase.svga.vram_max - 1);
 
     // why does this not work in one line
-    svga_t* svga = &nv3->nvbase.svga;
-    uint16_t* vram_16bit = (uint16_t*)svga->vram;
-    uint32_t raw_addr = addr; // saved after and
+    uint16_t* vram_16bit = (uint16_t*)nv3->nvbase.svga.vram;
+    uint32_t ramin_addr = (addr ^ nv3->nvbase.svga.vram_max - 0x10) >> 1;
 
-    addr ^= (nv3->nvbase.svga.vram_max - 0x10);
-    addr >>= 1; // what
+    uint16_t val = vram_16bit[ramin_addr];
 
-    uint32_t val = 0x00;
-
-    if (!nv3_ramin_arbitrate_read(addr, &val))
-    {
-        val = (uint16_t)vram_16bit[addr];
-        nv_log_verbose_only("Read word from PRAMIN addr=0x%08x (raw address=0x%08x)\n", addr, raw_addr);
-    }
+    nv_log_verbose_only("Read word from PRAMIN 0x%08x <- 0x%08x (raw address=0x%08x)\n", ramin_addr, val, addr);
 
     return val;
 }
@@ -98,26 +83,21 @@ uint16_t nv3_ramin_read16(uint32_t addr, void* priv)
 // Read 32-bit ramin
 uint32_t nv3_ramin_read32(uint32_t addr, void* priv)
 {
-    if (!nv3) 
-        return 0x00;
+    if (!nv3) return 0x00;
 
-    // we need this for 2mb+8mb cards
     addr &= (nv3->nvbase.svga.vram_max - 1);
 
     // why does this not work in one line
     uint32_t* vram_32bit = (uint32_t*)nv3->nvbase.svga.vram;
-    uint32_t raw_addr = addr; // saved after and logged
-
     uint32_t ramin_addr = (addr ^ nv3->nvbase.svga.vram_max - 0x10) >> 2;
 
     uint32_t val = vram_32bit[ramin_addr];
-    nv_log_verbose_only("Read dword from PRAMIN 0x%08x <- 0x%08x (raw address=0x%08x)\n", val, addr, raw_addr);
-
-    //if (!nv3_ramin_arbitrate_read(addr, &val))
-
+    nv_log_verbose_only("Read dword from PRAMIN 0x%08x <- 0x%08x (raw address=0x%08x)\n", ramin_addr, val, addr);
 
     return val;
 }
+
+// RAMIN write functions 
 
 // Write 8-bit ramin
 void nv3_ramin_write8(uint32_t addr, uint8_t val, void* priv)
@@ -125,23 +105,13 @@ void nv3_ramin_write8(uint32_t addr, uint8_t val, void* priv)
     if (!nv3) return;
 
     addr &= (nv3->nvbase.svga.vram_max - 1);
-    uint32_t raw_addr = addr; // saved after and
 
-    // Structures in RAMIN are stored from the bottom of vram up in reverse order
-    // this can be explained without bitwise math like so:
-    // real VRAM address = VRAM_size - (ramin_address - (ramin_address % reversal_unit_size)) - reversal_unit_size + (ramin_address % reversal_unit_size) 
-    // reversal unit size in this case is 16 bytes, vram size is 2-8mb (but 8mb is zx/nv3t only and 2mb...i haven't found a 22mb card)
-    addr ^= (nv3->nvbase.svga.vram_max - 0x10);
+    uint32_t ramin_addr = (addr ^ nv3->nvbase.svga.vram_max - 0x10);
+    nv3->nvbase.svga.vram[ramin_addr] = val;
+    
+    nv3->nvbase.svga.vram[addr] = val;
 
-    uint32_t val32 = (uint32_t)val;
-
-    if (!nv3_ramin_arbitrate_write(addr, val32))
-    {
-        nv3->nvbase.svga.vram[addr] = val;
-        nv_log_verbose_only("Write byte to PRAMIN addr=0x%08x val=0x%02x (raw address=0x%08x)\n", addr, val, raw_addr);
-    }
-
-
+    nv_log_verbose_only("Write byte to PRAMIN addr=0x%08x val=0x%02x (raw address=0x%08x)\n", ramin_addr, val, addr);
 }
 
 // Write 16-bit ramin
@@ -154,18 +124,11 @@ void nv3_ramin_write16(uint32_t addr, uint16_t val, void* priv)
     // why does this not work in one line
     svga_t* svga = &nv3->nvbase.svga;
     uint16_t* vram_16bit = (uint16_t*)svga->vram;
-    uint32_t raw_addr = addr; // saved after and
 
-    addr ^= (nv3->nvbase.svga.vram_max - 0x10);
-    addr >>= 1; // what
+    uint32_t ramin_addr = (addr ^ nv3->nvbase.svga.vram_max - 0x10) >> 1;
+    vram_16bit[ramin_addr] = val;
 
-    uint32_t val32 = (uint32_t)val;
-
-    if (!nv3_ramin_arbitrate_write(addr, val32))
-    {
-        vram_16bit[addr] = val;
-        nv_log_verbose_only("Write word to PRAMIN addr=0x%08x val=0x%04x (raw address=0x%08x)\n", addr, val, raw_addr);
-    }
+    nv_log_verbose_only("Write word to PRAMIN addr=0x%08x val=0x%04x (raw address=0x%08x)\n", ramin_addr, val, addr);
 }
 
 // Write 32-bit ramin
@@ -178,12 +141,11 @@ void nv3_ramin_write32(uint32_t addr, uint32_t val, void* priv)
     // why does this not work in one line
     svga_t* svga = &nv3->nvbase.svga;
     uint32_t* vram_32bit = (uint32_t*)svga->vram;
-    uint32_t raw_addr = addr; // saved after and
 
     uint32_t ramin_addr = (addr ^ nv3->nvbase.svga.vram_max - 0x10) >> 2;
     vram_32bit[ramin_addr] = val;
 
-    nv_log_verbose_only("Write dword to PRAMIN addr=0x%08x val=0x%08x (raw address=0x%08x)\n", addr, val, raw_addr);
+    nv_log_verbose_only("Write dword to PRAMIN addr=0x%08x val=0x%08x (raw address=0x%08x)\n", ramin_addr, val, addr);
 
 }
 
@@ -191,103 +153,6 @@ void nv3_pfifo_interrupt(uint32_t id, bool fire_now)
 {
     nv3->pfifo.intr |= (1 << id);
     nv3_pmc_handle_interrupts(fire_now);
-}
-
-/* 
-RAMIN access arbitration functions
-Arbitrates reads and writes to RAMFC (unused dma context storage), RAMRO (invalid object submission location), RAMHT (hashtable for graphics objectstorage) unused audio memory (RAMAU?) 
-and generic RAMIN
-
-Takes a pointer to a result integer. This is because we need to check its result in our normal write function.
-Returns true if a valid "non-generic" address was found (e.g. RAMFC/RAMRO/RAMHT). False if the specified address is a generic RAMIN address
-*/
-bool nv3_ramin_arbitrate_read(uint32_t address, uint32_t* value)
-{
-    if (!nv3) 
-        return 0x00;
-
-    uint32_t ramro_size = ((nv3->pfifo.ramro_config >> NV3_PFIFO_CONFIG_RAMRO_SIZE) & 0x01);
-
-    // Get the addresses of RAMHT, RAMFC, RAMRO
-    // They must be within first 64KB of PRAMIN!
-    uint32_t ramfc_start = ((nv3->pfifo.ramfc_config >> NV3_PFIFO_CONFIG_RAMFC_BASE_ADDRESS) & 0x7F) << 9;   // Must be 0x200 aligned
-    uint32_t ramro_start = ((nv3->pfifo.ramro_config >> NV3_PFIFO_CONFIG_RAMRO_BASE_ADDRESS) & 0x7F) << 9;   // Must be 0x200 aligned
-
-    // Calculate the RAMHT and RAMRO end points.
-    // (RAMFC is always 0x1000 bytes on NV3.)
-    uint32_t ramfc_end = ramfc_start + 0x1000;
-    uint32_t ramro_end = ramro_start;
-
-    switch (ramro_size)
-    {
-        case NV3_PFIFO_CONFIG_RAMRO_SIZE_512B:
-            ramro_end = ramro_start + NV3_RAMIN_RAMRO_SIZE_0;
-            break;
-        case NV3_PFIFO_CONFIG_RAMRO_SIZE_8K:
-            ramro_end = ramro_start + NV3_RAMIN_RAMRO_SIZE_1;
-            break;
-    }
-
-    // RAMHT is written like normal RAMIN. Todo: Is RAMFC the same?
-    if (address >= ramfc_start 
-    && address <= ramfc_end)
-    {
-        *value = nv3_ramfc_read(address);
-        return true;
-    }
-    else if (address >= ramro_start 
-    && address <= ramro_end)
-    {
-        *value = nv3_ramro_read(address);
-        return true;
-    }
- 
-    /* temp */
-    return false;
-}
-
-bool nv3_ramin_arbitrate_write(uint32_t address, uint32_t value) 
-{
-    if (!nv3) 
-        return 0x00;
-
-    uint32_t ramro_size = ((nv3->pfifo.ramro_config >> NV3_PFIFO_CONFIG_RAMRO_SIZE) & 0x01);
-
-    // Get the addresses of RAMHT, RAMFC, RAMRO
-    // They must be within first 64KB of PRAMIN!
-    uint32_t ramfc_start = ((nv3->pfifo.ramfc_config >> NV3_PFIFO_CONFIG_RAMFC_BASE_ADDRESS) & 0x7F) << 9;   // Must be 0x200 aligned
-    uint32_t ramro_start = ((nv3->pfifo.ramro_config >> NV3_PFIFO_CONFIG_RAMRO_BASE_ADDRESS) & 0x7F) << 9;   // Must be 0x200 aligned
-
-    // Calculate the RAMHT and RAMRO end points.
-    // (RAMFC is always 0x1000 bytes on NV3.)
-    uint32_t ramfc_end = ramfc_start + 0x1000;
-    uint32_t ramro_end = ramro_start;
-
-    switch (ramro_size)
-    {
-        case NV3_PFIFO_CONFIG_RAMRO_SIZE_512B:
-            ramro_end = ramro_start + NV3_RAMIN_RAMRO_SIZE_0;
-            break;
-        case NV3_PFIFO_CONFIG_RAMRO_SIZE_8K:
-            ramro_end = ramro_start + NV3_RAMIN_RAMRO_SIZE_1;
-            break;
-    }
-
-    // RAMHT is written like normal RAMIN, not needed here . Todo: Is RAMFC the same?
-    if (address >= ramfc_start 
-    && address <= ramfc_end)
-    {
-        nv3_ramfc_write(address, value);
-        return true;
-    }
-    else if (address >= ramro_start 
-    && address <= ramro_end)
-    {
-        nv3_ramro_write(address, value);
-        return true;
-    }
-
-    return false;
 }
 
 // THIS IS THE MOST IMPORTANT FUNCTION!

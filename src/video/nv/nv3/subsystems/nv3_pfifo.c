@@ -401,17 +401,18 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
             break;
         case NV3_PFIFO_CONFIG_RAMRO:
             nv3->pfifo.ramro_config = val;
+            nv3->pfifo.ramro_location = ((nv3->pfifo.ramro_config >> NV3_PFIFO_CONFIG_RAMRO_BASE_ADDRESS) & 0x7F);
 
             uint32_t new_size_ramro = ((val >> NV3_PFIFO_CONFIG_RAMRO_SIZE) & 0x01);
 
             if (new_size_ramro == 0)
-                new_size_ramro = 0x200;
+                nv3->pfifo.ramro_size = 0x1FF;
             else if (new_size_ramro == 1)
-                new_size_ramro = 0x2000;
+                nv3->pfifo.ramro_size = 0x1FFF;
             
             nv_log("RAMRO Reconfiguration\n"
             "Base Address in RAMIN: %d\n"
-            "Size: 0x%08x bytes\n", ((nv3->pfifo.ramro_config >> NV3_PFIFO_CONFIG_RAMRO_BASE_ADDRESS) & 0x7F) << 9, new_size_ramro); 
+            "Size: 0x%08x bytes\n", nv3->pfifo.ramro_location, new_size_ramro); 
             break;
         case NV3_PFIFO_DEBUG_0:
             nv3->pfifo.debug_0 = val;
@@ -490,26 +491,11 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
             nv3->pfifo.cache1_settings.get_address = val;
             break;
         case NV3_PFIFO_RUNOUT_GET:
-        {
-            uint32_t size_get = ((nv3->pfifo.ramro_config >> NV3_PFIFO_CONFIG_RAMRO_SIZE) & 0x01);
-
-            if (size_get == 0) //512b
-                nv3->pfifo.runout_get = val & (NV3_RAMIN_RAMRO_SIZE_0 - 0x07);
-            else 
-                nv3->pfifo.runout_get = val & (NV3_RAMIN_RAMRO_SIZE_1 - 0x07);
+            nv3->pfifo.runout_get = val & nv3->pfifo.ramro_size - 0x07; // either 1F7 or 1FF7, because ramro entries are 8bytes
             break;
-        }
         case NV3_PFIFO_RUNOUT_PUT:
-        {
-            uint32_t size_put = ((nv3->pfifo.ramro_config >> NV3_PFIFO_CONFIG_RAMRO_SIZE) & 0x01);
-
-            if (size_put == 0) //512b
-                nv3->pfifo.runout_put = val & (NV3_RAMIN_RAMRO_SIZE_0 - 0x07);
-            else 
-                nv3->pfifo.runout_put = val & (NV3_RAMIN_RAMRO_SIZE_1 - 0x07);
-
+            nv3->pfifo.runout_put = val & nv3->pfifo.ramro_size - 0x07; // either 1F7 or 1FF7, because ramro entries are 8bytes
             break;
-        }
         /* Cache1 Context is handled below */
         case NV3_PFIFO_CACHE0_CTX:
             nv3->pfifo.cache0_settings.context[0] = val;
@@ -727,6 +713,7 @@ void nv3_pfifo_cache1_push(uint32_t addr, uint32_t param)
         new_address |= (nv3_runout_reason_cache_ran_out << NV3_PFIFO_RUNOUT_RAMIN_ERR);
     }
 
+    // no space left
     if (!nv3_pfifo_cache1_num_free_spaces())
     {
         oh_shit = true;
@@ -734,14 +721,12 @@ void nv3_pfifo_cache1_push(uint32_t addr, uint32_t param)
         new_address |= (nv3_runout_reason_free_count_overrun << NV3_PFIFO_RUNOUT_RAMIN_ERR);
     }
 
-    // 0x0 is used for creating the object.
+    // 0x0 is used for creating the object. The rest are reserved nvidia methods
     if (method_offset > 0 && method_offset < 0x100)
     {
-        // Reserved nvidia methods
         oh_shit = true; 
         oh_shit_reason = nv3_runout_reason_reserved_access;
         new_address |= (nv3_runout_reason_reserved_access << NV3_PFIFO_RUNOUT_RAMIN_ERR);
-
     }
 
     // Now check for context switching
@@ -766,8 +751,8 @@ void nv3_pfifo_cache1_push(uint32_t addr, uint32_t param)
         nv_log("OH CRAP: Runout Error=%d Channel=%d Subchannel=%d Method=0x%04x", 
             oh_shit_reason, channel, subchannel, method_offset);
          
-        nv3_ramro_write(nv3->pfifo.runout_put, new_address);
-        nv3_ramro_write(nv3->pfifo.runout_put + 4, param);
+        nv3_ramin_write32(nv3->pfifo.ramro_location + nv3->pfifo.runout_put, new_address, nv3);
+        nv3_ramin_write32(nv3->pfifo.ramro_location + nv3->pfifo.runout_put + 4, param, nv3);
 
         nv3->pfifo.runout_put += 0x08;
 

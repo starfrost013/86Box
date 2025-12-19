@@ -160,8 +160,6 @@ add_library(vid OBJECT
     nv/nv3/subsystems/nv3_pbus_dma.c
     nv/nv3/subsystems/nv3_ptimer.c
     nv/nv3/subsystems/nv3_pramin.c 
-    nv/nv3/subsystems/nv3_pramin_ramfc.c 
-    nv/nv3/subsystems/nv3_pramin_ramro.c 
     nv/nv3/subsystems/nv3_pvideo.c
     nv/nv3/subsystems/nv3_user.c
 

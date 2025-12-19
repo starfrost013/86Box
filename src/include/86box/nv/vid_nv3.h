@@ -1093,6 +1093,9 @@ typedef struct nv3_pfifo_s
     uint32_t ramht_config;              // RAMHT config
     uint32_t ramfc_config;              // RAMFC config
     uint32_t ramro_config;              // RAMRO config
+    uint32_t ramro_location;            // not a real register, used to store the location to reduce code duplication
+    uint32_t ramro_size;                // not a real register, used to store the size to reduce code duplicatio
+
     // Runout stuff
     uint32_t runout_put;                // 8:3 if RAMRO=512b, otherwise 12:3
     uint32_t runout_get;                // 8:3 if RAMRO=512b, otherwise 12:3
@@ -1442,10 +1445,10 @@ void        nv3_dfb_write8(uint32_t addr, uint8_t val, void* priv);             
 void        nv3_dfb_write16(uint32_t addr, uint16_t val, void* priv);           // Write 16-bit DFB
 void        nv3_dfb_write32(uint32_t addr, uint32_t val, void* priv);           // Write 32-bit DFB
 
-uint8_t     nv3_svga_read(uint16_t addr, void* priv);                           // Read SVGA compatibility registers
-void        nv3_svga_write(uint16_t addr, uint8_t val, void* priv);             // Write SVGA registers
-uint8_t     nv3_pci_read(int32_t func, int32_t addr, void* priv);               // Read PCI configuration registers
-void        nv3_pci_write(int32_t func, int32_t addr, uint8_t val, void* priv); // Write PCI configuration registers
+uint8_t     nv3_svga_read(uint16_t addr, void* priv);                           // Read SVGA compatibility register
+void        nv3_svga_write(uint16_t addr, uint8_t val, void* priv);             // Write SVGA register
+uint8_t     nv3_pci_read(int32_t func, int32_t addr, void* priv);               // Read PCI configuration register
+void        nv3_pci_write(int32_t func, int32_t addr, uint8_t val, void* priv); // Write PCI configuration register
 
 uint8_t     nv3_ramin_read8(uint32_t addr, void* priv);                         // Read 8-bit RAMIN
 uint16_t    nv3_ramin_read16(uint32_t addr, void* priv);                        // Read 16-bit RAMIN
@@ -1453,10 +1456,6 @@ uint32_t    nv3_ramin_read32(uint32_t addr, void* priv);                        
 void        nv3_ramin_write8(uint32_t addr, uint8_t val, void* priv);           // Write 8-bit RAMIN
 void        nv3_ramin_write16(uint32_t addr, uint16_t val, void* priv);         // Write 16-bit RAMIN
 void        nv3_ramin_write32(uint32_t addr, uint32_t val, void* priv);         // Write 32-bit RAMIN
-
-bool        nv3_ramin_arbitrate_read(uint32_t address, uint32_t* value);       // Read arbitration so we can read/write to the structures in the first 64k of ramin
-bool        nv3_ramin_arbitrate_write(uint32_t address, uint32_t value);       // Write arbitration so we can read/write to the structures in the first 64k of ramin
-
 // RAMIN functions
 uint32_t    nv3_ramht_hash(uint32_t name, uint32_t channel);
 bool        nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t channel_id, uint8_t subchannel_id);
@@ -1464,11 +1463,7 @@ bool        nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t cha
 void        nv3_debug_ramin_print_context_info(uint32_t name, nv3_ramin_context_t context);
 #endif
 
-uint32_t    nv3_ramfc_read(uint32_t address);
-void        nv3_ramfc_write(uint32_t address, uint32_t value);
-uint32_t    nv3_ramro_read(uint32_t address);
-void        nv3_ramro_write(uint32_t address, uint32_t value);
-//RAMHT just uses RAMIN function
+//RAMHT, RAMRO and RAMFC just uses the RAMIN I/O functions
 
 // MMIO Arbitration
 // Determine where our reads or writes are going

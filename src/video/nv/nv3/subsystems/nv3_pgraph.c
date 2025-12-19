@@ -154,7 +154,7 @@ uint32_t nv3_pgraph_read(uint32_t address)
             break;
         // DMA
         case NV3_PGRAPH_DMA:
-            ret = *(uint32_t*)&nv3->pgraph.dma_settings;
+            ret = nv3->pgraph.dma_settings;
             break;
         case NV3_PGRAPH_NOTIFY:
             ret = *(uint32_t*)&nv3->pgraph.notifier;
@@ -334,7 +334,7 @@ void nv3_pgraph_write(uint32_t address, uint32_t value)
             break;
         // DMA
         case NV3_PGRAPH_DMA:
-            *(uint32_t*)&nv3->pgraph.dma_settings = value;
+            nv3->pgraph.dma_settings = value;
             break;
         case NV3_PGRAPH_NOTIFY:
             *(uint32_t*)&nv3->pgraph.notifier = value;
@@ -375,7 +375,6 @@ void nv3_pgraph_write(uint32_t address, uint32_t value)
         case NV3_PGRAPH_TRAPPED_INSTANCE:
             nv3->pgraph.trapped_instance = value;
             break;
-
     }
 
     /* Special exception for memory areas */
@@ -453,9 +452,7 @@ void nv3_pgraph_submit(uint32_t param, uint16_t method, uint8_t channel, uint8_t
 
     /* Methods below 0x104 are shared across all classids, so call generic_method for that*/
     if (method <= NV3_SET_NOTIFY)
-    {
         nv3_generic_method(param, method, context, grobj);
-    }
     else
     {
         // By this point, we already ANDed the class ID to 0x1F.
