@@ -23,6 +23,7 @@
 #include <QStringListModel>
 #include <QTimer>
 #include <QProgressDialog>
+#include <QShortcut>
 
 #include <thread>
 #include <atomic>
@@ -140,13 +141,13 @@ VMManagerMain::VMManagerMain(QWidget *parent)
 
             contextMenu.addSeparator();
 
-            QAction settingsAction(tr("&Settings..."));
+            QAction settingsAction(tr("&Settings…"));
             contextMenu.addAction(&settingsAction);
             connect(&settingsAction, &QAction::triggered, [this] {
                 selected_sysconfig->launchSettings();
             });
 
-            QAction nameChangeAction(tr("Change &display name..."));
+            QAction nameChangeAction(tr("Change &display name…"));
             contextMenu.addAction(&nameChangeAction);
             // Use a lambda to call a function so indexAt can be passed
             connect(&nameChangeAction, &QAction::triggered, ui->listView, [this, indexAt] {
@@ -154,7 +155,7 @@ VMManagerMain::VMManagerMain(QWidget *parent)
             });
             nameChangeAction.setEnabled(!selected_sysconfig->window_obscured);
 
-            QAction setSystemIcon(tr("Set &icon..."));
+            QAction setSystemIcon(tr("Set &icon…"));
             contextMenu.addAction(&setSystemIcon);
             connect(&setSystemIcon, &QAction::triggered, [this] {
                 IconSelectionDialog dialog(":/systemicons/");
@@ -168,7 +169,7 @@ VMManagerMain::VMManagerMain(QWidget *parent)
 
             contextMenu.addSeparator();
 
-            QAction cloneMachine(tr("C&lone..."));
+            QAction cloneMachine(tr("C&lone…"));
             contextMenu.addAction(&cloneMachine);
             connect(&cloneMachine, &QAction::triggered, [this] {
                 QDialog dialog = QDialog(this);
@@ -331,7 +332,7 @@ illegal_chars:
 
             contextMenu.addSeparator();
 
-            QAction openSystemFolderAction(tr("&Open folder..."));
+            QAction openSystemFolderAction(tr("&Open folder…"));
             contextMenu.addAction(&openSystemFolderAction);
             connect(&openSystemFolderAction, &QAction::triggered, [indexAt] {
                 if (const auto configDir = indexAt.data(VMManagerModel::Roles::ConfigDir).toString(); !configDir.isEmpty()) {
@@ -343,7 +344,7 @@ illegal_chars:
                 }
             });
 
-            QAction openPrinterFolderAction(tr("Open p&rinter tray..."));
+            QAction openPrinterFolderAction(tr("Open p&rinter tray…"));
             contextMenu.addAction(&openPrinterFolderAction);
             connect(&openPrinterFolderAction, &QAction::triggered, [indexAt] {
                 if (const auto printerDir = indexAt.data(VMManagerModel::Roles::ConfigDir).toString() + QString("/printer/"); !printerDir.isEmpty()) {
@@ -355,7 +356,7 @@ illegal_chars:
                 }
             });
 
-            QAction openScreenshotsFolderAction(tr("Open screenshots &folder..."));
+            QAction openScreenshotsFolderAction(tr("Open screenshots &folder…"));
             contextMenu.addAction(&openScreenshotsFolderAction);
             connect(&openScreenshotsFolderAction, &QAction::triggered, [indexAt] {
                 if (const auto screenshotsDir = indexAt.data(VMManagerModel::Roles::ConfigDir).toString() + QString("/screenshots/"); !screenshotsDir.isEmpty()) {
@@ -379,7 +380,7 @@ illegal_chars:
         } else {
             QMenu contextMenu(tr("Context Menu"), ui->listView);
 
-            QAction newMachineAction(tr("&New machine..."));
+            QAction newMachineAction(tr("&New machine…"));
             contextMenu.addAction(&newMachineAction);
             connect(&newMachineAction, &QAction::triggered, this, &VMManagerMain::newMachineWizard);
 
@@ -404,7 +405,12 @@ illegal_chars:
         ui->listView->setCurrentIndex(first_index);
     }
 
-    connect(ui->listView, &QListView::activated, this, &VMManagerMain::startButtonPressed);
+    // Connect double-click to start VM
+    connect(ui->listView, &QListView::doubleClicked, this, &VMManagerMain::startButtonPressed);
+
+    // Connect Enter key to start VM
+    auto enterShortcut = new QShortcut(QKeySequence(Qt::Key_Return), ui->listView);
+    connect(enterShortcut, &QShortcut::activated, this, &VMManagerMain::startButtonPressed);
 
     // Load and apply settings
     loadSettings();
