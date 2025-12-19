@@ -32,11 +32,6 @@ void nv3_class_003_method(uint32_t param, uint32_t method_id, nv3_ramin_context_
 {
     switch (method_id)
     {
-        case NV3_CHROMA_UNKNOWN_0200: 
-            nv_log("Method Execution: Chroma Unknown 0x0200 0x%08x", param);
-            nv3_pgraph_interrupt_invalid(NV3_PGRAPH_INTR_1_SOFTWARE_METHOD_PENDING);
-
-            break;
         case NV3_CHROMA_KEY:
         {
             nv3_color_expanded_t expanded_color = nv3_render_expand_color(param, grobj);

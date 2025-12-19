@@ -84,12 +84,10 @@ uint32_t nv3_pgraph_read(uint32_t address)
             ret = nv3->pgraph.intr_en_1;
             nv3_pmc_handle_interrupts(true);
             break;
-        // A lot of this is currently a temporary implementation so that we can just debug what the current state looks like
-        // during the driver initialisation process            
-
+        // Some of this is a temporary implementation so that we can just debug what the current state looks like during the driver initialisation process            
         // In the future, these will most likely have their own functions...
 
-        // Context Swithcing (THIS IS CONTROLLED BY PFIFO!)
+        // Context Switching (THIS IS CONTROLLED BY PFIFO!)
         case NV3_PGRAPH_CTX_SWITCH:
             ret = nv3->pgraph.context_switch;
             break;
@@ -400,7 +398,6 @@ void nv3_pgraph_interrupt_valid(uint32_t num)
 void nv3_pgraph_interrupt_invalid(uint32_t num)
 {
     nv3->pgraph.intr_1 |= (1 << num);
-
     // Some code in pcbox hat enables the "reserved" bit HERE if it's set in intr 0. What???
     nv3_pmc_handle_interrupts(true);
 }

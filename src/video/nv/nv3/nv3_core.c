@@ -1295,7 +1295,7 @@ void* nv3_init(const device_t *info)
     nv_log("Initialising core\n");
 
     // this will only be logged if ENABLE_NV_LOG_ULTRA is defined
-    nv_log_verbose_only("ULTRA LOGGING enabled");
+    nv_log_verbose_only("ULTRA LOGGING enabled\n");
 
     const device_t* device_id = &nv3_device_pci;
     static video_timings_t* timing_id = &timing_nv3_pci;
@@ -1375,7 +1375,6 @@ void* nv3_init(const device_t *info)
     nv3_pmc_init();                 // Initialise Master Control
     nv3_pfb_init();                 // Initialise Framebuffer Interface
     nv3_pramdac_init();             // Initialise RAMDAC (CLUT, final pixel presentation etc)
-    nv3_pfifo_init();               // Initialise FIFO for graphics object submission
     nv3_pgraph_init();              // Initialise accelerated graphics engine
 
     nv_log("Initialising I2C...");

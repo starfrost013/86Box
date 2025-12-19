@@ -1092,10 +1092,11 @@ typedef struct nv3_pfifo_s
     uint32_t config_0;
     uint32_t ramht_config;              // RAMHT config
     uint32_t ramht_size;                // not a real register, used to store the size of ramht to reduce code duplication
+    uint32_t ramht_location;            // not a real register, used to store the location of ramht to reduce code duplication
     uint32_t ramfc_config;              // RAMFC config
     uint32_t ramro_config;              // RAMRO config
-    uint32_t ramro_location;            // not a real register, used to store the location to reduce code duplication
-    uint32_t ramro_size;                // not a real register, used to store the size to reduce code duplication
+    uint32_t ramro_location;            // not a real register, used to store the location of ramro to reduce code duplication
+    uint32_t ramro_size;                // not a real register, used to store the size to of ramro reduce code duplication
 
     // Runout stuff
     uint32_t runout_put;                // 8:3 if RAMRO=512b, otherwise 12:3
@@ -1549,7 +1550,6 @@ void        nv3_class_01c_method(uint32_t param, uint32_t method_id, nv3_ramin_c
 void        nv3_notify_if_needed(uint32_t name, uint32_t method_id, nv3_ramin_context_t context,nv3_grobj_t grobj);
 
 // NV3 PFIFO
-void        nv3_pfifo_init(void);
 uint32_t    nv3_pfifo_read(uint32_t address);
 void        nv3_pfifo_write(uint32_t address, uint32_t value);
 void        nv3_pfifo_interrupt(uint32_t id, bool fire_now);

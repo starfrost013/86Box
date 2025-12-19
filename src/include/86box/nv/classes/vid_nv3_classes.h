@@ -83,7 +83,6 @@ typedef enum nv3_pgraph_class_e
 
 // Chroma Key
 // Can't figure out what this is, used in 9x but certainly software, can't find anywhere...
-#define NV3_CHROMA_UNKNOWN_0200                         0x0200
 #define NV3_CHROMA_KEY                                  0x0304
 
 // Clip

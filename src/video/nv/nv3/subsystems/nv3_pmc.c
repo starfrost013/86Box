@@ -30,7 +30,7 @@
 
 void nv3_pmc_init(void)
 {
-    nv_log("Initialising PMC....\n");
+    nv_log("Initialising PMC...\n");
 
     if (nv3->nvbase.gpu_revision == NV3_PCI_CFG_REVISION_A00)
         nv3->pmc.boot = NV3_BOOT_REG_REV_A00;

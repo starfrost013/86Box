@@ -28,18 +28,11 @@
 #include <86box/nv/vid_nv.h>
 #include <86box/nv/vid_nv3.h>
 
-
-
 void nv3_pfb_init(void)
 {  
     nv_log("Initialising PFB...");
 
-    // initial configuration:
-    // ram              4mb
-    // bus width        128bit
-    // extension ram    none (was this ever used?)
-    // ram banks        4 (based on observation of physical RIVA 128 with 4mb, does 1 bank = 1chip?)
-    // twiddle          off (check this on a real card once it's actually installed)
+    // initial configuration: 4mb ram, 128 bit bus width, no extension ram (nv3t only), 4 banks (from my riva 128), twiddle off
     nv3->pfb.boot = (NV3_PFB_BOOT_RAM_EXTENSION_NONE << (NV3_PFB_BOOT_RAM_EXTENSION)
     | (NV3_PFB_BOOT_RAM_DATA_TWIDDLE_OFF << NV3_PFB_BOOT_RAM_DATA_TWIDDLE)
     | (NV3_PFB_BOOT_RAM_BANKS_4 << NV3_PFB_BOOT_RAM_BANKS)
@@ -84,7 +77,6 @@ uint32_t nv3_pfb_read(uint32_t address)
         case NV3_PFB_RTL:
             ret = nv3->pfb.rtl;
             break;
-        
     }
 
     return ret; 
@@ -114,18 +106,15 @@ void nv3_pfb_write(uint32_t address, uint32_t value)
     }
 }
 
+// the actual size and pixel depth are set in PRAMDAC using the CRTC so we don't update things here for now
 void nv3_pfb_config0_write(uint32_t val)
 {
     nv3->pfb.config_0 = val;
-
-    // i think the actual size and pixel depth are set in PRAMDAC so we don't update things here for now
 
     uint32_t new_pfb_htotal = (nv3->pfb.config_0 & 0x3F) << 5;
     // i don't think 16:9 is supported
     uint32_t new_pfb_vtotal = new_pfb_htotal * (3.0/4.0); 
     uint32_t new_bit_depth = (nv3->pfb.config_0 >> 8) & 0x03;
-
-    // This doesn't actually seem very useful. Only 0x1114 is ever used, even though this functionality is proven to work...NV1 leftover?
 
     nv_log_verbose_only("Framebuffer Config Change\n");
     nv_log_verbose_only("Horizontal Size=%d pixels\n", new_pfb_htotal); 
@@ -137,5 +126,4 @@ void nv3_pfb_config0_write(uint32_t val)
         nv_log_verbose_only("Bit Depth=16bpp\n");
     else if (new_bit_depth == NV3_PFB_CONFIG_0_DEPTH_32BPP)
         nv_log_verbose_only("Bit Depth=32bpp\n");
-
 }

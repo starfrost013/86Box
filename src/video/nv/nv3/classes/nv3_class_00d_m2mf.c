@@ -61,7 +61,6 @@ void nv3_class_00d_method(uint32_t param, uint32_t method_id, nv3_ramin_context_
             nv_log("Method Execution: M2MF Format = 0x%08x", param);
 
             // Format Done - start m2mf
-            
             nv3_perform_dma_m2mf(grobj);
 
             break;

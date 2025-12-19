@@ -38,7 +38,6 @@
 nv_register_t* nv_get_register(uint32_t addr, nv_register_t* register_list)
 {
     uint32_t reg_num = 0;
-
     nv_register_t reg_current = register_list[0];
 
     // MAKE SURE THE NV_REGISTER LIST IS TERMINATED!!! OTHERWISE, VERY BAD THINGS WILL HAPPEN!!
@@ -64,8 +63,9 @@ uint32_t nv3_mmio_arbitrate_read(uint32_t addr)
 
     uint32_t ret = 0x00;
 
-    // Ensure the addres are dword aligned.
-    // I don't know why this is needed because writepriv32 is always to dword align, but it crashes if you don't do this.
+    // Ensure the addresses are dword aligned.
+    // I don't know why this is needed because writepriv32 is Nvidia's drivers is always dword aligned, but it crashes if you don't do this.
+    // Exclude the 4bpp/8bpp CLUT for this purpose
     if (!(addr >= NV3_USER_DAC_PALETTE_START && addr <= NV3_USER_DAC_PALETTE_END))
         addr &= 0xFFFFFC;
 
@@ -111,26 +111,23 @@ uint32_t nv3_mmio_arbitrate_read(uint32_t addr)
 
     //#ifdef ENABLE_NV_LOG
 
-    // Don't bother logging these registers, far too slow!
-    if (addr == NV3_PTIMER_TIME_0_NSEC
-    || addr == NV3_PTIMER_TIME_1_NSEC)
-        return ret;
-
-    nv_register_t* reg = nv_get_register(addr, nv3_registers);
-
-    if (reg)
+    // Don't log some very very highly used registers.
+    if (addr <= NV3_USER_START
+    && addr != NV3_PTIMER_TIME_0_NSEC
+    && addr != NV3_PTIMER_TIME_1_NSEC)
     {
-        if (reg->on_read)
-            ret = reg->on_read();
-        
-        nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)\n", ret, addr, reg->friendly_name);
-    }
-    else
-    {
-        nv_log_verbose_only("Unknown register read 0x%08x\n", addr);
-    }
+        nv_register_t* reg = nv_get_register(addr, nv3_registers);
 
-    //#endif 
+        if (reg)
+        {
+            if (reg->on_read)
+                ret = reg->on_read();
+            
+            nv_log_verbose_only("Register read 0x%08x from 0x%08x (%s)\n", ret, addr, reg->friendly_name);
+        }
+        else
+            nv_log_verbose_only("Unknown register read 0x%08x\n", addr);
+    }
 
     return ret;
 }
@@ -141,12 +138,11 @@ void nv3_mmio_arbitrate_write(uint32_t addr, uint32_t val)
     if (!nv3)
         return; 
 
-    // Some of these addres are Weitek VGA stuff and we need to mask it to this first because the weitek addres are 8-bit aligned.
+    // Some of these addresess are Weitek VGA stuff and we need to mask it to this first because the weitek addresses are 8-bit aligned.
     addr &= 0xFFFFFF;
 
-
-    // Ensure the addres are dword aligned.
-    // I don't know why this is needed because writepriv32 is always dword aligned in Nvidia's drivers, but it crashes if you don't do this.
+    // Ensure the addresses are dword aligned.
+    // I don't know why this is needed because writepriv32 is Nvidia's drivers is always dword aligned, but it crashes if you don't do this.
     // Exclude the 4bpp/8bpp CLUT for this purpose
     if (!(addr >= NV3_USER_DAC_PALETTE_START && addr <= NV3_USER_DAC_PALETTE_END))
         addr &= 0xFFFFFC;
@@ -185,29 +181,28 @@ void nv3_mmio_arbitrate_write(uint32_t addr, uint32_t val)
     else 
     {
         nv_log("MMIO write arbitration failed, INVALID addr NOT mapped to any GPU subsystem 0x%08x [returning 0x00]\n", addr);
-
         return;
     }
 
     //#ifdef ENABLE_NV_LOG
 
-    // Don't bother logging these registers
-    if (addr == NV3_PTIMER_TIME_0_NSEC
-    || addr == NV3_PTIMER_TIME_1_NSEC)
-        return;
 
-    nv_register_t* reg = nv_get_register(addr, nv3_registers);
+    // Don't log some very very highly used registers.
+    if (addr <= NV3_USER_START
+    && addr != NV3_PTIMER_TIME_0_NSEC
+    && addr != NV3_PTIMER_TIME_1_NSEC)
+    {
+        nv_register_t* reg = nv_get_register(addr, nv3_registers);
 
-    if (reg)
-    {
-        if (reg->on_write)
-            reg->on_write(val);
-        
-        nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)\n", val, addr, reg->friendly_name);   
-    }
-    else   
-    {
-        nv_log_verbose_only("Unknown register write 0x%08x -> 0x%08x\n", val, addr);
+        if (reg)
+        {
+            if (reg->on_write)
+                reg->on_write(val);
+            
+            nv_log_verbose_only("Register write 0x%08x to 0x%08x (%s)\n", addr, val, reg->friendly_name);
+        }
+        else
+            nv_log_verbose_only("Unknown register write 0x%08x to 0x%08x\n", addr, val);
     }
     //#endif 
 }

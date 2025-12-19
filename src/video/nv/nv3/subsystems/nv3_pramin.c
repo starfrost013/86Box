@@ -9,8 +9,6 @@
  *          NV3 PRAMIN - Basically, this is how we know what to render.
  *          Has a giant hashtable of all the submitted DMA objects using a pseudo-C++ class system
  *
- *
- *
  * Authors: Connor Hyde, <mario64crashed@gmail.com> I need a better email address ;^)
  *
  *          Copyright 2024-2025 starfrost
@@ -34,11 +32,6 @@
 #ifndef RELEASE_BUILD
 void nv3_debug_ramin_print_context_info(uint32_t name, nv3_ramin_context_t context);
 #endif
-
-// i believe the main loop is to walk the hashtable in RAMIN (last 0.5 MB of VRAM), 
-// find the objects that were submitted from DMA 
-// (going from software -> nvidia d3d / ogl implementation -> resource manager client -> nvapi -> nvrm -> GPU PFIFO -> GPU PBUS -> GPU PFB RAMIN -> PGRAPH) 
-// and then rendering each of those using PGRAPH
 
 // Notes for all of these functions:
 // Structures in RAMIN are stored from the bottom of vram up in reverse order
@@ -161,11 +154,8 @@ bool nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t channel, u
     // 4KB = 2, 8KB = 4, 16KB = 8, 32KB = 16. Newer GPUs may have more
     uint32_t bucket_entries = nv3->pfifo.ramht_size >> 11;
 
-    // Calculate the address in the hashtable
-    uint32_t ramht_base = ((nv3->pfifo.ramht_config >> NV3_PFIFO_CONFIG_RAMHT_BASE_ADDRESS) & 0x0F) << NV3_PFIFO_CONFIG_RAMHT_BASE_ADDRESS;
-
     // stored like this to optimise searches probably
-    uint32_t ramht_cur_address = ramht_base + (nv3_ramht_hash(name, channel) * bucket_entries << 3); 
+    uint32_t ramht_cur_address = nv3->pfifo.ramht_location + (nv3_ramht_hash(name, channel) * bucket_entries << 3); 
 
     nv_log_verbose_only("Beginning search for graphics object at RAMHT base=0x%04x, name=0x%08x, Cache%d, channel=%d.%d)\n",
         ramht_cur_address, name, cache_num, channel, subchannel);
@@ -277,7 +267,6 @@ bool nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t channel, u
             
         // It's an error but it isn't lol   
         nv3_pfifo_interrupt(NV3_PFIFO_INTR_CACHE_ERROR, true);
-        
     }
     else
     {
@@ -288,7 +277,7 @@ bool nv3_ramin_find_object(uint32_t name, uint32_t cache_num, uint8_t channel, u
             nv3->pfifo.cache1_settings.pull0 &= ~NV3_PFIFO_CACHE1_PULL0_SOFTWARE_METHOD;
     }
 
-    // Ok we found it. Lol
+    // done
     return true; 
     
 }

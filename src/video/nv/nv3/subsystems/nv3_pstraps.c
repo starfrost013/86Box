@@ -88,5 +88,4 @@ void nv3_pstraps_write(uint32_t address, uint32_t val)
         if (nv3->straps & NV3_PSTRAPS_OVERWRITE_ENABLED)
             nv3->straps = val; 
     }
-
 }
