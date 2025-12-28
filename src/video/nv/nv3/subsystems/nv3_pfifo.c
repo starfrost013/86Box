@@ -331,8 +331,6 @@ void nv3_pfifo_write(uint32_t address, uint32_t val)
         case NV3_PFIFO_INTR:
             nv3->pfifo.intr &= ~val;
             nv3_pmc_clear_interrupts();
-
-
             break;
         case NV3_PFIFO_INTR_EN:
             nv3->pfifo.intr_en = val & 0x00011111;
