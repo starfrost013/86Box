@@ -323,8 +323,8 @@ typedef struct cdrom {
 
     void              *priv;
 
-    char               image_path[1024];
-    char               prev_image_path[1280];
+    char               image_path[MAX_IMAGE_PATH_LEN];
+    char               prev_image_path[MAX_IMAGE_PATH_LEN + 256];
 
     uint32_t           sound_on;
     uint32_t           cdrom_capacity;
@@ -481,6 +481,8 @@ extern void            cdrom_close(void);
 extern void            cdrom_insert(const uint8_t id);
 extern void            cdrom_exit(const uint8_t id);
 extern int             cdrom_is_empty(const uint8_t id);
+extern int             cdrom_is_playing(const uint8_t id);
+extern int             cdrom_is_paused(const uint8_t id);
 extern void            cdrom_eject(const uint8_t id);
 extern void            cdrom_reload(const uint8_t id);
 
