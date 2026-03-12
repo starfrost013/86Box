@@ -60,7 +60,7 @@ extern const device_config_t nv1_config[];
 // FUNCTIONS
 //
 
-void nv1_init(const device_t* dev);
+void* nv1_init(const device_t* dev);
 void nv1_close(void* priv);
 void nv1_speed_changed(void *priv);
 void nv1_draw_cursor(svga_t* svga, int32_t drawline);

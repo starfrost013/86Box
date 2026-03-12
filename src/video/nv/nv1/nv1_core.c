@@ -16,7 +16,7 @@
 #include "nv1.h"
 #include "nv1_regs.h"
 
-void nv1_init(const device_t* dev)
+void* nv1_init(const device_t* dev)
 {
 
 }
