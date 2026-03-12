@@ -33,6 +33,7 @@ add_library(vid OBJECT
     ramdac/vid_ramdac_sc1502x.c 
     ramdac/vid_ramdac_sdac.c 
     ramdac/vid_ramdac_stg1702.c 
+    ramdac/vid_ramdac_stg1732.c 
     ramdac/vid_ramdac_tkd8001.c 
     ramdac/vid_ramdac_tvp3026.c 
 
@@ -141,6 +142,8 @@ add_library(vid OBJECT
 
     # NVidia (pending)
     nv/nv_rivatimer.c
+    nv/nv1/nv1_core.c
+    nv/nv1/nv1_config.c
 
     # Generic
     vid_bochs_vbe.c

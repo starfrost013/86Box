@@ -657,6 +657,9 @@ extern const device_t tandy_1000_video_device;
 extern const device_t tandy_1000hx_video_device;
 extern const device_t tandy_1000sl_video_device;
 
+/* NVidia GPUs */
+extern const device_t nv1_device;
+
 #endif
 
 #endif /*EMU_VIDEO_H*/

@@ -264,6 +264,7 @@ video_cards[] = {
     { .device = &s3_virge_357_agp_device,                       .flags = VIDEO_FLAG_TYPE_NONE },
     { .device = &s3_diamond_stealth_4000_agp_device,            .flags = VIDEO_FLAG_TYPE_NONE },
     { .device = &s3_trio3d2x_agp_device,                        .flags = VIDEO_FLAG_TYPE_NONE },
+    { .device = &nv1_device,                        .flags = VIDEO_FLAG_TYPE_NONE },
     { .device = NULL,                                           .flags = VIDEO_FLAG_TYPE_NONE }
   // clang-format on
 };
