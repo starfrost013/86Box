@@ -143,6 +143,7 @@ add_library(vid OBJECT
     # NVidia (pending)
     nv/nv_rivatimer.c
     nv/nv1/nv1_core.c
+    nv/nv1/nv1_io.c
     nv/nv1/nv1_config.c
 
     # Generic

@@ -254,11 +254,8 @@ stg1732_getclock(int clock, void *priv)
 static void *
 stg1732_ramdac_init(UNUSED(const device_t *info))
 {
-    stg1732_ramdac_t *ramdac = (stg1732_ramdac_t *) malloc(sizeof(stg1732_ramdac_t));
-    memset(ramdac, 0, sizeof(stg1732_ramdac_t));
-
+    stg1732_ramdac_t *ramdac = (stg1732_ramdac_t *) calloc(1, sizeof(stg1732_ramdac_t));
     ramdac->type = info->local & 0xff;
-
     return ramdac;
 }
 
