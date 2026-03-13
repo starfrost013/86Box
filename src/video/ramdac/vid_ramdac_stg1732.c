@@ -6,7 +6,8 @@
  *
  *          This file is part of the 86Box distribution.
  *
- *          STG1732/1764 (aka nvDAC64) 32-bit colour (64-bit pixel input) DAC - SGS-Thomson/Nvidia
+ *          STG1732 (Van Gogh) / 1764 (Van Dyke; aka NVDAC64) 
+ *          32-bit colour (64-bit pixel input on STG1764) DAC - SGS-Thomson/Nvidia
  *          Used for NVidia NV1. Based on 1702 code
  *
  * Authors: Sarah Walker, <https://pcem-emulator.co.uk/>
@@ -16,6 +17,7 @@
  *          Copyright 2008-2018 Sarah Walker.
  *          Copyright 2016-2018 Miran Grca.
  *          Copyright 2026 starfrost
+ *          This DAC has no vga interface
  */
 
 
