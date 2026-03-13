@@ -502,7 +502,7 @@ extern float    tvp3026_getclock(int clock, void *priv);
 extern void     tvp3026_gpio(uint8_t (*read)(uint8_t cntl, void *priv), void (*write)(uint8_t cntl, uint8_t data, void *priv), void *cb_priv, void *priv);
 
 uint8_t         stg1732_ramdac_in(uint16_t addr, void *priv, svga_t *svga);
-uint8_t         stg1732_ramdac_out(uint16_t addr, uint8_t val, void *priv, svga_t *svga);
+void            stg1732_ramdac_out(uint16_t addr, uint8_t val, void *priv, svga_t *svga);
 
 #    ifdef EMU_DEVICE_H
 extern const device_t ati68860_ramdac_device;
