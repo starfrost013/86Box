@@ -66,6 +66,7 @@ typedef struct nv1_s
     uint8_t pci_slot;                                           // PCI slot number
     uint8_t pci_regs_vga[NV1_PCI_NUM_REGS];                     // Function 0
     uint8_t pci_regs_nv[NV1_PCI_NUM_REGS];                      // Function 1
+    uint32_t bar0_addr;                                         // Must align to 32M
     mem_mapping_t mapping_vga;
     mem_mapping_t mapping_mmio;
     svga_t svga;                                                // Function 0 Base
@@ -90,6 +91,7 @@ void nv1_speed_changed(void *priv);
 void nv1_draw_cursor(svga_t* svga, int32_t drawline);
 void nv1_recalc_timings(svga_t* svga);
 void nv1_force_redraw(void* priv);
+void nv1_update_mappings();
 
 // I/O - PCI
 // PCI function 0 is VGA. PCI function 1 is NVIDIA

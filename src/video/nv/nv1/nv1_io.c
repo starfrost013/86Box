@@ -24,17 +24,30 @@ uint8_t nv1_pci_read(int32_t func, int32_t address, int32_t len, void* priv)
 {
     uint8_t ret;
 
+    // technically,
+    // VGA              0-FF
+    // NV1              100-1FF
+    // but in reality we don't realy care
+    address &= 0xFF;
+
     switch (address)
     {
         // PCI ID
-        case NV_CONFIG_PCI_NV_0:
+        case NV_CONFIG_PCI_VGA_0:
             return (NV_CONFIG_PCI_NV_0_VENDOR_ID_NVIDIA) & 0xFF;    
-        case NV_CONFIG_PCI_NV_0 + 1:
+        case NV_CONFIG_PCI_VGA_0 + 1:
             return (NV_CONFIG_PCI_NV_0_VENDOR_ID_NVIDIA >> 8) & 0xFF;    
-        case NV_CONFIG_PCI_NV_0 + 2:
+        case NV_CONFIG_PCI_VGA_0 + 2:
             return (NV_CONFIG_PCI_NV_0_DEVICE_ID_CHIP_NV1 << 3) | func;
-        case NV_CONFIG_PCI_NV_0 + 3:
+        case NV_CONFIG_PCI_VGA_0 + 3:
             return 0x00; // it doesn't actually matter what this value is
+        case NV_CONFIG_PCI_NV_4:
+            if (func == NV1_PCI_FUNCTION_VGA)
+                return 0x00;
+
+            return ((nv1->bar0_addr >> 25) << 25) | (1 << NV_CONFIG_PCI_NV_4_PREFETCHABLE);
+        case NV_CONFIG_PCI_NV_4 + 1 ... NV_CONFIG_PCI_NV_4 + 3:
+                return 0x00; 
         default:
             // return pci block based on function
             if (func == NV1_PCI_FUNCTION_VGA)
@@ -49,10 +62,25 @@ uint8_t nv1_pci_read(int32_t func, int32_t address, int32_t len, void* priv)
 
 void nv1_pci_write(int32_t func, int32_t address, int32_t len, uint8_t value, void* priv)
 {
+    address &= 0xFF;
+
+    switch (address)
+    {
+        case NV_CONFIG_PCI_NV_4:
+            if (func == NV1_PCI_FUNCTION_VGA)
+                nv1->pci_regs_vga[address] = 0x00;
+            else
+                nv1->bar0_addr = (value << 24);
+            break; 
+
+            nv1_update_mappings();
+    }
+
+    // default case
     if (func == NV1_PCI_FUNCTION_VGA)
-        nv1->pci_regs_vga[address & 0xFF] = value;
+        nv1->pci_regs_vga[address] = value;
     else
-        nv1->pci_regs_nv[address & 0xFF] = value;
+        nv1->pci_regs_nv[address] = value;
 }
 
 //

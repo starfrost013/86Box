@@ -64,6 +64,12 @@ nv1_init_mappings()
                     NULL, MEM_MAPPING_EXTERNAL, nv1);
 }
 
+void 
+nv1_update_mappings()
+{
+
+}
+
 void *
 nv1_init(const device_t *dev)
 {
