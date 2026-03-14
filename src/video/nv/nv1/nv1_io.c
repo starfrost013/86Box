@@ -173,16 +173,11 @@ void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* p
             }
             break;
         // we don't need to do anything in byte 1 (or most of 2)
-        // ensure 4MByte boundary
-        // these are aliased, so we don't care which function they come from
-        // don't use the regualr update_mappings functions since this is aliased between both functions 
+        // This is meant to be mapped at a 4M boundary per the datasheet and are aliased between both functions
+        // but if we implement that the VBIOS never runs
         case PCI_REG_ROM_BAR_BYTE3:
-            uint32_t byte2 = nv1->pci_regs_vga[PCI_REG_ROM_BAR_BYTE2] & 0b1100000; // turn off bits 21,20,19,18,17,16
-
-            uint32_t new_addr = nv1->pci_regs_vga[PCI_REG_ROM_BAR_BYTE3] << 24
-            | (byte2 << 16);
-
-            mem_mapping_set_addr(&nv1->vbios.mapping, new_addr, NV1_VBIOS_SIZE);
+            if (nv1->pci_vbios_enabled)
+                mem_mapping_set_addr(&nv1->vbios.mapping, NV1_VBIOS_LOCATION, NV1_VBIOS_SIZE);
             break; 
             
     }
