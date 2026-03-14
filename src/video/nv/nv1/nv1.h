@@ -77,6 +77,7 @@ typedef struct nv1_s
     uint32_t bar0_addr;                                         // Must align to 32M
     mem_mapping_t mapping_vga;
     mem_mapping_t mapping_mmio;
+    mem_mapping_t mapping_prm;                                  // map all vga ram accesses to nv1 for PRM handling
     svga_t svga;                                                // Function 0 Base
     rom_t vbios;
 } nv1_t;

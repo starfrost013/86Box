@@ -60,8 +60,19 @@ nv1_init_mappings()
                     nv1_mmio_write8,
                     nv1_mmio_write16,
                     nv1_mmio_write32,
-
                     NULL, MEM_MAPPING_EXTERNAL, nv1);
+
+    /*
+    mem_mapping_add(&nv1->mapping_prm, 0, 0,
+                    nv1_mmio_read8,
+                    nv1_mmio_read16,
+                    nv1_mmio_read32,
+                    nv1_mmio_write8,
+                    nv1_mmio_write16,
+                    nv1_mmio_write32,
+                    NULL, MEM_MAPPING_EXTERNAL, nv1);
+    
+    mem_mapping_set_addr(&nv1->mapping_prm, NV1_VGA_RAM_START, 0x1FFFF);*/
 }
 
 // Update the mappings for the VGA
@@ -158,11 +169,7 @@ nv1_init(const device_t *dev)
     return nv1;
 }
 
-void
-nv1_close(void *priv)
-{
-    log_close(nv1->log);
-}
+
 
 void
 nv1_speed_changed(void *priv)
@@ -177,7 +184,7 @@ nv1_draw_cursor(svga_t *svga, int32_t drawline)
 void
 nv1_recalc_timings(svga_t *svga)
 {
-
+    //svga_recalctimings(svga);
 }
 
 void
@@ -191,6 +198,13 @@ int32_t
 nv1_available(void)
 {
     return (rom_present(NV1_VBIOS_E3D_3X00));
+}
+
+void
+nv1_close(void *priv)
+{
+    log_close(nv1->log);
+    svga_close(&nv1->svga);
 }
 
 // NV3T (RIVA 128 ZX)

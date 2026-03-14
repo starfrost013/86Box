@@ -67,20 +67,20 @@ uint8_t nv1_pci_read(int32_t func, int32_t addr, int32_t len, void* priv)
             break;
         // 'VGA device' for func 0
         // else 0x48000 ('Multifunction device;)
+        case PCI_REG_SUBCLASS:
+            ret = 0x00;
+            break;
         case PCI_REG_CLASS:
             if (func == NV1_PCI_FUNCTION_VGA)
                 ret = 0x30; // vga controller
             else   
                 ret = 0x48; // multifunction device
             break;
-        case PCI_REG_SUBCLASS:
-            ret = 0x00;
-            break;
         case PCI_REG_BAR0_BYTE0:
             if (func == NV1_PCI_FUNCTION_VGA)
                 ret = 0x00;
             else
-                ret = ((nv1->bar0_addr >> 25) << 25) | (1 << NV_CONFIG_PCI_NV_4_PREFETCHABLE); // bit 24 is disregarded, 1 byte boundary
+                ret = ((nv1->bar0_addr >> 25) << 1) | (1 << NV_CONFIG_PCI_NV_4_PREFETCHABLE); // bit 24 is disregarded, 1 byte boundary
             break;
         case PCI_REG_BAR0_BYTE1 ... PCI_REG_BAR5_BYTE3: // all other BARs are hardwired to 0
             ret = 0x00; 
@@ -144,8 +144,12 @@ void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* p
             update_mappings = true;
             break;
         case PCI_REG_BAR0_BYTE0:
-            nv1->bar0_addr = (val << 24);   
-            update_mappings = true;
+            // vga function has no bars
+            if (func == NV1_PCI_FUNCTION_NV1)
+            {            
+                nv1->bar0_addr = ((val & 0b11111110) << 24);   
+                update_mappings = true;
+            }
             break;
         case PCI_REG_INT_LINE:
             nv1->pci_int_line = val;
@@ -205,7 +209,9 @@ uint8_t nv1_svga_read(uint16_t addr, void* priv)
 
 void nv1_svga_write(uint16_t addr, uint8_t val, void* priv)
 {
+
     svga_out(addr, val, &nv1->svga);
+    svga_recalctimings(&nv1->svga);
 }
 
 //
