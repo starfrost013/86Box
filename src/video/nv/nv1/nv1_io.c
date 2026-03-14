@@ -68,13 +68,16 @@ uint8_t nv1_pci_read(int32_t func, int32_t addr, int32_t len, void* priv)
         // 'VGA device' for func 0
         // else 0x48000 ('Multifunction device;)
         case PCI_REG_SUBCLASS:
-            ret = 0x00;
+            if (func == NV1_PCI_FUNCTION_VGA)
+                ret = 0x00; 
+            else
+                ret = 0x80; // 0x48000
             break;
         case PCI_REG_CLASS:
             if (func == NV1_PCI_FUNCTION_VGA)
-                ret = 0x30; // vga controller
+                ret = 0x03; // vga controller
             else   
-                ret = 0x48; // multifunction device
+                ret = 0x04; // multifunction device
             break;
         case PCI_REG_BAR0_BYTE0:
             if (func == NV1_PCI_FUNCTION_VGA)
