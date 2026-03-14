@@ -62,7 +62,7 @@ nv1_init_mappings()
                     nv1_mmio_write32,
                     NULL, MEM_MAPPING_EXTERNAL, nv1);
 
-    /*
+    
     mem_mapping_add(&nv1->mapping_prm, 0, 0,
                     nv1_mmio_read8,
                     nv1_mmio_read16,
@@ -72,7 +72,7 @@ nv1_init_mappings()
                     nv1_mmio_write32,
                     NULL, MEM_MAPPING_EXTERNAL, nv1);
     
-    mem_mapping_set_addr(&nv1->mapping_prm, NV1_VGA_RAM_START, 0x1FFFF);*/
+    mem_mapping_set_addr(&nv1->mapping_prm, NV1_VGA_RAM_START, 0x1FFFF);
 }
 
 // Update the mappings for the VGA

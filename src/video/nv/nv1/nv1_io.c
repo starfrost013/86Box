@@ -179,7 +179,7 @@ void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* p
             if (nv1->pci_vbios_enabled)
                 mem_mapping_set_addr(&nv1->vbios.mapping, NV1_VBIOS_LOCATION, NV1_VBIOS_SIZE);
             break; 
-            
+
     }
 
     // always reflect the registers (read will decide what gets returned)
@@ -207,9 +207,14 @@ uint8_t nv1_svga_read(uint16_t addr, void* priv)
 
 void nv1_svga_write(uint16_t addr, uint8_t val, void* priv)
 {
+    switch (addr)
+    {
+        case NV_IO_CC_ADDRESS__COLOR:
+            
+            break;
 
+    }
     svga_out(addr, val, &nv1->svga);
-    svga_recalctimings(&nv1->svga);
 }
 
 //

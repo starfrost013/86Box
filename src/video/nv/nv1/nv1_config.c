@@ -6,12 +6,11 @@
  *
  *          This file is part of the 86Box distribution.
  *
- *          Provides NV4 configuration
+ *          Provides NV1 configuration
  *
  *
- * Authors: Connor Hyde, <mario64crashed@gmail.com> I need a better email address ;^)
- *
- *          Copyright 2024-2025 starfrost
+ * Authors: Connor Hyde, <mario64crashed@gmail.com>  *
+ *          Copyright 2024-2026 starfrost
  */
 #include <stdlib.h>
 #include <stdint.h>
