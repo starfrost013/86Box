@@ -64,10 +64,46 @@ nv1_init_mappings()
                     NULL, MEM_MAPPING_EXTERNAL, nv1);
 }
 
-void 
-nv1_update_mappings()
+// Update the mappings for the VGA
+void nv1_update_mappings_vga()
 {
+    bool io_enabled = nv1->pci_regs_vga[PCI_REG_COMMAND_L] & PCI_COMMAND_IO;
+    (io_enabled) ? nv_log("I/O enabled\n") : nv_log("I/O disabled\n");
 
+    // remove to avoid setting multiple times
+    io_removehandler(NV1_VGA_START, NV1_VGA_SIZE, nv1_svga_read, NULL, NULL, nv1_svga_write, NULL, NULL, nv1);
+
+    if (io_enabled)
+        io_sethandler(NV1_VGA_START, NV1_VGA_SIZE, nv1_svga_read, NULL, NULL, nv1_svga_write, NULL, NULL, nv1);
+
+}
+
+// Update the mappings for the NV1
+void nv1_update_mappings_nv()
+{
+    bool mem_enabled = nv1->pci_regs_nv[PCI_REG_COMMAND_L] & PCI_COMMAND_MEM;
+    (mem_enabled) ? nv_log("MMIO enabled\n") : nv_log("MMIO disabled\n");
+
+    mem_mapping_disable(&nv1->mapping_mmio);
+
+    // SET_ADDR enables automatically
+    if (mem_enabled
+    && nv1->bar0_addr)
+    {
+        nv_log("BAR0 is now %08x\n", nv1->bar0_addr);
+        mem_mapping_set_addr(&nv1->mapping_mmio, nv1->bar0_addr, NV1_MMIO_SIZE);
+    }
+        
+}
+
+// Update the GPU mappings.
+void 
+nv1_update_mappings(int32_t func)
+{
+    if (func == NV1_PCI_FUNCTION_VGA)
+        nv1_update_mappings_vga();
+    else
+        nv1_update_mappings_nv();
 }
 
 void *
@@ -75,6 +111,9 @@ nv1_init(const device_t *dev)
 {
     nv1 = calloc(sizeof(nv1_t), 1);
     nv1->log = log_open("NV1");
+    
+    // initial values
+    nv1->pci_int_line = 0xFF;
 
     nv_log("NV1 Emulation Driver is initialising\n");
 

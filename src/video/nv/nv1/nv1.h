@@ -55,6 +55,12 @@
 #define NV1_VGA_START                               0x03C0
 #define NV1_VGA_SIZE                                0x0020
 
+// Not defined by NV's?
+#define NV1_VGA_RAM_START                           0xA0000
+#define NV1_VGA_RAM_END                             0xBFFFF
+#define NV1_VGA_BIOS_START                          0xC0000
+#define NV1_VGA_BIOS_END                          0xC7FFF
+
 // 
 // STRUCTS
 //
@@ -62,10 +68,12 @@
 typedef struct nv1_s
 {
     void* log;                                                  // debug builds only
-    uint32_t vram_amount;
+    uint32_t vram_amount;                                       // amount of vram
     uint8_t pci_slot;                                           // PCI slot number
     uint8_t pci_regs_vga[NV1_PCI_NUM_REGS];                     // Function 0
     uint8_t pci_regs_nv[NV1_PCI_NUM_REGS];                      // Function 1
+    uint8_t pci_int_line;                                       // 0-15, FF for none
+    bool pci_vbios_enabled;                                     // is bios enabled
     uint32_t bar0_addr;                                         // Must align to 32M
     mem_mapping_t mapping_vga;
     mem_mapping_t mapping_mmio;
@@ -91,13 +99,14 @@ void nv1_speed_changed(void *priv);
 void nv1_draw_cursor(svga_t* svga, int32_t drawline);
 void nv1_recalc_timings(svga_t* svga);
 void nv1_force_redraw(void* priv);
-void nv1_update_mappings();
+void nv1_update_mappings(int32_t func);
+void nv_log(const char *fmt, ...);
 
 // I/O - PCI
 // PCI function 0 is VGA. PCI function 1 is NVIDIA
 
 uint8_t nv1_pci_read(int32_t func, int32_t address, int32_t len, void* priv);
-void nv1_pci_write(int32_t func, int32_t address, int32_t len, uint8_t value, void* priv);
+void nv1_pci_write(int32_t func, int32_t address, int32_t len, uint8_t val, void* priv);
 
 // I/O - SVGA
 uint8_t nv1_svga_read(uint16_t addr, void* priv);
@@ -110,3 +119,10 @@ uint32_t nv1_mmio_read32(uint32_t addr, void* priv);
 void nv1_mmio_write8(uint32_t addr, uint8_t val, void* priv);
 void nv1_mmio_write16(uint32_t addr, uint16_t val, void* priv);
 void nv1_mmio_write32(uint32_t addr, uint32_t val, void* priv);
+
+uint32_t nv1_mmio_dispatch_read(uint32_t addr);                         // ensures reads are sent to the right gpu subsystem
+void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val);              // ensures writes are sent to the right gpu subsystem
+
+// subsystems
+uint32_t nv1_prmc_read(uint32_t addr);
+void nv1_prmc_write(uint32_t addr, uint32_t val);

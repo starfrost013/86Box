@@ -20,67 +20,177 @@
 // PCI
 // 
 
-uint8_t nv1_pci_read(int32_t func, int32_t address, int32_t len, void* priv)
+uint8_t nv1_pci_read(int32_t func, int32_t addr, int32_t len, void* priv)
 {
-    uint8_t ret;
+    uint8_t ret = 0x00;
+
+    // completely ignore invalid function reads
+    if (func > NV1_PCI_FUNCTION_NV1)
+        return 0xFF;
 
     // technically,
     // VGA              0-FF
     // NV1              100-1FF
     // but in reality we don't realy care
-    address &= 0xFF;
+    addr &= 0xFF;
 
-    switch (address)
+    // Use 86box devs rather tha nnvidia defs since they are less confusing + nvidia defs are for 32-bit writses
+    switch (addr)
     {
         // PCI ID
-        case NV_CONFIG_PCI_VGA_0:
-            return (NV_CONFIG_PCI_NV_0_VENDOR_ID_NVIDIA) & 0xFF;    
-        case NV_CONFIG_PCI_VGA_0 + 1:
-            return (NV_CONFIG_PCI_NV_0_VENDOR_ID_NVIDIA >> 8) & 0xFF;    
-        case NV_CONFIG_PCI_VGA_0 + 2:
-            return (NV_CONFIG_PCI_NV_0_DEVICE_ID_CHIP_NV1 << 3) | func;
-        case NV_CONFIG_PCI_VGA_0 + 3:
-            return 0x00; // it doesn't actually matter what this value is
-        case NV_CONFIG_PCI_NV_4:
+        case PCI_REG_VENDOR_ID_L:
+            ret = (NV_CONFIG_PCI_NV_0_VENDOR_ID_NVIDIA) & 0xFF;    
+            break;
+        case PCI_REG_VENDOR_ID_H:
+            ret = (NV_CONFIG_PCI_NV_0_VENDOR_ID_NVIDIA >> 8) & 0xFF;    
+            break;
+        case PCI_REG_DEVICE_ID_L:
+            ret = (NV_CONFIG_PCI_NV_0_DEVICE_ID_CHIP_NV1 << 3) | func;
+            break;
+        case PCI_REG_DEVICE_ID_H:
+            ret = 0x00; // it doesn't actually matter what this value is
+            break;
+        case PCI_REG_STATUS_H: // STATUS_H, these use different devsel timing
+            if (func == NV1_PCI_FUNCTION_NV1)
+                ret = nv1->pci_regs_nv[addr] | (NV_CONFIG_PCI_NV_1_DEVSEL_TIMING_FAST << 5);
+            else
+                ret = nv1->pci_regs_vga[addr] | (NV_CONFIG_PCI_NV_1_DEVSEL_TIMING_MEDIUM << 5);
+            break;
+        case PCI_REG_REVISION:
+            // A01 and B01 are prototypes.
+            // Most NV1s in the wild seem to be B02
+            // C01 was possibly never put into production (it's after the production halt)
+            ret = NV_CONFIG_PCI_NV_2_REVISION_ID_B02;
+            break; 
+        case PCI_REG_PROG_IF:
+            ret = 0x00;
+            break;
+        // 'VGA device' for func 0
+        // else 0x48000 ('Multifunction device;)
+        case PCI_REG_CLASS:
             if (func == NV1_PCI_FUNCTION_VGA)
-                return 0x00;
-
-            return ((nv1->bar0_addr >> 25) << 25) | (1 << NV_CONFIG_PCI_NV_4_PREFETCHABLE);
-        case NV_CONFIG_PCI_NV_4 + 1 ... NV_CONFIG_PCI_NV_4 + 3:
-                return 0x00; 
+                ret = 0x30; // vga controller
+            else   
+                ret = 0x48; // multifunction device
+            break;
+        case PCI_REG_SUBCLASS:
+            ret = 0x00;
+            break;
+        case PCI_REG_BAR0_BYTE0:
+            if (func == NV1_PCI_FUNCTION_VGA)
+                ret = 0x00;
+            else
+                ret = ((nv1->bar0_addr >> 25) << 25) | (1 << NV_CONFIG_PCI_NV_4_PREFETCHABLE); // bit 24 is disregarded, 1 byte boundary
+            break;
+        case PCI_REG_BAR0_BYTE1 ... PCI_REG_BAR5_BYTE3: // all other BARs are hardwired to 0
+            ret = 0x00; 
+            break;
+        case PCI_REG_HEADER_TYPE: // multifunction device
+            ret = NV_CONFIG_PCI_NV_3_HEADER_TYPE_MULTIFUNC;
+            break;
+        case PCI_REG_INT_LINE:
+            ret = nv1->pci_int_line;
+            break;
+        case PCI_REG_INT_PIN:
+            ret = NV_CONFIG_PCI_NV_15_INTR_PIN_INTA;
+            break;
+        case PCI_REG_MIN_GRANT: // maximum grant
+            if (func == NV1_PCI_FUNCTION_VGA)
+                ret = 0x00;
+            else
+                ret = NV_CONFIG_PCI_NV_15_MIN_GNT_750NS;
+            break;
+        case PCI_REG_MAX_LAT:
+            if (func == NV1_PCI_FUNCTION_VGA)
+                ret = 0x00;
+            else
+                ret = NV_CONFIG_PCI_NV_15_MAX_LAT_250NS;
+                break;  
+        // aliased across functions
+        case PCI_REG_ROM_BAR_BYTE0 ... PCI_REG_ROM_BAR_BYTE3:
+            ret = nv1->pci_regs_vga[addr & 0xFF];
+            break;
         default:
             // return pci block based on function
             if (func == NV1_PCI_FUNCTION_VGA)
-                ret = nv1->pci_regs_vga[address & 0xFF];
+                ret = nv1->pci_regs_vga[addr & 0xFF];
             else   
-                ret = nv1->pci_regs_nv[address & 0xFF];
-
+                ret = nv1->pci_regs_nv[addr & 0xFF];
+            break;
     }
+
+    nv_log("PCI func %d, read 0x%08x from 0x%02x\n", func, ret, addr);
 
     return ret;
 }
 
-void nv1_pci_write(int32_t func, int32_t address, int32_t len, uint8_t value, void* priv)
+void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* priv)
 {
-    address &= 0xFF;
+    addr &= 0xFF;
 
-    switch (address)
+    // update the mappings after we are done
+    bool update_mappings = false;
+
+    // completely ignore invalid function reads
+    if (func > NV1_PCI_FUNCTION_NV1)
+        return;
+        
+    switch (addr)
     {
-        case NV_CONFIG_PCI_NV_4:
-            if (func == NV1_PCI_FUNCTION_VGA)
-                nv1->pci_regs_vga[address] = 0x00;
-            else
-                nv1->bar0_addr = (value << 24);
-            break; 
+        case PCI_REG_COMMAND_H:
+            update_mappings = true;
+            break;
+        case PCI_REG_COMMAND_L:
+            update_mappings = true;
+            break;
+        case PCI_REG_BAR0_BYTE0:
+            nv1->bar0_addr = (val << 24);   
+            update_mappings = true;
+            break;
+        case PCI_REG_INT_LINE:
+            nv1->pci_int_line = val;
+            break;
+        // vbios control
+        case PCI_REG_ROM_BAR_BYTE0:
+            nv1->pci_vbios_enabled = (val & 0x01);
 
-            nv1_update_mappings();
+            if (nv1->pci_vbios_enabled)
+            {
+                mem_mapping_enable(&nv1->vbios.mapping);
+                nv_log("VBIOS enabled\n");
+            }
+            else
+            {
+                mem_mapping_disable(&nv1->vbios.mapping);
+                nv_log("VBIOS disabled\n");
+            }
+            break;
+        // we don't need to do anything in byte 1 (or most of 2)
+        // ensure 4MByte boundary
+        // these are aliased, so we don't care which function they come from
+        // don't use the regualr update_mappings functions since this is aliased between both functions 
+        case PCI_REG_ROM_BAR_BYTE3:
+            uint32_t byte2 = nv1->pci_regs_vga[PCI_REG_ROM_BAR_BYTE2] & 0b1100000; // turn off bits 21,20,19,18,17,16
+
+            uint32_t new_addr = nv1->pci_regs_vga[PCI_REG_ROM_BAR_BYTE3] << 24
+            | (byte2 << 16);
+
+            mem_mapping_set_addr(&nv1->vbios.mapping, new_addr, NV1_VBIOS_SIZE);
+            break; 
+            
     }
 
-    // default case
+    // always reflect the registers (read will decide what gets returned)
     if (func == NV1_PCI_FUNCTION_VGA)
-        nv1->pci_regs_vga[address] = value;
+        nv1->pci_regs_vga[addr] = val;
     else
-        nv1->pci_regs_nv[address] = value;
+        nv1->pci_regs_nv[addr] = val;
+
+    // write all register changes out before updating mappings
+    if (update_mappings)
+        nv1_update_mappings(func);
+
+    nv_log("PCI func %d, write 0x%08x to 0x%02x\n", func, val, addr);
 }
 
 //
@@ -128,7 +238,10 @@ uint32_t nv1_mmio_read32(uint32_t addr, void* priv)
 
     // DFB at 1000000
     if (addr & 0x1000000)
-        ret = nv1->svga.vram[addr & (nv1->vram_amount) - 1]; // always pot so fine
+        ret = nv1->svga.vram[addr & (nv1->vram_amount - 1)]; // always pot so fine
+    
+    //todo: "debug" register description
+    ret = nv1_mmio_dispatch_read(addr);
 
     return ret; 
 }
@@ -163,5 +276,71 @@ void nv1_mmio_write32(uint32_t addr, uint32_t val, void* priv)
     
     // DFB at 1000000
     if (addr & 0x1000000)
-        nv1->svga.vram[addr & (nv1->vram_amount) - 1] = val;
+        nv1->svga.vram[addr & (nv1->vram_amount - 1)] = val;
+
+    nv1_mmio_dispatch_write(addr, val);
+}
+
+// ensure a read reaches the right part of the emulated gpi
+uint32_t nv1_mmio_dispatch_read(uint32_t addr)
+{    
+    // allow us to turn off logs for certain subsystems that have endless writes or reads
+    bool send_log = true; 
+    bool unimpl = false; // same for unimplemented
+    uint32_t ret = 0x00;
+
+    // TODO: PMC_ENABLE et al
+
+    switch (addr)
+    {   
+        case NV1_VGA_RAM_START ... NV1_VGA_RAM_END:
+            ret = nv1_prmc_read(addr);
+            break;
+        case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
+            ret = nv1->vbios.rom[addr & 0x7FFF];
+            break;
+        default: // set unimplemented
+            unimpl = true;
+            break;
+    }           
+
+    if (send_log)
+    {
+        if (unimpl)
+            nv_log("***** UNIMPLEMENTED SUBSYSTEM ***** MMIO read 0x%08x from 0x%08x\n", ret, addr);
+        else 
+            nv_log("MMIO read 0x%08x from 0x%08x\n", ret, addr);
+    }
+
+    return ret; 
+}
+
+// ensure a write reaches the right part of the emulated gpu
+void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
+{
+    // allow us to turn off logs for certain subsystems that have endless writes or reads
+    bool send_log = true; 
+    bool unimpl = false; // same for unimplemented
+
+    // TODO: PMC_ENABLE et al
+
+    switch (addr)
+    {
+        case NV1_VGA_RAM_START ... NV1_VGA_RAM_END:
+            nv1_prmc_write(addr, val);
+            break;
+        case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
+            break; // can't write to ROM
+        default: // set unimplemented
+            unimpl = true;
+            break;
+    }
+
+    if (send_log)
+    {
+        if (unimpl)
+            nv_log("***** UNIMPLEMENTED SUBSYSTEM ***** MMIO write 0x%08x to 0x%08x\n", val, addr);
+        else 
+            nv_log("MMIO write 0x%08x to 0x%08x\n", val, addr);
+    }
 }
