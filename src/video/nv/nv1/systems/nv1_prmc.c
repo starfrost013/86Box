@@ -18,7 +18,9 @@
 
 uint32_t nv1_prmc_read(uint32_t addr)
 {
-    // if not, read SVGA
+    uint32_t ret = 0x00;
+
+    // if not, read SVGA (don't log this)
     if (!nv1->prm.window.enabled)
         return svga_readl(addr, &nv1->svga);
 
@@ -28,27 +30,28 @@ uint32_t nv1_prmc_read(uint32_t addr)
     {
         case NV_MEMORY_RMC_ACCESS(1):
             if (nv1->prm.window.enabled)
-                return NV_MEMORY_RMC_ACCESS_SECURITY_DISABLE;
+                ret = NV_MEMORY_RMC_ACCESS_SECURITY_DISABLE;
             else
-                return NV_MEMORY_RMC_ACCESS_SECURITY_ENABLE;
+                ret = NV_MEMORY_RMC_ACCESS_SECURITY_ENABLE;
             break;
         case NV_MEMORY_RMC_WINDOW(0):
-            return nv1->prm.window.addr_start;
-        
+            ret = nv1->prm.window.addr_start;
+            break;
         // VBIOS never uses these values, but depends on them to boot??? These are debug features
         // (NV_MEMORY_TRACE & 0x0F) must return 1
-        // (NV_MEMORY_TRACE_INDEX & 0x0F) must return 2
+        // (NV_MEMORY_IGNORE_0 & 0x0F) must return 2
         case NV_MEMORY_TRACE:
-            return NV_PRM_TRACE_IO_CAPTURE_WRITES;
-        case NV_MEMORY_TRACE_INDEX:
-            return 0x02;
+            ret = NV_PRM_TRACE_IO_CAPTURE_WRITES;
+            break; 
+        case NV_MEMORY_IGNORE_0: 
+            ret = NV_PRM_IGNORE_0_DAC_READS;
+            break;
     }  
 
     if (addr >= NV_MEMORY_WINDOW032(0, 0)
     && addr <= NV_MEMORY_WINDOW032(0, NV_MEMORY_WINDOW032__SIZE_2))
     {
         uint32_t mmio_addr = nv1->prm.window.addr_start + (addr - NV_MEMORY_WINDOW032(0, 0));
-        uint32_t ret = 0x00;
 
         // these are literally the only 8bit addresses in the system (the dac has some but the nv1 doesn't care)
         if (mmio_addr >= NV1_VGA_MMIO_START
@@ -63,8 +66,9 @@ uint32_t nv1_prmc_read(uint32_t addr)
 
         return ret; 
     }
-
-    return 0xFF; // no idea what this would do...
+    
+    nv_log("RMC-SVGA read %08x from %08x\n", ret, addr);
+    return ret; // no idea what this would do...
 }
 
 void nv1_prmc_write(uint32_t addr, uint32_t val)
