@@ -219,7 +219,7 @@ void nv1_svga_write(uint16_t addr, uint8_t val, void* priv)
 
 //
 // MMIO
-// *ALL* reads are 32-bit
+// *ALL* reads are 32-bit *EXCEPT* vga registers, so 8-bit has some special handling for these 
 //
 
 uint8_t nv1_mmio_read8(uint32_t addr, void* priv)
@@ -227,6 +227,15 @@ uint8_t nv1_mmio_read8(uint32_t addr, void* priv)
     uint32_t ret = 0x00;
 
     // see if unaligned reads are a problem
+    // VGA mirror at 6d13c0-6d13df (also gamepot)
+
+    if (addr >= NV1_VGA_MMIO_START
+    && addr <= NV1_VGA_MMIO_END)
+    {
+        ret = svga_in(NV1_VGA_START + (addr & 0x1F), &nv1->svga);
+        return ret; 
+    }
+
     ret = nv1_mmio_read32(addr, priv);
     return (uint8_t)(ret >> ((addr & 3) << 3) & 0xFF);
 }
@@ -242,21 +251,36 @@ uint16_t nv1_mmio_read16(uint32_t addr, void* priv)
 uint32_t nv1_mmio_read32(uint32_t addr, void* priv)
 {
     uint32_t ret = 0x00;
+    uint32_t* vram_32 = (uint32_t*)nv1->svga.vram;
 
     addr &= (NV1_MMIO_SIZE - 1); // must be power of 2
 
     // DFB at 1000000
     if (addr & 0x1000000)
-        ret = nv1->svga.vram[addr & (nv1->vram_amount - 1)]; // always pot so fine
-    
-    //todo: "debug" register description
-    ret = nv1_mmio_dispatch_read(addr);
+    {
+        // temp debug code
+        uint32_t vram_addr = addr & nv1->vram_amount - 1;
+        ret = vram_32[vram_addr >> 2];
+
+        nv_log("DFB read %08x from %08x (raw addr - %08x)\n", ret, vram_addr, addr);
+    }
+    else
+        ret = nv1_mmio_dispatch_read(addr);
 
     return ret; 
 }
 
 void nv1_mmio_write8(uint32_t addr, uint8_t val, void* priv)
 {
+    // VGA mirror at 6d13c0-6d13df (also gamepot)
+
+    if (addr >= NV1_VGA_MMIO_START
+    && addr <= NV1_VGA_MMIO_END)
+    {
+        svga_out(NV1_VGA_START + (addr & 0x1F), val, &nv1->svga);
+        return; 
+    }
+
     // overwrite first 8 bits of a 32 bit value
     uint32_t new_val = nv1_mmio_read32(addr, nv1);
 
@@ -282,12 +306,19 @@ void nv1_mmio_write16(uint32_t addr, uint16_t val, void* priv)
 void nv1_mmio_write32(uint32_t addr, uint32_t val, void* priv)
 {
     addr &= (NV1_MMIO_SIZE - 1); // must be power of 2
-    
+    uint32_t* vram_32 = (uint32_t*)nv1->svga.vram;
+
     // DFB at 1000000
     if (addr & 0x1000000)
-        nv1->svga.vram[addr & (nv1->vram_amount - 1)] = val;
+    {
+        // temp debug code
+        uint32_t vram_addr = addr & nv1->vram_amount - 1;
+        vram_32[vram_addr >> 2] = val;
 
-    nv1_mmio_dispatch_write(addr, val);
+        nv_log("DFB write %08x to %08x (raw addr - %08x)\n", val, vram_addr, addr);
+    }
+    else
+        nv1_mmio_dispatch_write(addr, val);
 }
 
 // ensure a read reaches the right part of the emulated gpi
@@ -303,11 +334,15 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr)
     switch (addr)
     {   
         case NV1_VGA_RAM_START ... NV1_VGA_RAM_END:
+            send_log = false; 
             ret = nv1_prmc_read(addr);
             break;
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
             ret = nv1->vbios.rom[addr & 0x7FFF];
             break;
+        case NV_PEEPROM ... NV_PEEPROM + NV1_PEEPROM_SIZE:
+            ret = nv1->eeprom[(addr & (NV1_PEEPROM_SIZE - 1)) >> 2];
+            break; 
         default: // set unimplemented
             unimpl = true;
             break;
@@ -336,10 +371,14 @@ void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
     switch (addr)
     {
         case NV1_VGA_RAM_START ... NV1_VGA_RAM_END:
+            send_log = false; 
             nv1_prmc_write(addr, val);
             break;
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
             break; // can't write to ROM
+        case NV_PEEPROM ... NV_PEEPROM + NV1_PEEPROM_SIZE:
+            nv1->eeprom[(addr & (NV1_PEEPROM_SIZE - 1)) >> 2] = val;
+            break; 
         default: // set unimplemented
             unimpl = true;
             break;

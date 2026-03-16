@@ -37,6 +37,7 @@
 
 //
 // DEFINES
+// Extra defines whcih aren't in "nv1_regs.h"
 //
 
 #define NV1_VBIOS_E3D_3X00                          "roms/video/nvidia/nv1/Diamond_Edge_3D_3400_BIOS_M27C256.BIN" 
@@ -52,18 +53,38 @@
 
 #define NV1_MMIO_SIZE                               0x2000000   // 32M (incl. VRAM)
 
-#define NV1_VGA_START                               0x03C0
+#define NV1_VGA_START                               0x03C0      // vga start
 #define NV1_VGA_SIZE                                0x0020
+
+#define NV1_VGA_MMIO_START                          0x6D03C0    // registers which are sent to VGA
+#define NV1_VGA_MMIO_END                            0x6D03DF    // registers which are sent to VGA
 
 // Not defined by NV's?
 #define NV1_VGA_RAM_START                           0xA0000
 #define NV1_VGA_RAM_END                             0xBFFFF
 #define NV1_VGA_BIOS_START                          0xC0000
-#define NV1_VGA_BIOS_END                          0xC7FFF
+#define NV1_VGA_BIOS_END                            0xC7FFF
+
+#define NV1_PEEPROM_SIZE                            128         // 128 bytes 
 
 // 
 // STRUCTS
 //
+
+typedef struct nv1_prm_window_s
+{
+    uint32_t addr_start;
+    bool enabled;
+} nv1_prm_window_t;
+
+typedef struct nv1_prm_s
+{
+    // The GPU actually implements *4* windows, 
+    // but in practice, only one is ever used, so to simplify the implementation, we just implement one
+    // IF THERE IS A BUG IN DOS APPS FOR NV1, CHANGE THIS
+    // there's also x86 segmentation type functionality to move the 8KB sliding window anywhere in MMIO, but this register is never touched?
+    nv1_prm_window_t window;
+} nv1_prm_t; 
 
 typedef struct nv1_s
 {
@@ -80,6 +101,10 @@ typedef struct nv1_s
     mem_mapping_t mapping_prm;                                  // map all vga ram accesses to nv1 for PRM handling
     svga_t svga;                                                // Function 0 Base
     rom_t vbios;
+
+    // SYSTEMS
+    nv1_prm_t prm;
+    uint32_t eeprom[NV1_PEEPROM_SIZE >> 2];                     // eeprom apparently
 } nv1_t;
 
 
