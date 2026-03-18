@@ -31,5 +31,13 @@
 #include <86box/vid_svga.h>
 #include <86box/plat_unused.h>
 
-void stg1732_ramdac_out(uint16_t addr, uint8_t val, void *priv, svga_t *svga);
-uint8_t stg1732_ramdac_in(uint16_t addr, void *priv, svga_t *svga);
+#include "vid_ramdac_stg1732_regs.h"
+
+
+/* read from internal 64kb register space */
+uint8_t stg1732_ramdac_reg_read(uint16_t addr, void *priv, svga_t *svga);
+void stg1732_ramdac_reg_write(uint16_t addr, uint8_t val, void *priv, svga_t *svga);
+
+/* Read from UPort */
+uint8_t stg1732_ramdac_uport_read(uint8_t addr, void* priv, svga_t* svga);
+void stg1732_ramdac_uport_write(uint8_t addr, uint8_t val, void* priv, svga_t* svga);

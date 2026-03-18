@@ -21,196 +21,172 @@
  */
 
 #include "vid_ramdac_stg1732.h"
+// temp
+#include "../nv/nv1/nv1.h"
 
 //
 // DEFINES
 // (local bitflags)
 //
 #define LOCAL_IS_STG1764            0x01
+#define PALETTE_SIZE                256
+#define LUT_SIZE                    768     // R,G,B components
 
 typedef struct stg1732_ramdac_t {
-    int     magic_count, index;
-    uint8_t regs[256];
-    uint8_t command;
+    uint16_t index;
+    uint32_t config_0, config_1;            // config registers 
+    uint8_t write_pal_addr, read_pal_addr;  // read/write addr's for lut
+    uint8_t write_lut_addr, read_lut_addr;  
+    uint8_t palette[PALETTE_SIZE];
+    uint8_t lut[LUT_SIZE];
+    
+    uint8_t data;       // need to save this because this is written separately and can receive data from several rgisters
     int     type;
 } stg1732_ramdac_t;
 
-static int stg_state_read[2][8] = {
-    {1,  2, 3, 4, 0, 0, 0, 0},
-    { 1, 2, 3, 4, 5, 6, 7, 7}
-};
-static int stg_state_write[8] = { 0, 0, 0, 0, 0, 6, 7, 7 };
+//
+// uPort I/O
+//
+uint8_t stg1732_ramdac_uport_read(uint8_t addr, void* priv, svga_t* svga)
+{
+    stg1732_ramdac_t *ramdac = (stg1732_ramdac_t *) priv;
+    uint8_t ret = 0x00;
+
+    switch (addr)
+    {
+        // i think this is how this is supposed tow ork
+        case SGS_DAC_UPORT_READ_PAL_ADDR:
+            ret = ramdac->palette[ramdac->read_pal_addr];
+            ramdac->read_pal_addr++;
+            ramdac->read_pal_addr &= (PALETTE_SIZE - 1);
+            break;
+        case SGS_DAC_UPORT_COLOR:
+            ret = ramdac->lut[ramdac->read_lut_addr];
+            ramdac->read_lut_addr++;
+            ramdac->read_lut_addr &= (LUT_SIZE - 1);
+            break;
+        case SGS_DAC_UPORT_INDEX_HI:
+            ret = (ramdac->index >> 8) & 0xFF;
+            break;
+        case SGS_DAC_UPORT_INDEX_LO:
+            ret = (ramdac->index) & 0xFF;
+            break;
+        case SGS_DAC_UPORT_INDEX_DATA:
+            ret = stg1732_ramdac_reg_read(ramdac->index, ramdac, svga);
+            break;
+        case SGS_DAC_UPORT_PIXEL_MASK:
+            // i think this can be straight into here  
+            ret = svga->dac_mask;
+            break;
+    }
+
+    if (addr != SGS_DAC_UPORT_INDEX_DATA)
+        nv_log("STG1764 uport read %02x from %02x\n", ret, addr);
+
+    return ret; 
+}
+
+void stg1732_ramdac_uport_write(uint8_t addr, uint8_t val, void* priv, svga_t* svga)
+{
+    stg1732_ramdac_t *ramdac = (stg1732_ramdac_t *) priv;
+
+    switch (addr)
+    {
+        // i think this is how this is supposed tow ork
+        case SGS_DAC_UPORT_WRITE_PAL_ADDR:
+            ramdac->palette[ramdac->write_pal_addr] = val;
+            ramdac->write_pal_addr++;
+            ramdac->write_pal_addr &= (PALETTE_SIZE - 1);
+            break;
+        case SGS_DAC_UPORT_COLOR:
+            ramdac->lut[ramdac->write_lut_addr] = val;
+            ramdac->write_lut_addr++;
+            ramdac->write_lut_addr &= (LUT_SIZE - 1);
+            break;
+        case SGS_DAC_UPORT_INDEX_HI:    
+            ramdac->index = (val << 8) | (ramdac->index & 0xFF);
+            break;
+        case SGS_DAC_UPORT_INDEX_LO:
+            ramdac->index = (ramdac->index & 0xFF00) | (val & 0xFF);
+            break;
+        case SGS_DAC_UPORT_INDEX_DATA:
+            stg1732_ramdac_reg_write(addr, val, priv, svga);
+            break;
+    }
+
+    if (addr != SGS_DAC_UPORT_INDEX_DATA)
+        nv_log("STG1764 uport write %02x to %02x\n", val, addr);
+}
 
 void
 stg1732_ramdac_set_bpp(svga_t *svga, stg1732_ramdac_t *ramdac)
 {
-    if (ramdac->command & 0x8) {
-        switch (ramdac->regs[3]) {
-            default:
-            case 0:
-                svga->bpp = 8;
-                break;
-            case 5:
-            case 7:
-                svga->bpp = 8;
-                break;
-            case 1:
-            case 2:
-            case 8:
-                svga->bpp = 15;
-                break;
-            case 3:
-            case 6:
-                svga->bpp = 16;
-                break;
-            case 4:
-            case 9:
-                svga->bpp = 24;
-                break;
-        }
-    } else {
-        switch (ramdac->command >> 5) {
-            default:
-            case 0:
-                svga->bpp = 8;
-                break;
-            case 5:
-                svga->bpp = 15;
-                break;
-            case 6:
-                svga->bpp = 16;
-                break;
-            case 7:
-                svga->bpp = 24;
-                break;
-        }
+    switch (ramdac->config_0 & 0x03)
+    {
+        case 0:
+            svga->bpp = 4;
+            break;
+        case 1:
+            svga->bpp = 8;
+            break;
+        case 2:
+            svga->bpp = 16;
+            break;
+        case 3:
+            svga->bpp = 32;
+            break;
     }
 
     svga_recalctimings(svga);
 }
 
-void
-stg1732_ramdac_out(uint16_t addr, uint8_t val, void *priv, svga_t *svga)
+uint8_t
+stg1732_ramdac_reg_read(uint16_t addr, void *priv, svga_t *svga)
 {
     stg1732_ramdac_t *ramdac = (stg1732_ramdac_t *) priv;
-    int           didwrite;
-    int           old;
+    uint8_t       ret   = 0xff;
 
-    switch (addr) {
-        case 0x3c6:
-            switch (ramdac->magic_count) {
-                /* 0 = PEL mask register */
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                    break;
-                case 4: /* REG06 */
-                    old             = ramdac->command;
-                    ramdac->command = val;
-                    if ((old ^ val) & 8)
-                        stg1732_ramdac_set_bpp(svga, ramdac);
-                    else {
-                        if ((old ^ val) & 0xE0)
-                            stg1732_ramdac_set_bpp(svga, ramdac);
-                    }
-                    break;
-                case 5:
-                    ramdac->index = (ramdac->index & 0xff00) | val;
-                    break;
-                case 6:
-                    ramdac->index = (ramdac->index & 0xff) | (val << 8);
-                    break;
-                case 7:
-                    if (ramdac->index < 0x100)
-                        ramdac->regs[ramdac->index] = val;
-                    if ((ramdac->index == 3) && (ramdac->command & 8))
-                        stg1732_ramdac_set_bpp(svga, ramdac);
-                    ramdac->index++;
-                    break;
-
-                default:
-                    break;
-            }
-            didwrite            = (ramdac->magic_count >= 4);
-            ramdac->magic_count = stg_state_write[ramdac->magic_count & 7];
-            if (didwrite)
-                return;
+    switch (addr)
+    {
+        case SGS_DAC_VENDOR_ID:
+            ret = SGS_DAC_VENDOR_ID_SGS;
+            break; 
+        case SGS_DAC_DEVICE_ID:
+            if (ramdac->type == LOCAL_IS_STG1764)
+                ret = SGS_DAC_DEVICE_ID_VAN_DYKE;
+            else
+                ret = SGS_DAC_DEVICE_ID_VAN_GOGH;
             break;
-        case 0x3c7:
-        case 0x3c8:
-        case 0x3c9:
-            ramdac->magic_count = 0;
+        case SGS_DAC_CONFIG_0:
+            ret = ramdac->config_0;
             break;
-
-        default:
+        case SGS_DAC_CONFIG_1:
+            ret = ramdac->config_1;
             break;
     }
-
-    svga_out(addr, val, svga);
+    
+    nv_log("STG1764 register read %02x from %02x\n", ret, addr);
+    return ret;
 }
 
-uint8_t
-stg1732_ramdac_in(uint16_t addr, void *priv, svga_t *svga)
+void
+stg1732_ramdac_reg_write(uint16_t addr, uint8_t val, void *priv, svga_t *svga)
 {
     stg1732_ramdac_t *ramdac = (stg1732_ramdac_t *) priv;
-    uint8_t       temp   = 0xff;
 
-    switch (addr) {
-        case 0x3c6:
-            switch (ramdac->magic_count) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                    temp = 0xff;
-                    break;
-                case 4:
-                    temp = ramdac->command;
-                    break;
-                case 5:
-                    temp = ramdac->index & 0xff;
-                    break;
-                case 6:
-                    temp = ramdac->index >> 8;
-                    break;
-                case 7:
-                    switch (ramdac->index) {
-                        case 0:
-                            temp = 0x44;
-                            break;
-                        case 1:
-                            temp = ramdac->type;
-                            break;
-                        case 7:
-                            temp = 0x88;
-                            break;
-                        default:
-                            if (ramdac->index < 0x100)
-                                temp = ramdac->regs[ramdac->index];
-                            else
-                                temp = 0xff;
-                            break;
-                    }
-                    ramdac->index++;
-                    break;
-
-                default:
-                    break;
-            }
-            ramdac->magic_count = stg_state_read[(ramdac->command & 0x10) ? 1 : 0][ramdac->magic_count & 7];
-            return temp;
-        case 0x3c7:
-        case 0x3c8:
-        case 0x3c9:
-            ramdac->magic_count = 0;
+    switch (addr) 
+    {
+        case SGS_DAC_CONFIG_0:
+            ramdac->config_0 = val;
+            // todo: act on other stuff
+            stg1732_ramdac_set_bpp(svga, ramdac);
             break;
-
-        default:
+        case SGS_DAC_CONFIG_1:
+            ramdac->config_1 = val;
             break;
     }
 
-    return svga_in(addr, svga);
+    nv_log("STG1764 register write %02x to %02x\n", val, addr);
 }
 
 float
@@ -224,6 +200,7 @@ stg1732_getclock(int clock, void *priv)
     int             d2;
     uint16_t        c;
 
+    /*
     if (clock == 0)
         return 25175000.0;
     if (clock == 1)
@@ -231,12 +208,12 @@ stg1732_getclock(int clock, void *priv)
 
     c  = ramdac->regs[0x20 + (clock << 1)];
     c |= (ramdac->regs[0x21 + (clock << 1)] << 8);
-    m  = (c & 0xff) + 2;        /* B+2 */
-    n  = ((c >> 8) & 0x1f) + 2; /* N1+2 */
-    d = ((c >> 13) & 0x07);    /* D */
+    m  = (c & 0xff) + 2;        /* B+2 
+    n  = ((c >> 8) & 0x1f) + 2; /* N1+2 
+    d = ((c >> 13) & 0x07);    /* D 
     d2 = (1 << d);
     t  = (14318184.0f * (float) m) / (float) (n * d2);
-
+*/
     //pclog("RAMDAC vclk val=0x%02x, vclk v=%d low, D=%d, t=%f.\n", ramdac->regs[0x20 + (clock << 1)], clock, d2, t);
     return t;
 }
@@ -259,7 +236,7 @@ stg1732_ramdac_close(void *priv)
 }
 
 const device_t stg1732_ramdac_device = {
-    .name          = "SGS-Thompson STG1732 RAMDAC",
+    .name          = "SGS-Thompson/nVIDIA STG1732 \"Van Gogh\" RAMDAC",
     .internal_name = "stg1732_ramdac",
     .flags         = 0,
     .local         = 0,
@@ -269,11 +246,11 @@ const device_t stg1732_ramdac_device = {
     .available     = NULL,
     .speed_changed = NULL,
     .force_redraw  = NULL,
-    .config        = NULL
+    .config       = NULL
 };
 
 const device_t stg1764_ramdac_device = {
-    .name          = "SGS-Thompson STG1764X (nVIDIA NVDAC64) RAMDAC",
+    .name          = "SGS-Thompson/nVIDIA STG1764X (NVDAC64) \"Van Dyke\" RAMDAC",
     .internal_name = "stg1732_ramdac",
     .flags         = 0,
     .local         = LOCAL_IS_STG1764,

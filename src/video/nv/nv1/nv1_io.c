@@ -340,6 +340,11 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr)
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
             ret = nv1->vbios.rom[addr & 0x7FFF];
             break;
+        case NV_PDAC_DATA(0) ... NV_PDAC_DATA(NV1_LAST_DAC_REG):
+            // STG-1764
+            send_log = false; // logged by STG1764 subsystem
+            ret = stg1732_ramdac_uport_read(addr & 0x1F, &nv1->svga.ramdac, &nv1->svga);
+            break; 
         default: // set unimplemented
             unimpl = true;
             break;
@@ -368,12 +373,16 @@ void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
     switch (addr)
     {
         case NV1_VGA_RAM_START ... NV1_VGA_RAM_END:
-            send_log = false; 
-
+            send_log = false;
             nv1_prmc_write(addr, val);
             break;
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
             break; // can't write to ROM
+        case NV_PDAC_DATA(0) ... NV_PDAC_DATA(NV1_LAST_DAC_REG):
+            // STG-1764
+            send_log = false; // logged by STG1764 subsystem
+            stg1732_ramdac_uport_write(addr & 0x1F, val & 0xFF, &nv1->svga.ramdac, &nv1->svga);
+            break; 
         default: // set unimplemented
             unimpl = true;
             break;

@@ -66,6 +66,8 @@
 #define NV1_VGA_BIOS_START                          0xC0000
 #define NV1_VGA_BIOS_END                            0xC7FFF
 
+#define NV1_LAST_DAC_REG                            0x1C >> 2   // not in sgs_dac.h
+
 #define NV1_PEEPROM_SIZE                            128         // 128 bytes 
 
 // 
