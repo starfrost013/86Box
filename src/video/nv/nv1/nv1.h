@@ -34,6 +34,7 @@
 #include <86box/vid_svga.h>
 
 #include "nv1_regs.h"
+#include "../../ramdac/vid_ramdac_stg1732.h"
 
 //
 // DEFINES
