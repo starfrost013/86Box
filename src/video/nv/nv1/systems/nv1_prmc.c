@@ -37,7 +37,7 @@ uint32_t nv1_prmc_read(uint32_t addr)
         case NV_MEMORY_RMC_WINDOW(0):
             ret = nv1->prm.window.addr_start;
             break;
-        // VBIOS never uses these values, but depends on them to boot??? These are debug features
+        // VBIOS never uses these values, but depends on them to boot??? These are debug features, so we don't need to emulate them
         // (NV_MEMORY_TRACE & 0x0F) must return 1
         // (NV_MEMORY_IGNORE_0 & 0x0F) must return 2
         case NV_MEMORY_TRACE:
@@ -93,7 +93,8 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
 
     if (addr == NV_MEMORY_RMC_WINDOW(0))
     {
-        nv1->prm.window.addr_start = val;
+        // only bits 24:13 matter
+        nv1->prm.window.addr_start = ((val & 0x1FFFFFF) >> 13) << 13;
         nv_log("PRMC start address is now 0x%08x\n", val);
     }
 
@@ -101,13 +102,17 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
     && addr <= NV_MEMORY_WINDOW032(0, NV_MEMORY_WINDOW032__SIZE_2))
     {
         uint32_t mmio_addr = nv1->prm.window.addr_start + (addr - NV_MEMORY_WINDOW032(0, 0));
-
+        
         nv_log("RMC-MMIO write %08x to %08x (VGA addr = %05x)\n", val, mmio_addr, addr);
 
         // these are literally the only 8bit addresses in the system (the dac has some but the nv1 doesn't care)
         if (mmio_addr >= NV1_VGA_MMIO_START
         && mmio_addr <= NV1_VGA_MMIO_END)
         {
+            /* wtf is it doing, it writes 0x60000 instead of 0x6 */
+            if (val > 0xFF)
+                val >>= 16; 
+
             nv1_mmio_write8(mmio_addr, val & 0xFF, &nv1);
         }
         else

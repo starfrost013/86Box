@@ -340,9 +340,6 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr)
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
             ret = nv1->vbios.rom[addr & 0x7FFF];
             break;
-        case NV_PEEPROM ... NV_PEEPROM + NV1_PEEPROM_SIZE:
-            ret = nv1->eeprom[(addr & (NV1_PEEPROM_SIZE - 1)) >> 2];
-            break; 
         default: // set unimplemented
             unimpl = true;
             break;
@@ -372,13 +369,11 @@ void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
     {
         case NV1_VGA_RAM_START ... NV1_VGA_RAM_END:
             send_log = false; 
+
             nv1_prmc_write(addr, val);
             break;
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
             break; // can't write to ROM
-        case NV_PEEPROM ... NV_PEEPROM + NV1_PEEPROM_SIZE:
-            nv1->eeprom[(addr & (NV1_PEEPROM_SIZE - 1)) >> 2] = val;
-            break; 
         default: // set unimplemented
             unimpl = true;
             break;
