@@ -20,19 +20,7 @@
  *          This DAC has no vga interface
  */
 
-
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <wchar.h>
-#include <86box/86box.h>
-#include <86box/device.h>
-#include <86box/mem.h>
-#include <86box/timer.h>
-#include <86box/video.h>
-#include <86box/vid_svga.h>
-#include <86box/plat_unused.h>
+#include "vid_ramdac_stg1732.h"
 
 //
 // DEFINES
