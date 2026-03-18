@@ -116,11 +116,13 @@ void stg1732_ramdac_uport_write(uint8_t addr, uint8_t val, void* priv, svga_t* s
             ramdac->index = (ramdac->index & 0xFF00) | (val & 0xFF);
             break;
         case SGS_DAC_UPORT_INDEX_DATA:
-            stg1732_ramdac_reg_write(addr, val, priv, svga);
+            stg1732_ramdac_reg_write(ramdac->index, val, priv, svga);
             break;
     }
 
-    if (addr != SGS_DAC_UPORT_INDEX_DATA)
+    if (addr != SGS_DAC_UPORT_INDEX_DATA
+    && addr != SGS_DAC_UPORT_INDEX_HI
+    && addr != SGS_DAC_UPORT_INDEX_LO)
         nv_log("STG1764 uPort write 0x%02x to 0x%02x\n", val, addr);
 }
 
@@ -257,6 +259,16 @@ stg1732_ramdac_init(UNUSED(const device_t *info))
 {
     stg1732_ramdac_t *ramdac = (stg1732_ramdac_t *) calloc(1, sizeof(stg1732_ramdac_t));
     ramdac->type = info->local & 0xff;
+
+    /* 
+        NVidia default PLL values for 50MHz card
+        Algo is same as riva 128
+    */  
+    ramdac->mpll_m = 11;
+    ramdac->mpll_n = 91;
+    ramdac->mpll_o = 1;
+    ramdac->mpll_p = 1;
+
     return ramdac;
 }
 

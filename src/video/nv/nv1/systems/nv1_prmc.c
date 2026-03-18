@@ -95,7 +95,7 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
     {
         // only bits 24:13 matter
         nv1->prm.window.addr_start = ((val & 0x1FFFFFF) >> 13) << 13;
-        nv_log("PRMC start address is now 0x%08x\n", val);
+        nv_log("PRMC start address is now 0x%08x\n", nv1->prm.window.addr_start);
     }
 
     if (addr >= NV_MEMORY_WINDOW032(0, 0)

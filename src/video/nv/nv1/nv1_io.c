@@ -343,7 +343,7 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr)
         case NV_PDAC_DATA(0) ... NV_PDAC_DATA(NV1_LAST_DAC_REG):
             // STG-1764
             send_log = false; // logged by STG1764 subsystem
-            ret = stg1732_ramdac_uport_read(addr & 0x1F, &nv1->svga.ramdac, &nv1->svga);
+            ret = stg1732_ramdac_uport_read(addr & 0x1F, nv1->svga.ramdac, &nv1->svga);
             break; 
         default: // set unimplemented
             unimpl = true;
@@ -381,7 +381,7 @@ void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
         case NV_PDAC_DATA(0) ... NV_PDAC_DATA(NV1_LAST_DAC_REG):
             // STG-1764
             send_log = false; // logged by STG1764 subsystem
-            stg1732_ramdac_uport_write(addr & 0x1F, val & 0xFF, &nv1->svga.ramdac, &nv1->svga);
+            stg1732_ramdac_uport_write(addr & 0x1F, val & 0xFF, nv1->svga.ramdac, &nv1->svga);
             break; 
         default: // set unimplemented
             unimpl = true;
