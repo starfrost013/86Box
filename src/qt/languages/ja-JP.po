@@ -1060,14 +1060,9 @@ msgstr "PCLファイルをPDFに自動変換するには%1が必要です。\n\n
 msgid "Don't show this message again"
 msgstr "今後、このメッセージを表示しない"
 
-msgid "Don't exit"
-msgstr "終了しない"
-
+#, fuzzy
 msgid "Reset"
 msgstr "リセット"
-
-msgid "Don't reset"
-msgstr "リセットしない"
 
 msgid "CD-ROM images"
 msgstr "CD-ROMイメージ"
@@ -1573,9 +1568,6 @@ msgstr "DMF (クラスター2048)"
 msgid "2.88 MB"
 msgstr "2.88 MB"
 
-msgid "ZIP 100"
-msgstr "ZIP 100"
-
 msgid "3.5\" 128 MB (ISO 10090)"
 msgstr "3.5\" 128 MB (ISO 10090)"
 
@@ -1702,8 +1694,8 @@ msgstr "カーソル/パック(&C)"
 msgid "&Pen"
 msgstr "ペン(&P)"
 
-msgid "&Host CD/DVD Drive (%1:)"
-msgstr "ホスト CD/DVD ドライブ (%1:) (&H)"
+msgid "&Host CD/DVD Drive (%1)"
+msgstr "ホスト CD/DVD ドライブ (%1) (&H)"
 
 msgid "&Connected"
 msgstr "コネクテッド"

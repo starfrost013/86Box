@@ -1061,14 +1061,9 @@ msgstr "%1 je potrebno za automatsku konverziju PCL datoteke u PDF datoteke.\n\n
 msgid "Don't show this message again"
 msgstr "Ne pokazi više ovu poruku"
 
-msgid "Don't exit"
-msgstr "Ne izlazi"
-
+#, fuzzy
 msgid "Reset"
 msgstr "Resetiraj"
-
-msgid "Don't reset"
-msgstr "Ne resetiraj"
 
 msgid "CD-ROM images"
 msgstr "CD-ROM slike"
@@ -1574,9 +1569,6 @@ msgstr "DMF (2048 clusteri)"
 msgid "2.88 MB"
 msgstr "2,88 MB"
 
-msgid "ZIP 100"
-msgstr "ZIP 100"
-
 msgid "3.5\" 128 MB (ISO 10090)"
 msgstr "3,5\" 128 MB (ISO 10090)"
 
@@ -1703,8 +1695,8 @@ msgstr "&Kursor/Pak"
 msgid "&Pen"
 msgstr "&Olovka"
 
-msgid "&Host CD/DVD Drive (%1:)"
-msgstr "CD/DVD pogon &nositelja (%1:)"
+msgid "&Host CD/DVD Drive (%1)"
+msgstr "CD/DVD pogon &nositelja (%1)"
 
 msgid "&Connected"
 msgstr "&Povezan"
