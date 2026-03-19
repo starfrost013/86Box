@@ -51,7 +51,7 @@ nv_log(const char *fmt, ...)
 void
 nv1_init_mappings()
 {
-    io_sethandler(NV1_VGA_START, NV1_VGA_SIZE, nv1_svga_read, NULL, NULL, nv1_svga_write, NULL, NULL, nv1);
+    io_sethandler(NV1_VGA_START, NV1_VGA_SIZE, nv1_svga_read_io, NULL, NULL, nv1_svga_write_io, NULL, NULL, nv1);
 
     mem_mapping_add(&nv1->mapping_mmio, 0, 0,
                     nv1_mmio_read8,
@@ -64,14 +64,23 @@ nv1_init_mappings()
 
     
     mem_mapping_add(&nv1->mapping_prm, 0, 0,
-                    nv1_mmio_read8,
-                    nv1_mmio_read16,
-                    nv1_mmio_read32,
-                    nv1_mmio_write8,
-                    nv1_mmio_write16,
-                    nv1_mmio_write32,
+                    nv1_svga_read8,
+                    nv1_svga_read16,
+                    nv1_svga_read32,
+                    nv1_svga_write8,
+                    nv1_svga_write16,
+                    nv1_svga_write32,
                     NULL, MEM_MAPPING_EXTERNAL, nv1);
-    
+
+    mem_mapping_add(&nv1->svga.mapping, 0, 0,
+                    nv1_svga_read8,
+                    nv1_svga_read16,
+                    nv1_svga_read32,
+                    nv1_svga_write8,
+                    nv1_svga_write16,
+                    nv1_svga_write32,
+                    NULL, MEM_MAPPING_EXTERNAL, nv1);
+
     mem_mapping_set_addr(&nv1->mapping_prm, NV1_VGA_RAM_START, 0x1FFFF);
 }
 
@@ -82,10 +91,10 @@ void nv1_update_mappings_vga()
     (io_enabled) ? nv_log("I/O enabled\n") : nv_log("I/O disabled\n");
 
     // remove to avoid setting multiple times
-    io_removehandler(NV1_VGA_START, NV1_VGA_SIZE, nv1_svga_read, NULL, NULL, nv1_svga_write, NULL, NULL, nv1);
+    io_removehandler(NV1_VGA_START, NV1_VGA_SIZE, nv1_svga_read_io, NULL, NULL, nv1_svga_write_io, NULL, NULL, nv1);
 
     if (io_enabled)
-        io_sethandler(NV1_VGA_START, NV1_VGA_SIZE, nv1_svga_read, NULL, NULL, nv1_svga_write, NULL, NULL, nv1);
+        io_sethandler(NV1_VGA_START, NV1_VGA_SIZE, nv1_svga_read_io, NULL, NULL, nv1_svga_write_io, NULL, NULL, nv1);
 
 }
 
@@ -96,7 +105,7 @@ void nv1_update_mappings_nv()
     (mem_enabled) ? nv_log("MMIO enabled\n") : nv_log("MMIO disabled\n");
 
     mem_mapping_disable(&nv1->mapping_mmio);
-
+    
     // SET_ADDR enables automatically
     if (mem_enabled
     && nv1->bar0_addr)
@@ -152,11 +161,12 @@ nv1_init(const device_t *dev)
 
     // tell the video subsystem we have an SVGA class card
     svga_init(&nv1_device, &nv1->svga, nv1, nv1->vram_amount,
-              nv1_recalc_timings, nv1_svga_read, nv1_svga_write, nv1_draw_cursor, NULL);
+              nv1_recalc_timings, nv1_svga_read_io, nv1_svga_write_io, nv1_draw_cursor, NULL);
 
     video_inform(VIDEO_FLAG_TYPE_SPECIAL, &timing_nv1);
 
-    nv1->svga.ramdac = device_add(&stg1764_ramdac_device);
+    nv1->ramdac = device_add(&stg1764_ramdac_device);
+    nv1->svga.ramdac = nv1->ramdac;
     nv1->svga.clock_gen = nv1->svga.ramdac;
 
     nv_log("[Phase 3] Initialising SVGA OK! [RAMDAC = STG1764]\n");

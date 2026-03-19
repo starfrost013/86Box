@@ -199,9 +199,12 @@ void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* p
 // SVGA (Function 0)
 //
 
-uint8_t nv1_svga_read(uint16_t addr, void* priv)
+uint8_t nv1_svga_read_io(uint16_t addr, void* priv)
 {
     uint8_t ret = 0x00;
+
+    if (((addr & 0xfff0) == 0x3d0 || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
+        addr ^= 0x60;
 
     switch (addr)
     {
@@ -218,11 +221,19 @@ uint8_t nv1_svga_read(uint16_t addr, void* priv)
             break;
     }
 
-    nv_log("SVGA read 0x%02x from 0x%02x\n", ret, addr);
+    //nv_log("SVGA read 0x%02x from 0x%02x\n", ret, addr);
+    return ret; 
 }
 
-void nv1_svga_write(uint16_t addr, uint8_t val, void* priv)
+void nv1_svga_write_io(uint16_t addr, uint8_t val, void* priv)
 {
+    // orce on colour mode 
+    //if (((addr & 0xfff0) == 0x3d0 || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
+        //addr ^= 0x60;
+
+    //if ((addr & 0xFFF0) == 0x3B0)
+        //addr |= 0x20;
+
     switch (addr)
     {
         case NV_IO_CC_ADDRESS__COLOR:
@@ -238,7 +249,7 @@ void nv1_svga_write(uint16_t addr, uint8_t val, void* priv)
             break;
     }
 
-    nv_log("SVGA write 0x%02x to 0x%04x\n", val, addr);
+    //nv_log("SVGA write 0x%02x to 0x%04x\n", val, addr);
 }
 
 //
@@ -248,19 +259,15 @@ void nv1_svga_write(uint16_t addr, uint8_t val, void* priv)
 
 uint8_t nv1_mmio_read8(uint32_t addr, void* priv)
 {
-    uint32_t ret = 0x00;
+    uint8_t ret = 0x00;
 
     // see if unaligned reads are a problem
-    // VGA mirror at 6d13c0-6d13df (also gamepot)
+    // VGA mirror at 6d03c0-6d03df (also gamepot)
 
     if (addr >= NV1_VGA_MMIO_START
     && addr <= NV1_VGA_MMIO_END)
     {
-        //f orce on colour mode 
-        if (((addr & 0xfff0) == 0x3d0 || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
-            addr ^= 0x60;
-
-        ret = nv1_svga_read(NV1_VGA_START + (addr & 0x1F), &nv1->svga);
+        ret = nv1_svga_read_io(addr & 0xFFF, &nv1->svga);
         return ret; 
     }
 
@@ -270,7 +277,7 @@ uint8_t nv1_mmio_read8(uint32_t addr, void* priv)
 
 uint16_t nv1_mmio_read16(uint32_t addr, void* priv)
 {
-    uint32_t ret = 0x00;
+    uint16_t ret = 0x00;
 
     ret = nv1_mmio_read32(addr, priv);
     return (uint16_t)(ret >> ((addr & 3) << 3) & 0xFFFF);
@@ -300,12 +307,12 @@ uint32_t nv1_mmio_read32(uint32_t addr, void* priv)
 
 void nv1_mmio_write8(uint32_t addr, uint8_t val, void* priv)
 {
-    // VGA mirror at 6d13c0-6d13df (also gamepot)
+    // VGA mirror at 6d03c0-6d03df (also gamepot)
 
     if (addr >= NV1_VGA_MMIO_START
     && addr <= NV1_VGA_MMIO_END)
     {
-        nv1_svga_write(NV1_VGA_START + (addr & 0x1F), val, &nv1->svga);
+        nv1_svga_write_io(addr & 0xFFF, val, &nv1->svga);
         return; 
     }
 
@@ -378,7 +385,7 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr)
         case NV_PDAC_DATA(0) ... NV_PDAC_DATA(NV1_LAST_DAC_REG):
             // STG-1764
             send_log = false; // logged by STG1764 subsystem
-            ret = stg1732_ramdac_uport_read(addr & 0x1F, nv1->svga.ramdac, &nv1->svga);
+            ret = stg1732_ramdac_uport_read(addr & 0x1F, nv1->ramdac, &nv1->svga);
             break; 
         default: // set unimplemented
             unimpl = true;
@@ -423,7 +430,7 @@ void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
         case NV_PDAC_DATA(0) ... NV_PDAC_DATA(NV1_LAST_DAC_REG):
             // STG-1764
             send_log = false; // logged by STG1764 subsystem
-            stg1732_ramdac_uport_write(addr & 0x1F, val & 0xFF, nv1->svga.ramdac, &nv1->svga);
+            stg1732_ramdac_uport_write(addr & 0x1F, val & 0xFF, nv1->ramdac, &nv1->svga);
             break; 
         default: // set unimplemented
             unimpl = true;

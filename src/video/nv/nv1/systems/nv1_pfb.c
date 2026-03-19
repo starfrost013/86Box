@@ -75,9 +75,6 @@ uint32_t nv1_pfb_read(uint32_t addr)
 
 void nv1_pfb_write(uint32_t addr, uint32_t val)
 {
-    // deosn't do anything yet
-    bool recalc_needed = false;
-
     // nv1 is not vga compatible but these are rough equivalents
     switch (addr)
     {
@@ -95,54 +92,28 @@ void nv1_pfb_write(uint32_t addr, uint32_t val)
             break;
         case NV_PFB_HOR_FRNT_PORCH:
             nv1->pfb.hfrontporch = val;
-            recalc_needed = true;
             break;
         case NV_PFB_HOR_SYNC_WIDTH:
             nv1->pfb.hsync_width = val;
-            recalc_needed = true;
             break;
         case NV_PFB_HOR_BACK_PORCH:
             nv1->pfb.hbackporch = val;
-            recalc_needed = true;
             break;
         case NV_PFB_HOR_DISP_WIDTH:
             nv1->pfb.hdisp = val;
-            recalc_needed = true;
             break;
         case NV_PFB_VER_FRNT_PORCH:
             nv1->pfb.vfrontporch = val;
-            recalc_needed = true;
             break;
         case NV_PFB_VER_SYNC_WIDTH:
             nv1->pfb.vsync_width = val;
-            recalc_needed = true;
             break;
         case NV_PFB_VER_BACK_PORCH:
             nv1->pfb.vbackporch = val;
-            recalc_needed = true;
             break;
         case NV_PFB_VER_DISP_WIDTH:
             nv1->pfb.vdisp = val;
-            recalc_needed = true;
             break; 
     }
 
-    // set svga stuff based on recalcualted values of this
-
-    /*
-    if (recalc_needed)
-    {        
-        nv1->svga.hdisp = nv1->pfb.hdisp;
-        nv1->svga.htotal = nv1->pfb.hdisp + nv1->pfb.hbackporch;
-        nv1->svga.vdisp = nv1->pfb.vdisp;
-        nv1->svga.vtotal = nv1->pfb.vdisp + nv1->pfb.vbackporch;
-
-        nv1->svga.hblankstart = nv1->pfb.hdisp;
-        nv1->svga.hblankend = nv1->pfb.hdisp + nv1->pfb.hsync_width;
-        nv1->svga.vblankstart = nv1->pfb.vdisp;
-        nv1->svga.dispend = nv1->svga.vblankstart; // no overscan...
-        nv1->svga.vblankend = nv1->pfb.vdisp + nv1->pfb.vsync_width;
-
-        svga_recalctimings(&nv1->svga);
-    }*/
 }

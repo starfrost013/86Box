@@ -120,6 +120,7 @@ typedef struct nv1_pfb_s
 typedef struct nv1_s
 {
     void* log;                                                  // debug builds only
+    void* ramdac;                                               // so we can run it without the ramdac
     uint32_t vram_amount;                                       // amount of vram
     uint8_t pci_slot;                                           // PCI slot number
     uint8_t pci_regs_vga[NV1_PCI_NUM_REGS];                     // Function 0
@@ -167,8 +168,15 @@ uint8_t nv1_pci_read(int32_t func, int32_t address, int32_t len, void* priv);
 void nv1_pci_write(int32_t func, int32_t address, int32_t len, uint8_t val, void* priv);
 
 // I/O - SVGA
-uint8_t nv1_svga_read(uint16_t addr, void* priv);
-void nv1_svga_write(uint16_t addr, uint8_t val, void* priv);
+uint8_t nv1_svga_read_io(uint16_t addr, void* priv);
+void nv1_svga_write_io(uint16_t addr, uint8_t val, void* priv);
+
+uint8_t nv1_svga_read8(uint32_t addr, void* priv);
+uint16_t nv1_svga_read16(uint32_t addr, void* priv);
+uint32_t nv1_svga_read32(uint32_t addr, void* priv);
+void nv1_svga_write8(uint32_t addr, uint8_t val, void* priv);
+void nv1_svga_write16(uint32_t addr, uint16_t val, void* priv);
+void nv1_svga_write32(uint32_t addr, uint32_t val, void* priv);
 
 // I/O - MMIO
 uint8_t nv1_mmio_read8(uint32_t addr, void* priv);

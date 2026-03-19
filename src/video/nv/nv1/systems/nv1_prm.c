@@ -7,7 +7,7 @@
  *          This file is part of the 86Box distribution.
  *
  *          WELCOME TO NVIDIA DRIVER VERSION 2.0!
- *          nv1_prmc: Real-Mode Communication driver
+ *          nv1_prmc: Real-Mode Communication driver and custom SVGA I/O handler
  *
  * Authors: starfrost
  *
@@ -15,6 +15,71 @@
  */
 
 #include "../nv1.h"
+
+
+void nv1_enable_rmc_if_needed(uint32_t addr, uint32_t val)
+{
+    if (addr == NV_MEMORY_RMC_ACCESS(1))
+    {
+        nv1->prm.window.enabled = (val == NV_MEMORY_RMC_ACCESS_SECURITY_ENABLE);
+        nv1->prm.window.enabled ? nv_log("PRMC window 1 enabled\n") : nv_log("PRMC window 1 disabled\n");
+    }
+}
+
+uint8_t nv1_svga_read8(uint32_t addr, void* priv)
+{
+    if (!nv1->prm.window.enabled)
+        return svga_read(addr, &nv1->svga);
+    else
+        return nv1_prmc_read(addr);
+}
+
+uint16_t nv1_svga_read16(uint32_t addr, void* priv)
+{
+    if (!nv1->prm.window.enabled)
+        return svga_readw(addr, &nv1->svga);
+    else
+        return nv1_prmc_read(addr);
+}
+
+uint32_t nv1_svga_read32(uint32_t addr, void* priv)
+{
+    if (!nv1->prm.window.enabled)
+        return svga_readl(addr, &nv1->svga);
+    else
+        return nv1_prmc_read(addr);
+}
+
+void nv1_svga_write8(uint32_t addr, uint8_t val, void* priv)
+{
+    nv1_enable_rmc_if_needed(addr, val);
+
+    // we don't need to put any checks on this since all RMC writes are gated in gonv/nonv writes
+    if (!nv1->prm.window.enabled)
+        svga_write(addr, val, &nv1->svga);
+    else
+        nv1_prmc_write(addr, val);
+}
+
+void nv1_svga_write16(uint32_t addr, uint16_t val, void* priv)
+{
+    nv1_enable_rmc_if_needed(addr, val);
+
+    if (!nv1->prm.window.enabled)
+        svga_writew(addr, val, &nv1->svga);
+    else
+        nv1_prmc_write(addr, val);
+}
+
+void nv1_svga_write32(uint32_t addr, uint32_t val, void* priv)
+{
+    nv1_enable_rmc_if_needed(addr, val);
+
+    if (!nv1->prm.window.enabled)
+        svga_writel(addr, val, &nv1->svga);
+    else
+        nv1_prmc_write(addr, val);
+}
 
 //
 // mmio regs
@@ -66,7 +131,7 @@ uint32_t nv1_prmc_write_prm(uint32_t addr, uint32_t val)
         // bit 4 - 0x01 - 8 bit, 0x00 - 6bit
         case NV_PRM_CONFIG_0:
             nv1->prm.config = val;
-            nv1->svga.ramdac_type = ((val >> NV_PRM_CONFIG_0_DAC_WIDTH) & 0x01) ? RAMDAC_8BIT : RAMDAC_6BIT; 
+            //nv1->svga.ramdac_type = ((val >> NV_PRM_CONFIG_0_DAC_WIDTH) & 0x01) ? RAMDAC_8BIT : RAMDAC_6BIT; 
             break;
         case NV_PRM_INTR_0:
             nv1->prm.intr = val;
@@ -116,9 +181,6 @@ uint32_t nv1_prmc_read(uint32_t addr)
     {
         return nv1_prmc_read_prm(addr); 
     }
-
-    if (!nv1->prm.window.enabled)
-        return svga_readl(addr, &nv1->svga);
 
     // the indexes are wrong because for some reason the VBIOS uses "access" index 1 (B1E04) and "window" index 0 (B1E40)
     // (GPU errata?)
@@ -172,19 +234,6 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
     // the indexes are wrong because for some reason the VBIOS uses "access" index 1 (B1E04) and "window" index 0 (B1E40)
     // (GPU errata?)
     // check this before writing
-
-    if (addr == NV_MEMORY_RMC_ACCESS(1))
-    {
-        nv1->prm.window.enabled = (val == NV_MEMORY_RMC_ACCESS_SECURITY_ENABLE);
-        nv1->prm.window.enabled ? nv_log("PRMC window 1 enabled\n") : nv_log("PRMC window 1 disabled\n");
-    }
-
-    // if not, send writes down to SVGA
-    if (!nv1->prm.window.enabled)
-    {
-        svga_writel(addr, val, &nv1->svga);
-        return;
-    } 
 
     // send mmio writes to mmio
     if (addr >= NV_PRM_START
