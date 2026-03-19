@@ -166,14 +166,18 @@ nv1_init(const device_t *dev)
 
     nv_log("[Phase 4] Initialising memory mappings OK! [32 MB MMIO, 32 I/O addresses for VGA]\n");
 
+    // initialise gpu subsystems
+    nv1_prmc_init();
+
+    nv_log("[Phase 5] Initialising GPU subsystems OK! ALL INIT OK!\n");
+
     return nv1;
 }
-
-
 
 void
 nv1_speed_changed(void *priv)
 {
+    svga_recalctimings(&nv1->svga);
 }
 
 void

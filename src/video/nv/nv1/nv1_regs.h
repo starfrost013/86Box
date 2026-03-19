@@ -623,7 +623,8 @@
 #define	NV_IO_AT_MODE_PALETTE_SIZE 7
 #define	NV_IO_DAC_DATA 0x000003C9
 #define	NV_IO_DAC_DATA_VALUE 7		// ends at bit 0
-#define	NV_PMC 0x00000000		// ends at 0xFFF
+#define	NV_PMC_START 0x00000000		// ends at 0xFFF
+#define	NV_PMC_END 0x00000FFF
 #define	NV_PMC_BOOT_0 0x00000000
 #define	NV_PMC_BOOT_0_REVISION 7		// ends at bit 0
 #define	NV_PMC_BOOT_0_REVISION_A 0x00000000
@@ -2760,7 +2761,8 @@
 #define	NV_UQTMB_COLOR(i) (0x005E0400+(i)*4)
 #define	NV_UQTMB_COLOR__SIZE_1 32
 #define	NV_UQTMB_COLOR_VALUE 31		// ends at bit 0
-#define	NV_PFB 0x00600000		// ends at 0x600FFF
+#define	NV_PFB_REG_START 0x00600000		// ends at 0x600FFF
+#define	NV_PFB_END 0x00600FFF   
 #define	NV_PFB_BOOT_0 0x00600000
 #define	NV_PFB_BOOT_0_RAM_AMOUNT 1		// ends at bit 0
 #define	NV_PFB_BOOT_0_RAM_AMOUNT_1MB 0x00000000
@@ -3041,7 +3043,8 @@
 #define	NV_PALT_DATA_VALUE 7		// ends at bit 0
 #define	NV_PRAMHT 0x00640000		// ends at 0x647FFF
 #define	NV_PRAMRO 0x00650000		// ends at 0x653FFF
-#define	NV_PRM 0x006C0000		// ends at 0x6C7FFF
+#define	NV_PRM_START 0x006C0000		// ends at 0x6C7FFF
+#define NV_PRM_END 0x006C7FFF
 #define	NV_PRM_DEBUG_0 0x006C0080
 #define	NV_PRM_DEBUG_0_FLIPFLOP 0
 #define	NV_PRM_DEBUG_0_FLIPFLOP_ADDRESS 0x00000000

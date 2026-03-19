@@ -146,6 +146,8 @@ add_library(vid OBJECT
     nv/nv1/nv1_io.c
     nv/nv1/nv1_config.c
     nv/nv1/systems/nv1_prmc.c
+    nv/nv1/systems/nv1_pfb.c
+    nv/nv1/systems/nv1_pmc.c
 
     # Generic
     vid_bochs_vbe.c

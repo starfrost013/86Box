@@ -28,7 +28,7 @@
 // DEFINES
 // (local bitflags)
 //
-#define LOCAL_IS_STG1764            0x01
+#define DAC_IS_STG1764            0x01
 #define PALETTE_SIZE                256
 #define LUT_SIZE                    768     // R,G,B components
 
@@ -42,6 +42,8 @@ typedef struct stg1732_ramdac_t {
     uint8_t vpll_m, vpll_n, vpll_o, vpll_p; // Video PLL
     uint8_t mpll_m, mpll_n, mpll_o, mpll_p; // Core & Memory PLL
     uint8_t apll_m, apll_n, apll_o, apll_p; // Audio PLL
+
+    uint8_t palette_control;                // controls the DAC state
 
     uint8_t palette[PALETTE_SIZE];
     uint8_t lut[LUT_SIZE];
@@ -86,7 +88,9 @@ uint8_t stg1732_ramdac_uport_read(uint8_t addr, void* priv, svga_t* svga)
             break;
     }
 
-    if (addr != SGS_DAC_UPORT_INDEX_DATA)
+    if (addr != SGS_DAC_UPORT_INDEX_DATA
+    && addr != SGS_DAC_UPORT_INDEX_HI
+    && addr != SGS_DAC_UPORT_INDEX_LO)
         nv_log("STG1764 uPort read 0x%02x from 0x%02x\n", ret, addr);
 
     return ret; 
@@ -162,16 +166,25 @@ stg1732_ramdac_reg_read(uint16_t addr, void *priv, svga_t *svga)
             ret = SGS_DAC_VENDOR_ID_SGS;
             break; 
         case SGS_DAC_DEVICE_ID:
-            if (ramdac->type == LOCAL_IS_STG1764)
+            if (ramdac->type == DAC_IS_STG1764)
                 ret = SGS_DAC_DEVICE_ID_VAN_DYKE;
             else
                 ret = SGS_DAC_DEVICE_ID_VAN_GOGH;
             break;
         case SGS_DAC_CONFIG_0:
             ret = ramdac->config_0;
+
+            if (ramdac->type == DAC_IS_STG1764)
+                ret |= (SGS_DAC_CONFIG_0_PORT_WIDTH_64BIT << SGS_DAC_CONFIG_0_PORT_WIDTH);
+            else
+                ret |= (SGS_DAC_CONFIG_0_PORT_WIDTH_32BIT << SGS_DAC_CONFIG_0_PORT_WIDTH);
+
             break;
         case SGS_DAC_CONFIG_1:
             ret = ramdac->config_1;
+            break;
+        case SGS_DAC_RGB_EXT_PAL_CTRL:
+            ret = ramdac->palette_control;
             break;
         // compressed to not waste tons of lines on trivial code
         case SGS_DAC_APLL_M: ret = ramdac->apll_m; break;
@@ -203,9 +216,23 @@ stg1732_ramdac_reg_write(uint16_t addr, uint8_t val, void *priv, svga_t *svga)
             ramdac->config_0 = val;
             // todo: act on other stuff
             stg1732_ramdac_set_bpp(svga, ramdac);
+
+            // not strictly needed but helpful while debugging
+            if (ramdac->type == DAC_IS_STG1764)
+                ramdac->config_0 |= (SGS_DAC_CONFIG_0_PORT_WIDTH_64BIT << SGS_DAC_CONFIG_0_PORT_WIDTH);
+            else
+            {
+                ramdac->config_0 |= (SGS_DAC_CONFIG_0_PORT_WIDTH_32BIT << SGS_DAC_CONFIG_0_PORT_WIDTH);
+                // STG1732 has vesa connector
+                ramdac->config_0 |= (SGS_DAC_CONFIG_0_VESA_CONNECTOR_ENABLED << SGS_DAC_CONFIG_0_VESA_CONNECTOR);
+            }
+                
             break;
         case SGS_DAC_CONFIG_1:
             ramdac->config_1 = val;
+            break;
+        case SGS_DAC_RGB_EXT_PAL_CTRL:
+            ramdac->palette_control = val; 
             break;
         // compressed to not waste tons of lines on trivial code
         case SGS_DAC_APLL_M: ramdac->apll_m = val; break;
@@ -222,6 +249,9 @@ stg1732_ramdac_reg_write(uint16_t addr, uint8_t val, void *priv, svga_t *svga)
         case SGS_DAC_VPLL_P: ramdac->vpll_p = val; break;
     }
 
+    if (addr >= SGS_DAC_MPLL_M && addr <= SGS_DAC_VPLL_P)
+        svga_recalctimings(svga);
+        
     nv_log("STG1764 register write 0x%02x to 0x%02x\n", val, addr);
 }
 
@@ -229,7 +259,7 @@ float
 stg1732_getclock(int clock, void *priv)
 {
     stg1732_ramdac_t   *ramdac = (stg1732_ramdac_t *) priv;
-    float           t;
+    float           t = 1.0f;
     int             m;
     int             n;
     int             d;
@@ -268,7 +298,18 @@ stg1732_ramdac_init(UNUSED(const device_t *info))
     ramdac->mpll_n = 91;
     ramdac->mpll_o = 1;
     ramdac->mpll_p = 1;
+                // not strictly needed but helpful while debugging
 
+    // hardcoded stuff
+    if (ramdac->type == DAC_IS_STG1764)
+        ramdac->config_0 |= (SGS_DAC_CONFIG_0_PORT_WIDTH_64BIT << SGS_DAC_CONFIG_0_PORT_WIDTH);
+    else
+    {
+        ramdac->config_0 |= (SGS_DAC_CONFIG_0_PORT_WIDTH_32BIT << SGS_DAC_CONFIG_0_PORT_WIDTH);
+        // STG1732 has vesa connector
+        ramdac->config_0 |= (SGS_DAC_CONFIG_0_VESA_CONNECTOR_ENABLED << SGS_DAC_CONFIG_0_VESA_CONNECTOR);
+    }
+                
     return ramdac;
 }
 
@@ -299,7 +340,7 @@ const device_t stg1764_ramdac_device = {
     .name          = "SGS-Thompson/nVIDIA STG1764X (NVDAC64) \"Van Dyke\" RAMDAC",
     .internal_name = "stg1732_ramdac",
     .flags         = 0,
-    .local         = LOCAL_IS_STG1764,
+    .local         = DAC_IS_STG1764,
     .init          = stg1732_ramdac_init,
     .close         = stg1732_ramdac_close,
     .reset         = NULL,

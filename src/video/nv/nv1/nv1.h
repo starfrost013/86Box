@@ -70,6 +70,8 @@
 
 #define NV1_PEEPROM_SIZE                            128         // 128 bytes 
 
+#define NV1_PMC_BOOT_0_GENERIC_REVB2                0x00010102  // NV1 Revision B2
+
 // 
 // STRUCTS
 //
@@ -87,7 +89,30 @@ typedef struct nv1_prm_s
     // IF THERE IS A BUG IN DOS APPS FOR NV1, CHANGE THIS
     // there's also x86 segmentation type functionality to move the 8KB sliding window anywhere in MMIO, but this register is never touched?
     nv1_prm_window_t window;
+
+    uint32_t debug;                 // debug register
+    uint32_t config;                // 6/8 bits mode
+    uint32_t intr, intr_en;
+    uint32_t trace;                 // debug
+    uint32_t ignore_0;              // ignore for trace
+    uint32_t ignore_1;              // ignore for trace
 } nv1_prm_t; 
+
+typedef struct nv1_pfb_s
+{
+    uint32_t config_0;                                          // config register
+    uint32_t green_0;                                           // power-down register
+
+    // NV1 is not vga compatible, but we "translate" this to 86box-SVGA for easier emulation
+    uint32_t hfrontporch;           // 0x600500 NV_PFB_HOR_FRNT_PORCH
+    uint32_t hsync_width;           // 0x600510 NV_PFB_HOR_SYNC_WIDTH
+    uint32_t hbackporch;            // 0x600520 NV_PFB_HOR_BACK_PORCH
+    uint32_t hdisp;                 // 0x600530 NV_PFB_HOR_DISP_WIDTH
+    uint32_t vfrontporch;           // 0x600540 NV_PFB_VER_FRNT_PORCH
+    uint32_t vsync_width;           // 0x600550 NV_PFB_VER_SYNC_WIDTH   
+    uint32_t vbackporch;            // 0x600560 NV_PFB_VER_BACK_PORCH
+    uint32_t vdisp;                 // 0x600570 NV_PFB_VER_DISP_WIDTH
+} nv1_pfb_t; 
 
 typedef struct nv1_s
 {
@@ -107,6 +132,7 @@ typedef struct nv1_s
 
     // SYSTEMS
     nv1_prm_t prm;
+    nv1_pfb_t pfb; 
     uint32_t eeprom[NV1_PEEPROM_SIZE >> 2];                     // eeprom apparently
 } nv1_t;
 
@@ -153,5 +179,10 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr);                         // ensur
 void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val);              // ensures writes are sent to the right gpu subsystem
 
 // subsystems
+void nv1_prmc_init();
 uint32_t nv1_prmc_read(uint32_t addr);
 void nv1_prmc_write(uint32_t addr, uint32_t val);
+uint32_t nv1_pfb_read(uint32_t addr);
+void nv1_pfb_write(uint32_t addr, uint32_t val);
+uint32_t nv1_pmc_read(uint32_t addr);
+void nv1_pmc_write(uint32_t addr, uint32_t val);

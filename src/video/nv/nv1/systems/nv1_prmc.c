@@ -16,11 +16,107 @@
 
 #include "../nv1.h"
 
-uint32_t nv1_prmc_read(uint32_t addr)
+//
+// mmio regs
+//
+
+uint32_t nv1_prmc_read_prm(uint32_t addr)
 {
     uint32_t ret = 0x00;
 
+    switch (addr)
+    {
+        case NV_PRM_DEBUG_0:
+            ret = nv1->prm.debug;
+            break; 
+        case NV_PRM_CONFIG_0:
+            ret = nv1->prm.config; 
+            break; 
+        case NV_PRM_INTR_0:
+            ret = nv1->prm.intr;
+            break;
+        case NV_PRM_INTR_EN_0:
+            ret = nv1->prm.intr_en;
+            break;
+        case NV_PRM_TRACE:
+        case NV_MEMORY_TRACE:
+            ret = nv1->prm.trace;
+            break; 
+        case NV_PRM_IGNORE_0:
+        case NV_MEMORY_IGNORE_0: //worst code
+            ret = nv1->prm.ignore_0 | NV_PRM_IGNORE_0_DAC_READS;
+            break;
+        case NV_PRM_IGNORE_1:
+        case NV_MEMORY_IGNORE_1: //worst code
+            ret = nv1->prm.ignore_0;
+            break;
+        }
+
+    return ret;
+}
+
+uint32_t nv1_prmc_write_prm(uint32_t addr, uint32_t val)
+{
+    switch (addr)
+    {
+        case NV_PRM_DEBUG_0:
+            nv1->prm.debug = val;
+            break;
+        // bit 0 - text mode
+        // bit 4 - 0x01 - 8 bit, 0x00 - 6bit
+        case NV_PRM_CONFIG_0:
+            nv1->prm.config = val;
+            nv1->svga.ramdac_type = ((val >> NV_PRM_CONFIG_0_DAC_WIDTH) & 0x01) ? RAMDAC_8BIT : RAMDAC_6BIT; 
+            break;
+        case NV_PRM_INTR_0:
+            nv1->prm.intr = val;
+            // TODO: FIRE INTERRUPT!!!!!
+            break;
+        case NV_PRM_INTR_EN_0:
+            nv1->prm.intr_en = val;
+            break;
+        // these are also mirrored into the real-mode space :/
+        case NV_PRM_TRACE:
+        case NV_MEMORY_TRACE:
+            nv1->prm.trace = val;
+            break; 
+        case NV_PRM_IGNORE_0:
+        case NV_MEMORY_IGNORE_0: //worst code, hack for some stupid shit
+            nv1->prm.ignore_0 = val; 
+            break;
+        case NV_PRM_IGNORE_1:
+        case NV_MEMORY_IGNORE_1: //worst code
+            nv1->prm.ignore_1 = val; 
+            break;
+    }
+}
+
+// init function
+void nv1_prmc_init()
+{
+    nv1->prm.intr_en |= (NV_PRM_INTR_EN_0_VBLANK_ENABLED << NV_PRM_INTR_EN_0_VBLANK);
+
+    // unknown reasons these are required to boot the Video BIOS
+    nv1->prm.trace |= NV_PRM_TRACE_IO_CAPTURE;
+    nv1->prm.ignore_0 |= NV_PRM_IGNORE_0_DAC_READS;
+}
+
+//
+// REAL MODE REGS
+//
+
+uint32_t nv1_prmc_read(uint32_t addr)
+{
+    uint32_t ret = 0x00;
     // if not, read SVGA (don't log this)
+
+    // send mmio writes to mmio
+    if (addr >= NV_PRM_START
+    && addr <= NV_PRM_END)
+    {
+        return nv1_prmc_read_prm(addr); 
+    }
+
     if (!nv1->prm.window.enabled)
         return svga_readl(addr, &nv1->svga);
 
@@ -41,10 +137,9 @@ uint32_t nv1_prmc_read(uint32_t addr)
         // (NV_MEMORY_TRACE & 0x0F) must return 1
         // (NV_MEMORY_IGNORE_0 & 0x0F) must return 2
         case NV_MEMORY_TRACE:
-            ret = NV_PRM_TRACE_IO_CAPTURE_WRITES;
-            break; 
         case NV_MEMORY_IGNORE_0: 
-            ret = NV_PRM_IGNORE_0_DAC_READS;
+        case NV_MEMORY_IGNORE_1: 
+            ret = nv1_prmc_read_prm(addr);
             break;
     }  
 
@@ -90,6 +185,14 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
         svga_writel(addr, val, &nv1->svga);
         return;
     } 
+
+    // send mmio writes to mmio
+    if (addr >= NV_PRM_START
+    && addr <= NV_PRM_END)
+    {
+        nv1_prmc_write_prm(addr, val);
+        return; 
+    }
 
     if (addr == NV_MEMORY_RMC_WINDOW(0))
     {

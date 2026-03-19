@@ -333,7 +333,14 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr)
 
     switch (addr)
     {   
+        case NV_PMC_START ... NV_PMC_END: // Master Control
+            ret = nv1_pmc_read(addr);
+            break;
+        case NV_PFB_REG_START ... NV_PFB_END: // PFB_START is already a register
+            ret = nv1_pfb_read(addr);
+            break; 
         case NV1_VGA_RAM_START ... NV1_VGA_RAM_END:
+        case NV_PRM_START ... NV_PRM_END:
             send_log = false; 
             ret = nv1_prmc_read(addr);
             break;
@@ -372,7 +379,14 @@ void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
 
     switch (addr)
     {
+        case NV_PMC_START ... NV_PMC_END: // Master Control
+            nv1_pmc_write(addr, val);
+            break; 
+        case NV_PFB_REG_START ... NV_PFB_END: // PFB_START is already a register
+            nv1_pfb_write(addr, val);
+            break; 
         case NV1_VGA_RAM_START ... NV1_VGA_RAM_END:
+        case NV_PRM_START ... NV_PRM_END:
             send_log = false;
             nv1_prmc_write(addr, val);
             break;
