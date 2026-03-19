@@ -213,8 +213,8 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
         && mmio_addr <= NV1_VGA_MMIO_END)
         {
             /* wtf is it doing, it writes 0x60000 instead of 0x6 */
-            if (val > 0xFF)
-                val >>= 16; 
+            //if (val > 0xFF)
+                //val >>= 16; 
 
             nv1_mmio_write8(mmio_addr, val & 0xFF, &nv1);
         }

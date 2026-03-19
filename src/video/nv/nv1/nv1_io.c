@@ -201,20 +201,27 @@ void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* p
 
 uint8_t nv1_svga_read(uint16_t addr, void* priv)
 {
-    // temp
-    return svga_in(addr, &nv1->svga);
+    switch (addr)
+    {
+        case NV_IO_CC_ADDRESS__COLOR:
+            return nv1->svga.crtcreg;
+        case NV_IO_CC_REGISTER__COLOR:
+            return nv1->svga.crtc[nv1->svga.crtcreg];
+        default:
+            return svga_in(addr, &nv1->svga);
+    }
 }
 
 void nv1_svga_write(uint16_t addr, uint8_t val, void* priv)
 {
     switch (addr)
     {
-        case NV_IO_CC_ADDRESS__COLOR:
-            
-            break;
+
+        default:
+            svga_out(addr, val, &nv1->svga);
 
     }
-    svga_out(addr, val, &nv1->svga);
+
 }
 
 //
@@ -232,7 +239,7 @@ uint8_t nv1_mmio_read8(uint32_t addr, void* priv)
     if (addr >= NV1_VGA_MMIO_START
     && addr <= NV1_VGA_MMIO_END)
     {
-        ret = svga_in(NV1_VGA_START + (addr & 0x1F), &nv1->svga);
+        ret = nv1_svga_read(NV1_VGA_START + (addr & 0x1F), &nv1->svga);
         return ret; 
     }
 
@@ -277,7 +284,7 @@ void nv1_mmio_write8(uint32_t addr, uint8_t val, void* priv)
     if (addr >= NV1_VGA_MMIO_START
     && addr <= NV1_VGA_MMIO_END)
     {
-        svga_out(NV1_VGA_START + (addr & 0x1F), val, &nv1->svga);
+        nv1_svga_write(NV1_VGA_START + (addr & 0x1F), val, &nv1->svga);
         return; 
     }
 

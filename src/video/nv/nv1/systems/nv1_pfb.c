@@ -123,6 +123,7 @@ void nv1_pfb_write(uint32_t addr, uint32_t val)
         nv1->svga.hblankstart = nv1->pfb.hdisp;
         nv1->svga.hblankend = nv1->pfb.hdisp + nv1->pfb.hsync_width;
         nv1->svga.vblankstart = nv1->pfb.vdisp;
+        nv1->svga.dispend = nv1->svga.vblankstart; // no overscan...
         nv1->svga.vblankend = nv1->pfb.vdisp + nv1->pfb.vsync_width;
 
         svga_recalctimings(&nv1->svga);
