@@ -23,6 +23,7 @@ uint32_t nv1_pfb_read(uint32_t addr)
     switch (addr)
     {
         case NV_PFB_BOOT_0:
+            ret = nv1->pfb.boot;
             ret |= (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << NV_PFB_BOOT_0_DAC_WIDTH);
             
             if (nv1->vram_amount == NV1_VRAM_SIZE_1MB)
@@ -34,9 +35,15 @@ uint32_t nv1_pfb_read(uint32_t addr)
                 
 
             break;
+        case NV_PFB_DEBUG_0:
+            ret = nv1->pfb.debug;
+            break;
         case NV_PFB_GREEN_0:
             ret = nv1->pfb.green_0;
             break;
+        case NV_PFB_CONFIG_0:
+            ret = nv1->pfb.config_0;
+            break; 
         case NV_PFB_HOR_FRNT_PORCH:
             ret = nv1->pfb.hfrontporch;
             break;
@@ -74,9 +81,18 @@ void nv1_pfb_write(uint32_t addr, uint32_t val)
     // nv1 is not vga compatible but these are rough equivalents
     switch (addr)
     {
+        case NV_PFB_BOOT_0:
+            nv1->pfb.boot = val;
+            break;
+        case NV_PFB_DEBUG_0:
+            nv1->pfb.debug = val;
+            break;
         case NV_PFB_GREEN_0:
             nv1->pfb.green_0 = val;
             break;        
+        case NV_PFB_CONFIG_0:
+            nv1->pfb.config_0 = val;
+            break;
         case NV_PFB_HOR_FRNT_PORCH:
             nv1->pfb.hfrontporch = val;
             recalc_needed = true;
@@ -113,6 +129,7 @@ void nv1_pfb_write(uint32_t addr, uint32_t val)
 
     // set svga stuff based on recalcualted values of this
 
+    /*
     if (recalc_needed)
     {        
         nv1->svga.hdisp = nv1->pfb.hdisp;
@@ -127,5 +144,5 @@ void nv1_pfb_write(uint32_t addr, uint32_t val)
         nv1->svga.vblankend = nv1->pfb.vdisp + nv1->pfb.vsync_width;
 
         svga_recalctimings(&nv1->svga);
-    }
+    }*/
 }

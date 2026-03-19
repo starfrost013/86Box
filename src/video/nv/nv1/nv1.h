@@ -58,7 +58,7 @@
 #define NV1_VGA_START                               0x03C0      // vga start
 #define NV1_VGA_SIZE                                0x0020
 
-#define NV1_VGA_MMIO_START                          0x6D03C0    // registers which are sent to VGA
+#define NV1_VGA_MMIO_START                          0x6D03B0    // registers which are sent to VGA
 #define NV1_VGA_MMIO_END                            0x6D03DF    // registers which are sent to VGA
 
 // Not defined by NV's?
@@ -100,9 +100,11 @@ typedef struct nv1_prm_s
 } nv1_prm_t; 
 
 typedef struct nv1_pfb_s
-{
-    uint32_t config_0;                                          // config register
-    uint32_t green_0;                                           // power-down register
+{    
+    uint32_t boot;
+    uint32_t debug;
+    uint32_t config_0;              // config register
+    uint32_t green_0;               // power-down register
 
     // NV1 is not vga compatible, but we "translate" this to 86box-SVGA for easier emulation
     uint32_t hfrontporch;           // 0x600500 NV_PFB_HOR_FRNT_PORCH

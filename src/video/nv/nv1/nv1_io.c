@@ -201,27 +201,44 @@ void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* p
 
 uint8_t nv1_svga_read(uint16_t addr, void* priv)
 {
+    uint8_t ret = 0x00;
+
     switch (addr)
     {
         case NV_IO_CC_ADDRESS__COLOR:
-            return nv1->svga.crtcreg;
+        case NV_IO_CC_ADDRESS__MONO:
+            ret = nv1->svga.crtcreg;
+            break; 
         case NV_IO_CC_REGISTER__COLOR:
-            return nv1->svga.crtc[nv1->svga.crtcreg];
+        case NV_IO_CC_REGISTER__MONO:
+            ret = nv1->svga.crtc[nv1->svga.crtcreg];
+            break; 
         default:
-            return svga_in(addr, &nv1->svga);
+            ret = svga_in(addr, &nv1->svga);
+            break;
     }
+
+    nv_log("SVGA read 0x%02x from 0x%02x\n", ret, addr);
 }
 
 void nv1_svga_write(uint16_t addr, uint8_t val, void* priv)
 {
     switch (addr)
     {
-
+        case NV_IO_CC_ADDRESS__COLOR:
+        case NV_IO_CC_ADDRESS__MONO:
+            nv1->svga.crtcreg = val;
+            break;
+        case NV_IO_CC_REGISTER__COLOR:
+        case NV_IO_CC_REGISTER__MONO:
+            nv1->svga.crtc[nv1->svga.crtcreg] = val;
+            break;
         default:
             svga_out(addr, val, &nv1->svga);
-
+            break;
     }
 
+    nv_log("SVGA write 0x%02x to 0x%04x\n", val, addr);
 }
 
 //
@@ -239,6 +256,10 @@ uint8_t nv1_mmio_read8(uint32_t addr, void* priv)
     if (addr >= NV1_VGA_MMIO_START
     && addr <= NV1_VGA_MMIO_END)
     {
+        //f orce on colour mode 
+        if (((addr & 0xfff0) == 0x3d0 || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
+            addr ^= 0x60;
+
         ret = nv1_svga_read(NV1_VGA_START + (addr & 0x1F), &nv1->svga);
         return ret; 
     }
