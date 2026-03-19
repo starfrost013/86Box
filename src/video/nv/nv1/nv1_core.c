@@ -105,7 +105,7 @@ void nv1_update_mappings_nv()
     (mem_enabled) ? nv_log("MMIO enabled\n") : nv_log("MMIO disabled\n");
 
     mem_mapping_disable(&nv1->mapping_mmio);
-    
+
     // SET_ADDR enables automatically
     if (mem_enabled
     && nv1->bar0_addr)
@@ -168,6 +168,9 @@ nv1_init(const device_t *dev)
     nv1->ramdac = device_add(&stg1764_ramdac_device);
     nv1->svga.ramdac = nv1->ramdac;
     nv1->svga.clock_gen = nv1->svga.ramdac;
+
+    // seems to require starting up in colour mode
+    nv1->svga.miscout |= NV_IO_EX_MISC_OUT_IO_ADDRESS_COLOR;
 
     nv_log("[Phase 3] Initialising SVGA OK! [RAMDAC = STG1764]\n");
 

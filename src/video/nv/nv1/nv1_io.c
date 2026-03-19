@@ -202,9 +202,14 @@ void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* p
 uint8_t nv1_svga_read_io(uint16_t addr, void* priv)
 {
     uint8_t ret = 0x00;
-
-    if (((addr & 0xfff0) == 0x3d0 || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
-        addr ^= 0x60;
+                                           
+    /* It is expected by NV1 that the VGA register set that is not selected is *unavailable*  */
+    if (((addr & 0xfff0) == 0x3d0 
+    || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
+    {
+        ret = 0xFF;
+        return ret; 
+    }
 
     switch (addr)
     {
@@ -223,16 +228,20 @@ uint8_t nv1_svga_read_io(uint16_t addr, void* priv)
 
     //nv_log("SVGA read 0x%02x from 0x%02x\n", ret, addr);
     return ret; 
-}
+} 
+
 
 void nv1_svga_write_io(uint16_t addr, uint8_t val, void* priv)
 {
-    // orce on colour mode 
-    //if (((addr & 0xfff0) == 0x3d0 || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
-        //addr ^= 0x60;
+    /* It is expected by NV1 that the VGA register set that is not selected is *unavailable*  */
+    if (((addr & 0xfff0) == 0x3d0 
+    || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
+    {
+        // writing has no effect
+        return; 
+    }
 
-    //if ((addr & 0xFFF0) == 0x3B0)
-        //addr |= 0x20;
+    uint8_t old = 0x00;
 
     switch (addr)
     {
@@ -242,6 +251,20 @@ void nv1_svga_write_io(uint16_t addr, uint8_t val, void* priv)
             break;
         case NV_IO_CC_REGISTER__COLOR:
         case NV_IO_CC_REGISTER__MONO:
+            old = nv1->svga.crtc[nv1->svga.crtcreg];
+
+            // recalc timings if we need to
+            if (old != val) {
+                if (nv1->svga.crtcreg < 0xe || nv1->svga.crtcreg > 0x10) {
+                    if ((nv1->svga.crtcreg == 0xc) || (nv1->svga.crtcreg == 0xd)) {
+                        nv1->svga.fullchange = 3;
+                        nv1->svga.memaddr_latch = ((nv1->svga.crtc[0xc] << 8) | nv1->svga.crtc[0xd]) + ((nv1->svga.crtc[8] & 0x60) >> 5);
+                    } else {
+                        nv1->svga.fullchange = changeframecount;
+                        svga_recalctimings(&nv1->svga);
+                    }
+                }
+            }
             nv1->svga.crtc[nv1->svga.crtcreg] = val;
             break;
         default:
@@ -249,7 +272,7 @@ void nv1_svga_write_io(uint16_t addr, uint8_t val, void* priv)
             break;
     }
 
-    //nv_log("SVGA write 0x%02x to 0x%04x\n", val, addr);
+    nv_log("SVGA write 0x%02x to 0x%04x\n", val, addr);
 }
 
 //
