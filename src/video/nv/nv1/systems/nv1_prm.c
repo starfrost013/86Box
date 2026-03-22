@@ -16,19 +16,39 @@
 
 #include "../nv1.h"
 
+// Check if any of the RMC windows are enabled
+bool nv1_rmc_window_is_enabled()
+{
+    for (int32_t i = 0; i < NV_PBUS_RMC_WINDOW__SIZE_1; i++)
+    {
+        if (nv1->prm.windows[i].enabled)
+            return true;
+    }
+
+    return false; 
+}
 
 void nv1_enable_rmc_if_needed(uint32_t addr, uint32_t val)
-{
-    if (addr == NV_MEMORY_RMC_ACCESS(1))
+{            
+    if (addr >= NV_MEMORY_RMC_ACCESS(0)
+    && addr <= NV_MEMORY_RMC_ACCESS(NV_MEMORY_RMC_ACCESS__SIZE_1))
     {
-        nv1->prm.window.enabled = (val == NV_MEMORY_RMC_ACCESS_SECURITY_ENABLE);
-        nv1->prm.window.enabled ? nv_log("PRMC window 1 enabled\n") : nv_log("PRMC window 1 disabled\n");
+        // calculate window index (off by one due to some errata)
+        int32_t window_index = (((addr - NV_MEMORY_RMC_ACCESS(0)) >> 2) - 1);
+
+        // the vbios has an off by one error, where it writes to b1e04 for window 1 but uses b1e40 for window 0
+        // so we have to do this stupid shit
+        if (window_index < 0)
+            window_index = 0;
+
+        nv1->prm.windows[window_index].enabled = (val == NV_MEMORY_RMC_ACCESS_SECURITY_ENABLE);
+        nv1->prm.windows[window_index].enabled ? nv_log("PRMC window %d enabled\n", window_index) : nv_log("PRMC window %d disabled\n", window_index);
     }
 }
 
 uint8_t nv1_svga_read8(uint32_t addr, void* priv)
 {
-    if (!nv1->prm.window.enabled)
+    if (!nv1_rmc_window_is_enabled())
         return svga_read(addr, &nv1->svga);
     else
         return nv1_prmc_read(addr);
@@ -36,7 +56,7 @@ uint8_t nv1_svga_read8(uint32_t addr, void* priv)
 
 uint16_t nv1_svga_read16(uint32_t addr, void* priv)
 {
-    if (!nv1->prm.window.enabled)
+    if (!nv1_rmc_window_is_enabled())
         return svga_readw(addr, &nv1->svga);
     else
         return nv1_prmc_read(addr);
@@ -44,7 +64,7 @@ uint16_t nv1_svga_read16(uint32_t addr, void* priv)
 
 uint32_t nv1_svga_read32(uint32_t addr, void* priv)
 {
-    if (!nv1->prm.window.enabled)
+    if (!nv1_rmc_window_is_enabled())
         return svga_readl(addr, &nv1->svga);
     else
         return nv1_prmc_read(addr);
@@ -55,7 +75,7 @@ void nv1_svga_write8(uint32_t addr, uint8_t val, void* priv)
     nv1_enable_rmc_if_needed(addr, val);
 
     // we don't need to put any checks on this since all RMC writes are gated in gonv/nonv writes
-    if (!nv1->prm.window.enabled)
+    if (!nv1_rmc_window_is_enabled())
         svga_write(addr, val, &nv1->svga);
     else
         nv1_prmc_write(addr, val);
@@ -65,7 +85,7 @@ void nv1_svga_write16(uint32_t addr, uint16_t val, void* priv)
 {
     nv1_enable_rmc_if_needed(addr, val);
 
-    if (!nv1->prm.window.enabled)
+    if (!nv1_rmc_window_is_enabled())
         svga_writew(addr, val, &nv1->svga);
     else
         nv1_prmc_write(addr, val);
@@ -75,7 +95,7 @@ void nv1_svga_write32(uint32_t addr, uint32_t val, void* priv)
 {
     nv1_enable_rmc_if_needed(addr, val);
 
-    if (!nv1->prm.window.enabled)
+    if (!nv1_rmc_window_is_enabled())
         svga_writel(addr, val, &nv1->svga);
     else
         nv1_prmc_write(addr, val);
@@ -182,18 +202,28 @@ uint32_t nv1_prmc_read(uint32_t addr)
         return nv1_prmc_read_prm(addr); 
     }
 
-    // the indexes are wrong because for some reason the VBIOS uses "access" index 1 (B1E04) and "window" index 0 (B1E40)
+    int32_t window_index = 0;
+
+    // the indexes are wrong because for some reason the GPU uses "access" index i+1 (B1E04) and "window" index 0 (B1E40)
     // (GPU errata?)
     switch (addr)
     {
-        case NV_MEMORY_RMC_ACCESS(1):
-            if (nv1->prm.window.enabled)
+        case NV_MEMORY_RMC_ACCESS(0) ... NV_MEMORY_RMC_ACCESS(NV_MEMORY_RMC_ACCESS__SIZE_1):
+            window_index = (((addr - NV_MEMORY_RMC_ACCESS(0)) >> 2) - 1);
+
+            // fix off by one error in vbios, idk why this even works
+            if (window_index < 0)
+                window_index = 0; 
+
+            if (nv1->prm.windows[window_index].enabled)
                 ret = NV_MEMORY_RMC_ACCESS_SECURITY_DISABLE;
             else
                 ret = NV_MEMORY_RMC_ACCESS_SECURITY_ENABLE;
             break;
-        case NV_MEMORY_RMC_WINDOW(0):
-            ret = nv1->prm.window.addr_start;
+        case NV_MEMORY_RMC_WINDOW(0) ... NV_MEMORY_RMC_WINDOW(NV_MEMORY_RMC_WINDOW__SIZE_1):
+            window_index = (((addr - NV_MEMORY_RMC_WINDOW(0)) >> 4)); // /16
+
+            ret = nv1->prm.windows[window_index].addr_start;
             break;
         // VBIOS never uses these values, but depends on them to boot??? These are debug features, so we don't need to emulate them
         // (NV_MEMORY_TRACE & 0x0F) must return 1
@@ -206,9 +236,11 @@ uint32_t nv1_prmc_read(uint32_t addr)
     }  
 
     if (addr >= NV_MEMORY_WINDOW032(0, 0)
-    && addr <= NV_MEMORY_WINDOW032(0, NV_MEMORY_WINDOW032__SIZE_2))
+    && addr <= NV_MEMORY_WINDOW032(NV_MEMORY_WINDOW032__SIZE_1 - 1, NV_MEMORY_WINDOW032__SIZE_2)) // END AT b7fff (3 windows)
     {
-        uint32_t mmio_addr = nv1->prm.window.addr_start + (addr - NV_MEMORY_WINDOW032(0, 0));
+        window_index = (addr - NV_MEMORY_WINDOW032(0, 0)) / NV_MEMORY_WINDOW008__SIZE_2; // use 8 bitindex here
+ 
+        uint32_t mmio_addr = nv1->prm.windows[window_index].addr_start + (addr - NV_MEMORY_WINDOW032(window_index, 0));
 
         // these are literally the only 8bit addresses in the system (the dac has some but the nv1 doesn't care)
         if (mmio_addr >= NV1_VGA_MMIO_START
@@ -219,7 +251,7 @@ uint32_t nv1_prmc_read(uint32_t addr)
         else
             ret = nv1_mmio_read32(mmio_addr, &nv1);
     
-        nv_log("RMC-MMIO read %08x from %08x (VGA addr = %05x)\n", ret, mmio_addr, addr);
+        nv_log("RMC-MMIO window %d read %08x from %08x (VGA addr = %05x)\n", window_index, ret, mmio_addr, addr);
 
         return ret; 
     }
@@ -228,8 +260,10 @@ uint32_t nv1_prmc_read(uint32_t addr)
     return ret; // no idea what this would do...
 }
 
+// prmc write
 void nv1_prmc_write(uint32_t addr, uint32_t val)
 {    
+    uint32_t window_index = 0;
 
     // the indexes are wrong because for some reason the VBIOS uses "access" index 1 (B1E04) and "window" index 0 (B1E40)
     // (GPU errata?)
@@ -243,19 +277,24 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
         return; 
     }
 
-    if (addr == NV_MEMORY_RMC_WINDOW(0))
+    if (addr >= NV_MEMORY_RMC_WINDOW(0)
+    && addr <= NV_MEMORY_RMC_WINDOW(NV_MEMORY_RMC_WINDOW__SIZE_1))
     {
+        window_index = (((addr - NV_MEMORY_RMC_WINDOW(0)) >> 4)); // /16
+
         // only bits 24:13 matter
-        nv1->prm.window.addr_start = ((val & 0x1FFFFFF) >> 13) << 13;
-        nv_log("PRMC start address is now 0x%08x\n", nv1->prm.window.addr_start);
+        nv1->prm.windows[window_index].addr_start = ((val & 0x1FFFFFF) >> 13) << 13;
+        nv_log("PRMC window %d start address is now 0x%08x\n", window_index, nv1->prm.windows[window_index].addr_start);
     }
 
     if (addr >= NV_MEMORY_WINDOW032(0, 0)
-    && addr <= NV_MEMORY_WINDOW032(0, NV_MEMORY_WINDOW032__SIZE_2))
+    && addr <= NV_MEMORY_WINDOW032(NV_MEMORY_WINDOW032__SIZE_1 - 1, NV_MEMORY_WINDOW032__SIZE_2))
     {
-        uint32_t mmio_addr = nv1->prm.window.addr_start + (addr - NV_MEMORY_WINDOW032(0, 0));
-        
-        nv_log("RMC-MMIO write %08x to %08x (VGA addr = %05x)\n", val, mmio_addr, addr);
+        window_index = (addr - NV_MEMORY_WINDOW032(0, 0)) / NV_MEMORY_WINDOW008__SIZE_2; // use 8 bitindex here
+ 
+        uint32_t mmio_addr = nv1->prm.windows[window_index].addr_start + (addr - NV_MEMORY_WINDOW032(window_index, 0));
+
+        nv_log("RMC-MMIO window %d write %08x to %08x (VGA addr = %05x)\n", window_index, val, mmio_addr, addr);
 
         // these are literally the only 8bit addresses in the system (the dac has some but the nv1 doesn't care)
         if (mmio_addr >= NV1_VGA_MMIO_START

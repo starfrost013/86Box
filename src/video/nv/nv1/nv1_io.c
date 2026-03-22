@@ -255,11 +255,16 @@ void nv1_svga_write_io(uint16_t addr, uint8_t val, void* priv)
 
             // recalc timings if we need to
             if (old != val) {
-                if (nv1->svga.crtcreg < 0xe || nv1->svga.crtcreg > 0x10) {
-                    if ((nv1->svga.crtcreg == 0xc) || (nv1->svga.crtcreg == 0xd)) {
+                if (nv1->svga.crtcreg < 0xe || nv1->svga.crtcreg > 0x10) 
+                {
+                    if ((nv1->svga.crtcreg == 0xc) || (nv1->svga.crtcreg == 0xd)) 
+                    {
                         nv1->svga.fullchange = 3;
-                        nv1->svga.memaddr_latch = ((nv1->svga.crtc[0xc] << 8) | nv1->svga.crtc[0xd]) + ((nv1->svga.crtc[8] & 0x60) >> 5);
-                    } else {
+                        nv1->svga.memaddr_latch = ((nv1->svga.crtc[0xc] << 8) | nv1->svga.crtc[0xd]) 
+                        + ((nv1->svga.crtc[8] & 0x60) >> 5);
+                    } 
+                    else 
+                    {
                         nv1->svga.fullchange = changeframecount;
                         svga_recalctimings(&nv1->svga);
                     }
@@ -267,12 +272,27 @@ void nv1_svga_write_io(uint16_t addr, uint8_t val, void* priv)
             }
             nv1->svga.crtc[nv1->svga.crtcreg] = val;
             break;
+        case NV_IO_GC_ADDRESS:    
+            nv1->svga.gdcaddr = val;
+            break;
+        case NV_IO_GC_SR:
+            /* 
+                NV1 *REQUIRES* all vga ram to be mapepd at all times, even when it isn't being used 
+                [B1E00...B7FFF] PRM MMIO window region *must* always be visible
+            */
+            svga_out(addr, val, &nv1->svga);
+
+            if (nv1->svga.gdcaddr == NV_PRMIO_GC_MISC__INDEX
+            && old != val)
+            {               
+                 mem_mapping_set_addr(&nv1->svga.mapping, 0xa0000, 0x20000);
+            };
         default:
             svga_out(addr, val, &nv1->svga);
             break;
     }
 
-    nv_log("SVGA write 0x%02x to 0x%04x\n", val, addr);
+    //nv_log("SVGA write 0x%02x to 0x%04x\n", val, addr);
 }
 
 //

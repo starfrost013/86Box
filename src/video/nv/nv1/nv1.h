@@ -85,11 +85,10 @@ typedef struct nv1_prm_window_s
 
 typedef struct nv1_prm_s
 {
-    // The GPU actually implements *4* windows, 
-    // but in practice, only one is ever used, so to simplify the implementation, we just implement one
-    // IF THERE IS A BUG IN DOS APPS FOR NV1, CHANGE THIS
-    // there's also x86 segmentation type functionality to move the 8KB sliding window anywhere in MMIO, but this register is never touched?
-    nv1_prm_window_t window;
+    // The GPU actually implements *3* windows, 
+    // only one is strictly reuqired to boot but the nvidia dos support software requires all 3 to be used
+    // so we implement all three
+    nv1_prm_window_t windows[NV_PBUS_RMC_WINDOW__SIZE_1]; // ad one to be safe with how our window index calculations work
 
     uint32_t debug;                 // debug register
     uint32_t config;                // 6/8 bits mode
