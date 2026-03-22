@@ -418,10 +418,23 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr)
             ret = nv1_pfb_read(addr);
             break; 
         case NV1_VGA_RAM_START ... NV1_VGA_RAM_END:
-        case NV_PRM_START ... NV_PRM_END:
+        case NV_PRM_START ... NV_PRM_END:   // Real Mode Control
             send_log = false; 
             ret = nv1_prmc_read(addr);
             break;
+        // 32 bit pci io it seems?
+        case NV_PBUS_PCI_VGA_0 ... NV_PBUS_PCI_VGA_0 + 0xFF:            // vga function mirror
+            ret = nv1_pci_read(NV1_PCI_FUNCTION_VGA, addr & 0xFF, 1, nv1) << 24
+            | nv1_pci_read(NV1_PCI_FUNCTION_VGA, (addr + 1) & 0xFF, 1, nv1) << 16
+            | nv1_pci_read(NV1_PCI_FUNCTION_VGA, (addr + 2) & 0xFF, 1, nv1) << 8
+            | nv1_pci_read(NV1_PCI_FUNCTION_VGA, (addr + 3) & 0xFF, 1, nv1);
+            break; 
+        case NV_PBUS_PCI_NV_0 ... NV_PBUS_PCI_NV_0 + 0xFF:              // nv1 function mirror
+            ret = nv1_pci_read(NV1_PCI_FUNCTION_NV1, addr & 0xFF, 1, nv1) << 24
+            | nv1_pci_read(NV1_PCI_FUNCTION_NV1, (addr + 1) & 0xFF, 1, nv1) << 16
+            | nv1_pci_read(NV1_PCI_FUNCTION_NV1, (addr + 2) & 0xFF, 1, nv1) << 8
+            | nv1_pci_read(NV1_PCI_FUNCTION_NV1, (addr + 3) & 0xFF, 1, nv1);
+            break; 
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
             ret = nv1->vbios.rom[addr & 0x7FFF];
             break;
@@ -470,6 +483,19 @@ void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
             break;
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
             break; // can't write to ROM
+            // 32-bit
+        case NV_PBUS_PCI_VGA_0 ... NV_PBUS_PCI_VGA_0 + 0xFF:            // vga function mirror
+            nv1_pci_write(NV1_PCI_FUNCTION_VGA, addr & 0xFF, 4, (val & 0xFF000000) >> 24, nv1);
+            nv1_pci_write(NV1_PCI_FUNCTION_VGA, (addr + 1) & 0xFF, 4, (val & 0xFF0000) >> 16, nv1);
+            nv1_pci_write(NV1_PCI_FUNCTION_VGA, (addr + 2) & 0xFF, 4, (val & 0xFF00) >> 8, nv1);
+            nv1_pci_write(NV1_PCI_FUNCTION_VGA, (addr + 3) & 0xFF, 4, (val & 0xFF), nv1);
+            break; 
+        case NV_PBUS_PCI_NV_0 ... NV_PBUS_PCI_NV_0 + 0xFF:              // nv1 functon mirror
+            nv1_pci_write(NV1_PCI_FUNCTION_NV1, addr & 0xFF, 4, (val & 0xFF000000) >> 24, nv1);
+            nv1_pci_write(NV1_PCI_FUNCTION_NV1, (addr + 1) & 0xFF, 4, (val & 0xFF0000) >> 16, nv1);
+            nv1_pci_write(NV1_PCI_FUNCTION_NV1, (addr + 2) & 0xFF, 4, (val & 0xFF00) >> 8, nv1);
+            nv1_pci_write(NV1_PCI_FUNCTION_NV1, (addr + 3) & 0xFF, 4, (val & 0xFF), nv1);
+            break; 
         case NV_PDAC_DATA(0) ... NV_PDAC_DATA(NV1_LAST_DAC_REG):
             // STG-1764
             send_log = false; // logged by STG1764 subsystem
