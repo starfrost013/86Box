@@ -79,14 +79,17 @@ uint8_t nv1_pci_read(int32_t func, int32_t addr, int32_t len, void* priv)
             else   
                 ret = 0x04; // multifunction device
             break;
-        case PCI_REG_BAR0_BYTE0:
+        case PCI_REG_BAR0_BYTE0 ... PCI_REG_BAR0_BYTE2:
+        case PCI_REG_BAR1_BYTE0 ... PCI_REG_BAR5_BYTE3:
+            ret = 0x00;
+            break; 
+        // only bits 31:25 (32m) of BAR0 matter
+        case PCI_REG_BAR0_BYTE3:
+
             if (func == NV1_PCI_FUNCTION_VGA)
                 ret = 0x00;
             else
                 ret = ((nv1->bar0_addr >> 25) << 1) | (1 << NV_CONFIG_PCI_NV_4_PREFETCHABLE); // bit 24 is disregarded, 1 byte boundary
-            break;
-        case PCI_REG_BAR0_BYTE1 ... PCI_REG_BAR5_BYTE3: // all other BARs are hardwired to 0
-            ret = 0x00; 
             break;
         case PCI_REG_HEADER_TYPE: // multifunction device
             ret = NV_CONFIG_PCI_NV_3_HEADER_TYPE_MULTIFUNC;
@@ -146,7 +149,7 @@ void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* p
         case PCI_REG_COMMAND_L:
             update_mappings = true;
             break;
-        case PCI_REG_BAR0_BYTE0:
+        case PCI_REG_BAR0_BYTE3:
             // vga function has no bars
             if (func == NV1_PCI_FUNCTION_NV1)
             {            
@@ -179,7 +182,6 @@ void nv1_pci_write(int32_t func, int32_t addr, int32_t len, uint8_t val, void* p
             if (nv1->pci_vbios_enabled)
                 mem_mapping_set_addr(&nv1->vbios.mapping, NV1_VBIOS_LOCATION, NV1_VBIOS_SIZE);
             break; 
-
     }
 
     // always reflect the registers (read will decide what gets returned)
