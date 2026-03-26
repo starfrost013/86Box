@@ -16,6 +16,7 @@
 
 #include "../nv1.h"
 
+// Master control read functon
 uint32_t nv1_pmc_read(uint32_t addr)
 {
     uint32_t ret = 0x00;
@@ -25,12 +26,36 @@ uint32_t nv1_pmc_read(uint32_t addr)
         case NV_PMC_BOOT_0: 
             ret = NV1_PMC_BOOT_0_GENERIC_REVB2;
             break;
+        // TODO handle
+        case NV_PMC_INTR_0:
+            ret = nv1->pmc.intr;
+            break;
+        case NV_PMC_INTR_EN_0:
+            ret = nv1->pmc.intr_en;
+            break;
+        case NV_PMC_ENABLE:
+            ret = nv1->pmc.enable;
+            break;
     }
 
     return ret; 
 }
 
+// Master control writes
 void nv1_pmc_write(uint32_t addr, uint32_t val)
 {
-    
+    // TODO: handle
+
+    switch (addr)
+    {
+        case NV_PMC_INTR_0:
+            nv1->pmc.intr = val;
+            break;
+        case NV_PMC_INTR_EN_0:
+            nv1->pmc.intr_en = val;
+            break;
+        case NV_PMC_ENABLE:
+            nv1->pmc.enable = val;
+            break;
+    }
 }

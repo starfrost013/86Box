@@ -83,6 +83,27 @@ typedef struct nv1_prm_window_s
     bool enabled;
 } nv1_prm_window_t;
 
+typedef struct nv1_pmc_s
+{
+    uint32_t intr, intr_en;
+    uint32_t enable;
+} nv1_pmc_t;
+
+typedef struct nv1_pbus_s
+{
+    /* 
+        SEcondary access control mechanism.
+        0:0 - gameport disabled
+        4:4 - MDA disabled
+        8:8 - sound disabled
+        12:12 - RMC disabled
+        17:16 - MPU401 address, 0 = none, 1 = 0330h, 2 = 0300h, 3 = 0230h 
+        20:20 - DMA disabled
+        24:24 - FM disabled
+    */
+    uint32_t access;
+} nv1_pbus_t;
+
 typedef struct nv1_prm_s
 {
     // The GPU actually implements *3* windows, 
@@ -134,6 +155,8 @@ typedef struct nv1_s
     rom_t vbios;
 
     // SYSTEMS
+    nv1_pmc_t pmc;                                              // Master Control 
+    nv1_pbus_t pbus;                                            // Bus control
     nv1_prm_t prm;
     nv1_pfb_t pfb; 
     uint32_t eeprom[NV1_PEEPROM_SIZE >> 2];                     // eeprom apparently
