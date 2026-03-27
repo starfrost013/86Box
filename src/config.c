@@ -32,6 +32,10 @@
 #else
 #    include <arpa/inet.h>
 #endif
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#    include <sys/types.h>
+#    include <sys/socket.h>
+#endif
 #include <inttypes.h>
 #ifdef ENABLE_CONFIG_LOG
 #include <stdarg.h>
@@ -86,6 +90,7 @@
 #include <86box/ui.h>
 #include <86box/snd_opl.h>
 #include <86box/version.h>
+#include <86box/plat_floppy_ioctl.h>
 
 #ifndef USE_SDL_UI
 /* Deliberate to not make the 86box.h header kitchen-sink. */
@@ -1467,6 +1472,10 @@ load_hard_disks(void)
         p = ini_section_get_string(cat, temp, "");
         strncpy(hdd[c].vhd_parent, p, sizeof(hdd[c].vhd_parent) - 1);
 
+        /* Raw device flag - when set, path is treated as block device */
+        sprintf(temp, "hdd_%02i_raw_device", c + 1);
+        hdd[c].raw_device = ini_section_get_int(cat, temp, 0) ? 1 : 0;
+
         /* If disk is empty or invalid, mark it for deletion. */
         if (!hdd_is_valid(c)) {
             sprintf(temp, "hdd_%02i_parameters", c + 1);
@@ -1583,6 +1592,10 @@ load_floppy_and_cdrom_drives(void)
         fdd_set_audio_profile(c, 0);
 #endif
 
+        sprintf(temp, "fdd_%02i_host_device", c + 1);
+        p = ini_section_get_string(cat, temp, "");
+        fdd_set_host_device(c, p);
+
         for (int i = 0; i < MAX_PREV_IMAGES; i++) {
             fdd_image_history[c][i] = (char *) calloc((MAX_IMAGE_PATH_LEN + 1) << 1, sizeof(char));
             sprintf(temp, "fdd_%02i_image_history_%02i", c + 1, i + 1);
@@ -1594,6 +1607,8 @@ load_floppy_and_cdrom_drives(void)
             }
         }
     }
+
+    floppy_ioctl_set_buffering(ini_section_get_int(cat, "fdd_host_buffering", 1));
 
     memset(temp, 0x00, sizeof(temp));
     for (c = 0; c < CDROM_NUM; c++) {
@@ -3642,6 +3657,12 @@ save_hard_disks(void)
         } else
             ini_section_delete_var(cat, temp);
 
+        sprintf(temp, "hdd_%02i_raw_device", c + 1);
+        if (hdd_is_valid(c) && hdd[c].raw_device)
+            ini_section_set_int(cat, temp, 1);
+        else
+            ini_section_delete_var(cat, temp);
+
         sprintf(temp, "hdd_%02i_speed", c + 1);
         if (!hdd_is_valid(c) ||
             ((hdd[c].bus_type != HDD_BUS_MFM) && (hdd[c].bus_type != HDD_BUS_ESDI) &&
@@ -3684,7 +3705,8 @@ save_floppy_and_cdrom_drives(void)
                                    fdd_get_internal_name(fdd_get_type(c)));
 
         sprintf(temp, "fdd_%02i_fn", c + 1);
-        if (strlen(floppyfns[c]) == 0) {
+        /* Don't save ioctl:// paths */
+        if (strlen(floppyfns[c]) == 0 || strstr(floppyfns[c], "ioctl://") != NULL) {
             ini_section_delete_var(cat, temp);
 
             ui_writeprot[c] = 0;
@@ -3729,7 +3751,19 @@ save_floppy_and_cdrom_drives(void)
 #else
         ini_section_delete_var(cat, temp);
 #endif
+
+        sprintf(temp, "fdd_%02i_host_device", c + 1);
+        const char *host_dev = fdd_get_host_device(c);
+        if (host_dev && host_dev[0] != '\0')
+            ini_section_set_string(cat, temp, host_dev);
+        else
+            ini_section_delete_var(cat, temp);
     }
+
+    if (floppy_ioctl_get_buffering())
+        ini_section_set_int(cat, "fdd_host_buffering", 1);
+    else
+        ini_section_delete_var(cat, "fdd_host_buffering");
 
     for (c = 0; c < CDROM_NUM; c++) {
         sprintf(temp, "cdrom_%02i_host_drive", c + 1);
