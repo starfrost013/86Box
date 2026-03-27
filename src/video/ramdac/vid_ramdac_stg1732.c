@@ -165,15 +165,15 @@ void stg1732_set_clock_speed(uint16_t addr, void* priv)
     switch (addr)
     {
         case SGS_DAC_APLL_P:
-            ramdac->apll_hz = ((STG1732_BASE_CLOCK * ramdac->apll_n) * (ramdac->apll_m << ramdac->apll_p));
+            ramdac->apll_hz = ((STG1732_BASE_CLOCK * ramdac->apll_n) / (ramdac->apll_m << ramdac->apll_p));
             nv_log("Audio clock is now %d MHz\n", (float)(ramdac->apll_hz) / 1000.0f);
             break; 
         case SGS_DAC_VPLL_P:
-            ramdac->vpll_hz = ((STG1732_BASE_CLOCK * ramdac->vpll_n) * (ramdac->vpll_m << ramdac->vpll_p));
+            ramdac->vpll_hz = ((STG1732_BASE_CLOCK * ramdac->vpll_n) / (ramdac->vpll_m << ramdac->vpll_p));
             nv_log("Video clock is now %d MHz\n", (float)(ramdac->vpll_hz) / 1000.0f);
             break; 
         case SGS_DAC_MPLL_P:
-            ramdac->mpll_hz = ((STG1732_BASE_CLOCK * ramdac->mpll_n) * (ramdac->mpll_m << ramdac->mpll_p));
+            ramdac->mpll_hz = ((STG1732_BASE_CLOCK * ramdac->mpll_n)/ (ramdac->mpll_m << ramdac->mpll_p));
             nv_log("Core & Memory clock is now %d MHz\n", (float)(ramdac->mpll_hz) / 1000.0f);
             break; 
     }
