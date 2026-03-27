@@ -43,6 +43,10 @@ typedef struct stg1732_ramdac_t {
     uint8_t mpll_m, mpll_n, mpll_o, mpll_p; // Core & Memory PLL
     uint8_t apll_m, apll_n, apll_o, apll_p; // Audio PLL
 
+    uint32_t vpll_hz;                       // VPLL clock speed in hertz
+    uint32_t mpll_hz;                       // MPLL clock speed in hertz
+    uint32_t apll_hz;                       // APLL clock speed in hertz
+
     uint8_t palette_control;                // controls the DAC state
 
     uint8_t palette[PALETTE_SIZE];
@@ -152,6 +156,29 @@ stg1732_ramdac_set_bpp(svga_t *svga, stg1732_ramdac_t *ramdac)
     svga_recalctimings(svga);
 }
 
+// Set the clock speed 
+void stg1732_set_clock_speed(uint16_t addr, void* priv)
+{
+    stg1732_ramdac_t *ramdac = (stg1732_ramdac_t *)priv;
+    
+    // OPLl does not matter and is always 1
+    switch (addr)
+    {
+        case SGS_DAC_APLL_P:
+            ramdac->apll_hz = ((STG1732_BASE_CLOCK * ramdac->apll_n) * (ramdac->apll_m << ramdac->apll_p));
+            nv_log("Audio clock is now %d MHz\n", (float)(ramdac->apll_hz) / 1000.0f);
+            break; 
+        case SGS_DAC_VPLL_P:
+            ramdac->vpll_hz = ((STG1732_BASE_CLOCK * ramdac->vpll_n) * (ramdac->vpll_m << ramdac->vpll_p));
+            nv_log("Video clock is now %d MHz\n", (float)(ramdac->vpll_hz) / 1000.0f);
+            break; 
+        case SGS_DAC_MPLL_P:
+            ramdac->mpll_hz = ((STG1732_BASE_CLOCK * ramdac->mpll_n) * (ramdac->mpll_m << ramdac->mpll_p));
+            nv_log("Core & Memory clock is now %d MHz\n", (float)(ramdac->mpll_hz) / 1000.0f);
+            break; 
+    }
+}
+
 uint8_t
 stg1732_ramdac_reg_read(uint16_t addr, void *priv, svga_t *svga)
 {
@@ -190,11 +217,11 @@ stg1732_ramdac_reg_read(uint16_t addr, void *priv, svga_t *svga)
         case SGS_DAC_APLL_M: ret = ramdac->apll_m; break;
         case SGS_DAC_APLL_N: ret = ramdac->apll_n; break;
         case SGS_DAC_APLL_O: ret = ramdac->apll_o; break;
-        case SGS_DAC_APLL_P: ret = ramdac->apll_p; break;
+        case SGS_DAC_APLL_P: ret = ramdac->apll_p; break; 
         case SGS_DAC_MPLL_M: ret = ramdac->mpll_m; break;
         case SGS_DAC_MPLL_N: ret = ramdac->mpll_n; break;
         case SGS_DAC_MPLL_O: ret = ramdac->mpll_o; break;
-        case SGS_DAC_MPLL_P: ret = ramdac->mpll_p; break;
+        case SGS_DAC_MPLL_P: ret = ramdac->mpll_p; break; 
         case SGS_DAC_VPLL_M: ret = ramdac->vpll_m; break;
         case SGS_DAC_VPLL_N: ret = ramdac->vpll_n; break;
         case SGS_DAC_VPLL_O: ret = ramdac->vpll_o; break;
@@ -204,6 +231,7 @@ stg1732_ramdac_reg_read(uint16_t addr, void *priv, svga_t *svga)
     nv_log("STG1764 register read 0x%02x from 0x%02x\n", ret, addr);
     return ret;
 }
+
 
 void
 stg1732_ramdac_reg_write(uint16_t addr, uint8_t val, void *priv, svga_t *svga)
@@ -238,15 +266,24 @@ stg1732_ramdac_reg_write(uint16_t addr, uint8_t val, void *priv, svga_t *svga)
         case SGS_DAC_APLL_M: ramdac->apll_m = val; break;
         case SGS_DAC_APLL_N: ramdac->apll_n = val; break;
         case SGS_DAC_APLL_O: ramdac->apll_o = val; break;
-        case SGS_DAC_APLL_P: ramdac->apll_p = val; break;
+        case SGS_DAC_APLL_P: 
+            ramdac->apll_p = val; 
+            stg1732_set_clock_speed(addr, priv);
+            break;
         case SGS_DAC_MPLL_M: ramdac->mpll_m = val; break;
         case SGS_DAC_MPLL_N: ramdac->mpll_n = val; break;
         case SGS_DAC_MPLL_O: ramdac->mpll_o = val; break;
-        case SGS_DAC_MPLL_P: ramdac->mpll_p = val; break;
+        case SGS_DAC_MPLL_P: 
+            ramdac->mpll_p = val; 
+            stg1732_set_clock_speed(addr, priv);
+            break;
         case SGS_DAC_VPLL_M: ramdac->vpll_m = val; break;
         case SGS_DAC_VPLL_N: ramdac->vpll_n = val; break;
         case SGS_DAC_VPLL_O: ramdac->vpll_o = val; break;
-        case SGS_DAC_VPLL_P: ramdac->vpll_p = val; break;
+        case SGS_DAC_VPLL_P:
+            ramdac->vpll_p = val; 
+            stg1732_set_clock_speed(addr, priv);
+            break;
     }
 
     if (addr >= SGS_DAC_MPLL_M && addr <= SGS_DAC_VPLL_P)
@@ -254,36 +291,6 @@ stg1732_ramdac_reg_write(uint16_t addr, uint8_t val, void *priv, svga_t *svga)
         
     nv_log("STG1764 register write 0x%02x to 0x%02x\n", val, addr);
 }
-
-float
-stg1732_getclock(int clock, void *priv)
-{
-    stg1732_ramdac_t   *ramdac = (stg1732_ramdac_t *) priv;
-    float           t = 1.0f;
-    int             m;
-    int             n;
-    int             d;
-    int             d2;
-    uint16_t        c;
-
-    /*
-    if (clock == 0)
-        return 25175000.0;
-    if (clock == 1)
-        return 28322000.0;
-
-    c  = ramdac->regs[0x20 + (clock << 1)];
-    c |= (ramdac->regs[0x21 + (clock << 1)] << 8);
-    m  = (c & 0xff) + 2;        /* B+2 
-    n  = ((c >> 8) & 0x1f) + 2; /* N1+2 
-    d = ((c >> 13) & 0x07);    /* D 
-    d2 = (1 << d);
-    t  = (14318184.0f * (float) m) / (float) (n * d2);
-*/
-    //pclog("RAMDAC vclk val=0x%02x, vclk v=%d low, D=%d, t=%f.\n", ramdac->regs[0x20 + (clock << 1)], clock, d2, t);
-    return t;
-}
-
 static void *
 stg1732_ramdac_init(UNUSED(const device_t *info))
 {

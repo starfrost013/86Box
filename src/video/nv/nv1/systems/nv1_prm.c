@@ -249,9 +249,12 @@ uint32_t nv1_prmc_read(uint32_t addr)
             ret = (uint32_t)nv1_mmio_read8(mmio_addr, &nv1);
         }
         else
+        {
+            // don't log svga read/write 
             ret = nv1_mmio_read32(mmio_addr, &nv1);
+            nv_log("RMC-MMIO window %d read %08x from %08x (VGA addr = %05x)\n", window_index, ret, mmio_addr, addr);
+        }
     
-        nv_log("RMC-MMIO window %d read %08x from %08x (VGA addr = %05x)\n", window_index, ret, mmio_addr, addr);
 
         return ret; 
     }
@@ -294,8 +297,6 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
  
         uint32_t mmio_addr = nv1->prm.windows[window_index].addr_start + (addr - NV_MEMORY_WINDOW032(window_index, 0));
 
-        nv_log("RMC-MMIO window %d write %08x to %08x (VGA addr = %05x)\n", window_index, val, mmio_addr, addr);
-
         // these are literally the only 8bit addresses in the system (the dac has some but the nv1 doesn't care)
         if (mmio_addr >= NV1_VGA_MMIO_START
         && mmio_addr <= NV1_VGA_MMIO_END)
@@ -303,6 +304,10 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
             nv1_mmio_write8(mmio_addr, val & 0xFF, &nv1);
         }
         else
+        {
+            // don't log
             nv1_mmio_write32(mmio_addr, val, &nv1);
+            nv_log("RMC-MMIO window %d write %08x to %08x (VGA addr = %05x)\n", window_index, val, mmio_addr, addr);
+        }
     }
 }

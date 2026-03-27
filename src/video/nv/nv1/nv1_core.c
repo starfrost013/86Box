@@ -112,8 +112,7 @@ void nv1_update_mappings_nv()
     {
         nv_log("BAR0 is now %08x\n", nv1->bar0_addr);
         mem_mapping_set_addr(&nv1->mapping_mmio, nv1->bar0_addr, NV1_MMIO_SIZE);
-    }
-        
+    }  
 }
 
 // Update the GPU mappings.
@@ -149,10 +148,12 @@ nv1_init(const device_t *dev)
     int32_t rom_err = rom_init(&nv1->vbios, vbios_path, NV1_VBIOS_LOCATION, NV1_VBIOS_SIZE, NV1_VBIOS_SIZE - 1,
                                0, MEM_MAPPING_EXTERNAL);
 
-    if (rom_err) {
+    if (rom_err) 
+    {
         nv_log("[Phase 1] Error %d!\n", rom_err);
         return NULL;
-    } else
+    } 
+    else
         nv_log("[Phase 1] OK!\n");
 
     pci_add_card(PCI_ADD_NORMAL, nv1_pci_read, nv1_pci_write, nv1, &nv1->pci_slot);

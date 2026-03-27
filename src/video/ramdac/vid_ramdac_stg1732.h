@@ -33,6 +33,9 @@
 
 #include "vid_ramdac_stg1732_regs.h"
 
+#define STG1732_BASE_CLOCK              12096000.0f
+
+void stg1732_set_clock_speed(uint16_t addr, void* priv);
 
 /* read from internal 64kb register space */
 uint8_t stg1732_ramdac_reg_read(uint16_t addr, void *priv, svga_t *svga);
