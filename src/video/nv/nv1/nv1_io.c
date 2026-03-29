@@ -79,17 +79,22 @@ uint8_t nv1_pci_read(int32_t func, int32_t addr, int32_t len, void* priv)
             else   
                 ret = 0x04; // multifunction device
             break;
-        case PCI_REG_BAR0_BYTE0 ... PCI_REG_BAR0_BYTE2:
+        case PCI_REG_BAR0_BYTE0:
+            if (func == NV1_PCI_FUNCTION_NV1)
+                ret = (1 << NV_CONFIG_PCI_NV_4_PREFETCHABLE);
+            else
+                ret = 0x00;
+            break; 
+        case PCI_REG_BAR0_BYTE1 ... PCI_REG_BAR0_BYTE2:
         case PCI_REG_BAR1_BYTE0 ... PCI_REG_BAR5_BYTE3:
             ret = 0x00;
             break; 
         // only bits 31:25 (32m) of BAR0 matter
         case PCI_REG_BAR0_BYTE3:
-
             if (func == NV1_PCI_FUNCTION_VGA)
                 ret = 0x00;
             else
-                ret = ((nv1->bar0_addr >> 25) << 1) | (1 << NV_CONFIG_PCI_NV_4_PREFETCHABLE); // bit 24 is disregarded, 1 byte boundary
+                ret = ((nv1->bar0_addr >> 25) << 1) ; // bit 24 is disregarded, 1 byte boundary
             break;
         case PCI_REG_HEADER_TYPE: // multifunction device
             ret = NV_CONFIG_PCI_NV_3_HEADER_TYPE_MULTIFUNC;
@@ -438,6 +443,7 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr)
             | nv1_pci_read(NV1_PCI_FUNCTION_NV1, (addr + 3) & 0xFF, 1, nv1);
             break; 
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
+        case NV_PROM_DATA(0) ... NV_PROM_DATA(NV_PROM_DATA__SIZE_1): // MMIO mirror also at 610000?!
             ret = nv1->vbios.rom[addr & 0x7FFF];
             break;
         case NV_PDAC_DATA(0) ... NV_PDAC_DATA(NV1_LAST_DAC_REG):
@@ -484,6 +490,7 @@ void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
             nv1_prmc_write(addr, val);
             break;
         case NV1_VGA_BIOS_START ... NV1_VGA_BIOS_END: // read vbios
+        case NV_PROM_DATA(0) ... NV_PROM_DATA(NV_PROM_DATA__SIZE_1): // MMIO mirror also at 610000?!
             break; // can't write to ROM
             // 32-bit
         case NV_PBUS_PCI_VGA_0 ... NV_PBUS_PCI_VGA_0 + 0xFF:            // vga function mirror

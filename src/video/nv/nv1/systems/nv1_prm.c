@@ -31,10 +31,11 @@ bool nv1_rmc_window_is_enabled()
 void nv1_enable_rmc_if_needed(uint32_t addr, uint32_t val)
 {            
     if (addr >= NV_MEMORY_RMC_ACCESS(0)
-    && addr <= NV_MEMORY_RMC_ACCESS(NV_MEMORY_RMC_ACCESS__SIZE_1))
+    && addr <= NV_MEMORY_RMC_ACCESS(NV_MEMORY_RMC_ACCESS__SIZE_1)
+    && (addr & 0xFFFFFF00)) // should not be required, but let's put it here for consistency...
     {
         // calculate window index (off by one due to some errata)
-        int32_t window_index = (((addr - NV_MEMORY_RMC_ACCESS(0)) >> 2) - 1);
+        int32_t window_index = (((addr - NV_MEMORY_RMC_ACCESS(0)) >> 2)); // - 1
 
         // the vbios has an off by one error, where it writes to b1e04 for window 1 but uses b1e40 for window 0
         // so we have to do this stupid shit
@@ -209,7 +210,7 @@ uint32_t nv1_prmc_read(uint32_t addr)
     switch (addr)
     {
         case NV_MEMORY_RMC_ACCESS(0) ... NV_MEMORY_RMC_ACCESS(NV_MEMORY_RMC_ACCESS__SIZE_1):
-            window_index = (((addr - NV_MEMORY_RMC_ACCESS(0)) >> 2) - 1);
+            window_index = (((addr - NV_MEMORY_RMC_ACCESS(0)) >> 2));// - 1
 
             // fix off by one error in vbios, idk why this even works
             if (window_index < 0)
@@ -236,7 +237,7 @@ uint32_t nv1_prmc_read(uint32_t addr)
     }  
 
     if (addr >= NV_MEMORY_WINDOW032(0, 0)
-    && addr <= NV_MEMORY_WINDOW032(NV_MEMORY_WINDOW032__SIZE_1 - 1, NV_MEMORY_WINDOW032__SIZE_2)) // END AT b7fff (3 windows)
+    && addr <= NV_MEMORY_WINDOW032(NV_MEMORY_WINDOW032__SIZE_1, NV_MEMORY_WINDOW032__SIZE_2)) // END AT b7fff (3 windows)
     {
         window_index = (addr - NV_MEMORY_WINDOW032(0, 0)) / NV_MEMORY_WINDOW008__SIZE_2; // use 8 bitindex here
  
@@ -280,6 +281,8 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
         return; 
     }
 
+    /* only respond to b1e40, b1e50, be160, b1e70 */
+
     if (addr >= NV_MEMORY_RMC_WINDOW(0)
     && addr <= NV_MEMORY_RMC_WINDOW(NV_MEMORY_RMC_WINDOW__SIZE_1))
     {
@@ -291,7 +294,8 @@ void nv1_prmc_write(uint32_t addr, uint32_t val)
     }
 
     if (addr >= NV_MEMORY_WINDOW032(0, 0)
-    && addr <= NV_MEMORY_WINDOW032(NV_MEMORY_WINDOW032__SIZE_1 - 1, NV_MEMORY_WINDOW032__SIZE_2))
+    && addr <= NV_MEMORY_WINDOW032(NV_MEMORY_WINDOW032__SIZE_1, NV_MEMORY_WINDOW032__SIZE_2)
+    && (addr & 0xFFFFFF00))
     {
         window_index = (addr - NV_MEMORY_WINDOW032(0, 0)) / NV_MEMORY_WINDOW008__SIZE_2; // use 8 bitindex here
  
