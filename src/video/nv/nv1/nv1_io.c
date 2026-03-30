@@ -292,7 +292,7 @@ void nv1_svga_write_io(uint16_t addr, uint8_t val, void* priv)
             if (nv1->svga.gdcaddr == NV_PRMIO_GC_MISC__INDEX
             && old != val)
             {               
-                 mem_mapping_set_addr(&nv1->svga.mapping, 0xa0000, 0x20000);
+                mem_mapping_set_addr(&nv1->svga.mapping, 0xa0000, 0x20000);
             };
         default:
             svga_out(addr, val, &nv1->svga);
@@ -451,6 +451,16 @@ uint32_t nv1_mmio_dispatch_read(uint32_t addr)
             send_log = false; // logged by STG1764 subsystem
             ret = stg1732_ramdac_uport_read(addr & 0x1F, nv1->ramdac, &nv1->svga);
             break; 
+        case NV_PEEPROM_CONTROL:
+            ret |= nv1->eeprom.data_current;
+        
+            // temp because REF2HEADER is FUCKED!!!!
+            ret |= ((nv1->eeprom.address & 0x03) << 8);
+            ret |= ((nv1->eeprom.command & 0x03) << 24);
+
+            nv_log("EEPROM Control Read addr=%02x command=%02x, data_current=%02x\n", nv1->eeprom.address, nv1->eeprom.command,
+            nv1->eeprom.data_current);
+            break;
         default: // set unimplemented
             unimpl = true;
             break;
@@ -510,6 +520,23 @@ void nv1_mmio_dispatch_write(uint32_t addr, uint32_t val)
             send_log = false; // logged by STG1764 subsystem
             stg1732_ramdac_uport_write(addr & 0x1F, val & 0xFF, nv1->ramdac, &nv1->svga);
             break; 
+        // EEPROM implementation
+        case NV_PEEPROM_CONTROL:
+            // TEMP BECAUSE REF2HEADER HAS THE BITS THE WRONG WAY AROUND!!!!
+            nv1->eeprom.address = (val >> 8) & 0x7F;
+            nv1->eeprom.command = (val >> 24) & 0x03;
+            
+            if (nv1->eeprom.command == NV_PEEPROM_CONTROL_COMMAND_READ)
+                nv1->eeprom.data_current = nv1->eeprom.data[nv1->eeprom.address]; 
+            else if (nv1->eeprom.command == NV_PEEPROM_CONTROL_COMMAND_WRITE)
+            {
+                nv1->eeprom.data[nv1->eeprom.address] = val & 0xFF;
+                nv1->eeprom.data_current = val & 0xFF;
+            }
+
+            nv_log("EEPROM Control Write, addr=%02x command=%02x, data_current=%02x\n", nv1->eeprom.address, nv1->eeprom.command,
+            nv1->eeprom.data_current);
+            break;
         default: // set unimplemented
             unimpl = true;
             break;

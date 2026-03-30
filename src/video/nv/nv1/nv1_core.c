@@ -170,6 +170,11 @@ nv1_init(const device_t *dev)
     nv1->svga.ramdac = nv1->ramdac;
     nv1->svga.clock_gen = nv1->svga.ramdac;
 
+    // Setup chiptoken for DRM
+    //memcpy(nv1->eeprom.data[0], NV1_GENERIC_CHIPTOKEN, sizeof(uint64_t));
+    nv1->eeprom.data[NV1_PEEPROM_SIZE - 1] = 0x4E; // I don't know what it does but it seems important :/
+    nv1->eeprom.data[NV1_PEEPROM_SIZE - 2] = 0x0D; // I don't know what it does
+
     // seems to require starting up in colour mode
     nv1->svga.miscout |= NV_IO_EX_MISC_OUT_IO_ADDRESS_COLOR;
 

@@ -69,6 +69,8 @@
 
 #define NV1_LAST_DAC_REG                            0x1C >> 2   // not in sgs_dac.h
 
+#define NV1_GENERIC_CHIPTOKEN                       0x31FD69A57262FE4F  // Unique ID (from Furball)
+
 #define NV1_PEEPROM_SIZE                            128         // 128 bytes 
 
 #define NV1_PMC_BOOT_0_GENERIC_REVB2                0x00010102  // NV1 Revision B2
@@ -103,6 +105,16 @@ typedef struct nv1_pbus_s
     */
     uint32_t access;
 } nv1_pbus_t;
+ 
+typedef struct nv1_eeprom_s
+{
+    uint8_t address;
+    uint8_t data_current;
+    uint8_t mode;
+    uint8_t command;
+    // don't bother with "BUSY"
+    uint8_t data[NV1_PEEPROM_SIZE];                     // eeprom apparently
+} nv1_eeprom_t; 
 
 typedef struct nv1_prm_s
 {
@@ -113,7 +125,7 @@ typedef struct nv1_prm_s
 
     uint32_t debug;                 // debug register
     uint32_t config;                // 6/8 bits mode
-    uint32_t intr, intr_en;
+    uint32_t intr, intr_en;         // interrupt system
     uint32_t trace;                 // debug
     uint32_t ignore_0;              // ignore for trace
     uint32_t ignore_1;              // ignore for trace
@@ -159,7 +171,7 @@ typedef struct nv1_s
     nv1_pbus_t pbus;                                            // Bus control
     nv1_prm_t prm;
     nv1_pfb_t pfb; 
-    uint32_t eeprom[NV1_PEEPROM_SIZE >> 2];                     // eeprom apparently
+    nv1_eeprom_t eeprom;                                
 } nv1_t;
 
 
