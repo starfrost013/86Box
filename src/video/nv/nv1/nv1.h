@@ -55,10 +55,10 @@
 
 #define NV1_MMIO_SIZE                               0x2000000   // 32M (incl. VRAM)
 
-#define NV1_VGA_START                               0x03B0      // vga start
-#define NV1_VGA_SIZE                                0x0030
+#define NV1_VGA_START                               0x03C0      // vga start
+#define NV1_VGA_SIZE                                0x0020
 
-#define NV1_VGA_MMIO_START                          0x6D03B0    // registers which are sent to VGA
+#define NV1_VGA_MMIO_START                          0x6D03C0    // registers which are sent to VGA
 #define NV1_VGA_MMIO_END                            0x6D03DF    // registers which are sent to VGA
 
 // Not defined by NV's?

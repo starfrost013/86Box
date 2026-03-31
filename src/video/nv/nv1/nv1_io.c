@@ -211,12 +211,8 @@ uint8_t nv1_svga_read_io(uint16_t addr, void* priv)
     uint8_t ret = 0x00;
                                            
     /* It is expected by NV1 that the VGA register set that is not selected is *unavailable*  */
-    if (((addr & 0xfff0) == 0x3d0 
-    || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
-    {
-        ret = 0xFF;
-        return ret; 
-    }
+    if (((addr & 0xFFF0) == 0x3D0 || (addr & 0xFFF0) == 0x3B0) && !(nv1->svga.miscout & 1))
+        addr ^= 0x60;
 
     switch (addr)
     {
@@ -241,12 +237,8 @@ uint8_t nv1_svga_read_io(uint16_t addr, void* priv)
 void nv1_svga_write_io(uint16_t addr, uint8_t val, void* priv)
 {
     /* It is expected by NV1 that the VGA register set that is not selected is *unavailable*  */
-    if (((addr & 0xfff0) == 0x3d0 
-    || (addr & 0xfff0) == 0x3b0) && !(nv1->svga.miscout & 1))
-    {
-        // writing has no effect
-        return; 
-    }
+    if (((addr & 0xFFF0) == 0x3D0 || (addr & 0xFFF0) == 0x3B0) && !(nv1->svga.miscout & 1))
+        addr ^= 0x60;
 
     uint8_t old = 0x00;
 

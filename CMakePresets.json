@@ -35,7 +35,9 @@
         {
             "name": "debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "DEBUGREGS486": "ON"
+
             },
             "inherits": "base"
         },
@@ -70,7 +72,7 @@
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "cmake/llvm-macos-aarch64.cmake",
-                "NEW_DYNAREC": "ON",
+                "DEBUGREGS486": "ON",
                 "QT": "ON",
                 "USE_QT6": "OFF",
                 "Qt5_DIR": "/opt/homebrew/opt/qt@5/lib/cmake/Qt5",
