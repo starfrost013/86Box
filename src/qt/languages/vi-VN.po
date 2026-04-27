@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-03-10 14:03+0000\n"
-"Last-Translator: OBattler <oubattler@gmail.com>\n"
+"PO-Revision-Date: 2026-04-25 15:00+0000\n"
+"Last-Translator: nguyen <barnacl437@disroot.org>\n"
 "Language-Team: Vietnamese <https://weblate.86box.net/projects/86box/86box/vi/"
 ">\n"
 "Language: vi-VN\n"
@@ -356,19 +356,19 @@ msgid "Machine type:"
 msgstr "Loại máy:"
 
 msgid "[1989] i486 (Socket 168 and 1)"
-msgstr ""
+msgstr "[1989] i486 (Socket 168 và 1)"
 
 msgid "[1994] i486 (Miscellaneous)"
-msgstr ""
+msgstr "[1994] i486 (Khác)"
 
 msgid "[1995] Socket 7 (Single Voltage)"
-msgstr ""
+msgstr "[1995] Socket 7 (hiệu điện thế đơn)"
 
 msgid "[1996] Socket 7 (Dual Voltage)"
-msgstr ""
+msgstr "[1996] Socket 7 (hiệu điện thế kép)"
 
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Lặt vặt khác"
 
 msgid "Machine:"
 msgstr "Mẫu máy:"
@@ -523,18 +523,6 @@ msgstr "YMFM (nhanh hơn)"
 msgid "Internal LPT ECP DMA:"
 msgstr "LPT ECP DMA nội bộ:"
 
-msgid "Serial port 1"
-msgstr "Cổng serial 1"
-
-msgid "Serial port 2"
-msgstr "Cổng serial 2"
-
-msgid "Serial port 3"
-msgstr "Cổng serial 3"
-
-msgid "Serial port 4"
-msgstr "Cổng serial 4"
-
 msgid "Floppy disk controller:"
 msgstr "Bộ điều khiển ổ mềm:"
 
@@ -542,43 +530,43 @@ msgid "CD-ROM controller:"
 msgstr "Bộ điều khiển CD-ROM:"
 
 msgid "Mitsumi interface"
-msgstr ""
+msgstr "Giao diện Mitsumi"
 
 msgid "MKE/Panasonic interface"
-msgstr ""
+msgstr "Giao diện MKE/Panasonic"
 
 msgid "MKE/Panasonic interface (Creative)"
-msgstr ""
+msgstr "Giao diện MKE/Panasonic (Creative)"
 
 msgid "IDE Controller"
 msgstr "Bộ điều khiển IDE"
 
 msgid "IDE Controller (Dual-Channel)"
-msgstr ""
+msgstr "Bộ điều khiển IDE (hai kênh)"
 
 msgid "PC/AT IDE Controller"
-msgstr ""
+msgstr "Bộ điều khiển IDE PC/AT"
 
 msgid "PC/AT IDE Controller (Dual-Channel)"
-msgstr ""
+msgstr "Bộ điều khiển IDE PC/AT (hai kênh)"
 
 msgid "PC/AT XTIDE (Primary Only)"
-msgstr ""
+msgstr "XTIDE PC/AT (chỉ có đầu cắm chính)"
 
 msgid "PS/2 AT XTIDE (1.1.5) (Primary Only)"
-msgstr ""
+msgstr "XTIDE PS/2 AT (1.1.5) (chỉ có đầu cắm chính)"
 
 msgid "CMD PCI-0646 (Tertiary and Quaternary)"
-msgstr ""
+msgstr "CMD PCI-0646 (giao diện cắm thứ 3 và 4)"
 
 msgid "CMD PCI-0648 (Tertiary and Quaternary)"
-msgstr ""
+msgstr "CMD PCI-0648 (giao diện cắm thứ 3 và 4)"
 
 msgid "CMD PCI-0649 (Tertiary and Quaternary)"
-msgstr ""
+msgstr "CMD PCI-0649 (giao diện cắm thứ 3 và 4)"
 
 msgid "McIDE Controller"
-msgstr ""
+msgstr "Bộ điều khiển McIDE"
 
 msgid "Tertiary IDE Controller"
 msgstr "Bộ điều khiển IDE thứ ba"
@@ -612,6 +600,9 @@ msgstr "Đĩa cứng:"
 
 msgid "Firmware Version"
 msgstr "Phiên bản firmware"
+
+msgid "DSP Version"
+msgstr "Phiên bản DSP"
 
 msgid "&New…"
 msgstr "Tạ&o mới…"
@@ -1795,17 +1786,17 @@ msgstr "MiB"
 msgid "GiB"
 msgstr "GiB"
 
-msgid "Network Card #1"
-msgstr "Thẻ mạng 1"
+msgid "Adapter 1"
+msgstr "Bộ chuyển đổi 1"
 
-msgid "Network Card #2"
-msgstr "Thẻ mạng 2"
+msgid "Adapter 2"
+msgstr "Bộ chuyển đổi 2"
 
-msgid "Network Card #3"
-msgstr "Thẻ mạng 3"
+msgid "Adapter 3"
+msgstr "Bộ chuyển đổi 3"
 
-msgid "Network Card #4"
-msgstr "Thẻ mạng 4"
+msgid "Adapter 4"
+msgstr "Bộ chuyển đổi 4"
 
 msgid "Mode:"
 msgstr "Chế độ:"
@@ -1827,18 +1818,6 @@ msgstr "Trình kiểm tra đơn vị 86box"
 
 msgid "Novell NetWare 2.x Key Card"
 msgstr "Thẻ khóa Novell Netware 2.x"
-
-msgid "Serial port passthrough 1"
-msgstr "Thông qua cổng serial 1"
-
-msgid "Serial port passthrough 2"
-msgstr "Thông qua cổng serial 2"
-
-msgid "Serial port passthrough 3"
-msgstr "Thông qua cổng serial 3"
-
-msgid "Serial port passthrough 4"
-msgstr "Thông qua cổng serial 4"
 
 msgid "Renderer &options…"
 msgstr "Tùy chọn kết xuất…"
@@ -2668,7 +2647,8 @@ msgstr "Dongle bảo vệ cho Savage Quest"
 msgid "Loopback Plug"
 msgstr ""
 
-msgid "Serial Passthrough Device"
+#, fuzzy
+msgid "Serial Passthrough"
 msgstr "Thiết bị thông qua cổng serial"
 
 msgid "Passthrough Mode"
@@ -3010,9 +2990,6 @@ msgstr "Hệ thống sẽ không được thêm."
 msgid "&Update mouse every CPU frame"
 msgstr "&Cập nhật chuột mỗi cỡ khung CPU"
 
-msgid "Composite CGA"
-msgstr ""
-
 msgid "Hue"
 msgstr "Màu sắc"
 
@@ -3028,17 +3005,20 @@ msgstr "Độ sáng"
 msgid "Sharpness"
 msgstr "Độ sắc nét"
 
-msgid "Reset"
-msgstr ""
+msgid "&CGA composite settings…"
+msgstr "Cài đặt chế độ tổng hợp &CGA…"
+
+msgid "CGA composite settings"
+msgstr "Cài đặt chế độ tổng hợp CGA"
 
 msgid "Monitor EDID"
 msgstr "EDID của màn hình"
 
 msgid "Export…"
-msgstr "Xuất khẩu…"
+msgstr "Xuất ra file…"
 
 msgid "Export EDID"
-msgstr "Xuất khẩu EDID"
+msgstr "Xuất ra file EDID"
 
 msgid "EDID file \"%ls\" is too large."
 msgstr "Tệp EDID \"%ls\" quá lớn."
@@ -3050,16 +3030,16 @@ msgid "OpenGL input stretch mode"
 msgstr "Chế độ kéo giãn đầu vào của OpenGL"
 
 msgid "Color scheme"
-msgstr "Bảng màu"
+msgstr "Kiểu giao diện"
 
 msgid "Light"
-msgstr "Ánh sáng"
+msgstr "Sáng"
 
 msgid "Dark"
 msgstr "Tối"
 
 msgid "Force interpretation"
-msgstr "Buộc giải thích"
+msgstr "Buộc thông dịch"
 
 msgid "Allow recompilation"
 msgstr "Cho phép biên dịch lại"
@@ -3083,4 +3063,10 @@ msgid "Raw"
 msgstr "Thô"
 
 msgid "Use EDC/ECC emulation"
-msgstr ""
+msgstr "Dùng mô phỏng EDC/ECC"
+
+msgid "Audio output device:"
+msgstr "Thiết bị đầu ra âm thanh:"
+
+msgid "System Default"
+msgstr "Mặc định hệ thống"

@@ -272,6 +272,9 @@ add_library(ui STATIC
 
     qt_iconindicators.hpp
     qt_iconindicators.cpp
+    qt_cgasettingsdialog.hpp
+    qt_cgasettingsdialog.cpp
+    qt_cgasettingsdialog.ui
 )
 
 if(EMU_BUILD_NUM)
@@ -348,12 +351,10 @@ endif()
 
 if(WIN32)
     target_sources(plat PRIVATE
-        win_serial_passthrough.c
         win_netsocket.c
     )
 else()
     target_sources(plat PRIVATE
-        ../unix/unix_serial_passthrough.c
         ../unix/unix_netsocket.c
     )
 endif()

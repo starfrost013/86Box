@@ -74,7 +74,6 @@
 #include <86box/isartc.h>
 #include <86box/lpt.h>
 #include <86box/serial.h>
-#include <86box/serial_passthrough.h>
 #include <86box/keyboard.h>
 #include <86box/mouse.h>
 #include <86box/gameport.h>
@@ -180,8 +179,6 @@ int      force_43                               = 0;              /* (C) video *
 int      video_filter_method                    = 1;              /* (C) video */
 int      video_vsync                            = 0;              /* (C) video */
 int      video_framerate                        = -1;             /* (C) video */
-bool     serial_passthrough_enabled[SERIAL_MAX - 1] = { 0, 0, 0, 0, 0, 0, 0 }; /* (C) activation and kind of
-                                                                                  pass-through for serial ports */
 int      bugger_enabled                         = 0;              /* (C) enable ISAbugger */
 int      novell_keycard_enabled                 = 0;              /* (C) enable Novell NetWare 2.x key card emulation. */
 int      postcard_enabled                       = 0;              /* (C) enable POST card */
@@ -412,7 +409,7 @@ pclog_ex(UNUSED(const char *fmt), UNUSED(va_list ap))
 #ifndef RELEASE_BUILD
     char temp[LOG_SIZE_BUFFER];
 
-    if (strcmp(fmt, "") == 0)
+    if (!fmt || !fmt[0])
         return;
 
     pclog_ensure_stdlog_open();
@@ -503,8 +500,6 @@ fatal(const char *fmt, ...)
 
     nvr_save();
 
-    config_save();
-
 #ifdef ENABLE_808X_LOG
     dumpregs(1);
 #endif
@@ -546,8 +541,6 @@ fatal_ex(const char *fmt, va_list ap)
     fflush(stdlog);
 
     nvr_save();
-
-    config_save();
 
 #ifdef ENABLE_808X_LOG
     dumpregs(1);
@@ -679,6 +672,21 @@ delete_nvr_file(uint8_t flash)
     free(fn);
     fn = NULL;
 }
+
+#ifdef _WIN32
+void
+pc_debug_console(void)
+{
+    if (!force_debug && AllocConsole()) {
+        force_debug = 1;
+        freopen("CONIN$", "r", stdin);
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
+    }
+    if (force_debug && vm_name[0])
+        SetConsoleTitle(vm_name);
+}
+#endif
 
 extern void  device_find_all_descs(void);
 
@@ -848,7 +856,7 @@ usage:
             lvmp = 1;
 #ifdef _WIN32
         } else if (!strcasecmp(argv[c], "--debug") || !strcasecmp(argv[c], "-D")) {
-            force_debug = 1;
+            pc_debug_console();
 #endif
 #ifndef USE_SDL_UI
         } else if (!strcasecmp(argv[c], "--vmmpath") ||
@@ -1199,11 +1207,17 @@ usage:
      * If no --vmname parameter specified we'll use the
      *   working directory name as the VM's name.
      */
-    if (strlen(vm_name) == 0) {
+    if (!vm_name[0]) {
         char ltemp[1024] = { '\0' };
         path_get_dirname(ltemp, usr_path);
         strcpy(vm_name, path_get_filename(ltemp));
     }
+
+#ifdef _WIN32
+    /* Update debug console title with the VM name. */
+    if (force_debug)
+        pc_debug_console();
+#endif
 
     /*
      * This is where we start outputting to the log file,
@@ -1235,6 +1249,13 @@ usage:
 
     pclog("# Emulator path: %s\n", exe_path);
     pclog("# Global configuration file: %s\n", global_cfg_path);
+
+    /* Initialize the keyboard accelerator list with default values */
+    for (int x = 0; x < NUM_ACCELS; x++) {
+        strcpy(acc_keys[x].name, def_acc_keys[x].name);
+        strcpy(acc_keys[x].desc, def_acc_keys[x].desc);
+        strcpy(acc_keys[x].seq, def_acc_keys[x].seq);
+    }
 
     /* Load the global configuration file. */
     config_load_global();
@@ -1296,15 +1317,10 @@ usage:
         mo_global_init();
         tape_global_init();
 
-        /* Initialize the keyboard accelerator list with default values */
-        for (int x = 0; x < NUM_ACCELS; x++) {
-            strcpy(acc_keys[x].name, def_acc_keys[x].name);
-            strcpy(acc_keys[x].desc, def_acc_keys[x].desc);
-            strcpy(acc_keys[x].seq, def_acc_keys[x].seq);
-        }
-
         /* Load the configuration file. */
         config_load();
+        /* To save the global key binds. */
+        config_save_global();
 
         /* Clear the CMOS and/or BIOS flash file, if we were started with
            the relevant parameter(s). */
@@ -1742,7 +1758,6 @@ pc_reset_hard_init(void)
     /* Reset and reconfigure the serial ports. */
     /* note: SLIP COM side has to be initialized before the network side */
     serial_standalone_init();
-    serial_passthrough_init();
 
     /* Reset and reconfigure the Network Card layer. */
     network_reset();
@@ -1930,8 +1945,6 @@ pc_close(UNUSED(thread_t *ptr))
     is_quit = 1;
 
     nvr_save();
-
-    config_save();
 
     plat_mouse_capture(0);
 
@@ -2235,8 +2248,8 @@ do_pause(int p)
 // Helper to find an accelerator key and return it's index in acc_keys
 int FindAccelerator(const char *name) {
     for (int x = 0; x < NUM_ACCELS; x++) {
-        if(strcmp(acc_keys[x].name, name) == 0)
-            return(x);
+        if (!strcmp(acc_keys[x].name, name))
+            return x;
     }
 
     // No key was found

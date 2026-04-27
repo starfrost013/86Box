@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-03-31 20:10+0000\n"
+"PO-Revision-Date: 2026-04-15 14:00+0000\n"
 "Last-Translator: DimMan88 <dimman88@hotmail.com>\n"
 "Language-Team: Greek <https://weblate.86box.net/projects/86box/86box/el/>\n"
 "Language: el-GR\n"
@@ -359,7 +359,7 @@ msgid "[1989] i486 (Socket 168 and 1)"
 msgstr ""
 
 msgid "[1994] i486 (Miscellaneous)"
-msgstr ""
+msgstr "[1994] i486 (Ανάμεικτα)"
 
 msgid "[1995] Socket 7 (Single Voltage)"
 msgstr ""
@@ -368,7 +368,7 @@ msgid "[1996] Socket 7 (Dual Voltage)"
 msgstr ""
 
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Διάφορα"
 
 msgid "Machine:"
 msgstr "Σύστημα:"
@@ -523,18 +523,6 @@ msgstr "YMFM (γρήγορο)"
 msgid "Internal LPT ECP DMA:"
 msgstr "Εσωτερικό LPT ECP DMA:"
 
-msgid "Serial port 1"
-msgstr "Σειριακή θύρα 1"
-
-msgid "Serial port 2"
-msgstr "Σειριακή θύρα 2"
-
-msgid "Serial port 3"
-msgstr "Σειριακή θύρα 3"
-
-msgid "Serial port 4"
-msgstr "Σειριακή θύρα 4"
-
 msgid "Floppy disk controller:"
 msgstr "Ελεγκτής δισκέτας:"
 
@@ -542,13 +530,13 @@ msgid "CD-ROM controller:"
 msgstr "Ελεγκτής CD-ROM:"
 
 msgid "Mitsumi interface"
-msgstr ""
+msgstr "Διεπαφή Mitsumi"
 
 msgid "MKE/Panasonic interface"
-msgstr ""
+msgstr "Διεπαφή MKE/Panasonic"
 
 msgid "MKE/Panasonic interface (Creative)"
-msgstr ""
+msgstr "Διεπαφή MKE/Panasonic (Creative)"
 
 msgid "IDE Controller"
 msgstr "Ελεγκτής IDE"
@@ -612,6 +600,9 @@ msgstr "Σκληροί δίσκοι:"
 
 msgid "Firmware Version"
 msgstr "Έκδοση Firmware"
+
+msgid "DSP Version"
+msgstr "Έκδοση DSP"
 
 msgid "&New…"
 msgstr "&Δημιουργία…"
@@ -1831,17 +1822,17 @@ msgstr "MiB"
 msgid "GiB"
 msgstr "GiB"
 
-msgid "Network Card #1"
-msgstr "Κάρτα δικτύου #1"
+msgid "Adapter 1"
+msgstr "Προσαρμογέας 1"
 
-msgid "Network Card #2"
-msgstr "Κάρτα δικτύου #2"
+msgid "Adapter 2"
+msgstr "Προσαρμογέας 2"
 
-msgid "Network Card #3"
-msgstr "Κάρτα δικτύου #3"
+msgid "Adapter 3"
+msgstr "Προσαρμογέας 3"
 
-msgid "Network Card #4"
-msgstr "Κάρτα δικτύου #4"
+msgid "Adapter 4"
+msgstr "Προσαρμογέας 4"
 
 msgid "Mode:"
 msgstr "Λειτουργία:"
@@ -1863,18 +1854,6 @@ msgstr "Μονάδα δοκιμής 86Box"
 
 msgid "Novell NetWare 2.x Key Card"
 msgstr "Novell NetWare 2.x Key Card"
-
-msgid "Serial port passthrough 1"
-msgstr "Διέλευση σειριακής πόρτας 1"
-
-msgid "Serial port passthrough 2"
-msgstr "Διέλευση σειριακής πόρτας 2"
-
-msgid "Serial port passthrough 3"
-msgstr "Διέλευση σειριακής πόρτας 3"
-
-msgid "Serial port passthrough 4"
-msgstr "Διέλευση σειριακής πόρτας 4"
 
 msgid "Renderer &options…"
 msgstr "&Επιλογές απεικόνισης…"
@@ -2027,7 +2006,7 @@ msgid "BIOS Language"
 msgstr "Γλώσσα BIOS"
 
 msgid "Variant"
-msgstr ""
+msgstr "Παραλλαγή"
 
 msgid "IBM 5161 Expansion Unit"
 msgstr "Επέκταση μονάδας IBM 5161"
@@ -2703,9 +2682,10 @@ msgid "Protection Dongle for Savage Quest"
 msgstr "Dongle προστασίας για το Savage Quest"
 
 msgid "Loopback Plug"
-msgstr ""
+msgstr "Βύσμα Loopback"
 
-msgid "Serial Passthrough Device"
+#, fuzzy
+msgid "Serial Passthrough"
 msgstr "Συσκευή Σειριακής Διέλευσης"
 
 msgid "Passthrough Mode"
@@ -2796,10 +2776,10 @@ msgid "Generic PC/AT Memory Expansion"
 msgstr "Γενική Επέκταση Μνήμης PC/AT"
 
 msgid "Generic MM58167 RTC"
-msgstr ""
+msgstr "Γενικό MM58167 RTC"
 
 msgid "OPL2Board (External Device)"
-msgstr ""
+msgstr "OPL2Board (Εξωτερική Συσκευή)"
 
 msgid "Unable to find Dot-Matrix fonts"
 msgstr "Αδυναμία εύρεσης γραμματοσειρών Dot-Matrix"
@@ -2873,10 +2853,10 @@ msgid "Could not load file %1"
 msgstr "Αδυναμία φόρτωσης αρχείου %1"
 
 msgid "Emulator"
-msgstr ""
+msgstr "Εξομοιωτής"
 
 msgid "Input"
-msgstr ""
+msgstr "Είσοδος"
 
 msgid "Key bindings"
 msgstr "Αντιστοιχίσεις πλήκτρων"
@@ -3071,9 +3051,6 @@ msgstr "Το σύστημα δεν θα προστεθεί."
 msgid "&Update mouse every CPU frame"
 msgstr "&Ανανέωση ποντικιού ανα καρέ CPU"
 
-msgid "Composite CGA"
-msgstr ""
-
 msgid "Hue"
 msgstr "Απόχρωση"
 
@@ -3089,8 +3066,11 @@ msgstr "Φωτεινότητα"
 msgid "Sharpness"
 msgstr "Οξύτητα"
 
-msgid "Reset"
-msgstr ""
+msgid "&CGA composite settings…"
+msgstr "Ρυθμίσεις &CGA composite…"
+
+msgid "CGA composite settings"
+msgstr "Ρυθμίσεις CGA composite"
 
 msgid "Monitor EDID"
 msgstr "Οθόνη EDID"
@@ -3105,10 +3085,10 @@ msgid "EDID file \"%ls\" is too large."
 msgstr "Το αρχείο EDID \"%ls\" είναι πολύ μεγάλο."
 
 msgid "OpenGL input scale"
-msgstr "Κλίμακα OpenGL input"
+msgstr "Κλίμακα εισόδου OpenGL"
 
 msgid "OpenGL input stretch mode"
-msgstr "OpenGL input σε λειτουργία τεντώματος"
+msgstr "Είσοδος OpenGL σε λειτουργία τεντώματος"
 
 msgid "Color scheme"
 msgstr "Συνδυασμός χρωμάτων"
@@ -3144,4 +3124,10 @@ msgid "Raw"
 msgstr "Αρχικος"
 
 msgid "Use EDC/ECC emulation"
-msgstr ""
+msgstr "Χρήση εξομοίωσης EDC/ECC"
+
+msgid "Audio output device:"
+msgstr "Συσκευή εξόδου ήχου:"
+
+msgid "System Default"
+msgstr "Προεπιλογή Συστήματος"

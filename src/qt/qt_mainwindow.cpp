@@ -31,6 +31,8 @@
 #include "qt_rendererstack.hpp"
 #include "qt_renderercommon.hpp"
 
+#include "qt_cgasettingsdialog.hpp"
+
 #include "qt_defs.hpp"
 
 extern "C" {
@@ -271,12 +273,20 @@ MainWindow::MainWindow(QWidget *parent)
     ui->toolBar->setBackgroundRole(QPalette::Light);
 #endif
     renderers[0].reset(nullptr);
-    auto toolbar_spacer = new QWidget();
-    toolbar_spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->toolBar->addWidget(toolbar_spacer);
 
-    auto toolbar_label = new QLabel();
-    ui->toolBar->addWidget(toolbar_label);
+    auto toolbar_label_widget = new QWidget();
+    auto toolbar_label_layout = new QHBoxLayout(toolbar_label_widget);
+    toolbar_label_layout->setContentsMargins(0, 0, 0, 0);
+
+    toolbar_label = new QLabel();
+    toolbar_label->setMinimumWidth(0);
+    toolbar_label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    toolbar_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    toolbar_label_layout->addWidget(toolbar_label);
+    toolbar_label_widget->setMinimumWidth(0);
+    toolbar_label_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    ui->toolBar->addWidget(toolbar_label_widget);
 
     this->setWindowFlag(Qt::MSWindowsFixedSizeDialogHint, vid_resize != 1);
     this->setWindowFlag(Qt::WindowMaximizeButtonHint, vid_resize == 1);
@@ -317,17 +327,28 @@ MainWindow::MainWindow(QWidget *parent)
 #else
         ui->menuTablet_tool->menuAction()->setVisible(false);
 #endif
+
+        bool enable_comp_option = false;
+        for (int i = 0; i < MONITORS_NUM; i++) {
+            if (monitors[i].mon_composite) {
+                enable_comp_option = true;
+                break;
+            }
+        }
+
+        ui->actionCGA_composite_settings->setEnabled(enable_comp_option);
     });
 
     connect(this, &MainWindow::showMessageForNonQtThread, this, &MainWindow::showMessage_, Qt::QueuedConnection);
 
-    connect(this, &MainWindow::setTitle, this, [toolbar_label](const QString &title) {
-        if (dopause && !hide_tool_bar) {
-            toolbar_label->setText(toolbar_label->text() + tr(" - PAUSED"));
+    connect(this, &MainWindow::setTitle, this, [this](const QString &title) {
+        if (hide_tool_bar)
             return;
-        }
-        if (!hide_tool_bar)
-            toolbar_label->setText(title);
+        if (dopause)
+            toolbar_text += tr(" - PAUSED");
+        else
+            toolbar_text = title;
+        toolbar_label->setText(toolbar_label->fontMetrics().elidedText(toolbar_text, Qt::ElideRight, toolbar_label->width()));
     });
     connect(this, &MainWindow::getTitleForNonQtThread, this, &MainWindow::getTitle_, Qt::BlockingQueuedConnection);
 
@@ -920,7 +941,6 @@ MainWindow::closeEvent(QCloseEvent *event)
     }
 
     qt_nvr_save();
-    config_save();
     QApplication::processEvents();
     cpu_thread_run = 0;
     event->accept();
@@ -1030,6 +1050,8 @@ MainWindow::resizeEvent(QResizeEvent *event)
     }
     move(newX, newY);
 #endif /*MOVE_WINDOW*/
+
+    toolbar_label->setText(toolbar_label->fontMetrics().elidedText(toolbar_text, Qt::ElideRight, toolbar_label->width()));
 }
 
 void
@@ -1462,7 +1484,7 @@ MainWindow::on_actionFullscreen_triggered()
     }
     fs_on_signal  = false;
     fs_off_signal = false;
-    ui->stackedWidget->onResize(width(), height());
+    ui->stackedWidget->onResize(ui->stackedWidget->width(), ui->stackedWidget->height());
 }
 
 void
@@ -1624,6 +1646,16 @@ MainWindow::refreshMediaMenu()
     int ext_ax_kbd = machine_has_bus(machine, MACHINE_BUS_PS2_PORTS | MACHINE_BUS_AT_KBD) && (keyboard_type == KEYBOARD_TYPE_AX);
     int int_ax_kbd = machine_has_flags(machine, MACHINE_KEYBOARD_JIS) && !machine_has_bus(machine, MACHINE_BUS_PS2_PORTS);
     kana_label->setVisible(ext_ax_kbd || int_ax_kbd);
+
+    bool enable_comp_option = false;
+    for (int i = 0; i < MONITORS_NUM; i++) {
+        if (monitors[i].mon_composite) {
+            enable_comp_option = true;
+            break;
+        }
+    }
+
+    ui->actionCGA_composite_settings->setEnabled(enable_comp_option);
 }
 
 void
@@ -1990,6 +2022,7 @@ MainWindow::on_actionForce_4_3_display_ratio_triggered()
                 renderers[i]->onResize(renderers[i]->width(), renderers[i]->height());
         }
     }
+    config_save();
 }
 
 void
@@ -2036,6 +2069,7 @@ MainWindow::on_actionRemember_size_and_position_triggered()
         }
     }
     ui->actionRemember_size_and_position->setChecked(window_remember);
+    config_save();
 }
 
 void
@@ -2056,6 +2090,7 @@ MainWindow::on_actionHiDPI_scaling_triggered()
         if (renderers[i])
             emit resizeContentsMonitor(monitors[i].mon_scrnsz_x, monitors[i].mon_scrnsz_y, i);
     }
+    config_save();
 }
 
 void
@@ -2080,6 +2115,7 @@ MainWindow::on_actionHide_status_bar_triggered()
         if (vid_resize == 1)
             setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
     }
+    config_save();
 }
 
 void
@@ -2101,6 +2137,7 @@ MainWindow::on_actionHide_tool_bar_triggered()
         if (vid_resize == 1)
             setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
     }
+    config_save();
 }
 
 void
@@ -2111,6 +2148,8 @@ MainWindow::on_actionUpdate_status_bar_icons_triggered()
 
     /* Prevent icons staying when disabled during activity. */
     status->clearActivity();
+
+    config_save();
 }
 
 void
@@ -2235,9 +2274,7 @@ MainWindow::on_actionPreferences_triggered()
         default:
             break;
         case QDialog::Accepted:
-            preferences.save();
             updateShortcuts();
-            config_changed = 2;
             emit vmmGlobalConfigurationChanged();
             break;
         case QDialog::Rejected:
@@ -2259,6 +2296,7 @@ MainWindow::on_actionEnable_Discord_integration_triggered(bool checked)
         discordupdate.stop();
     }
 #endif
+    config_save();
 }
 
 void
@@ -2327,6 +2365,7 @@ MainWindow::on_actionRenderer_options_triggered()
                     if (renderers[i] && renderers[i]->hasOptions())
                         renderers[i]->reloadOptions();
                 }
+            config_save();
         } else if (reload_renderers && ui->stackedWidget->reloadRendererOption()) {
             reload_renderers = false;
             ui->stackedWidget->switchRenderer(static_cast<RendererStack::Renderer>(vid_api));
@@ -2382,6 +2421,7 @@ MainWindow::on_actionShow_non_primary_monitors_triggered()
             }
         }
     }
+    config_save();
 }
 
 void
@@ -2433,4 +2473,15 @@ void
 MainWindow::on_actionACPI_Shutdown_triggered()
 {
     acpi_pwrbut_pressed = 1;
+}
+
+void
+MainWindow::on_actionCGA_composite_settings_triggered()
+{
+    isNonPause = true;
+    CGASettingsDialog dialog;
+    dialog.setModal(true);
+    dialog.exec();
+    isNonPause = false;
+    config_save();
 }

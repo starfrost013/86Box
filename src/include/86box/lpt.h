@@ -30,6 +30,7 @@ typedef struct lpt_device_s {
 } lpt_device_t;
 
 #ifdef _TIMER_H_
+#include <86box/char.h>
 typedef struct lpt_t {
     uint8_t       enabled;
     uint8_t       irq;
@@ -54,13 +55,17 @@ typedef struct lpt_t {
     uint8_t       cfg_regs_enabled;
     uint8_t       inst;
     uint8_t       eir;
-    uint8_t       pad;
+    uint8_t       enable_irq;
     uint8_t       ext_regs[8];
     uint16_t      addr;
     uint16_t      id;
-    uint16_t      pad0[2];
-    int           enable_irq;
+    uint8_t       char_read;
+    uint8_t       char_write;
+    uint8_t       char_pti_mode;
+    uint8_t       char_pti_readout;
+    unsigned int  char_spin_count;
     lpt_device_t *dt;
+    char_port_t   port;
 #ifdef FIFO_H
     fifo16_t *    fifo;
 #else
@@ -68,6 +73,7 @@ typedef struct lpt_t {
 #endif
 
     pc_timer_t    fifo_out_timer;
+    pc_timer_t    char_timer;
 } lpt_t;
 #endif /* _TIMER_H_ */
 
@@ -95,15 +101,6 @@ extern const device_t      dss_device;
 extern const device_t      lpt_hasp_savquest_device;
 
 extern const device_t      lpt_loopback_device;
-
-extern int                 lpt_device_available(int id);
-#ifdef EMU_DEVICE_H
-extern const device_t     *lpt_device_getdevice(const int id);
-#endif
-extern int                 lpt_device_has_config(const int id);
-extern const char         *lpt_device_get_name(int id);
-extern const char         *lpt_device_get_internal_name(int id);
-extern int                 lpt_device_get_from_internal_name(const char *str);
 
 extern void                lpt_write(uint16_t port, uint8_t val, void *priv);
 

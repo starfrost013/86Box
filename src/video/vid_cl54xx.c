@@ -1260,8 +1260,16 @@ gd54xx_out(uint16_t addr, uint8_t val, void *priv)
                 if (svga->crtcreg < 0xe || svga->crtcreg > 0x10) {
                     if ((svga->crtcreg == 0xc) || (svga->crtcreg == 0xd)) {
                         svga->fullchange = 3;
-                        svga->memaddr_latch   = ((svga->crtc[0xc] << 8) | svga->crtc[0xd]) +
-                                           ((svga->crtc[8] & 0x60) >> 5);
+                        svga->memaddr_latch   = ((svga->crtc[0xc] << 8) | svga->crtc[0xd]) |
+                                                ((svga->crtc[0x1b] & 0x01) << 16);
+                        if (svga->crtc[0x27] >= CIRRUS_ID_CLGD5420)
+                            svga->memaddr_latch |= ((svga->crtc[0x1b] & 0x04) << 15);
+                        if ((svga->crtc[0x27] >= CIRRUS_ID_CLGD5426) ||
+                            (svga->crtc[0x27] >= CIRRUS_ID_CLGD5428))
+                            svga->memaddr_latch |= ((svga->crtc[0x1b] & 0x08) << 15);
+                        if (svga->crtc[0x27] >= CIRRUS_ID_CLGD5430)
+                            svga->memaddr_latch |= ((svga->crtc[0x1d] & 0x80) << 12);
+                        svga->memaddr_latch  += ((svga->crtc[8] & 0x60) >> 5);
                     } else {
                         svga->fullchange = changeframecount;
                         svga_recalctimings(svga);
@@ -1925,7 +1933,16 @@ gd54xx_recalctimings(svga_t *svga)
     } else if (svga->gdcreg[5] & 0x40)
         svga->render = svga_render_8bpp_lowres;
 
-    svga->memaddr_latch |= ((svga->crtc[0x1b] & 0x01) << 16) | ((svga->crtc[0x1b] & 0xc) << 15);
+    svga->memaddr_latch   = ((svga->crtc[0xc] << 8) | svga->crtc[0xd]) |
+                            ((svga->crtc[0x1b] & 0x01) << 16);
+    if (svga->crtc[0x27] >= CIRRUS_ID_CLGD5420)
+        svga->memaddr_latch |= ((svga->crtc[0x1b] & 0x04) << 15);
+    if ((svga->crtc[0x27] >= CIRRUS_ID_CLGD5426) ||
+        (svga->crtc[0x27] >= CIRRUS_ID_CLGD5428))
+        svga->memaddr_latch |= ((svga->crtc[0x1b] & 0x08) << 15);
+    if (svga->crtc[0x27] >= CIRRUS_ID_CLGD5430)
+        svga->memaddr_latch |= ((svga->crtc[0x1d] & 0x80) << 12);
+    svga->memaddr_latch  += ((svga->crtc[8] & 0x60) >> 5);
 
     if (gd54xx->ramdac.ctrl & 0x80) {
         if (gd54xx->ramdac.ctrl & 0x40) {
@@ -4153,7 +4170,7 @@ cl_pci_write(UNUSED(int func), int addr, UNUSED(int len), uint8_t val, void *pri
 }
 
 static uint8_t
-gd5428_mca_read(int port, void *priv)
+gd5428_mca_read(const uint16_t port, void *priv)
 {
     const gd54xx_t *gd54xx = (gd54xx_t *) priv;
 
@@ -4161,7 +4178,7 @@ gd5428_mca_read(int port, void *priv)
 }
 
 static void
-gd5428_mca_write(int port, uint8_t val, void *priv)
+gd5428_mca_write(const uint16_t port, uint8_t val, void *priv)
 {
     gd54xx_t *gd54xx = (gd54xx_t *) priv;
 
@@ -5315,7 +5332,7 @@ static const device_config_t gd5480_config[] = {
 // clang-format on
 
 const device_t gd5401_isa_device = {
-    .name          = "Cirrus Logic GD5401 (ISA) (ACUMOS AVGA1)",
+    .name          = "Cirrus Logic GD5401 (ISA)",
     .internal_name = "cl_gd5401_isa",
     .flags         = DEVICE_ISA,
     .local         = CIRRUS_ID_CLGD5401,
@@ -5325,11 +5342,12 @@ const device_t gd5401_isa_device = {
     .available     = gd5401_available,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
-    .config        = NULL,
+    .alias         = "ACUMOS AVGA1",
+    .config        = NULL
 };
 
 const device_t gd5401_onboard_device = {
-    .name          = "Cirrus Logic GD5401 (ISA) (ACUMOS AVGA1) (On-Board)",
+    .name          = "Cirrus Logic GD5401 (ISA) (On-Board)",
     .internal_name = "cl_gd5402_onboard",
     .flags         = DEVICE_ISA16,
     .local         = CIRRUS_ID_CLGD5401 | 0x100,
@@ -5339,11 +5357,12 @@ const device_t gd5401_onboard_device = {
     .available     = NULL,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
-    .config        = NULL,
+    .alias         = "ACUMOS AVGA1",
+    .config        = NULL
 };
 
 const device_t gd5402_isa_device = {
-    .name          = "Cirrus Logic GD5402 (ISA) (ACUMOS AVGA2)",
+    .name          = "Cirrus Logic GD5402 (ISA)",
     .internal_name = "cl_gd5402_isa",
     .flags         = DEVICE_ISA,
     .local         = CIRRUS_ID_CLGD5402,
@@ -5353,11 +5372,12 @@ const device_t gd5402_isa_device = {
     .available     = gd5402_available,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
-    .config        = gd5402_config,
+    .alias         = "ACUMOS AVGA2",
+    .config        = gd5402_config
 };
 
 const device_t gd5402_onboard_device = {
-    .name          = "Cirrus Logic GD5402 (ISA) (ACUMOS AVGA2) (On-Board)",
+    .name          = "Cirrus Logic GD5402 (ISA) (On-Board)",
     .internal_name = "cl_gd5402_onboard",
     .flags         = DEVICE_ISA16,
     .local         = CIRRUS_ID_CLGD5402 | 0x200,
@@ -5367,11 +5387,12 @@ const device_t gd5402_onboard_device = {
     .available     = NULL,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
-    .config        = gd5402_config,
+    .alias         = "ACUMOS AVGA2",
+    .config        = gd5402_config
 };
 
 const device_t gd5402_onboard_commodore_device = {
-    .name          = "Cirrus Logic GD5402 (ISA) (ACUMOS AVGA2) (On-Board) (Commodore)",
+    .name          = "Cirrus Logic GD5402 (ISA) (On-Board) (Commodore)",
     .internal_name = "cl_gd5402_onboard_commodore",
     .flags         = DEVICE_ISA16,
     .local         = CIRRUS_ID_CLGD5402 | 0x100,
@@ -5381,7 +5402,9 @@ const device_t gd5402_onboard_commodore_device = {
     .available     = NULL,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
-    .config        = gd5402_config,
+    .machine       = "Commodore",
+    .alias         = "ACUMOS AVGA2",
+    .config        = gd5402_config
 };
 
 const device_t gd5420_isa_device = {
@@ -5554,7 +5577,7 @@ const device_t gd5428_vlb_device = {
 };
 
 const device_t gd5428_mca_device = {
-    .name          = "Cirrus Logic GD5428 (MCA) (IBM SVGA Adapter/A)",
+    .name          = "Cirrus Logic GD5428 (MCA)",
     .internal_name = "ibm1mbsvga",
     .flags         = DEVICE_MCA,
     .local         = CIRRUS_ID_CLGD5428,
@@ -5564,11 +5587,12 @@ const device_t gd5428_mca_device = {
     .available     = gd5428_mca_available,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
+    .alias         = "IBM SVGA Adapter/A",
     .config        = NULL
 };
 
 const device_t gd5426_mca_device = {
-    .name          = "Cirrus Logic GD5426 (MCA) (Reply Video Adapter)",
+    .name          = "Cirrus Logic GD5426 (MCA)",
     .internal_name = "replymcasvga",
     .flags         = DEVICE_MCA,
     .local         = CIRRUS_ID_CLGD5426,
@@ -5578,6 +5602,7 @@ const device_t gd5426_mca_device = {
     .available     = gd5426_mca_available,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
+    .alias         = "Reply Video Adapter",
     .config        = gd5426_config
 };
 
@@ -5620,6 +5645,8 @@ const device_t gd5428_onboard_vlb_device = {
     .available     = NULL,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
+    /* Not really a machine but let's reuse it. */
+    .machine       = "1MB",
     .config        = gd542x_config
 };
 
@@ -5634,6 +5661,7 @@ const device_t gd5428_vlb_onboard_pb450_device = {
     .available     = NULL,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
+    .machine       = "PB450",
     .config        = gd5428_1mb_config
 };
 
@@ -5648,6 +5676,7 @@ const device_t gd5428_vlb_onboard_tandy_device = {
     .available     = NULL,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
+    .machine       = "Tandy",
     .config        = NULL
 };
 
@@ -5826,6 +5855,7 @@ const device_t gd5436_onboard_pci_ics_device = {
     .available     = NULL,
     .speed_changed = gd54xx_speed_changed,
     .force_redraw  = gd54xx_force_redraw,
+    .machine       = "ICS",
     .config        = NULL
 };
 

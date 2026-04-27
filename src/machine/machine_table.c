@@ -9614,7 +9614,7 @@ const machine_t machines[] = {
         .gpio_acpi_handler = NULL,
         .cpu               = {
             .package     = CPU_PKG_SOCKET3,
-            .block       = CPU_BLOCK_NONE,
+            .block       = CPU_BLOCK(CPU_Cx486S, CPU_Cx486DX, CPU_Cx5x86),
             .min_bus     = 25000000,
             .max_bus     = 50000000,
             .min_voltage = 3300,
@@ -10243,7 +10243,7 @@ const machine_t machines[] = {
         .gpio_acpi_handler = NULL,
         .cpu               = {
             .package     = CPU_PKG_SOCKET3,
-            .block       = CPU_BLOCK_NONE,
+            .block       = CPU_BLOCK(CPU_Cx486S, CPU_Cx486DX, CPU_Cx5x86),
             .min_bus     = 20000000,
             .max_bus     = 50000000,
             .min_voltage = 3300,
@@ -10348,7 +10348,7 @@ const machine_t machines[] = {
             .max_multi   = 0
         },
         .bus_flags = MACHINE_PS2_VLB,
-        .flags     = MACHINE_IDE | MACHINE_APM, /* Has internal video: Western Digital WD90C33-ZZ */
+        .flags     = MACHINE_IDE, /* Has internal video: Western Digital WD90C33-ZZ */
         .ram       = {
             .min  = 4096,
             .max  = 40960,
@@ -10832,7 +10832,7 @@ const machine_t machines[] = {
         .gpio_acpi_handler = NULL,
         .cpu               = {
             .package     = CPU_PKG_SOCKET3,
-            .block       = CPU_BLOCK_NONE,
+            .block       = CPU_BLOCK(CPU_ENH_Am486DX, CPU_Cx486S, CPU_Cx486DX, CPU_Cx5x86),
             .min_bus     = 25000000,
             .max_bus     = 50000000,
             .min_voltage = 3300,
@@ -11374,6 +11374,8 @@ const machine_t machines[] = {
             .max_multi   = 3.0
         },
         .bus_flags = MACHINE_PS2_PCI,
+        /* Machine has custom (currently unemulated) power management harware
+           needed for the APM interface to function */
         .flags     = MACHINE_IDE | MACHINE_VIDEO | MACHINE_APM,
         .ram       = {
             .min  = 1024,
@@ -11570,7 +11572,7 @@ const machine_t machines[] = {
         .bus_flags = MACHINE_PCI,
         .flags     = MACHINE_PS2_KBC | MACHINE_IDE_DUAL | MACHINE_APM,
         .ram       = {
-            .min  = 1024,
+            .min  = 2048,
             .max  = 131072,
             .step = 1024
         },
@@ -13524,7 +13526,7 @@ const machine_t machines[] = {
             .max_multi   = 2.0
         },
         .bus_flags = MACHINE_PS2_PCI,
-        .flags     = MACHINE_IDE_DUAL | MACHINE_APM | MACHINE_VIDEO,
+        .flags     = MACHINE_IDE_DUAL | MACHINE_APM,
         .ram       = {
             .min  = 4096,
             .max  = 262144,
@@ -14553,7 +14555,7 @@ const machine_t machines[] = {
             .max_multi   = 1.5
         },
         .bus_flags = MACHINE_PS2_PCI,
-        .flags     = MACHINE_IDE_DUAL | MACHINE_APM,
+        .flags     = MACHINE_IDE_DUAL,
         .ram       = {
             .min  = 8192,
             .max  = 131072,
@@ -14926,7 +14928,7 @@ const machine_t machines[] = {
         .vid_device               = &s3_trio64_onboard_pci_device,
         .snd_device               = NULL,
         .net_device               = NULL,
-        .aliases                  = { "AT&T Globalyst 630", "NCR 3248", "NCR3348", "" }
+        .aliases                  = { "AT&T Globalyst 630", "NCR 3248", "NCR 3348", "" }
     },
     /* Has a VIA KBC chip */
     {
@@ -15129,7 +15131,7 @@ const machine_t machines[] = {
         .vid_device               = &s3_trio64vplus_onboard_pci_device,
         .snd_device               = &cs4232_onboard_device,
         .net_device               = NULL,
-        .aliases                  = { "HP Pavilion 7070", "HP Pavilion 7079", "HP Pavilion 71xx (Holly)", "HP Holly", "" }
+        .aliases                  = { "HP Pavilion 7070", "HP Pavilion 7090", "HP Pavilion 71xx (Holly)", "HP Holly", "" }
     },
     {
         .name              = "[i430FX] HP Vectra 500 Series xxx/MT",
@@ -15840,7 +15842,7 @@ const machine_t machines[] = {
             .block       = CPU_BLOCK_NONE,
             .min_bus     = 50000000,
             .max_bus     = 66666667,
-            .min_voltage = 2800,
+            .min_voltage = 3380,
             .max_voltage = 3520,
             .min_multi   = 1.5,
             .max_multi   = 3.0
@@ -15869,6 +15871,54 @@ const machine_t machines[] = {
         .fdc_device               = NULL,
         .vid_device               = &gd5436_onboard_pci_device,
         .snd_device               = &sb_vibra16c_onboard_device,
+        .net_device               = NULL,
+        .aliases                  = { "" }
+    },
+    /* Has the SM(S)C FDC37C932QF Super I/O chip with the AMI '5' MEGAKEY KBC firmware. */
+    {
+        .name              = "[i430HX] Siemens Simatic OP47",
+        .internal_name     = "op47",
+        .type              = MACHINE_TYPE_SOCKET7_3V,
+        .chipset           = MACHINE_CHIPSET_INTEL_430HX,
+        .init              = machine_at_op47_init,
+        .p1_handler        = machine_generic_p1_handler,
+        .gpio_handler      = NULL,
+        .available_flag    = MACHINE_AVAILABLE,
+        .gpio_acpi_handler = NULL,
+        .cpu               = {
+            .package     = CPU_PKG_SOCKET5_7,
+            .block       = CPU_BLOCK_NONE,
+            .min_bus     = 50000000,
+            .max_bus     = 66666667,
+            .min_voltage = 3380,
+            .max_voltage = 3520,
+            .min_multi   = 1.5,
+            .max_multi   = 3.0
+        },
+        .bus_flags = MACHINE_PS2_PCI,
+        .flags     = MACHINE_IDE_DUAL | MACHINE_APM, /* Machine has onboard video: C&T F65548 (not yet implemented) */
+        .ram       = {
+            .min  = 8192,
+            .max  = 65536,
+            .step = 4096
+        },
+        .nvrmask                  = 511,
+        .jumpered_ecp_dma         = 0,
+        .default_jumpered_ecp_dma = -1,
+        .kbc_device               = NULL,
+        .kbc_params               = 0x00000000,
+        .nvr_device               = NULL,
+        .nvr_params               = 0x00000000,
+        .sio_device               = NULL,
+        .sio_params               = 0x00000000,
+        .kbc_p1                   = 0x000044f0,
+        .gpio                     = 0xffffffff,
+        .gpio_acpi                = 0xffffffff,
+        .device                   = NULL,
+        .kbd_device               = NULL,
+        .fdc_device               = NULL,
+        .vid_device               = NULL,
+        .snd_device               = NULL,
         .net_device               = NULL,
         .aliases                  = { "" }
     },
@@ -16790,7 +16840,7 @@ const machine_t machines[] = {
             .max_multi   = 3.5
         },
         .bus_flags = MACHINE_PS2_PCI,
-        .flags     = MACHINE_IDE_DUAL | MACHINE_APM,
+        .flags     = MACHINE_IDE_DUAL,
         .ram       = {
             .min  = 4096,
             .max  = 524288,
@@ -17752,7 +17802,7 @@ const machine_t machines[] = {
         .net_device               = NULL,
         .aliases                  = { "" }
     },
-    /* This has the AMIKey KBC firmware, which is type 'F' (YM430TX is based on the TX97). */
+    /* This has a Holtek HT6542B with AMIKey-2 ('H') KBC firmware. */
     {
         .name              = "[i430TX] ASUS TX97",
         .internal_name     = "tx97",
@@ -17797,6 +17847,54 @@ const machine_t machines[] = {
         .fdc_device               = NULL,
         .vid_device               = NULL,
         .snd_device               = NULL,
+        .net_device               = NULL,
+        .aliases                  = { "" }
+    },
+    /* The has a Holtek HT6542B with AMIKey-2 ('H') KBC firmware. */
+    {
+        .name              = "[i430TX] ASUS TXP4-X",
+        .internal_name     = "txp4x",
+        .type              = MACHINE_TYPE_SOCKET7,
+        .chipset           = MACHINE_CHIPSET_INTEL_430TX,
+        .init              = machine_at_txp4x_init,
+        .p1_handler        = machine_generic_p1_handler,
+        .gpio_handler      = NULL,
+        .available_flag    = MACHINE_AVAILABLE,
+        .gpio_acpi_handler = NULL,
+        .cpu               = {
+            .package     = CPU_PKG_SOCKET5_7,
+            .block       = CPU_BLOCK_NONE,
+            .min_bus     = 50000000,
+            .max_bus     = 66666667,
+            .min_voltage = 2100,
+            .max_voltage = 3520,
+            .min_multi   = 1.5,
+            .max_multi   = 3.5
+        },
+        .bus_flags = MACHINE_PS2_PCI | MACHINE_BUS_USB,
+        .flags     = MACHINE_IDE_DUAL | MACHINE_APM | MACHINE_SOUND | MACHINE_USB,
+        .ram       = {
+            .min  = 4096,
+            .max  = 262144,
+            .step = 4096
+        },
+        .nvrmask                  = 255,
+        .jumpered_ecp_dma         = 0,
+        .default_jumpered_ecp_dma = -1,
+        .kbc_device               = &kbc_at_device,
+        .kbc_params               = KBC_VEN_AMI | 0x00004600,
+        .nvr_device               = NULL,
+        .nvr_params               = 0x00000000,
+        .sio_device               = NULL,
+        .sio_params               = 0x00000000,
+        .kbc_p1                   = 0x00000cf0,
+        .gpio                     = 0xffffffff,
+        .gpio_acpi                = 0xffffffff,
+        .device                   = &txp4x_device,
+        .kbd_device               = NULL,
+        .fdc_device               = NULL,
+        .vid_device               = NULL,
+        .snd_device               = &sb_vibra16cl_onboard_device,
         .net_device               = NULL,
         .aliases                  = { "" }
     },
@@ -18055,8 +18153,7 @@ const machine_t machines[] = {
         .aliases                  = { "Intel Yamamoto", "" }
     },
     /*
-       PhoenixBIOS 4.0 Rel 6.0 for 430TX, has onboard Yamaha YMF701 which
-       is not emulated yet.
+       PhoenixBIOS 4.0 Rel 6.0 for 430TX.
 
        Has a SM(S)C FDC37C935 Super I/O chip with on-chip KBC with Phoenix
        MultiKey/42 (version 1.38) KBC firmware.
@@ -18082,8 +18179,7 @@ const machine_t machines[] = {
             .max_multi   = 3.5
         },
         .bus_flags = MACHINE_PS2_PCI | MACHINE_BUS_USB,
-        /* Machine has internal sound: Yamaha YMF701-S */
-        .flags     = MACHINE_IDE_DUAL | MACHINE_APM | MACHINE_GAMEPORT | MACHINE_USB,
+        .flags     = MACHINE_IDE_DUAL | MACHINE_APM | MACHINE_SOUND | MACHINE_GAMEPORT | MACHINE_USB,
         .ram       = {
             .min  = 8192,
             .max  = 262144,
@@ -18105,7 +18201,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .vid_device               = NULL,
-        .snd_device               = NULL,
+        .snd_device               = &ymf701_device,
         .net_device               = NULL,
         .aliases                  = { "" }
     },
@@ -22474,11 +22570,11 @@ const machine_t machines[] = {
     /* Has the VIA VT82C586B southbridge with on-chip KBC identical to the VIA
        VT82C42N. */
     {
-        .name              = "[VIA Apollo Pro] PC Partner APAS3",
-        .internal_name     = "apas3",
+        .name              = "[VIA Apollo Pro] PC Partner VIM863S",
+        .internal_name     = "vim863s",
         .type              = MACHINE_TYPE_SOCKET370,
         .chipset           = MACHINE_CHIPSET_VIA_APOLLO_PRO,
-        .init              = machine_at_apas3_init,
+        .init              = machine_at_vim863s_init,
         .p1_handler        = machine_generic_p1_handler,
         .gpio_handler      = NULL,
         .available_flag    = MACHINE_AVAILABLE,
@@ -22494,7 +22590,8 @@ const machine_t machines[] = {
             .max_multi   = 8.0
         },
         .bus_flags = MACHINE_PS2_AGP | MACHINE_BUS_USB,
-        .flags     = MACHINE_IDE_DUAL | MACHINE_APM | MACHINE_ACPI | MACHINE_USB, /* Machine has internal video: Creative Vibra 16XV */
+        /* Machine has internal video: Creative Vibra 16XV */
+        .flags     = MACHINE_IDE_DUAL | MACHINE_APM | MACHINE_ACPI | MACHINE_USB | MACHINE_SOUND,
         .ram       = {
             .min  = 8192,
             .max  = 786432,
@@ -22516,7 +22613,7 @@ const machine_t machines[] = {
         .kbd_device               = NULL,
         .fdc_device               = NULL,
         .vid_device               = NULL,
-        .snd_device               = NULL,
+        .snd_device               = &sb_vibra16xv_onboard_device,
         .net_device               = NULL,
         .aliases                  = { "" }
     },

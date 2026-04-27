@@ -68,7 +68,6 @@
 #include <86box/fdc_ext.h>
 #include <86box/gameport.h>
 #include <86box/keyboard.h>
-#include <86box/serial_passthrough.h>
 #include <86box/machine.h>
 #include <86box/mouse.h>
 #include <86box/thread.h>
@@ -123,11 +122,98 @@ config_log(const char *fmt, ...)
 #    define config_log(fmt, ...)
 #endif
 
+int new_loaded = 0;
+int kb_loaded  = 0;
+
 /* Load global configuration */
 static void
-load_global(void)
+load_global_emulator(void)
+{
+    ini_section_t cat = ini_find_section(global, "Emulator");
+    new_loaded |= (cat != NULL);
+
+    char         *p;
+
+    p = ini_section_get_string(cat, "language", NULL);
+    if (p != NULL)
+        lang_id = plat_language_code(p);
+    else
+        lang_id = plat_language_code(DEFAULT_LANGUAGE);
+
+    open_dir_usr_path = ini_section_get_int(cat, "open_dir_usr_path", 0);
+
+    confirm_reset = ini_section_get_int(cat, "confirm_reset", 1);
+    confirm_exit  = ini_section_get_int(cat, "confirm_exit", 1);
+    confirm_save  = ini_section_get_int(cat, "confirm_save", 1);
+    color_scheme  = ini_section_get_int(cat, "color_scheme", 0);
+
+    vmm_disabled = ini_section_get_int(cat, "vmm_disabled", 0);
+
+    p = ini_section_get_string(cat, "vmm_path", NULL);
+    if (p != NULL) {
+        /* Convert relative paths to absolute in portable mode */
+        if (portable_mode && !path_abs(p)) {
+            path_append_filename(vmm_path_cfg, exe_path, p);
+            path_normalize(vmm_path_cfg);
+        } else {
+            strncpy(vmm_path_cfg, p, sizeof(vmm_path_cfg) - 1);
+        }
+    } else {
+        plat_get_vmm_dir(vmm_path_cfg, sizeof(vmm_path_cfg));
+    }
+}
+
+static void
+load_global_input(void)
+{
+    ini_section_t cat = ini_find_section(global, "Input");
+    new_loaded |= (cat != NULL);
+
+    inhibit_multimedia_keys = ini_section_get_int(cat, "inhibit_multimedia_keys", 0);
+
+    mouse_sensitivity = ini_section_get_double(cat, "mouse_sensitivity", 1.0);
+    if (mouse_sensitivity < 0.1)
+        mouse_sensitivity = 0.1;
+    else if (mouse_sensitivity > 2.0)
+        mouse_sensitivity = 2.0;
+}
+
+/* Load "Keybinds" section. */
+static void
+load_global_keybinds(void)
+{
+    ini_section_t cat = ini_find_section(global, "Keybinds");
+    kb_loaded |= (cat != NULL);
+    char         *p;
+    char          temp[512];
+    memset(temp, 0, sizeof(temp));
+
+    /* Now load values from config */
+    for (int x = 0; x < NUM_ACCELS; x++) {
+        p = ini_section_get_string(cat, acc_keys[x].name, "default");
+        /* Check if the binding was marked as cleared */
+        if (strcmp(p, "none") == 0)
+            acc_keys[x].seq[0] = '\0';
+        /* If there's no binding in the file, leave it alone. */
+        else if (strcmp(p, "default") != 0) {
+            /*
+               It would be ideal to validate whether the user entered a
+               valid combo at this point, but the Qt method for testing that is
+               not available from C. Fortunately, if you feed Qt an invalid
+               keysequence string it just assigns nothing, so this won't blow up.
+               However, to improve the user experience, we should validate keys
+               and erase any bad combos from config on mainwindow load.
+             */
+            strcpy(acc_keys[x].seq, p);
+        }
+    }
+}
+
+static void
+load_global_legacy(void)
 {
     ini_section_t cat = ini_find_section(global, "");
+
     char         *p;
 
     p = ini_section_get_string(cat, "language", NULL);
@@ -165,6 +251,21 @@ load_global(void)
     } else {
         plat_get_vmm_dir(vmm_path_cfg, sizeof(vmm_path_cfg));
     }
+}
+
+static void
+load_global(void)
+{
+    new_loaded = 0;
+    kb_loaded  = 0;
+
+    load_global_emulator();
+    load_global_input();
+
+    load_global_keybinds();            /* Load shortcut keybinds */
+
+    if (!new_loaded)
+        load_global_legacy();
 }
 
 /* Load scan code mappings. */
@@ -352,6 +453,7 @@ load_machine(void)
         { .old = "dellvenus", .new = "vs440fx", .new_bios = "dellvenus" },
         { .old = "gw2kvenus", .new = "vs440fx", .new_bios = "gw2kvenus" },
         { .old = "lgibmx7g", .new = "ms6119", .new_bios = "lgibmx7g" },
+        { .old = "apas3", .new = "vim863s", .new_bios = NULL },
         { 0 }
     };
 
@@ -559,7 +661,7 @@ load_video(void)
                 if (old != NULL) {
                     ini_section_delete_var(old, "bios_ver");
                     ini_section_delete_var(old, "memory");
-                    ini_delete_section_if_empty(config, "Tseng Labs ET4000AX (TC6058AF) (ISA)");
+                    ini_delete_section_if_empty(config, old);
                 }
             } else if (!strcmp(p, "tgkorvga") || !strcmp(p, "et4000k_tg286_isa") || !strcmp(p, "kasan16vga")) {
                 gfxcard[0] = video_get_video_from_internal_name("et4000ax");
@@ -579,14 +681,14 @@ load_video(void)
                 ini_section_set_int(new, "memory", mem);
                 if (old != NULL) {
                     ini_section_delete_var(old, "memory");
-                    ini_delete_section_if_empty(config, on);
+                    ini_delete_section_if_empty(config, old);
                 }
             } else {
                 gfxcard[0] = video_get_video_from_internal_name(p);
                 if (!strcmp(p, "et4000ax")) {
                     ini_section_t new  = ini_find_section(config, "Tseng Labs ET4000AX (ISA)");
                     char *        bios = ini_section_get_string(new, "bios_ver", "v8_01");
-                    if (strcmp(p, "v8_01"))
+                    if (strcmp(bios, "v8_01"))
                         ini_section_set_string(new, "bios", bios);
                     ini_section_delete_var(new, "bios_ver");
                 }
@@ -852,6 +954,10 @@ load_sound(void)
     } else {
         fm_driver = FM_DRV_NUKED;
     }
+
+    p = ini_section_get_string(cat, "sound_output_device", "");
+    strncpy(sound_output_device, p, sizeof(sound_output_device) - 1);
+    sound_output_device[sizeof(sound_output_device) - 1] = '\0';
 }
 
 /* Load "Network" section. */
@@ -1027,11 +1133,60 @@ load_ports(void)
         sprintf(temp, "serial%d_enabled", c + 1);
         com_ports[c].enabled = !!ini_section_get_int(cat, temp, (c >= 2) ? 0 : 1);
 
+        /* Get old serial passthrough enable. */
         sprintf(temp, "serial%d_passthrough_enabled", c + 1);
-        serial_passthrough_enabled[c] = !!ini_section_get_int(cat, temp, 0);
+        int old_enable = ini_section_get_int(cat, temp, 0);
+        ini_section_delete_var(cat, temp);
 
-        if (serial_passthrough_enabled[c])
-            config_log("Serial Port %d: passthrough enabled.\n\n", c + 1);
+        /* Migrate serial passthrough device settings. */
+        sprintf(temp, "Serial Passthrough Device #%i", c + 1);
+        ini_section_t cat2 = ini_find_section(config, temp);
+        if (!cat2) {
+            sprintf(temp, "Serial Passthrough #%i", c + 1); /* as of 8699 */
+            cat2 = ini_find_section(config, temp);
+        }
+        int old_mode = ini_section_get_int(cat2, "mode", -1);
+        if (old_mode >= 3) { /* passthrough (4 on v5.3 Windows, 3 otherwise) */
+            sprintf(temp, "Serial Passthrough (COM) #%i", c + 1);
+            ini_rename_section(cat2, temp);
+            ini_section_delete_var(cat2, "mode");
+            p = ini_section_get_string(cat2, "host_serial_path", "");
+            if (p[0])
+                ini_section_set_string(cat2, "path", p);
+            p = "serial_passthrough";
+        } else { /* pipe/pty */
+#ifdef _WIN32
+            sprintf(temp, "Named Pipe (COM) #%i", c + 1);
+            ini_rename_section(cat2, temp);
+            if (old_enable || (old_mode >= 0) || cat2)
+                ini_set_int(config, temp, "mode", (old_mode == 1) ? CHAR_PIPE_MODE_CLIENT : CHAR_PIPE_MODE_SERVER);
+            p = ini_section_get_string(cat2, "named_pipe", (old_enable || (old_mode >= 0) || cat2) ? "\\\\.\\pipe\\86Box\\test" : ""); /* use old default path if there's any evidence of passthrough having been enabled */
+            if (p[0])
+                ini_set_string(config, temp, "path", p); /* create section if not present */
+            p = "pipe";
+#else
+            sprintf(temp, "Virtual Console (COM) #%i", c + 1);
+            ini_rename_section(cat2, temp);
+            if (old_enable || (old_mode >= 0) || cat2)
+                ini_set_int(config, temp, "mode", CHAR_STDIO_MODE_PTY);
+            p = "stdio";
+#endif
+        }
+
+        /* Clean up old serial passthrough device settings. */
+        ini_section_delete_var(cat2, "host_serial_path");
+        ini_section_delete_var(cat2, "named_pipe");
+        ini_section_delete_var(cat2, "data_bits");
+        ini_section_delete_var(cat2, "stop_bits");
+        ini_section_delete_var(cat2, "baudrate");
+
+        /* Migrate old serial passthrough enable. */
+        sprintf(temp, "serial%d_device", c + 1);
+        if (old_enable)
+            ini_section_set_string(cat, temp, p);
+        else
+            p = ini_section_get_string(cat, temp, "none");
+        com_ports[c].device = char_get_from_internal_name(p, DEVICE_COM);
     }
 
     for (int c = 0; c < PARALLEL_MAX; c++) {
@@ -1040,7 +1195,7 @@ load_ports(void)
 
         sprintf(temp, "lpt%d_device", c + 1);
         p                    = ini_section_get_string(cat, temp, "none");
-        lpt_ports[c].device  = lpt_device_get_from_internal_name(p);
+        lpt_ports[c].device  = char_get_from_internal_name(!strcmp(p, "lpt_loopback") ? "loopback" : p, DEVICE_LPT);
     }
 
 #if 0
@@ -2400,7 +2555,11 @@ load_keybinds(void)
               */
              strcpy(acc_keys[x].seq, p);
         }
+
+        ini_section_delete_var(cat, acc_keys[x].name);
     }
+
+    ini_delete_section_if_empty(config, cat);
 }
 
 void
@@ -2529,7 +2688,8 @@ config_load(void)
 #ifndef USE_SDL_UI
         load_gl3_shaders();             /* GL3 Shaders */
 #endif
-        load_keybinds();                /* Load shortcut keybinds */
+        if (!kb_loaded)
+            load_keybinds();            /* Load shortcut keybinds */
 
         /* Migrate renamed device configurations. */
         c = ini_find_section(config, "MDA");
@@ -2557,11 +2717,10 @@ config_load(void)
     video_copy = (video_grayscale || invert_display) ? video_transform_copy : memcpy;
 }
 
-/* Save global configuration */
 static void
-save_global(void)
+save_global_emulator(void)
 {
-    ini_section_t cat = ini_find_or_create_section(global, "");
+    ini_section_t cat = ini_find_or_create_section(global, "Emulator");
     char          buffer[512] = { 0 };
 
     if (lang_id == plat_language_code(DEFAULT_LANGUAGE))
@@ -2596,16 +2755,6 @@ save_global(void)
     else
         ini_section_delete_var(cat, "confirm_save");
 
-    if (inhibit_multimedia_keys == 1)
-        ini_section_set_int(cat, "inhibit_multimedia_keys", inhibit_multimedia_keys);
-    else
-        ini_section_delete_var(cat, "inhibit_multimedia_keys");
-
-    if (mouse_sensitivity != 1.0)
-        ini_section_set_double(cat, "mouse_sensitivity", mouse_sensitivity);
-    else
-        ini_section_delete_var(cat, "mouse_sensitivity");
-
     if (vmm_disabled != 0)
         ini_section_set_int(cat, "vmm_disabled", vmm_disabled);
     else
@@ -2621,6 +2770,56 @@ save_global(void)
     } else {
         ini_section_delete_var(cat, "vmm_path");
     }
+
+    ini_delete_section_if_empty(global, cat);
+}
+
+static void
+save_global_input(void)
+{
+    ini_section_t cat = ini_find_or_create_section(global, "Input");
+
+    if (inhibit_multimedia_keys == 1)
+        ini_section_set_int(cat, "inhibit_multimedia_keys", inhibit_multimedia_keys);
+    else
+        ini_section_delete_var(cat, "inhibit_multimedia_keys");
+
+    if (mouse_sensitivity != 1.0)
+        ini_section_set_double(cat, "mouse_sensitivity", mouse_sensitivity);
+    else
+        ini_section_delete_var(cat, "mouse_sensitivity");
+
+    ini_delete_section_if_empty(global, cat);
+}
+
+/* Save "Keybinds" section. */
+static void
+save_global_keybinds(void)
+{
+    ini_section_t cat = ini_find_or_create_section(global, "Keybinds");
+
+    for (int x = 0; x < NUM_ACCELS; x++) {
+        /* Has accelerator been changed from default? */
+        if (strcmp(def_acc_keys[x].seq, acc_keys[x].seq) == 0)
+            ini_section_delete_var(cat, acc_keys[x].name);
+        /* Check for a cleared binding to avoid saving it as an empty string */
+        else if (acc_keys[x].seq[0] == '\0')
+            ini_section_set_string(cat, acc_keys[x].name, "none");
+        else
+            ini_section_set_string(cat, acc_keys[x].name, acc_keys[x].seq);
+    }
+
+    ini_delete_section_if_empty(global, cat);
+}
+
+/* Save global configuration */
+static void
+save_global(void)
+{
+    save_global_emulator();
+    save_global_input();
+
+    save_global_keybinds();
 }
 
 /* Save scan code mappings. */
@@ -3146,6 +3345,11 @@ save_sound(void)
     else
         ini_section_set_string(cat, "fm_driver", "ymfm");
 
+    if (sound_output_device[0] == '\0')
+        ini_section_delete_var(cat, "sound_output_device");
+    else
+        ini_section_set_string(cat, "sound_output_device", sound_output_device);
+
     ini_delete_section_if_empty(config, cat);
 }
 
@@ -3269,11 +3473,11 @@ save_ports(void)
         else
             ini_section_set_int(cat, temp, com_ports[c].enabled);
 
-        sprintf(temp, "serial%d_passthrough_enabled", c + 1);
-        if (serial_passthrough_enabled[c])
-            ini_section_set_int(cat, temp, 1);
-        else
+        sprintf(temp, "serial%d_device", c + 1);
+        if (com_ports[c].device == 0)
             ini_section_delete_var(cat, temp);
+        else
+            ini_section_set_string(cat, temp, char_get_device(com_ports[c].device)->internal_name);
     }
 
     for (int c = 0; c < PARALLEL_MAX; c++) {
@@ -3288,7 +3492,7 @@ save_ports(void)
         if (lpt_ports[c].device == 0)
             ini_section_delete_var(cat, temp);
         else
-            ini_section_set_string(cat, temp, lpt_device_get_internal_name(lpt_ports[c].device));
+            ini_section_set_string(cat, temp, char_get_device(lpt_ports[c].device)->internal_name);
     }
 
 #if 0
@@ -3318,26 +3522,6 @@ save_ports(void)
                                    gameport_get_internal_name(gameport_type[c]));
     }
 #endif
-
-    ini_delete_section_if_empty(config, cat);
-}
-
-/* Save "Keybinds" section. */
-static void
-save_keybinds(void)
-{
-    ini_section_t cat = ini_find_or_create_section(config, "Keybinds");
-
-    for (int x = 0; x < NUM_ACCELS; x++) {
-        /* Has accelerator been changed from default? */
-        if (strcmp(def_acc_keys[x].seq, acc_keys[x].seq) == 0)
-            ini_section_delete_var(cat, acc_keys[x].name);
-        /* Check for a cleared binding to avoid saving it as an empty string */
-        else if (acc_keys[x].seq[0] == '\0')
-            ini_section_set_string(cat, acc_keys[x].name, "none");
-        else
-            ini_section_set_string(cat, acc_keys[x].name, acc_keys[x].seq);
-    }
 
     ini_delete_section_if_empty(config, cat);
 }
@@ -4098,7 +4282,6 @@ config_save(void)
 #ifndef USE_SDL_UI
     save_gl3_shaders();             /* GL3 Shaders */
 #endif
-    save_keybinds();                /* Key bindings */
 
     ini_write(config, cfg_path);
 

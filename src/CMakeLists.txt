@@ -34,6 +34,7 @@ add_executable(86Box
     dma.c
     ddma.c
     nmi.c
+    pci_dummy.c
     pic.c
     pit.c
     pit_fast.c
@@ -119,6 +120,7 @@ endif()
 
 target_link_libraries(86Box
     cpu
+    char
     chipset
     mch
     dev
@@ -198,6 +200,7 @@ else()
 endif()
 
 add_subdirectory(cdrom)
+add_subdirectory(char)
 add_subdirectory(chipset)
 
 add_subdirectory(cpu)

@@ -208,6 +208,14 @@ device_set_context(device_context_t *ctx, const device_t *dev, int inst)
         { .old = "IBM PS/2 ESDI Fixed Disk Adapter (MCA)", .new = "IBM ESDI Fixed Disk Adapter" },
         { .old = "IBM Integrated Fixed Disk and Controller (MCA)", .new = "IBM Integrated Fixed Disk" },
         { .old = "IBM PS/2 ST506 Fixed Disk Adapter (MCA)", .new = "IBM ST506 Fixed Disk Adapter" },
+        { .old = "Cirrus Logic GD5401 (ISA) (ACUMOS AVGA1)", .new = "Cirrus Logic GD5401 (ISA)" },
+        { .old = "Cirrus Logic GD5401 (ISA) (ACUMOS AVGA1) (On-Board)", .new = "Cirrus Logic GD5401 (ISA) (On-Board)" },
+        { .old = "Cirrus Logic GD5402 (ISA) (ACUMOS AVGA2)", .new = "Cirrus Logic GD5402 (ISA)" },
+        { .old = "Cirrus Logic GD5402 (ISA) (ACUMOS AVGA2) (On-Board)", .new = "Cirrus Logic GD5402 (ISA) (On-Board)" },
+        { .old = "Cirrus Logic GD5402 (ISA) (ACUMOS AVGA2) (On-Board) (Commodore)", .new = "Cirrus Logic GD5402 (ISA) (On-Board) (Commodore)" },
+        { .old = "Cirrus Logic GD5428 (MCA) (IBM SVGA Adapter/A)", .new = "Cirrus Logic GD5428 (MCA)" },
+        { .old = "Cirrus Logic GD5426 (MCA) (Reply Video Adapter)", .new = "Cirrus Logic GD5426 (MCA)" },
+        { .old = "3dfx Voodoo3 2000 (On-Board 8MB SGRAM)", .new = "3dfx Voodoo3 2000 (On-Board)" },
         { 0 }
     };
 
@@ -387,6 +395,15 @@ device_get_alias(const device_t *dev)
         return "";
 
     return dev->alias;
+}
+
+const char *
+device_get_machine(const device_t *dev)
+{
+    if (dev == NULL)
+        return NULL;
+
+    return dev->machine;
 }
 
 void *
@@ -731,11 +748,6 @@ device_get_name(const device_t *dev, int bus, char *name)
             /* Then change string from ISA16 to ISA if applicable. */
             if (!strcmp(sbus, "ISA16"))
                 sbus = "ISA";
-            else if (!strcmp(sbus, "COM")) {
-                sbus = NULL;
-                strcat(name, dev->name);
-                return;
-            }
 
             /* Generate the bus string with parentheses. */
             strcat(pbus, "(");
@@ -922,6 +934,23 @@ device_get_config_mac(const char *str, int def)
     }
 
     return def;
+}
+
+void
+device_set_config_string(const char *str, const char *val)
+{
+    if (device_current.dev != NULL) {
+        const device_config_t *cfg = device_current.dev->config;
+
+        while ((cfg != NULL) && (cfg->type != CONFIG_END)) {
+            if (!strcmp(str, cfg->name)) {
+                config_set_string((char *) device_current.name, (char *) str, val);
+                break;
+            }
+
+            cfg++;
+        }
+    }
 }
 
 void

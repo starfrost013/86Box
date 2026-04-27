@@ -123,125 +123,125 @@ CLAMP(int16_t in, int16_t min, int16_t max)
 #define READ_HIGH(addr, dat)                            \
     dat |= (dev->vram[(addr) & (dev->vram_mask)] << 8);
 
-#define MIX(mixmode, dest_dat, src_dat)                                                               \
-    {                                                                                                 \
-        switch ((mixmode) ? dev->accel.frgd_mix : dev->accel.bkgd_mix) {                              \
-            case 0x00:                                                                                \
-                dest_dat = ~dest_dat;                                                                 \
-                break;                                                                                \
-            case 0x01:                                                                                \
-                dest_dat = 0;                                                                         \
-                break;                                                                                \
-            case 0x02:                                                                                \
-                dest_dat = ~0;                                                                        \
-                break;                                                                                \
-            case 0x03:                                                                                \
-                dest_dat = dest_dat;                                                                  \
-                break;                                                                                \
-            case 0x04:                                                                                \
-                dest_dat = ~src_dat;                                                                  \
-                break;                                                                                \
-            case 0x05:                                                                                \
-                dest_dat = src_dat ^ dest_dat;                                                        \
-                break;                                                                                \
-            case 0x06:                                                                                \
-                dest_dat = ~(src_dat ^ dest_dat);                                                     \
-                break;                                                                                \
-            case 0x07:                                                                                \
-                dest_dat = src_dat;                                                                   \
-                break;                                                                                \
-            case 0x08:                                                                                \
-                dest_dat = ~(src_dat & dest_dat);                                                     \
-                break;                                                                                \
-            case 0x09:                                                                                \
-                dest_dat = ~src_dat | dest_dat;                                                       \
-                break;                                                                                \
-            case 0x0a:                                                                                \
-                dest_dat = src_dat | ~dest_dat;                                                       \
-                break;                                                                                \
-            case 0x0b:                                                                                \
-                dest_dat = src_dat | dest_dat;                                                        \
-                break;                                                                                \
-            case 0x0c:                                                                                \
-                dest_dat = src_dat & dest_dat;                                                        \
-                break;                                                                                \
-            case 0x0d:                                                                                \
-                dest_dat = src_dat & ~dest_dat;                                                       \
-                break;                                                                                \
-            case 0x0e:                                                                                \
-                dest_dat = ~src_dat & dest_dat;                                                       \
-                break;                                                                                \
-            case 0x0f:                                                                                \
-                dest_dat = ~(src_dat | dest_dat);                                                     \
-                break;                                                                                \
-            case 0x10:                                                                                \
-                dest_dat = MIN(src_dat, dest_dat);                                                    \
-                break;                                                                                \
-            case 0x11: \
-                if (dev->bpp) \
-                    dest_dat = SATURATE_W(dest_dat - src_dat); \
-                else \
-                    dest_dat = SATURATE_B(dest_dat - src_dat); \
-                break; \
-            case 0x12: \
-                if (dev->bpp) \
-                    dest_dat = SATURATE_W(src_dat - dest_dat); \
-                else \
-                    dest_dat = SATURATE_B(src_dat - dest_dat); \
-                break; \
-            case 0x13: \
-                if (dev->bpp) \
-                    dest_dat = SATURATE_W(dest_dat + src_dat); \
-                else \
-                    dest_dat = SATURATE_B(dest_dat + src_dat); \
-                break;                                                                                \
-            case 0x14:                                                                                \
-                dest_dat = MAX(src_dat, dest_dat);                                                    \
-                break;                                                                                \
-            case 0x15:                                                                                \
-                dest_dat = (src_dat | ~dest_dat) >> 1;                                                \
-                break;                                                                                \
-            case 0x16:                                                                                \
-                dest_dat = (~src_dat | dest_dat) >> 1;                                                \
-                break;                                                                                \
-            case 0x17:                                                                                \
-                dest_dat = (src_dat | dest_dat) >> 1;                                                 \
-                break;                                                                                \
-            case 0x18:                                                                                \
-            case 0x19:                                                                                \
-                dest_dat = MAX(0, ~src_dat | dest_dat);                                               \
-                break;                                                                                \
-            case 0x1a:                                                                                \
-                dest_dat = MAX(0, src_dat | ~dest_dat);                                               \
-                break;                                                                                \
-            case 0x1b:                                                                                \
-                if (dev->bpp)                                                                         \
-                    dest_dat = MIN(0xffff, src_dat | dest_dat);                                       \
-                else                                                                                  \
-                    dest_dat = MIN(0xff, src_dat | dest_dat);                                         \
-                break;                                                                                \
-            case 0x1c:                                                                                \
-            case 0x1d:                                                                                \
-                dest_dat = MAX(0, ~src_dat | dest_dat) >> 1;                                          \
-                break;                                                                                \
-            case 0x1e:                                                                                \
-                dest_dat = MAX(0, src_dat | ~dest_dat) >> 1;                                          \
-                break;                                                                                \
-            case 0x1f:                                                                                \
-                if (dev->bpp)                                                                         \
+#define MIX(mixmode, dest_dat, src_dat)                                                                \
+    {                                                                                                  \
+        switch ((mixmode) ? dev->accel.frgd_mix : dev->accel.bkgd_mix) {                               \
+            case 0x00:                                                                                 \
+                dest_dat = ~dest_dat;                                                                  \
+                break;                                                                                 \
+            case 0x01:                                                                                 \
+                dest_dat = 0;                                                                          \
+                break;                                                                                 \
+            case 0x02:                                                                                 \
+                dest_dat = ~0;                                                                         \
+                break;                                                                                 \
+            case 0x03:                                                                                 \
+                dest_dat = dest_dat;                                                                   \
+                break;                                                                                 \
+            case 0x04:                                                                                 \
+                dest_dat = ~src_dat;                                                                   \
+                break;                                                                                 \
+            case 0x05:                                                                                 \
+                dest_dat = src_dat ^ dest_dat;                                                         \
+                break;                                                                                 \
+            case 0x06:                                                                                 \
+                dest_dat = ~(src_dat ^ dest_dat);                                                      \
+                break;                                                                                 \
+            case 0x07:                                                                                 \
+                dest_dat = src_dat;                                                                    \
+                break;                                                                                 \
+            case 0x08:                                                                                 \
+                dest_dat = ~(src_dat & dest_dat);                                                      \
+                break;                                                                                 \
+            case 0x09:                                                                                 \
+                dest_dat = ~src_dat | dest_dat;                                                        \
+                break;                                                                                 \
+            case 0x0a:                                                                                 \
+                dest_dat = src_dat | ~dest_dat;                                                        \
+                break;                                                                                 \
+            case 0x0b:                                                                                 \
+                dest_dat = src_dat | dest_dat;                                                         \
+                break;                                                                                 \
+            case 0x0c:                                                                                 \
+                dest_dat = src_dat & dest_dat;                                                         \
+                break;                                                                                 \
+            case 0x0d:                                                                                 \
+                dest_dat = src_dat & ~dest_dat;                                                        \
+                break;                                                                                 \
+            case 0x0e:                                                                                 \
+                dest_dat = ~src_dat & dest_dat;                                                        \
+                break;                                                                                 \
+            case 0x0f:                                                                                 \
+                dest_dat = ~(src_dat | dest_dat);                                                      \
+                break;                                                                                 \
+            case 0x10:                                                                                 \
+                dest_dat = MIN(src_dat, dest_dat);                                                     \
+                break;                                                                                 \
+            case 0x11:                                                                                 \
+                if (dev->bpp)                                                                          \
+                    dest_dat = SATURATE_W(dest_dat - src_dat);                                         \
+                else                                                                                   \
+                    dest_dat = SATURATE_B(dest_dat - src_dat);                                         \
+                break;                                                                                 \
+            case 0x12:                                                                                 \
+                if (dev->bpp)                                                                          \
+                    dest_dat = SATURATE_W(src_dat - dest_dat);                                         \
+                else                                                                                   \
+                    dest_dat = SATURATE_B(src_dat - dest_dat);                                         \
+                break;                                                                                 \
+            case 0x13:                                                                                 \
+                if (dev->bpp)                                                                          \
+                    dest_dat = SATURATE_W(dest_dat + src_dat);                                         \
+                else                                                                                   \
+                    dest_dat = SATURATE_B(dest_dat + src_dat);                                         \
+                break;                                                                                 \
+            case 0x14:                                                                                 \
+                dest_dat = MAX(src_dat, dest_dat);                                                     \
+                break;                                                                                 \
+            case 0x15:                                                                                 \
+                dest_dat = (src_dat | ~dest_dat) >> 1;                                                 \
+                break;                                                                                 \
+            case 0x16:                                                                                 \
+                dest_dat = (~src_dat | dest_dat) >> 1;                                                 \
+                break;                                                                                 \
+            case 0x17:                                                                                 \
+                dest_dat = (src_dat | dest_dat) >> 1;                                                  \
+                break;                                                                                 \
+            case 0x18:                                                                                 \
+            case 0x19:                                                                                 \
+                dest_dat = MAX(0, ~src_dat | dest_dat);                                                \
+                break;                                                                                 \
+            case 0x1a:                                                                                 \
+                dest_dat = MAX(0, src_dat | ~dest_dat);                                                \
+                break;                                                                                 \
+            case 0x1b:                                                                                 \
+                if (dev->bpp)                                                                          \
+                    dest_dat = MIN(0xffff, src_dat | dest_dat);                                        \
+                else                                                                                   \
+                    dest_dat = MIN(0xff, src_dat | dest_dat);                                          \
+                break;                                                                                 \
+            case 0x1c:                                                                                 \
+            case 0x1d:                                                                                 \
+                dest_dat = MAX(0, ~src_dat | dest_dat) >> 1;                                           \
+                break;                                                                                 \
+            case 0x1e:                                                                                 \
+                dest_dat = MAX(0, src_dat | ~dest_dat) >> 1;                                           \
+                break;                                                                                 \
+            case 0x1f:                                                                                 \
+                if (dev->bpp)                                                                          \
                     dest_dat = (0xffff < (src_dat | dest_dat)) ? 0xffff : ((src_dat | dest_dat) >> 1); \
-                else                                                                                  \
-                    dest_dat = (0xff < (src_dat | dest_dat)) ? 0xff : ((src_dat | dest_dat) >> 1);    \
-                break;                                                                                \
-        }                                                                                             \
+                else                                                                                   \
+                    dest_dat = (0xff < (src_dat | dest_dat)) ? 0xff : ((src_dat | dest_dat) >> 1);     \
+                break;                                                                                 \
+        }                                                                                              \
     }
 
-#define WRITE(addr, dat)                                                               \
-    if (dev->bpp) {                                                                    \
-        vram_w[((addr)) & (dev->vram_mask >> 1)]                    = dat;             \
+#define WRITE(addr, dat)                                                                                  \
+    if (dev->bpp) {                                                                                       \
+        vram_w[((addr)) & (dev->vram_mask >> 1)]                   = dat;                                 \
         dev->changedvram[(((addr)) & (dev->vram_mask >> 1)) >> 11] = svga->monitor->mon_changeframecount; \
-    } else {                                                                           \
-        dev->vram[((addr)) & (dev->vram_mask)]                = dat;                   \
+    } else {                                                                                              \
+        dev->vram[((addr)) & (dev->vram_mask)]                = dat;                                      \
         dev->changedvram[(((addr)) & (dev->vram_mask)) >> 12] = svga->monitor->mon_changeframecount;      \
     }
 
@@ -307,7 +307,7 @@ ibm8514_accel_out_pixtrans(svga_t *svga, UNUSED(uint16_t port), uint32_t val, in
                                 val = (val >> 8) | (val << 8);
                         }
                         if ((cmd <= 2) || (cmd == 4) || (cmd == 6)) {
-                            if (dev->accel.cmd & 0x08) {
+                            if ((dev->accel.cmd & 0x08) && (pixcnt == 8)) {
                                 if (val & 0x02)
                                     nibble |= 0x08;
                                 if (val & 0x04)
@@ -351,7 +351,7 @@ ibm8514_accel_out_pixtrans(svga_t *svga, UNUSED(uint16_t port), uint32_t val, in
             } else
                 pixelxfer = val;
 
-            if (dev->accel.input)
+            if (dev->accel.input || dev->accel.input3 || dev->accel.output3)
                 ibm8514_accel_start(pixcnt >> 1, 1, monoxfer & 0xff, pixelxfer & 0xff, svga, len);
             else
                 ibm8514_accel_start(pixcnt, 1, monoxfer & 0xffff, pixelxfer & 0xffff, svga, len);
@@ -616,7 +616,12 @@ ibm8514_accel_out_fifo(svga_t *svga, uint16_t port, uint32_t val, int len)
                     else {
                         if (ibm8514_cpu_dest(svga))
                             break;
-                        ibm8514_accel_out_pixtrans(svga, port, val, len);
+
+                        if (dev->accel.output3) {
+                            ibm8514_accel_out_pixtrans(svga, port, val & 0xff, len);
+                            ibm8514_accel_out_pixtrans(svga, port, (val >> 8) & 0xff, len);
+                        } else
+                            ibm8514_accel_out_pixtrans(svga, port, val, len);
                     }
                 }
             } else {
@@ -634,7 +639,12 @@ ibm8514_accel_out_fifo(svga_t *svga, uint16_t port, uint32_t val, int len)
                     else {
                         if (ibm8514_cpu_dest(svga))
                             break;
-                        ibm8514_accel_out_pixtrans(svga, port, val, len);
+
+                        if (dev->accel.output3) {
+                            ibm8514_accel_out_pixtrans(svga, port, val & 0xff, len);
+                            ibm8514_accel_out_pixtrans(svga, port, (val >> 8) & 0xff, len);
+                        } else
+                            ibm8514_accel_out_pixtrans(svga, port, val, len);
                     }
                 }
             } else {
@@ -917,7 +927,7 @@ ibm8514_accel_in_fifo(svga_t *svga, uint16_t port, int len)
                 if (len == 2) {
                     cmd = (dev->accel.cmd >> 13);
                     READ_PIXTRANS_WORD(dev->accel.cx, 0);
-                    if (dev->accel.input) {
+                    if (dev->accel.input || dev->accel.input3) {
                         ibm8514_accel_out_pixtrans(svga, port, temp & 0xff, len);
                         if (dev->accel.odd_in) { /*WORDs on odd destination scan lengths.*/
                             dev->accel.odd_in = 0;
@@ -1508,7 +1518,6 @@ ibm8514_accel_start(int count, int cpu_input, uint32_t mix_dat, uint32_t cpu_dat
 
         case 1: /*Draw line*/
             if (!cpu_input) {
-                dev->accel.output = 0;
                 dev->accel.x_count = 0;
 
                 dev->accel.cx = dev->accel.cur_x;
@@ -1531,7 +1540,6 @@ ibm8514_accel_start(int count, int cpu_input, uint32_t mix_dat, uint32_t cpu_dat
                             if (dev->accel.cmd & 0x08) {
                                 if (and3) {
                                     dev->accel.sy += and3;
-                                    dev->accel.output = 1;
                                     switch (dev->accel.cmd & 0xe0) {
                                         case 0x00:
                                             dev->accel.cx -= and3;
@@ -2032,8 +2040,10 @@ ibm8514_accel_start(int count, int cpu_input, uint32_t mix_dat, uint32_t cpu_dat
                 dev->accel.x_count = 0;
                 dev->accel.output = 0;
                 dev->accel.output2 = 0;
+                dev->accel.output3 = 0;
                 dev->accel.input = 0;
                 dev->accel.input2 = 0;
+                dev->accel.input3 = 0;
                 dev->accel.odd_in = 0;
 
                 dev->accel.cx = dev->accel.cur_x;
@@ -2102,10 +2112,15 @@ ibm8514_accel_start(int count, int cpu_input, uint32_t mix_dat, uint32_t cpu_dat
                     } else {
                         if (dev->accel.cmd & 0x1000) {
                             if (dev->accel.cmd & 0x200) {
-                                if (dev->accel.cmd & 0x04) {
-                                    dev->accel.output = 1;
-                                    dev->accel.sx -= 2;
+                                if (dev->accel.cmd & 0x40) {
+                                    dev->accel.output3 = 1;
+                                } else {
+                                    if (dev->accel.cmd & 0x04) {
+                                        dev->accel.output = 1;
+                                        dev->accel.sx -= 2;
+                                    }
                                 }
+
                             }
                         }
                     }
@@ -2118,12 +2133,17 @@ ibm8514_accel_start(int count, int cpu_input, uint32_t mix_dat, uint32_t cpu_dat
                     if (!(dev->accel.cmd & 0x02)) {
                         if (dev->accel.cmd & 0x1000) {
                             if (dev->accel.cmd & 0x200) {
-                                if (!(dev->accel.sx & 1) && !(dev->accel.cmd & 0x04)) {
-                                    dev->accel.input = 1;
-                                } else if (dev->accel.cmd & 0x04) {
-                                    dev->accel.input2 = 1;
-                                    dev->accel.sx -= 2;
+                                if (dev->accel.cmd & 0x40) {
+                                    dev->accel.input3 = 1;
+                                } else {
+                                    if (!(dev->accel.sx & 1) && !(dev->accel.cmd & 0x04)) {
+                                        dev->accel.input = 1;
+                                    } else if (dev->accel.cmd & 0x04) {
+                                        dev->accel.input2 = 1;
+                                        dev->accel.sx -= 2;
+                                    }
                                 }
+
                             }
                         }
                     }
@@ -2136,7 +2156,7 @@ ibm8514_accel_start(int count, int cpu_input, uint32_t mix_dat, uint32_t cpu_dat
                 }
             }
 
-            ibm8514_log("Rectangle %d: full=%04x, odd=%d, c(%d,%d), frgdmix=%d, bkgdmix=%d, xcount=%d, and3=%d, len(%d,%d), CURX=%d, Width=%d, pixcntl=%d, mix_dat=%08x, count=%d, cpu_data=%08x, cpu_input=%d.\n", cmd, dev->accel.cmd, dev->accel.input, dev->accel.cx, dev->accel.cy, frgd_mix, bkgd_mix, dev->accel.x_count, and3, dev->accel.sx, dev->accel.sy, dev->accel.cur_x, dev->accel.maj_axis_pcnt, pixcntl, mix_dat, count, cpu_dat, cpu_input);
+            ibm8514_log("Rectangle %d: flags=%04x, odd=%d, c(%d,%d), frgdmix=%d, bkgdmix=%d, xcount=%d, and3=%d, len(%d,%d), CURX=%d, Width=%d, pixcntl=%d, mix_dat=%08x, count=%d, cpu_data=%08x, cpu_input=%d.\n", cmd, dev->accel.cmd, dev->accel.input, dev->accel.cx, dev->accel.cy, frgd_mix, bkgd_mix, dev->accel.x_count, and3, dev->accel.sx, dev->accel.sy, dev->accel.cur_x, dev->accel.maj_axis_pcnt, pixcntl, mix_dat, count, cpu_dat, cpu_input);
 
             if (dev->accel.cmd & 0x08) { /*Vectored Rectangle*/
                 if (cpu_input) {
@@ -2362,7 +2382,11 @@ ibm8514_accel_start(int count, int cpu_input, uint32_t mix_dat, uint32_t cpu_dat
                             cpu_dat >>= 8;
 
                         dev->accel.sx--;
-                        dev->accel.x_count++;
+                        if (ibm8514_cpu_src(svga) || !cpu_input) {
+                            if ((dev->accel.cmd & 0x02) && !(dev->accel.cmd & 0x1000))
+                                dev->accel.x_count++;
+                        }
+
                         if (dev->accel.sx < 0) {
                             dev->accel.sx = dev->accel.maj_axis_pcnt & 0x7ff;
                             dev->accel.x_count = 0;
@@ -4052,7 +4076,7 @@ ibm8514_recalctimings(svga_t *svga)
 }
 
 static uint8_t
-ibm8514_mca_read(int port, void *priv)
+ibm8514_mca_read(const uint16_t port, void *priv)
 {
     const svga_t    *svga = (svga_t *) priv;
     const ibm8514_t *dev  = (ibm8514_t *) svga->dev8514;
@@ -4061,7 +4085,7 @@ ibm8514_mca_read(int port, void *priv)
 }
 
 static void
-ibm8514_mca_write(int port, uint8_t val, void *priv)
+ibm8514_mca_write(const uint16_t port, uint8_t val, void *priv)
 {
     svga_t    *svga = (svga_t *) priv;
     ibm8514_t *dev  = (ibm8514_t *) svga->dev8514;

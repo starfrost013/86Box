@@ -167,6 +167,8 @@ private slots:
 
     void on_actionApply_fullscreen_stretch_mode_when_maximized_triggered(bool checked);
 
+    void on_actionCGA_composite_settings_triggered();
+
 private:
     Ui::MainWindow                *ui;
     std::unique_ptr<MachineStatus> status;
@@ -202,7 +204,8 @@ private:
     friend class RendererStack;         // For UI variable access by non-primary renderer windows.
     friend class WindowsRawInputFilter; // Needed to reload renderers on style sheet changes.
 
-    QLabel *caps_label, *scroll_label, *num_label, *kana_label;
+    QString toolbar_text;
+    QLabel *toolbar_label, *caps_label, *scroll_label, *num_label, *kana_label;
     QIcon   caps_icon, scroll_icon, num_icon, kana_icon;
     QIcon   caps_icon_off, scroll_icon_off, num_icon_off, kana_icon_off;
 

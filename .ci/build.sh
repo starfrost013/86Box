@@ -161,6 +161,7 @@ mac_signidentity() {
 	echo "-s -"
 }
 mac_notarize() {
+	is_mac || return 0
 	if keychain_name=$(mac_keychain)
 	then
 		if [ -n "$keychain_name" ]
@@ -172,8 +173,13 @@ mac_notarize() {
 				if [ -n "$keychain_path" ]
 				then
 					echo [-] Notarizing with profile [$keychain_profile] in keychain [$keychain_name]
-					xcrun notarytool submit "$1" --keychain-profile "$keychain_profile" --keychain "$keychain_path" --no-wait
-					return $?
+					if xcrun notarytool submit "$1" --keychain-profile "$keychain_profile" --keychain "$keychain_path" --no-wait
+					then
+						echo [-] Notarization submission successful
+						return 0
+					else
+						err="Notarization submission failed"
+					fi
 				else
 					err="File path for keychain [$keychain_name] not found"
 				fi
@@ -575,11 +581,12 @@ then
 		fi
 
 		# Notarize the compressed app bundle.
-		mac_notarize "$zip_name"
+		status=0
+		mac_notarize "$zip_name" || status=50
 
 		# All good.
 		echo [-] Universal build of [$package_name] for [$arch] with flags [$cmake_flags] successful
-		exit 0
+		exit $status
 	fi
 
 	# Switch into the correct architecture if required.
@@ -631,12 +638,9 @@ then
 		sudo sed -i -e 's/--enable-libproxy/--disable-libproxy/g' "$wget_portfile"
 		sudo sed -i -e 's/port:libproxy//g' "$wget_portfile"
 
-		# Work around assimp failing to build with newer zlib. Upstream issue as of writing.
-		sudo "$macports/bin/port" install zlib
-		for header in "$macports/include/minizip/"*.h
-		do
-			sudo ln -s "$header" "$macports/include/" 2>/dev/null
-		done
+		# Work around openal-soft failing to build due to C++20. (MacPorts issue 73874)
+		alsoft_portfile="$macports/var/macports/sources/rsync.macports.org/macports/release/tarballs/ports/audio/openal-soft/Portfile"
+		wc -c "$alsoft_portfile" | grep -q ' 6722 ' && sudo sed -i -e 's/configure.args-append/configure.compiler macports-clang-19\nconfigure.args-append/' "$alsoft_portfile"
 
 		while :
 		do
@@ -915,19 +919,33 @@ then
 fi
 
 # Build mdsx library.
+prefix="$cache_dir/mdsx"
 debug_args=
 grep -qiE "^CMAKE_BUILD_TYPE:[^=]+=Debug" build/CMakeCache.txt && debug_args=DEBUG=y
-cd archive_tmp
-for retry in 0 1 2 3 4
-do
-	sleep $retry
-	git clone --depth 1 "$(dirname "$git_repo")/mdsx.git" mdsx && break
-done
-make -C mdsx/src -j$(nproc) CC="$cc_binary" STRIP="$strip_binary" $debug_args || exit 99
-rm -f mdsx/src/*.a
-mv mdsx/src/mdsx.* . || exit 99
-rm -rf mdsx
-cd ..
+if [ -e "$prefix/src/Makefile" ]
+then
+	if ! check_buildtag mdsx
+	then
+		git -C "$prefix" clean -dfx
+		git -C "$prefix" reset --hard HEAD
+		for retry in 0 1 2 3 4
+		do
+			sleep $retry
+			git -C "$prefix" pull && break
+		done
+		save_buildtag mdsx
+	fi
+else
+	rm -rf "$prefix"
+	for retry in 0 1 2 3 4
+	do
+		sleep $retry
+		git clone --depth 1 "$(dirname "$git_repo")/mdsx.git" "$prefix" && break
+	done
+fi
+make -C "$prefix/src" -j$(nproc) CC="$cc_binary" STRIP="$strip_binary" $debug_args || exit 99
+find "$prefix/src" -name '*.[oa]' -delete
+mv "$prefix/src/mdsx."* archive_tmp/ || exit 99
 
 # Archive the executable and its dependencies.
 # The executable should always be archived last for the check after this block.
@@ -941,10 +959,13 @@ then
 	[ "$arch" = "32" -a -d "/c/Program Files (x86)" ] && pf="/c/Program Files (x86)"
 
 	# Archive Ghostscript DLL from local official distribution installation.
-	for gs in "$pf"/gs/gs*.*.*
-	do
-		cp -p "$gs"/bin/gsdll*.dll archive_tmp/
-	done
+	if [ "$arch" != "ARM64" -a "$arch" != "arm64" ]
+	then
+		for gs in "$pf"/gs/gs*.*.*
+		do
+			cp -p "$gs"/bin/gsdll*.dll archive_tmp/
+		done
+	fi
 
 	# Archive Discord Game SDK DLL.
 	"$sevenzip" e -y -o"archive_tmp" "$discord_zip" "lib/$arch_discord/discord_game_sdk.dll"
@@ -996,7 +1017,6 @@ then
 	fi
 else
 	cwd_root="$(pwd)"
-	check_buildtag "libs.$arch_deb"
 
 	if grep -qiE "^OPENAL:BOOL=ON" build/CMakeCache.txt
 	then
@@ -1279,10 +1299,7 @@ fi
 
 # Notarize the compressed app bundle if we're on macOS.
 status=0
-if is_mac
-then
-	mac_notarize "$zip_name" || status=50
-fi
+mac_notarize "$zip_name" || status=50
 
 # All good.
 echo [-] Build of [$package_name] for [$arch] with flags [$cmake_flags] successful
