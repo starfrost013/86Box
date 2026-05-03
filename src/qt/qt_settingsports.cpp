@@ -78,8 +78,12 @@ SettingsPorts::changed()
     for (int i = 0; i < PARALLEL_MAX; i++) {
         auto *cbox     = findChild<QComboBox *>(QString("comboBoxLpt%1").arg(i + 1));
         auto *checkBox = findChild<QCheckBox *>(QString("checkBoxParallel%1").arg(i + 1));
-        if (cbox != NULL)
-            soft_changed |= (lpt_ports[i].device           != cbox->currentData().toInt());
+        if (cbox != NULL) {
+            if (lpt_ports[i].lpt && (lpt_ports[i].lpt->port.attached == 2))
+                has_changed  |= (lpt_ports[i].device != cbox->currentData().toInt());
+            else
+                soft_changed |= (lpt_ports[i].device != cbox->currentData().toInt());
+        }
         if (checkBox != NULL)
             has_changed  |= (lpt_ports[i].enabled          != (checkBox->isChecked() ? 1 : 0));
         soft_changed  |= lpt_device_cfg_changed[i];
@@ -105,10 +109,8 @@ SettingsPorts::restore()
 }
 
 void
-SettingsPorts::save()
+SettingsPorts::save(int soft)
 {
-    jumpered_internal_ecp_dma = ui->comboBoxLptECPDMA->currentData().toInt();
-
     for (int i = 0; i < PARALLEL_MAX; i++) {
         auto *cbox     = findChild<QComboBox *>(QString("comboBoxLpt%1").arg(i + 1));
         auto *checkBox = findChild<QCheckBox *>(QString("checkBoxParallel%1").arg(i + 1));
@@ -118,6 +120,9 @@ SettingsPorts::save()
             lpt_ports[i].enabled = checkBox->isChecked() ? 1 : 0;
     }
 
+    if (soft)
+        return;
+
     for (int i = 0; i < SERIAL_MAX_UI; i++) {
         auto *cbox     = findChild<QComboBox *>(QString("comboBoxCom%1").arg(i + 1));
         auto *checkBox = findChild<QCheckBox *>(QString("checkBoxSerial%1").arg(i + 1));
@@ -126,6 +131,8 @@ SettingsPorts::save()
         if (checkBox != NULL)
             com_ports[i].enabled = checkBox->isChecked() ? 1 : 0;
     }
+
+    jumpered_internal_ecp_dma = ui->comboBoxLptECPDMA->currentData().toInt();
 }
 
 void
