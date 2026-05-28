@@ -2000,9 +2000,9 @@ handle_char(escp_t *dev, uint8_t ch)
         line_y = PIXY;
 
         if (dev->font_style & STYLE_UNDERLINE)
-            line_y = (PIXY + (uint16_t) (dev->fontface->size->metrics.height * 0.9));
+            line_y = (PIXY + (uint16_t) (dev->fontface->size->metrics.y_ppem * 0.9));
         if (dev->font_style & STYLE_STRIKETHROUGH)
-            line_y = (PIXY + (uint16_t) (dev->fontface->size->metrics.height * 0.45));
+            line_y = (PIXY + (uint16_t) (dev->fontface->size->metrics.y_ppem * 0.45));
         if (dev->font_style & STYLE_OVERSCORE)
             line_y = PIXY - ((dev->font_score == SCORE_DOUBLE || dev->font_score == SCORE_DOUBLEBROKEN) ? 5 : 0);
 
@@ -2253,6 +2253,9 @@ escp_close(void *priv)
         free(dev->page);
     }
 
+    timer_disable(&dev->pulse_timer);
+    timer_disable(&dev->timeout_timer);
+
     FT_Done_Face(dev->fontface);
     free(dev);
 }
@@ -2328,7 +2331,7 @@ static const device_config_t lpt_prt_escp_config[] = {
 const device_t lpt_prt_escp_device = {
     .name          = "Generic ESC/P 2 Dot-Matrix Printer",
     .internal_name = "dot_matrix",
-    .flags         = DEVICE_LPT,
+    .flags         = DEVICE_LPT | DEVICE_HOTPLUG,
     .local         = 0,
     .init          = escp_init,
     .close         = escp_close,

@@ -48,22 +48,11 @@ hdd_string_to_bus(char *str, int cdrom)
     if (!strcmp(str, "none"))
         return HDD_BUS_DISABLED;
 
-    if (!strcmp(str, "mfm")) {
-        if (cdrom) {
-no_cdrom:
-            ui_msgbox_header(MBX_ERROR, plat_get_string(STRING_INVALID_CONFIG), plat_get_string(STRING_NO_ST506_ESDI_CDROM));
-            return 0;
-        }
-
+    if (!strcmp(str, "mfm") && !cdrom)
         return HDD_BUS_MFM;
-    }
 
-    if (!strcmp(str, "esdi")) {
-        if (cdrom)
-            goto no_cdrom;
-
+    if (!strcmp(str, "esdi") && !cdrom)
         return HDD_BUS_ESDI;
-    }
 
     if (!strcmp(str, "ide"))
         return HDD_BUS_IDE;
@@ -77,38 +66,28 @@ no_cdrom:
     if (!strcmp(str, "scsi"))
         return HDD_BUS_SCSI;
     
-    if (!strcmp(str, "mitsumi"))
+    if (!strcmp(str, "mitsumi") && cdrom)
         return CDROM_BUS_MITSUMI;
 
-    if (!strcmp(str, "mke"))
+    if (!strcmp(str, "mke") && cdrom)
         return CDROM_BUS_MKE;
 
-    return 0;
+    return HDD_BUS_DISABLED;
 }
 
 char *
-hdd_bus_to_string(int bus, UNUSED(int cdrom))
+hdd_bus_to_string(int bus, int cdrom)
 {
     char *s = "none";
 
     switch (bus) {
         default:
-        if (cdrom) {
-            switch (bus) {
-                case CDROM_BUS_MITSUMI:
-                    s = "mitsumi";
-                    break;
-                case CDROM_BUS_MKE:
-                    s = "mke";
-                    break;
-            }
-            break;
-        }
         case HDD_BUS_DISABLED:
             break;
 
         case HDD_BUS_MFM:
-            s = "mfm";
+            if (!cdrom)
+                s = "mfm";
             break;
 
         case HDD_BUS_XTA:
@@ -116,7 +95,8 @@ hdd_bus_to_string(int bus, UNUSED(int cdrom))
             break;
 
         case HDD_BUS_ESDI:
-            s = "esdi";
+            if (!cdrom)
+                s = "esdi";
             break;
 
         case HDD_BUS_IDE:
@@ -129,6 +109,16 @@ hdd_bus_to_string(int bus, UNUSED(int cdrom))
 
         case HDD_BUS_SCSI:
             s = "scsi";
+            break;
+
+        case CDROM_BUS_MITSUMI:
+            if (cdrom)
+                s = "mitsumi";
+            break;
+
+        case CDROM_BUS_MKE:
+            if (cdrom)
+                s = "mke";
             break;
     }
 
@@ -580,10 +570,11 @@ static hdd_preset_t hdd_speed_presets[] = {
     { .name = "[ATA-5] Samsung SpinPoint V6800 (SV2046D)",        .internal_name = "SV2046D",      .model = "SAMSUNG SV2046D",                                             .zones =  8, .avg_spt = 295, .heads =  6, .rpm = 5400, .full_stroke_ms = 18, .track_seek_ms = 1.3, .rcache_num_seg = 16, .rcache_seg_size =  512, .max_multiple = 32 },
     { .name = "[ATA-5] Seagate U8 - 4.3gb",                       .internal_name = "ST34313A",     .model = "ST34313A",                                                    .zones = 16, .avg_spt = 289, .heads =  1, .rpm = 5400, .full_stroke_ms = 25, .track_seek_ms = 1.5, .rcache_num_seg = 16, .rcache_seg_size =  512, .max_multiple = 32 },
     { .name = "[ATA-5] Seagate U8 - 8.4gb",                       .internal_name = "ST38410A",     .model = "ST38410A",                                                    .zones = 16, .avg_spt = 289, .heads =  2, .rpm = 5400, .full_stroke_ms = 25, .track_seek_ms = 1.5, .rcache_num_seg = 16, .rcache_seg_size =  512, .max_multiple = 32 },
-    { .name = "[ATA-5] Seagate U8 - 13gb",                        .internal_name = "ST313021A",    .model = "ST313021A",                                                   .zones = 16, .avg_spt = 289, .heads =  4, .rpm = 5400, .full_stroke_ms = 25, .track_seek_ms = 1.5, .rcache_num_seg = 16, .rcache_seg_size =  512, .max_multiple = 32 },
-    { .name = "[ATA-5] Seagate U8 - 17.2gb",                      .internal_name = "ST317221A",    .model = "ST317221A",                                                   .zones = 16, .avg_spt = 289, .heads =  3, .rpm = 5400, .full_stroke_ms = 25, .track_seek_ms = 1.5, .rcache_num_seg = 16, .rcache_seg_size =  512, .max_multiple = 32 },
+    { .name = "[ATA-5] Seagate U8 - 13gb",                        .internal_name = "ST313021A",    .model = "ST313021A",                                                   .zones = 16, .avg_spt = 289, .heads =  3, .rpm = 5400, .full_stroke_ms = 25, .track_seek_ms = 1.5, .rcache_num_seg = 16, .rcache_seg_size =  512, .max_multiple = 32 },
+    { .name = "[ATA-5] Seagate U8 - 17.2gb",                      .internal_name = "ST317221A",    .model = "ST317221A",                                                   .zones = 16, .avg_spt = 289, .heads =  4, .rpm = 5400, .full_stroke_ms = 25, .track_seek_ms = 1.5, .rcache_num_seg = 16, .rcache_seg_size =  512, .max_multiple = 32 },
     { .name = "[ATA-5] Western Digital Caviar 102AA",             .internal_name = "WD102AA",      .model = "WDC WD102AA-00ANA0",                                          .zones = 16, .avg_spt = 295, .heads =  8, .rpm = 5400, .full_stroke_ms = 12, .track_seek_ms = 1.5, .rcache_num_seg = 16, .rcache_seg_size =  512, .max_multiple = 32 },
-    { .name = "[ATA-5] Western Digital Expert",                   .internal_name = "WD135BA",      .model = "WDC WD135BA-60AK",                                            .zones = 16, .avg_spt = 350, .heads =  6, .rpm = 7200, .full_stroke_ms = 15, .track_seek_ms = 2,   .rcache_num_seg = 16, .rcache_seg_size = 1920, .max_multiple = 32 },
+    { .name = "[ATA-5] Western Digital Expert 135BA",             .internal_name = "WD135BA",      .model = "WDC WD135BA-60AK",                                            .zones = 16, .avg_spt = 350, .heads =  4, .rpm = 7200, .full_stroke_ms = 15, .track_seek_ms = 2,   .rcache_num_seg = 16, .rcache_seg_size = 1920, .max_multiple = 32 },
+    { .name = "[ATA-5] Western Digital Expert 200BA",             .internal_name = "WD200BA",      .model = "WDC WD200BA-60AGA0",                                          .zones = 16, .avg_spt = 350, .heads =  6, .rpm = 7200, .full_stroke_ms = 15, .track_seek_ms = 2,   .rcache_num_seg = 16, .rcache_seg_size = 1920, .max_multiple = 32 },
    // clang-format on
 };
 

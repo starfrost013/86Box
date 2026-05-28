@@ -266,8 +266,8 @@ static const device_config_t cu430hx_config[] = {
 };
 
 const device_t cu430hx_device = {
-    .name          = "Intel CU430HX (Cumberland)",
-    .internal_name = "cu430hx_device",
+    .name          = "Intel CU430HX",
+    .internal_name = "cu430hx",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,
@@ -392,8 +392,8 @@ static const device_config_t tc430hx_config[] = {
 };
 
 const device_t tc430hx_device = {
-    .name          = "Intel TC430HX (Tucson)",
-    .internal_name = "tc430hx_device",
+    .name          = "Intel TC430HX",
+    .internal_name = "tc430hx",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,
@@ -517,7 +517,7 @@ static const device_config_t m7shi_config[] = {
 
 const device_t m7shi_device = {
     .name          = "Micronics M7S-Hi",
-    .internal_name = "m7shi_device",
+    .internal_name = "m7shi",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,
@@ -922,7 +922,7 @@ static const device_config_t p5vxb_config[] = {
 
 const device_t p5vxb_device = {
     .name          = "ECS P5VX-B",
-    .internal_name = "p5vxb_device",
+    .internal_name = "p5vxb",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,
@@ -1101,8 +1101,8 @@ static const device_config_t lgibmx52_config[] = {
 };
 
 const device_t lgibmx52_device = {
-    .name          = "LG IBM Multinet x52 (MSI MS-5136)",
-    .internal_name = "lgibmx52_device",
+    .name          = "LG IBM Multinet x52",
+    .internal_name = "lgibmx52",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,
@@ -1409,7 +1409,7 @@ static const device_config_t txp4x_config[] = {
 
 const device_t txp4x_device = {
     .name          = "ASUS TXP4-X",
-    .internal_name = "txp4x_device",
+    .internal_name = "txp4x",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,
@@ -1806,9 +1806,12 @@ machine_at_ma23c_init(const machine_t *model)
     device_add(&i430tx_device);
     device_add(&piix4_device);
     device_add(&nec_mate_unk_device);
-    device_add_params(&fdc37c67x_device, (void *) (FDC37XXX2 | FDC37XXXX_370));
+    device_add_params(&fdc37c67x_device, (void *) (FDC37XXX5 | FDC37XXXX_370));
     device_add(&intel_flash_bxt_device);
     spd_register(SPD_TYPE_SDRAM, 0x7, 256);
+
+    if (sound_card_current[0] == SOUND_INTERNAL)
+        machine_snd = device_add(machine_get_snd_device(machine));
 
     return ret;
 }
@@ -1855,8 +1858,8 @@ static const device_config_t an430tx_config[] = {
 };
 
 const device_t an430tx_device = {
-    .name          = "Intel AN430TX (Anchorage)",
-    .internal_name = "an430tx_device",
+    .name          = "Intel AN430TX",
+    .internal_name = "an430tx",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,
@@ -2105,6 +2108,37 @@ machine_at_ficpa2012_init(const machine_t *model)
 }
 
 int
+machine_at_5avp3_init(const machine_t *model)
+{
+    int ret;
+
+    ret = bios_load_linear("roms/machines/5avp3/lea7-3.bin",
+                           0x000e0000, 131072, 0);
+
+    if (bios_only || !ret)
+        return ret;
+
+    machine_at_common_init(model);
+
+    pci_init(PCI_CONFIG_TYPE_1);
+    pci_register_slot(0x00, PCI_CARD_NORTHBRIDGE, 0, 0, 0, 0);
+    pci_register_slot(0x07, PCI_CARD_SOUTHBRIDGE, 1, 2, 3, 4);
+    pci_register_slot(0x08, PCI_CARD_NORMAL,      1, 2, 3, 4);
+    pci_register_slot(0x09, PCI_CARD_NORMAL,      2, 3, 4, 1);
+    pci_register_slot(0x0A, PCI_CARD_NORMAL,      3, 4, 1, 2);
+    pci_register_slot(0x0B, PCI_CARD_NORMAL,      4, 1, 2, 3);
+    pci_register_slot(0x01, PCI_CARD_AGPBRIDGE,   1, 2, 3, 4);
+
+    device_add(&via_vp3_device);
+    device_add(&via_vt82c586b_device);
+    device_add(&it8661f_device);
+    device_add(&sst_flash_29ee010_device);
+    spd_register(SPD_TYPE_SDRAM, 0x7, 512);
+
+    return ret;
+}
+
+int
 machine_at_via809ds_init(const machine_t *model)
 {
     int ret;
@@ -2203,7 +2237,7 @@ static const device_config_t ms5146_config[] = {
 
 const device_t ms5146_device = {
     .name          = "MSI MS-5146",
-    .internal_name = "ms5146_device",
+    .internal_name = "ms5146",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,
@@ -2286,7 +2320,7 @@ static const device_config_t r534f_config[] = {
 
 const device_t r534f_device = {
     .name          = "Rise R534F",
-    .internal_name = "r534f_device",
+    .internal_name = "r534f",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,
@@ -2456,7 +2490,7 @@ static const device_config_t m5ata_config[] = {
 
 const device_t m5ata_device = {
     .name          = "Biostar M5ATA",
-    .internal_name = "m5ata_device",
+    .internal_name = "m5ata",
     .flags         = 0,
     .local         = 0,
     .init          = NULL,

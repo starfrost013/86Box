@@ -79,6 +79,7 @@ typedef struct {
 #ifdef _WIN32
     HANDLE       fd_in;
     HANDLE       fd_out;
+    unsigned int stdout_redirected   : 1;
     unsigned int prev_in_mode_valid  : 1;
     unsigned int prev_out_mode_valid : 1;
     DWORD        prev_in_mode;
@@ -98,9 +99,9 @@ typedef struct {
 #endif
 } char_stdio_t;
 
-#ifdef _WIN32
-static int stdio_claimed = 0;
+static const char *stdio_claimed_by = NULL;
 
+#ifdef _WIN32
 static void
 char_stdio_stdin_thread(void *priv)
 {
@@ -216,6 +217,13 @@ char_stdio_close(void *priv)
     char_stdio_t *dev = (char_stdio_t *) priv;
 
     /* Resume logging to stdout if it had been stopped. */
+#ifdef _WIN32
+    if (dev->stdout_redirected) {
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
+        CloseHandle(dev->fd_out);
+    } else
+#endif
     if (dev->prev_log) {
         fclose(stdlog);
         stdlog = dev->prev_log;
@@ -243,7 +251,7 @@ char_stdio_close(void *priv)
         char_stdio_log(dev->log, "Output restore SetConsoleMode failed (%08X)\n", GetLastError());
 
     /* Release console. */
-    stdio_claimed = 0;
+    stdio_claimed_by = NULL;
     if (dev->prev_title) { /* reset title */
         SetConsoleTitle(dev->prev_title);
         free(dev->prev_title);
@@ -254,9 +262,11 @@ char_stdio_close(void *priv)
     if (dev->prev_flags_valid && CHAR_FD_VALID(dev->fd_out) && (fcntl(dev->fd_out, F_SETFL, dev->prev_flags) < 0))
         char_stdio_log(dev->log, "Restore F_SETFL failed (%d)\n", errno);
 
-    /* Terminate pseudoterminal if we have one. */
-    if (CHAR_FD_VALID(dev->fd_out) && (dev->fd_out != STDOUT_FILENO))
-        close(dev->fd_out);
+    /* Release console. */
+    if (dev->fd_out == STDOUT_FILENO)
+        stdio_claimed_by = NULL;
+    else if (CHAR_FD_VALID(dev->fd_out))
+        close(dev->fd_out); /* terminate pseudoterminal */
 #endif
 
     log_close(dev->log);
@@ -274,30 +284,49 @@ char_stdio_init(const device_t *info)
     dev->log  = char_log_open(dev->port, "StdIO");
     char_stdio_log(dev->log, "init()\n");
 
-#ifdef _WIN32
     /* Check if another instance has already claimed the console. */
     char msg[2048];
-    if (stdio_claimed) {
-        char_stdio_log(dev->log, "Windows console already claimed\n");
+#ifndef _WIN32
+    int mode = device_get_config_int("mode");
+    if (mode == CHAR_STDIO_MODE_STDIO)
+#endif
+    {
+        if (stdio_claimed_by) {
+            char_stdio_log(dev->log, "Standard input/output already claimed by %s\n", stdio_claimed_by);
 
-        snprintf(msg, sizeof(msg), "%s: Only one virtual console can be used on Windows", dev->port->name);
-        ui_msgbox(MBX_INFO | MBX_ANSI, msg);
+            snprintf(msg, sizeof(msg), "%s: Virtual console already in use by %s", dev->port->name, stdio_claimed_by);
+            ui_msgbox(MBX_INFO, msg);
 
-        dev->fd_in = dev->fd_out = INVALID_HANDLE_VALUE;
-        char_update_status(dev->port);
-        return dev;
+            dev->fd_in = dev->fd_out =
+#ifdef _WIN32
+                INVALID_HANDLE_VALUE
+#else
+                -1
+#endif
+                ;
+            char_update_status(dev->port);
+            return dev;
+        }
+        stdio_claimed_by = dev->port->name;
     }
-    stdio_claimed = 1;
 
+#ifdef _WIN32
     /* Set file descriptors. */
     dev->fd_in = GetStdHandle(STD_INPUT_HANDLE);
     if (!CHAR_FD_VALID(dev->fd_in)) {
         /* Spawn a console if one isn't present. (GUI executable) */
         char_stdio_log(dev->log, "No Windows console, spawning one\n");
         pc_debug_console();
-        dev->fd_in = GetStdHandle(STD_INPUT_HANDLE);
+        dev->fd_in  = GetStdHandle(STD_INPUT_HANDLE);
+        dev->fd_out = CreateFileA("CONOUT$", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (CHAR_FD_VALID(dev->fd_out))
+            dev->stdout_redirected = 1;
+        else
+            goto use_stdout;
+    } else {
+use_stdout:
+        dev->fd_out = GetStdHandle(STD_OUTPUT_HANDLE);
     }
-    dev->fd_out = GetStdHandle(STD_OUTPUT_HANDLE);
 
     /* Set console title. */
     if (CHAR_FD_VALID(dev->fd_in) || CHAR_FD_VALID(dev->fd_out)) {
@@ -331,10 +360,8 @@ char_stdio_init(const device_t *info)
             char_stdio_log(dev->log, "Output SetConsoleMode failed (%08X)\n", GetLastError());
     }
 #else
-    int mode = device_get_config_int("mode");
     if (mode != CHAR_STDIO_MODE_STDIO) {
         /* Create pseudoterminal. */
-        char msg[2048];
         int  err;
         dev->fd_in = dev->fd_out = posix_openpt(O_RDWR | O_NOCTTY | O_NONBLOCK);
         fcntl(dev->fd_out, F_SETFD, FD_CLOEXEC); /* required for any commands we run to properly detach from the pty when it's closed */
@@ -355,7 +382,7 @@ char_stdio_init(const device_t *info)
 
                         if (mode == CHAR_STDIO_MODE_PTY) {
                             snprintf(msg, sizeof(msg), "%s: Attached to %s", dev->port->name, pty);
-                            ui_msgbox(MBX_INFO | MBX_ANSI, msg);
+                            ui_msgbox(MBX_INFO, msg);
                         } else {
                             /* Build environment variables. */
                             static const char *pipe_cmd = "PIPECMD="
@@ -376,7 +403,7 @@ char_stdio_init(const device_t *info)
                             /* Determine command to execute. */
                             const char *cmd;
                             if (mode == CHAR_STDIO_MODE_TERM) {
-                                cmd = "eval $PIPECMD";
+                                cmd = "sh -c \"$PIPECMD\";reset;clear";
                             } else {
                                 cmd = device_get_config_string("command");
                                 if (!cmd || !cmd[0]) {
@@ -414,8 +441,8 @@ char_stdio_init(const device_t *info)
             err = errno;
             char_stdio_log(dev->log, "posix_openpt failed (%d)\n", err);
 errmsg:
-            snprintf(msg, sizeof(msg), "%s: Could not create pseudoterminal: %s", dev->port->name, strerror(err));
-            ui_msgbox(MBX_ERROR | MBX_ANSI, msg);
+            snprintf(msg, sizeof(msg), "%s: Could not create terminal: %s", dev->port->name, strerror(err));
+            ui_msgbox(MBX_ERROR, msg);
             close(dev->fd_out);
             dev->fd_out = -1;
         }
@@ -460,7 +487,12 @@ errmsg:
         char_stdio_log(dev->log, "Disconnecting logging from stdout\n");
         dev->prev_log = stdlog;
 #ifdef _WIN32
-        stdlog = plat_fopen("NUL", "w");
+        if (dev->stdout_redirected) {
+            freopen("NUL", "w", stdout);
+            freopen("NUL", "w", stderr);
+        } else {
+            stdlog = plat_fopen("NUL", "w");
+        }
 #else
         stdlog = plat_fopen("/dev/null", "w");
 #endif
@@ -516,7 +548,7 @@ static const device_config_t char_stdio_config[] = {
 const device_t char_stdio_com_device = {
     .name          = "Virtual Console (COM)",
     .internal_name = "stdio",
-    .flags         = DEVICE_COM,
+    .flags         = DEVICE_COM | DEVICE_HOTPLUG,
     .local         = 0,
     .init          = char_stdio_init,
     .close         = char_stdio_close,

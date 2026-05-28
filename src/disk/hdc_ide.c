@@ -478,7 +478,7 @@ static int
 ide_get_max(const ide_t *ide, const int type)
 {
     const int       ata_4     = ide_is_ata4(ide_boards[ide->board]);
-    const int       max[2][4] = { { 3, -1, -1, -1 }, { 4, 2, 2, 5 } };
+    const int       max[2][4] = { { 3, -1, -1, -1 }, { 4, -1, 2, 5 } };
     int             ret;
 
     if (ide->type == IDE_ATAPI)
@@ -571,7 +571,8 @@ ide_hd_identify(const ide_t *ide)
     ide->buffer[50] = 0x4000;
     ide->buffer[59] = ide->blocksize ? (ide->blocksize | 0x100) : 0;
 
-    if ((ide->tracks >= 1024) || (ide->hpc > 16) || (ide->spt > 63)) {
+    if (ide->is_jride || (ide->tracks >= 1024) || (ide->hpc > 16) || (ide->spt > 63)) {
+        /* JR-IDE requires IDENTIFY word 49 bit 9 even for small CHS-only geometries. */
         ide->buffer[49] = (1 << 9);
         ide_log("LBA supported\n");
 
@@ -587,19 +588,16 @@ ide_hd_identify(const ide_t *ide)
         ide->buffer[53] = 1;
 
         if (ide->params_specified) {
-            ide->buffer[54] = (full_size / ide->cfg_hpc) / ide->cfg_spt;
+            if (full_size <= 16514064)
+                ide->buffer[54] = (full_size / ide->cfg_hpc) / ide->cfg_spt;
+            else
+                ide->buffer[54] = (16514064 / ide->cfg_hpc) / ide->cfg_spt;
             ide->buffer[55] = ide->cfg_hpc;
             ide->buffer[56] = ide->cfg_spt;
         } else {
-            if (full_size <= 16514064) {
-                ide->buffer[54] = d_tracks;
-                ide->buffer[55] = d_hpc;
-                ide->buffer[56] = d_spt;
-            } else {
-                ide->buffer[54] = 16383;
-                ide->buffer[55] = 16;
-                ide->buffer[56] = 63;
-            }
+            ide->buffer[54] = ide->buffer[1];
+            ide->buffer[55] = ide->buffer[3];
+            ide->buffer[56] = ide->buffer[6];
         }
 
         full_size = ((uint64_t) ide->buffer[54]) * ((uint64_t) ide->buffer[55]) *
@@ -651,7 +649,11 @@ ide_identify(ide_t *ide)
     }
 
     max_pio  = ide_get_max(ide, TYPE_PIO);
+#ifdef REPORT_SDMA
     max_sdma = ide_get_max(ide, TYPE_SDMA);
+#else
+    max_sdma = -1;
+#endif
     max_mdma = ide_get_max(ide, TYPE_MDMA);
     max_udma = ide_get_max(ide, TYPE_UDMA);
     ide_log("IDE %i: max_pio = %i, max_sdma = %i, max_mdma = %i, max_udma = %i\n",
@@ -659,7 +661,7 @@ ide_identify(ide_t *ide)
 
     if (ide_boards[ide->board]->bit32)
         ide->buffer[48] |= 1; /*Dword transfers supported*/
-    ide->buffer[51] = ide_get_timings(ide, TIMINGS_PIO);
+    ide->buffer[51] = ((max_pio > 2) ? 2 : max_pio) << 8;
     ide->buffer[53] &= 0xfff9;
     ide->buffer[52] = ide->buffer[62] = ide->buffer[63] = ide->buffer[64] = 0x0000;
     ide->buffer[65] = ide->buffer[66] = ide_get_timings(ide, TIMINGS_DMA);
@@ -742,6 +744,29 @@ ide_get_sector(ide_t *ide)
 
         return ((((off64_t) ide->tf->cylinder * heads) + (off64_t) ide->tf->head) * sectors) +
                (off64_t) sector;
+    }
+}
+
+/*
+ * Return the last sector offset for the current register values
+ */
+static off64_t
+ide_get_last_sector(ide_t *ide)
+{
+    uint32_t heads;
+    uint32_t sectors;
+    uint32_t add     = (ide->tf->secount ? ide->tf->secount : 256) - 1;
+
+    if (ide->tf->lba)
+        return (off64_t) ide->lba_addr + (off64_t) add;
+    else {
+        heads   = ide->cfg_hpc;
+        sectors = ide->cfg_spt;
+
+        uint8_t sector = ide->tf->sector ? (ide->tf->sector - 1) : 0;
+
+        return (((((off64_t) ide->tf->cylinder * heads) + (off64_t) ide->tf->head) * sectors) +
+                (off64_t) sector) + (off64_t) add;
     }
 }
 
@@ -945,6 +970,7 @@ ide_zero(int d)
     dev->channel                       = d;
     dev->type                          = IDE_NONE;
     dev->hdd_num                       = -1;
+    dev->is_jride                      = 0;
     dev->tf->atastat                   = DRDY_STAT | DSC_STAT;
     dev->service                       = 0;
     dev->board                         = d >> 1;
@@ -1400,6 +1426,44 @@ ide_write_data(ide_t *ide, const uint16_t val)
             }
         }
     }
+}
+
+static ide_t *
+ide_get_current_device(void *priv)
+{
+    const ide_board_t *dev = (const ide_board_t *) priv;
+
+    if (dev == NULL)
+        return NULL;
+
+    return ide_drives[dev->cur_dev];
+}
+
+uint8_t *
+ide_get_pio_buffer(void *priv)
+{
+    ide_t *ide = ide_get_current_device(priv);
+
+    if ((ide == NULL) || (ide->type == IDE_NONE) || (ide->type & IDE_SHADOW) || (ide->buffer == NULL))
+        return NULL;
+
+    return (uint8_t *) ide->buffer;
+}
+
+void
+ide_complete_pio_buffer_write(void *priv)
+{
+    ide_t    *ide    = ide_get_current_device(priv);
+    uint8_t  *buffer = NULL;
+    uint16_t  value;
+
+    if ((ide == NULL) || !(ide->tf->atastat & DRQ_STAT) ||
+        ((buffer = ide_get_pio_buffer(priv)) == NULL))
+        return;
+
+    ide->tf->pos = 510;
+    value        = (uint16_t) buffer[510] | ((uint16_t) buffer[511] << 8);
+    ide_write_data(ide, value);
 }
 
 void
@@ -2024,6 +2088,18 @@ ide_read_data(ide_t *ide)
     return ret;
 }
 
+void
+ide_complete_pio_buffer_read(void *priv)
+{
+    ide_t *ide = ide_get_current_device(priv);
+
+    if ((ide == NULL) || !(ide->tf->atastat & DRQ_STAT) || (ide_get_pio_buffer(priv) == NULL))
+        return;
+
+    ide->tf->pos = 510;
+    (void) ide_read_data(ide);
+}
+
 static uint8_t
 ide_status(ide_t *ide, UNUSED(ide_t *ide_other), UNUSED(int ch))
 {
@@ -2353,7 +2429,9 @@ ide_callback(void *priv)
             if (ide->type == IDE_ATAPI) {
                 ide_set_signature(ide);
                 err = ABRT_ERR;
-            } else if (!ide->tf->lba && (ide->cfg_spt == 0))
+            } else if ((!ide->tf->lba && (ide->cfg_spt == 0)) ||
+                       (ide_get_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)) ||
+                       (ide_get_last_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)))
                 err = IDNF_ERR;
             else {
                 if (ide->do_initial_read) {
@@ -2386,7 +2464,9 @@ ide_callback(void *priv)
             if ((ide->type == IDE_ATAPI) || ide_boards[ide->board]->force_ata3 || (bm == NULL)) {
                 ide_log("IDE %i: DMA read aborted (bad device or board)\n", ide->channel);
                 err = ABRT_ERR;
-            } else if (!ide->tf->lba && (ide->cfg_spt == 0)) {
+            } else if ((!ide->tf->lba && (ide->cfg_spt == 0)) ||
+                       (ide_get_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)) ||
+                       (ide_get_last_sector(ide) > hdd_image_get_last_sector(ide->hdd_num))) {
                 ide_log("IDE %i: DMA read aborted (SPECIFY failed)\n", ide->channel);
                 err = IDNF_ERR;
             } else {
@@ -2438,7 +2518,9 @@ ide_callback(void *priv)
                mand error. */
             if ((ide->type == IDE_ATAPI) || !ide->blocksize)
                 err = ABRT_ERR;
-            else if (!ide->tf->lba && (ide->cfg_spt == 0))
+            else if ((!ide->tf->lba && (ide->cfg_spt == 0)) ||
+                     (ide_get_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)) ||
+                     (ide_get_last_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)))
                 err = IDNF_ERR;
             else {
                 if (ide->do_initial_read) {
@@ -2475,7 +2557,9 @@ ide_callback(void *priv)
 #endif
             if (ide->type == IDE_ATAPI)
                 err = ABRT_ERR;
-            else if (!ide->tf->lba && (ide->cfg_spt == 0))
+            else if ((!ide->tf->lba && (ide->cfg_spt == 0)) ||
+                     (ide_get_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)) ||
+                     (ide_get_last_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)))
                 err = IDNF_ERR;
             else {
                 ui_sb_update_icon_write(SB_HDD | hdd[ide->hdd_num].bus_type, 1);
@@ -2500,7 +2584,9 @@ ide_callback(void *priv)
             if ((ide->type == IDE_ATAPI) || ide_boards[ide->board]->force_ata3 || (bm == NULL)) {
                 ide_log("IDE %i: DMA write aborted (bad device type or board)\n", ide->channel);
                 err = ABRT_ERR;
-            } else if (!ide->tf->lba && (ide->cfg_spt == 0)) {
+            } else if ((!ide->tf->lba && (ide->cfg_spt == 0)) ||
+                       (ide_get_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)) ||
+                       (ide_get_last_sector(ide) > hdd_image_get_last_sector(ide->hdd_num))) {
                 ide_log("IDE %i: DMA write aborted (SPECIFY failed)\n", ide->channel);
                 err = IDNF_ERR;
             } else {
@@ -2551,7 +2637,9 @@ ide_callback(void *priv)
                mand error. */
             if ((ide->type == IDE_ATAPI) || !ide->blocksize)
                 err = ABRT_ERR;
-            else if (!ide->tf->lba && (ide->cfg_spt == 0))
+            else if ((!ide->tf->lba && (ide->cfg_spt == 0)) ||
+                     (ide_get_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)) ||
+                     (ide_get_last_sector(ide) > hdd_image_get_last_sector(ide->hdd_num)))
                 err = IDNF_ERR;
             else {
                 ret = hdd_image_write(ide->hdd_num, ide_get_sector(ide), 1, (uint8_t *) ide->buffer);
@@ -3156,6 +3244,7 @@ void *
 ide_xtide_init(void)
 {
     ide_board_init(0, -1, 0, 0, 0, 0);
+    ide_xtide_set_is_jride(0);
 
     return ide_boards[0];
 }
@@ -3164,6 +3253,17 @@ void
 ide_xtide_close(void)
 {
     ide_board_close(0);
+}
+
+void
+ide_xtide_set_is_jride(int is_jride)
+{
+    for (int channel = 0; channel < 2; channel++) {
+        ide_t *ide = ide_drives[channel];
+
+        if (ide != NULL)
+            ide->is_jride = is_jride;
+    }
 }
 
 void

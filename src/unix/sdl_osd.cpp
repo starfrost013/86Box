@@ -1,10 +1,16 @@
-/* ImGui OSD for 86Box SDL2/GLES2. Renders into FBO so shaders apply. */
+/* ImGui OSD for 86Box SDL2. Uses either the stock SDL_Renderer or OpenGL3 backend. */
+#ifdef USE_SDL_SHADER_PIPELINE
 #include <GLES2/gl2.h>
+#endif
 #include <SDL.h>
 
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
+#ifdef USE_SDL_SHADER_PIPELINE
 #include "imgui_impl_opengl3.h"
+#else
+#include "imgui_impl_sdlrenderer2.h"
+#endif
 
 #include <cstdio>
 #include <cstring>
@@ -24,17 +30,25 @@
 #include <86box/video.h>
 #include <86box/ui.h>
 #include <86box/version.h>
-#include <86box/unix_sdl.h>
-#include <86box/unix_osd.h>
-#include "unix_sdl_shader.h"
+
+#include "sdl_render.h"
+#include "sdl_osd.h"
+
+#ifdef USE_SDL_SHADER_PIPELINE
+#include "sdl_shader.h"
+#endif
+
+extern "C" {
+#include "sdl_monitor.h"
+}
 
 /* ------------------------------------------------------------------ */
 /*  Extern interface to SDL environment                                */
 /* ------------------------------------------------------------------ */
 extern "C" {
 extern SDL_Window  *sdl_win;
-extern wchar_t      sdl_win_title[512];
-extern void         unix_executeLine(char *line);
+extern SDL_Renderer *sdl_render;
+extern char         sdl_win_title[512];
 }
 
 /* ------------------------------------------------------------------ */
@@ -73,8 +87,6 @@ static bool      mouse_was_captured = false;
 static char      files[OSD_FILE_CAPACITY][OSD_PATH_CAPACITY];
 static int       file_count     = 0;
 
-static char      sdl_win_title_mb[512] = "";
-
 /* ------------------------------------------------------------------ */
 /*  Log ring buffer                                                    */
 /* ------------------------------------------------------------------ */
@@ -86,6 +98,57 @@ static bool        log_scroll_pending = false;
 
 static void show_main_menu(void);
 static bool FocusedButton(const char *label, bool focused);
+
+static void normalize_slashes(char *path)
+{
+    while (*path != '\0') {
+        if (*path == '\\')
+            *path = '/';
+        path++;
+    }
+}
+
+static bool osd_backend_init(void)
+{
+#ifdef USE_SDL_SHADER_PIPELINE
+    SDL_GLContext ctx = sdl_shader_get_context();
+    if (!ctx)
+        return false;
+
+    SDL_GL_MakeCurrent(sdl_win, ctx);
+
+    if (!ImGui_ImplSDL2_InitForOpenGL(sdl_win, ctx))
+        return false;
+
+    if (!ImGui_ImplOpenGL3_Init("#version 100")) {
+        ImGui_ImplSDL2_Shutdown();
+        return false;
+    }
+#else
+    if (sdl_render == nullptr)
+        return false;
+
+    if (!ImGui_ImplSDL2_InitForSDLRenderer(sdl_win, sdl_render))
+        return false;
+
+    if (!ImGui_ImplSDLRenderer2_Init(sdl_render)) {
+        ImGui_ImplSDL2_Shutdown();
+        return false;
+    }
+#endif
+
+    return true;
+}
+
+static void osd_backend_shutdown(void)
+{
+#ifdef USE_SDL_SHADER_PIPELINE
+    ImGui_ImplOpenGL3_Shutdown();
+#else
+    ImGui_ImplSDLRenderer2_Shutdown();
+#endif
+    ImGui_ImplSDL2_Shutdown();
+}
 
 static void osd_log_push(const char *line)
 {
@@ -188,13 +251,13 @@ static void scan_dir_recursive(char path[], size_t path_len, const char *const *
     if (!visited.insert(key).second)
         return; /* already visited (symlink / bind-mount) */
 
-    struct dirent **nl;
-    int n = scandir(path, &nl, nullptr, alphasort);
-    if (n < 0)
+    DIR *dir = opendir(path);
+    if (!dir)
         return;
 
-    for (int i = 0; i < n; i++) {
-        const char *name = nl[i]->d_name;
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        const char *name = entry->d_name;
         if (file_count < OSD_FILE_CAPACITY && name[0] != '.') {
             int added = snprintf(path + path_len, OSD_PATH_CAPACITY - path_len,
                                  "/%s", name);
@@ -210,9 +273,9 @@ static void scan_dir_recursive(char path[], size_t path_len, const char *const *
             }
             path[path_len] = '\0';
         }
-        free(nl[i]);
     }
-    free(nl);
+
+    closedir(dir);
 }
 
 static void load_files(OsdView view)
@@ -249,11 +312,13 @@ static bool  cd_folder_pending = false;
 static void load_cd_folders(void)
 {
     cd_folder_count = 0;
-    struct dirent **nl;
-    int n = scandir(cd_folder_path, &nl, nullptr, alphasort);
-    if (n < 0) return;
-    for (int i = 0; i < n; i++) {
-        const char *name = nl[i]->d_name;
+    DIR *dir = opendir(cd_folder_path);
+    if (!dir)
+        return;
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        const char *name = entry->d_name;
         if (name[0] != '.') {
             char tmp[OSD_PATH_CAPACITY];
             snprintf(tmp, sizeof(tmp), "%s/%s", cd_folder_path, name);
@@ -263,9 +328,9 @@ static void load_cd_folders(void)
                 cd_folder_count++;
             }
         }
-        free(nl[i]);
     }
-    free(nl);
+
+    closedir(dir);
 }
 
 static void cd_folder_go_up(void)
@@ -294,9 +359,9 @@ static void cd_folder_enter(int idx)
 
 static void open_cd_folder_browser(void)
 {
-    char *rp = realpath(".", NULL); /* allocating form; no PATH_MAX constraint */
-    snprintf(cd_folder_path, sizeof(cd_folder_path), "%s", rp ? rp : "/");
-    free(rp);
+    if (!plat_getcwd(cd_folder_path, sizeof(cd_folder_path)))
+        snprintf(cd_folder_path, sizeof(cd_folder_path), ".");
+    normalize_slashes(cd_folder_path);
     cd_folder_pending = true;
     load_cd_folders();
 }
@@ -328,7 +393,7 @@ static void run_cmd(const char *cmd)
 {
     char *buf = strdup(cmd);
     if (buf) {
-        unix_executeLine(buf);
+        monitor_execute_line(buf);
         free(buf);
     }
 }
@@ -384,12 +449,6 @@ void osd_init(void)
     if (imgui_inited)
         return;
 
-    SDL_GLContext ctx = sdl_shader_get_context();
-    if (!ctx)
-        return;
-
-    SDL_GL_MakeCurrent(sdl_win, ctx);
-
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -399,8 +458,10 @@ void osd_init(void)
 
     setup_retro_style();
 
-    ImGui_ImplSDL2_InitForOpenGL(sdl_win, ctx);
-    ImGui_ImplOpenGL3_Init("#version 100");
+    if (!osd_backend_init()) {
+        ImGui::DestroyContext();
+        return;
+    }
 
     log_mutex = SDL_CreateMutex();
     pclog_hook = osd_log_push;
@@ -416,8 +477,7 @@ void osd_deinit(void)
     pclog_hook = nullptr;
     if (log_mutex) { SDL_DestroyMutex(log_mutex); log_mutex = nullptr; }
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
+    osd_backend_shutdown();
     ImGui::DestroyContext();
     imgui_inited = false;
 }
@@ -431,10 +491,8 @@ int osd_open(SDL_Event event)
     osd_visible  = true;
     show_main_menu();
 
-    mouse_was_captured = (SDL_GetRelativeMouseMode() == SDL_TRUE);
-    if (mouse_was_captured)
-        plat_mouse_capture(0);
-    SDL_ShowCursor(SDL_TRUE);
+    mouse_was_captured = mouse_capture;
+    plat_mouse_capture(0);
 
     /* Prevent stale ESC from firing on re-open. */
     if (imgui_inited)
@@ -449,11 +507,8 @@ int osd_close(SDL_Event event)
     osd_visible = false;
 
     /* Restore mouse capture if it was active before OSD opened. */
-    if (mouse_was_captured) {
-        plat_mouse_capture(1);
-        mouse_was_captured = false;
-    }
-    SDL_ShowCursor(SDL_FALSE);
+    plat_mouse_capture(mouse_was_captured);
+    mouse_was_captured = false;
 
     return 1;
 }
@@ -587,8 +642,6 @@ static bool draw_menu(void)
     const bool enter = ImGui::IsKeyPressed(ImGuiKey_Enter,       false)
                     || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter, false);
 
-    wcstombs(sdl_win_title_mb, sdl_win_title, sizeof(sdl_win_title_mb) - 1);
-
     menu_normalize_selection();
 
     bool close_osd = false;
@@ -616,8 +669,8 @@ static bool draw_menu(void)
                  ImGuiWindowFlags_NoNav);
 
     /* Show window title (machine info) */
-    if (sdl_win_title_mb[0]) {
-        ImGui::TextDisabled("%s", sdl_win_title_mb);
+    if (sdl_win_title[0]) {
+        ImGui::TextDisabled("%s", sdl_win_title);
         ImGui::Separator();
     }
 
@@ -1033,6 +1086,7 @@ void osd_present(int fb_w, int fb_h)
     if (!osd_visible || !imgui_inited)
         return;
 
+#ifdef USE_SDL_SHADER_PIPELINE
     SDL_GLContext ctx = sdl_shader_get_context();
     if (!ctx)
         return;
@@ -1096,6 +1150,39 @@ void osd_present(int fb_w, int fb_h)
     ImDrawData *dd = ImGui::GetDrawData();
     flip_draw_data_y(dd);
     ImGui_ImplOpenGL3_RenderDrawData(dd);
+#else
+    (void)fb_w;
+    (void)fb_h;
+
+    if (sdl_render == nullptr)
+        return;
+
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+
+    bool still_open = true;
+    switch (current_view) {
+        case VIEW_MENU:
+            still_open = draw_menu();
+            break;
+        case VIEW_LOG:
+            still_open = draw_log();
+            break;
+        case VIEW_CD_FOLDER:
+            still_open = draw_folder_browser();
+            break;
+        default:
+            still_open = draw_file_selector();
+            break;
+    }
+
+    if (!still_open)
+        pending_close = true;
+
+    ImGui::Render();
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), sdl_render);
+#endif
 }
 
 int osd_is_visible(void)

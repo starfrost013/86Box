@@ -131,6 +131,7 @@ option(OPENAL       "OpenAL"                                                    
 option(RTMIDI       "RtMidi"                                                     ON)
 option(FLUIDSYNTH   "FluidSynth"                                                 ON)
 option(MUNT         "MUNT"                                                       ON)
+option(SOUNDCANVAS  "Sound Canvas (CLAP)"                                        ON)
 option(VNC          "VNC renderer"                                               OFF)
 option(MINITRACE    "Enable Chrome tracing using the modified minitrace library" OFF)
 option(GDBSTUB      "Enable GDB stub server for debugging"                       OFF)
@@ -138,6 +139,7 @@ option(DEV_BRANCH   "Development branch"                                        
 option(DISCORD      "Discord Rich Presence support"                              ON)
 option(DEBUGREGS486 "Enable debug register opeartion on 486+ CPUs"               ON)
 option(LIBASAN      "Enable compilation with the addresss sanitizer"             OFF)
+option(QT           "Use the Qt-based user interface"                            ON)
 
 if((ARCH STREQUAL "arm64"))
     set(NEW_DYNAREC ON)
@@ -158,11 +160,17 @@ else()
 endif()
 
 if(WIN32)
-    set(QT ON)
     option(CPPTHREADS "C++11 threads" OFF)
 else()
-    option(QT "Qt GUI" ON)
     option(CPPTHREADS "C++11 threads" ON)
+endif()
+
+if(WIN32 AND NOT QT)
+    # Force console subsystem when building the SDL frontend
+    set(CMAKE_WIN32_EXECUTABLE OFF CACHE BOOL "Build a Windows GUI executable" FORCE)
+
+    # FluidSynth pulls in SDL3 - disable for now
+    set(FLUIDSYNTH OFF CACHE BOOL "FluidSynth" FORCE)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
@@ -234,7 +242,3 @@ endif()
 set(CMAKE_TOP_LEVEL_PROCESSED TRUE)
 
 add_subdirectory(src)
-
-if(WIN32)
-    target_link_libraries(86Box ucrt)
-endif()

@@ -623,6 +623,8 @@ extern int             machine_at_wd76c10_init(const machine_t *);
 /* m_at_m6117.c */
 /* ALi M6117D */
 extern int             machine_at_pja511m_init(const machine_t *);
+extern int             machine_at_icop6021_init(const machine_t *);
+extern int             machine_at_mops386a_init(const machine_t *);
 extern int             machine_at_prox1332_init(const machine_t *);
 
 /* m_at_486slc.c */
@@ -686,8 +688,9 @@ extern void            machine_at_ps2_ide_init(const machine_t *);
 /* CS4031 */
 extern int             machine_at_cs4031_init(const machine_t *);
 
-/* OPTi 381 */
+/* OPTi 481 */
 extern int             machine_at_ga486l_init(const machine_t *);
+extern int             machine_at_vantage4865c_init(const machine_t *);
 
 /* OPTi 493 */
 extern int             machine_at_svc486wb_init(const machine_t *);
@@ -746,6 +749,9 @@ extern int             machine_at_g486ip_init(const machine_t *);
 
 /* OPTi 499 */
 extern int             machine_at_cougar_init(const machine_t *);
+
+/* SiS 460 */
+extern int             machine_at_spc7500p_init(const machine_t *);
 
 /* SiS 461 */
 extern int             machine_at_decpclpv_init(const machine_t *);
@@ -1150,6 +1156,7 @@ extern int             machine_at_ficva502_init(const machine_t *);
 
 /* VIA VP3 */
 extern int             machine_at_ficpa2012_init(const machine_t *);
+extern int             machine_at_5avp3_init(const machine_t *);
 extern int             machine_at_via809ds_init(const machine_t *);
 
 /* SiS 5571 */

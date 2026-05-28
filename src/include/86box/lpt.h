@@ -63,14 +63,15 @@ typedef struct lpt_t {
     uint8_t       char_write;
     uint8_t       char_pti_mode;
     uint8_t       char_pti_readout;
+    uint32_t      char_control;
     unsigned int  char_spin_count;
     lpt_device_t *dt;
-    char_port_t   port;
 #ifdef FIFO_H
     fifo16_t *    fifo;
 #else
     void *        fifo;
 #endif
+    char_port_t   char_port;
 
     pc_timer_t    fifo_out_timer;
     pc_timer_t    char_timer;
@@ -80,6 +81,7 @@ typedef struct lpt_t {
 typedef struct lpt_port_s {
     uint8_t       enabled;
 
+    uint8_t       hotunplug;
     int           device;
 
     lpt_t        *lpt;
@@ -148,7 +150,7 @@ extern void *              lpt_attach_ex(int     port,
                                          void    (*epp_request_read)(uint8_t is_addr, void *priv),
                                          void    *priv);
 #define lpt_attach(...) lpt_attach_ex(device_get_instance() - 1, __VA_ARGS__)
-extern void                lpt_devices_close(void);
+extern void                lpt_devices_close(int soft);
 extern void                lpt_devices_reset(void);
 
 extern void                lpt_set_next_inst(int ni);

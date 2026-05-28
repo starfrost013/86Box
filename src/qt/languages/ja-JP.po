@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-04-05 18:51+0000\n"
-"Last-Translator: Alexander Babikov <lemondrops358@gmail.com>\n"
+"PO-Revision-Date: 2026-05-16 15:51+0000\n"
+"Last-Translator: BlueRain-debug <bluerain.debug@gmail.com>\n"
 "Language-Team: Japanese <https://weblate.86box.net/projects/86box/86box/ja/>"
 "\n"
 "Language: ja-JP\n"
@@ -368,7 +368,7 @@ msgid "[1996] Socket 7 (Dual Voltage)"
 msgstr ""
 
 msgid "Miscellaneous"
-msgstr ""
+msgstr "その他"
 
 msgid "Machine:"
 msgstr "マシン:"
@@ -769,17 +769,17 @@ msgstr "ベーシック セクター イメージ"
 msgid "Surface images"
 msgstr "サーフェス イメージ"
 
-msgid "Machine \"%hs\" is not available due to missing ROMs in the roms/machines directory. Switching to an available machine."
-msgstr "roms/machines ディレクトリにROMがないため、マシン「%hs」は使用できません。使用可能なマシンに切り替えます。"
+msgid "Machine \"%s\" is not available due to missing ROMs in the roms/machines directory. Switching to an available machine."
+msgstr "roms/machines ディレクトリにROMがないため、マシン「%s」は使用できません。使用可能なマシンに切り替えます。"
 
-msgid "Video card \"%hs\" is not available due to missing ROMs in the roms/video directory. Switching to an available video card."
-msgstr "roms/video ディレクトリにROMがないため、ビデオ カード「%hs」は使用できません。使用可能なビデオカードに切り替えます。"
+msgid "Video card \"%s\" is not available due to missing ROMs in the roms/video directory. Switching to an available video card."
+msgstr "roms/video ディレクトリにROMがないため、ビデオ カード「%s」は使用できません。使用可能なビデオカードに切り替えます。"
 
-msgid "Video card #2 \"%hs\" is not available due to missing ROMs in the roms/video directory. Disabling the second video card."
-msgstr "roms/video ディレクトリにROMがないため、ビデオ カード2「%hs」は使用できません。2枚目のビデオカードを無効にします。"
+msgid "Video card #2 \"%s\" is not available due to missing ROMs in the roms/video directory. Disabling the second video card."
+msgstr "roms/video ディレクトリにROMがないため、ビデオ カード2「%s」は使用できません。2枚目のビデオカードを無効にします。"
 
-msgid "Device \"%hs\" is not available due to missing ROMs. Ignoring the device."
-msgstr "ROMがないため、デバイス「%hs」は使用できません。装置を無視する。"
+msgid "Device \"%s\" is not available due to missing ROMs. Ignoring the device."
+msgstr "ROMがないため、デバイス「%s」は使用できません。デバイスを無視します。"
 
 msgid "Machine"
 msgstr "マシン"
@@ -1019,7 +1019,7 @@ msgid "New machine"
 msgstr "新しいマシン"
 
 msgid "&Check for updates…"
-msgstr "アップデートを確認中(&C)…"
+msgstr "アップデートを確認(&C)…"
 
 msgid "Exit"
 msgstr "終了"
@@ -1456,11 +1456,32 @@ msgstr "選択したファイルは上書きされます。よろしいですか
 msgid "Unsupported disk image"
 msgstr "非対応のディスクイメージ"
 
-msgid "Overwrite"
-msgstr "上書き"
+msgid "Unable to read device"
+msgstr ""
 
-msgid "Don't overwrite"
-msgstr "上書きしない"
+msgid "Could not determine block device size. Make sure you have permission to access this device."
+msgstr ""
+
+msgid "Device too large"
+msgstr ""
+
+msgid "Block device is too large to be used as a hard disk."
+msgstr ""
+
+msgid "Block device detected"
+msgstr ""
+
+msgid "Detected block device: %1\nSize: %2 MB\nGeometry: %3 cylinders, %4 heads, %5 sectors"
+msgstr ""
+
+msgid "Failed to write the disk image."
+msgstr ""
+
+msgid "Failed to read the disk image."
+msgstr ""
+
+msgid "The disk image has been successfully created."
+msgstr ""
 
 msgid "Raw image"
 msgstr "生のイメージ"
@@ -1748,7 +1769,7 @@ msgid "Couldn't create OpenGL context."
 msgstr "OpenGLコンテキストを作成できませんでした。"
 
 msgid "Couldn't switch to OpenGL context."
-msgstr "OpenGLコンテキストに切り替えられなかった。"
+msgstr "OpenGLコンテキストに切り替えられませんでした。"
 
 msgid "OpenGL version 3.0 or greater is required. Current version is %1.%2"
 msgstr "OpenGLのバージョン3.0以上が必要です。現在のバージョンは %1.%2 です"
@@ -1763,13 +1784,13 @@ msgid "<html><head/><body><p>When selecting media images (CD-ROM, floppy, etc.) 
 msgstr "<html><head/><body><p>メディアイメージ（CD-ROM、フロッピーなど）を選択するとき、オープンダイアログは86Box設定ファイルと同じディレクトリで開始します。この設定は、おそらく macOS でのみ違いがあります。</p></body></html>"
 
 msgid "This machine might have been moved or copied."
-msgstr "このマシンは移動されたかコピーされた可能性がある。"
+msgstr "このマシンは移動またはコピーされた可能性があります。"
 
 msgid "In order to ensure proper networking functionality, 86Box needs to know if this machine was moved or copied.\n\nSelect \"I Copied It\" if you are not sure."
-msgstr "ネットワーク機能を正しく動作させるために、86Boxはこのマシンが移動されたかコピーされたかを知る必要があります。\n\n「コピーした」を選択してください。"
+msgstr "ネットワーク機能を正しく動作させるために、86Boxはこのマシンが移動されたかコピーされたかを知る必要があります。\n\n不明な場合は、「コピーした」を選択してください。"
 
 msgid "I Moved It"
-msgstr "動かした"
+msgstr "移動した"
 
 msgid "I Copied It"
 msgstr "コピーした"
@@ -1778,7 +1799,7 @@ msgid "86Box Monitor #%1"
 msgstr "86Box モニター%1"
 
 msgid "No MCA devices."
-msgstr "MCAデバイスはない。"
+msgstr "MCAデバイスはありません。"
 
 msgid "MiB"
 msgstr "MiB"
@@ -1970,7 +1991,7 @@ msgid "BIOS Language"
 msgstr "BIOS言語"
 
 msgid "Variant"
-msgstr ""
+msgstr "バリアント"
 
 msgid "IBM 5161 Expansion Unit"
 msgstr "IBM 5161拡張ユニット"
@@ -2353,20 +2374,47 @@ msgstr "EMS 2メモリ容量"
 msgid "Enable EMS"
 msgstr "EMSを有効にする"
 
-msgid "Enable EMS 1"
-msgstr "EMS 1を有効にする"
-
-msgid "Enable EMS 2"
-msgstr "EMS 2を有効にする"
-
 msgid "Address for > 2 MB"
 msgstr "2MB以上のアドレス"
 
 msgid "Frame Address"
 msgstr "フレームアドレス"
 
-msgid "USA"
-msgstr "アメリカ"
+msgid "English"
+msgstr ""
+
+msgid "English (US)"
+msgstr ""
+
+msgid "English (UK)"
+msgstr ""
+
+msgid "English (Canada)"
+msgstr ""
+
+msgid "German"
+msgstr ""
+
+msgid "French"
+msgstr ""
+
+msgid "Spanish"
+msgstr ""
+
+msgid "Swedish"
+msgstr ""
+
+msgid "Italian"
+msgstr ""
+
+msgid "Portuguese"
+msgstr ""
+
+msgid "Norwegian"
+msgstr ""
+
+msgid "Greek"
+msgstr ""
 
 msgid "Danish"
 msgstr "デンマーク語"
@@ -2563,9 +2611,6 @@ msgstr "グレイスケール"
 msgid "Color"
 msgstr "カラー"
 
-msgid "U.S. English"
-msgstr "アメリカ英語"
-
 msgid "Scandinavian"
 msgstr "スカンジナビア"
 
@@ -2651,32 +2696,77 @@ msgstr ""
 msgid "Serial Passthrough"
 msgstr "シリアルポートパススルーデバイス"
 
-msgid "Passthrough Mode"
-msgstr "パススルーモード"
-
-msgid "Host Serial Device"
+msgid "Host serial device"
 msgstr "ホストシリアルデバイス"
 
-msgid "Name of pipe"
-msgstr "パイプ名"
+msgid "Named Pipe"
+msgstr "名前付きパイプ"
 
-msgid "Data bits"
-msgstr "データビット"
+msgid "Output file"
+msgstr ""
 
-msgid "Stop bits"
-msgstr "ストップビット"
+msgid "Append to file if it exists"
+msgstr ""
 
-msgid "Baud Rate of Passthrough"
-msgstr "パススルーのボーレート"
+msgid "Input file"
+msgstr ""
 
-msgid "Named Pipe (Server)"
-msgstr "名前付きパイプ(サーバー)"
+msgid "Loop input file"
+msgstr ""
 
-msgid "Named Pipe (Client)"
-msgstr "名前付きパイプ(クライアント)"
+msgid "Require STROBE signal"
+msgstr ""
 
-msgid "Host Serial Passthrough"
-msgstr "ホストシリアルポートのパススルー"
+msgid "Loopback Type"
+msgstr ""
+
+msgid "Parallel cable"
+msgstr ""
+
+msgid "Unidirectional (8-bit) / LapLink (4-bit)"
+msgstr ""
+
+msgid "Bidirectional (8-bit)"
+msgstr ""
+
+msgid "Pipe path"
+msgstr ""
+
+msgid "FIFO / terminal"
+msgstr ""
+
+msgid "Mode"
+msgstr ""
+
+msgid "Server"
+msgstr "サーバー"
+
+msgid "Client"
+msgstr "クライアント"
+
+msgid "Reconnect automatically"
+msgstr ""
+
+msgid "Use standard input/output"
+msgstr ""
+
+msgid "Create pseudoterminal"
+msgstr ""
+
+msgid "Start terminal emulator"
+msgstr ""
+
+msgid "Run custom command"
+msgstr ""
+
+msgid "Custom command"
+msgstr ""
+
+msgid "Run custom command in terminal"
+msgstr ""
+
+msgid "Virtual Console"
+msgstr ""
 
 msgid "E&ject %1"
 msgstr "%1を取り出す(&J)"
@@ -2720,8 +2810,8 @@ msgstr "[汎用] 1998 (5400 RPM)"
 msgid "[Generic] 2000 (7200 RPM)"
 msgstr "[汎用] 2000 (7200 RPM)"
 
-msgid "IBM 8514/A clone (ISA)"
-msgstr "IBM 8514/A クローン（ISA）"
+msgid "IBM 8514/A clone"
+msgstr "IBM 8514/A クローン"
 
 msgid "Vendor"
 msgstr "業者"
@@ -2811,7 +2901,7 @@ msgid "Emulator"
 msgstr ""
 
 msgid "Input"
-msgstr ""
+msgstr "入力"
 
 msgid "Key bindings"
 msgstr "キーバインド"
@@ -2895,7 +2985,7 @@ msgid "&Wipe NVRAM"
 msgstr "NVRAMを消去する(&W)"
 
 msgid "This will delete all NVRAM (and related) files of the virtual machine located in the \"nvr\" subdirectory. You'll have to reconfigure the BIOS (and possibly other devices inside the VM) settings again if applicable.\n\nAre you sure you want to wipe all NVRAM contents of the virtual machine \"%1\"?"
-msgstr "これによって、仮想マシン内の「nvr」サブディレクトリに格納されているすべてのNVRAM(および関連)ファイルが削除されます。必要に応じて、BIOSの設定(および仮想マシン内の他のデバイス設定)を再構成する必要があります。\n\n仮想マシン「%1」のすべてのNVRAM内容を削除してもよろしいですか？"
+msgstr "これにより、仮想マシン内の「nvr」サブディレクトリに格納されているすべてのNVRAM(および関連)ファイルが削除されます。必要に応じて、BIOSの設定(および仮想マシン内の他のデバイス設定)を再構成する必要があります。\n\n仮想マシン「%1」のすべてのNVRAM内容を削除してもよろしいですか？"
 
 msgid "Success"
 msgstr "成功"
@@ -2916,7 +3006,7 @@ msgid "Unknown Status"
 msgstr "不明な状態"
 
 msgid "No Machines Found!"
-msgstr "マシンが検出されません！"
+msgstr "マシンが見つかりません！"
 
 msgid "Check for updates on startup"
 msgstr "起動時にアップデートを確認する"
@@ -2958,7 +3048,7 @@ msgid "<b>Build %1</b> is now available."
 msgstr "<b>ビルド %1</b> が現在利用可能です。"
 
 msgid "Would you like to visit the download page?"
-msgstr "ダウンロードページをご覧になりたいですか？"
+msgstr "ダウンロードページを開きますか？"
 
 msgid "Visit download page"
 msgstr "ダウンロードページをご覧ください"
@@ -3020,8 +3110,8 @@ msgstr "エクスポート…"
 msgid "Export EDID"
 msgstr "EDIDのエクスポート"
 
-msgid "EDID file \"%ls\" is too large."
-msgstr "EDIDファイル「%ls」が大きすぎます。"
+msgid "EDID file \"%s\" is too large."
+msgstr "EDIDファイル「%s」が大きすぎます。"
 
 msgid "OpenGL input scale"
 msgstr "OpenGLの入力スケール"
@@ -3070,3 +3160,156 @@ msgstr "音声出力デバイス:"
 
 msgid "System Default"
 msgstr "システム既定値"
+
+msgid "Unable to open image or folder \"%s\"."
+msgstr ""
+
+msgid "Unable to open cue sheet \"%s\"."
+msgstr ""
+
+msgid "Unable to open MDS file \"%s\"."
+msgstr ""
+
+msgid "Unable to load CD-ROM image \"%s\"."
+msgstr ""
+
+msgid "Unable to load image \"%s\": mdsx.so is missing, which is required for Daemon Tools MDS v2 and MDX image support."
+msgstr ""
+
+msgid "The DVD image \"%s\" has been inserted into a drive that does not support DVD media and will be ignored."
+msgstr ""
+
+msgid "%s: Could not connect to %s: %s"
+msgstr ""
+
+msgid "%s: Could not create %s: %s"
+msgstr ""
+
+msgid "%s: Attached to %s"
+msgstr ""
+
+msgid "%s: Virtual console already in use by %s"
+msgstr ""
+
+msgid "%s: Could not create terminal: %s"
+msgstr ""
+
+msgid "Auto-detect"
+msgstr ""
+
+msgid "Channel"
+msgstr ""
+
+msgid "Both Channels"
+msgstr ""
+
+msgid "Left Channel"
+msgstr ""
+
+msgid "Right Channel"
+msgstr ""
+
+msgid "Allow Flash BIOS Updates"
+msgstr ""
+
+msgid "Slot #"
+msgstr ""
+
+msgid "Parallel Port"
+msgstr ""
+
+msgid "Paper Size"
+msgstr ""
+
+msgid "Legal (sideways)"
+msgstr ""
+
+msgid "B4 (sideways)"
+msgstr ""
+
+msgid "Quality"
+msgstr ""
+
+msgid "Draft"
+msgstr ""
+
+msgid "(Near) Letter"
+msgstr ""
+
+msgid "Auto LF"
+msgstr ""
+
+msgid "Tandy PSSJ Clone"
+msgstr ""
+
+msgid "PC-CM (Color)"
+msgstr ""
+
+msgid "PC-MM (Monochrome)"
+msgstr ""
+
+msgid "White Monochrome"
+msgstr ""
+
+msgid "Hardware font"
+msgstr ""
+
+msgid "Diagnostic mode"
+msgstr ""
+
+msgid "CGA monitor"
+msgstr ""
+
+msgid "MDA monitor"
+msgstr ""
+
+msgid "Television"
+msgstr ""
+
+msgid "Invert LCD colors"
+msgstr ""
+
+msgid "LCD (CGA mode)"
+msgstr ""
+
+msgid "LCD (MDA mode)"
+msgstr ""
+
+msgid "Disabled (250h)"
+msgstr ""
+
+msgid "Enabled (350h)"
+msgstr ""
+
+msgid "Test mode"
+msgstr ""
+
+msgid "32 MB"
+msgstr ""
+
+msgid "64 MB"
+msgstr ""
+
+msgid "2048 MB"
+msgstr ""
+
+msgid "Refresh rate"
+msgstr ""
+
+msgid "US (CP 437)"
+msgstr ""
+
+msgid "IBM Nordic (CP 437-Nordic)"
+msgstr ""
+
+msgid "Czech Kamenicky (CP 895) #1"
+msgstr ""
+
+msgid "Czech Kamenicky (CP 895) #2"
+msgstr ""
+
+msgid "932 (Japanese)"
+msgstr ""
+
+msgid "938 (Traditional Chinese)"
+msgstr ""

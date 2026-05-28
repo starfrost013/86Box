@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-03-31 14:23+0000\n"
-"Last-Translator: OBattler <oubattler@gmail.com>\n"
+"PO-Revision-Date: 2026-05-28 17:34+0000\n"
+"Last-Translator: RichardG867 <richardg867@gmail.com>\n"
 "Language-Team: Portuguese (Portugal) <https://weblate.86box.net/projects/"
 "86box/86box/pt_PT/>\n"
 "Language: pt-PT\n"
@@ -769,17 +769,17 @@ msgstr "Imagens básicas de sector"
 msgid "Surface images"
 msgstr "Imagens de superfície"
 
-msgid "Machine \"%hs\" is not available due to missing ROMs in the roms/machines directory. Switching to an available machine."
-msgstr "A máquina \"%hs\" não está disponível devido à falta de ROMs na pasta roms/machines. A mudar para uma máquina disponível."
+msgid "Machine \"%s\" is not available due to missing ROMs in the roms/machines directory. Switching to an available machine."
+msgstr "A máquina \"%s\" não está disponível devido à falta de ROMs na pasta roms/machines. A mudar para uma máquina disponível."
 
-msgid "Video card \"%hs\" is not available due to missing ROMs in the roms/video directory. Switching to an available video card."
-msgstr "A placa vídeo \"%hs\" não está disponível devido à falta de ROMs na pasta roms/video. A mudar para uma placa vídeo disponível."
+msgid "Video card \"%s\" is not available due to missing ROMs in the roms/video directory. Switching to an available video card."
+msgstr "A placa vídeo \"%s\" não está disponível devido à falta de ROMs na pasta roms/video. A mudar para uma placa vídeo disponível."
 
-msgid "Video card #2 \"%hs\" is not available due to missing ROMs in the roms/video directory. Disabling the second video card."
-msgstr "A placa vídeo 2 \"%hs\" não está disponível devido à falta de ROMs na pasta roms/video. A desativar a segunda placa vídeo."
+msgid "Video card #2 \"%s\" is not available due to missing ROMs in the roms/video directory. Disabling the second video card."
+msgstr "A placa vídeo 2 \"%s\" não está disponível devido à falta de ROMs na pasta roms/video. A desativar a segunda placa vídeo."
 
-msgid "Device \"%hs\" is not available due to missing ROMs. Ignoring the device."
-msgstr "O dispositivo \"%hs\" não está disponível devido à falta de ROMs A ignorar o dispositivo."
+msgid "Device \"%s\" is not available due to missing ROMs. Ignoring the device."
+msgstr "O dispositivo \"%s\" não está disponível devido à falta de ROMs A ignorar o dispositivo."
 
 msgid "Machine"
 msgstr "Máquina"
@@ -1456,11 +1456,47 @@ msgstr "O ficheiro selecionado será sobrescrito. Tem a certeza de que quer util
 msgid "Unsupported disk image"
 msgstr "Imagem de disco sem suporte"
 
-msgid "Overwrite"
-msgstr "Sobrescrever"
+#, fuzzy
+msgid "Unable to read device"
+msgstr "Não foi possível ler o dispositivo"
 
-msgid "Don't overwrite"
-msgstr "Não sobrescrever"
+#, fuzzy
+msgid "Could not determine block device size. Make sure you have permission to access this device."
+msgstr ""
+"Não foi possível determinar o tamanho do dispositivo de bloco. Certifique-se "
+"que você tenha permissão para acessar este dispositivo."
+
+#, fuzzy
+msgid "Device too large"
+msgstr "Dispositivo grande demais"
+
+#, fuzzy
+msgid "Block device is too large to be used as a hard disk."
+msgstr ""
+"O dispositivo de bloco é grande demais para ser usado como disco rígido."
+
+#, fuzzy
+msgid "Block device detected"
+msgstr "Dispositivo de bloco detectado"
+
+#, fuzzy
+msgid "Detected block device: %1\nSize: %2 MB\nGeometry: %3 cylinders, %4 heads, %5 sectors"
+msgstr ""
+"Dispositivo de bloco detectado: %1\n"
+"Tamanho: %2 MB\n"
+"Geometria: %3 cilindros, %4 cabeças, %5 setores"
+
+#, fuzzy
+msgid "Failed to write the disk image."
+msgstr "Não foi possível gravar a imagem de disco."
+
+#, fuzzy
+msgid "Failed to read the disk image."
+msgstr "Não foi possível ler a imagem de disco."
+
+#, fuzzy
+msgid "The disk image has been successfully created."
+msgstr "A imagem de disco foi criada com sucesso."
 
 msgid "Raw image"
 msgstr "Imagem bruta"
@@ -2353,20 +2389,59 @@ msgstr "Tamanho da memória EMS 2"
 msgid "Enable EMS"
 msgstr "Activar a EMS"
 
-msgid "Enable EMS 1"
-msgstr "Activar a EMS 1"
-
-msgid "Enable EMS 2"
-msgstr "Activar a EMS 2"
-
 msgid "Address for > 2 MB"
 msgstr "Endereço para > 2 MB"
 
 msgid "Frame Address"
 msgstr "Endereço do quadro"
 
-msgid "USA"
-msgstr "EUA"
+#, fuzzy
+msgid "English"
+msgstr "Inglês"
+
+#, fuzzy
+msgid "English (US)"
+msgstr "Inglês (Estados Unidos)"
+
+#, fuzzy
+msgid "English (UK)"
+msgstr "Inglês (Reino Unido)"
+
+#, fuzzy
+msgid "English (Canada)"
+msgstr "Inglês (Canadá)"
+
+#, fuzzy
+msgid "German"
+msgstr "Alemão"
+
+#, fuzzy
+msgid "French"
+msgstr "Francês"
+
+#, fuzzy
+msgid "Spanish"
+msgstr "Espanhol"
+
+#, fuzzy
+msgid "Swedish"
+msgstr "Sueco"
+
+#, fuzzy
+msgid "Italian"
+msgstr "Italiano"
+
+#, fuzzy
+msgid "Portuguese"
+msgstr "Português"
+
+#, fuzzy
+msgid "Norwegian"
+msgstr "Norueguês"
+
+#, fuzzy
+msgid "Greek"
+msgstr "Grego"
 
 msgid "Danish"
 msgstr "Dinamarquesa"
@@ -2563,9 +2638,6 @@ msgstr "Escala de cinzentos"
 msgid "Color"
 msgstr "Cor"
 
-msgid "U.S. English"
-msgstr "Inglês dos E.U.A."
-
 msgid "Scandinavian"
 msgstr "Escandinavo"
 
@@ -2650,32 +2722,97 @@ msgstr "Conector de Loopback"
 msgid "Serial Passthrough"
 msgstr "Passagem de porta de série"
 
-msgid "Passthrough Mode"
-msgstr "Modo de passagem"
-
-msgid "Host Serial Device"
+msgid "Host serial device"
 msgstr "Dispositivo de série anfitrião"
 
-msgid "Name of pipe"
-msgstr "Nome do tubo"
+msgid "Named Pipe"
+msgstr "Tubo nomeado"
 
-msgid "Data bits"
-msgstr "Bits de dados"
+#, fuzzy
+msgid "Output file"
+msgstr "Ficheiro de saída"
 
-msgid "Stop bits"
-msgstr "Bits de paragem"
+#, fuzzy
+msgid "Append to file if it exists"
+msgstr "Adicionar ao ficheiro caso exista"
 
-msgid "Baud Rate of Passthrough"
-msgstr "Taxa de transmissão de passagem"
+#, fuzzy
+msgid "Input file"
+msgstr "Ficheiro de entrada"
 
-msgid "Named Pipe (Server)"
-msgstr "Tubo nomeado (servidor)"
+#, fuzzy
+msgid "Loop input file"
+msgstr "Repetir ficheiro de entrada"
 
-msgid "Named Pipe (Client)"
-msgstr "Tubo nomeado (cliente)"
+#, fuzzy
+msgid "Require STROBE signal"
+msgstr "Exigir sinal STROBE"
 
-msgid "Host Serial Passthrough"
-msgstr "Passagem da porta de série do anfitrião"
+#, fuzzy
+msgid "Loopback Type"
+msgstr "Tipo de loopback"
+
+#, fuzzy
+msgid "Parallel cable"
+msgstr "Cabo paralelo"
+
+#, fuzzy
+msgid "Unidirectional (8-bit) / LapLink (4-bit)"
+msgstr "Unidirecional (8 bits) / LapLink (4 bits)"
+
+#, fuzzy
+msgid "Bidirectional (8-bit)"
+msgstr "Bidirecional (8 bits)"
+
+#, fuzzy
+msgid "Pipe path"
+msgstr "Caminho do tubo"
+
+#, fuzzy
+msgid "FIFO / terminal"
+msgstr "FIFO ou terminal"
+
+#, fuzzy
+msgid "Mode"
+msgstr "Modo"
+
+msgid "Server"
+msgstr "Servidor"
+
+msgid "Client"
+msgstr "Cliente"
+
+#, fuzzy
+msgid "Reconnect automatically"
+msgstr "Reconectar automaticamente"
+
+#, fuzzy
+msgid "Use standard input/output"
+msgstr "Utilizar entrada/saída padrão"
+
+#, fuzzy
+msgid "Create pseudoterminal"
+msgstr "Criar pseudoterminal"
+
+#, fuzzy
+msgid "Start terminal emulator"
+msgstr "Iniciar emulador de terminal"
+
+#, fuzzy
+msgid "Run custom command"
+msgstr "Executar comando personalizado"
+
+#, fuzzy
+msgid "Custom command"
+msgstr "Comando personalizado"
+
+#, fuzzy
+msgid "Run custom command in terminal"
+msgstr "Executar comando personalizado em um terminal"
+
+#, fuzzy
+msgid "Virtual Console"
+msgstr "Console Virtual"
 
 msgid "E&ject %1"
 msgstr "E&jetar %1"
@@ -2719,8 +2856,8 @@ msgstr "[Genérico] 1998 (5400 RPM)"
 msgid "[Generic] 2000 (7200 RPM)"
 msgstr "[Genérico] 2000 (7200 RPM)"
 
-msgid "IBM 8514/A clone (ISA)"
-msgstr "Clone IBM 8514/A (ISA)"
+msgid "IBM 8514/A clone"
+msgstr "Clone IBM 8514/A"
 
 msgid "Vendor"
 msgstr "Fabricante"
@@ -3019,8 +3156,8 @@ msgstr "Exportar…"
 msgid "Export EDID"
 msgstr "Exportar EDID"
 
-msgid "EDID file \"%ls\" is too large."
-msgstr "O ficheiro EDID \"%ls\" é demasiado grande."
+msgid "EDID file \"%s\" is too large."
+msgstr "O ficheiro EDID \"%s\" é demasiado grande."
 
 msgid "OpenGL input scale"
 msgstr "Escala de entrada do OpenGL"
@@ -3069,3 +3206,210 @@ msgstr "Dispositivo de saída de áudio:"
 
 msgid "System Default"
 msgstr "Padrão do sistema"
+
+#, fuzzy
+msgid "Unable to open image or folder \"%s\"."
+msgstr "Não foi possível abrir a imagem ou pasta \"%s\"."
+
+#, fuzzy
+msgid "Unable to open cue sheet \"%s\"."
+msgstr "Não foi possível abrir o ficheiro cue \"%s\"."
+
+#, fuzzy
+msgid "Unable to open MDS file \"%s\"."
+msgstr "Não foi possível abrir o ficheiro MDS \"%s\"."
+
+#, fuzzy
+msgid "Unable to load CD-ROM image \"%s\"."
+msgstr "Não foi possível carregar a imagem de CD-ROM \"%s\"."
+
+#, fuzzy
+msgid "Unable to load image \"%s\": mdsx.so is missing, which is required for Daemon Tools MDS v2 and MDX image support."
+msgstr ""
+"Não foi possível carregar a imagem \"%s\": Falta mdsx.so, necessário para "
+"suporte a imagens Daemon Tools MDS v2 e MDX."
+
+#, fuzzy
+msgid "The DVD image \"%s\" has been inserted into a drive that does not support DVD media and will be ignored."
+msgstr ""
+"A imagem de DVD \"%s\" foi inserida em uma unidade que não suporta mídia DVD "
+"e será ignorada."
+
+#, fuzzy
+msgid "%s: Could not connect to %s: %s"
+msgstr "%s: Não foi possível conectar a %s: %s"
+
+#, fuzzy
+msgid "%s: Could not create %s: %s"
+msgstr "%s: Não foi possível criar %s: %s"
+
+#, fuzzy
+msgid "%s: Attached to %s"
+msgstr "%s: Conectado a %s"
+
+#, fuzzy
+msgid "%s: Virtual console already in use by %s"
+msgstr "%s: Console virtual já está em uso por %s"
+
+#, fuzzy
+msgid "%s: Could not create terminal: %s"
+msgstr "%s: Não foi possível criar o terminal: %s"
+
+#, fuzzy
+msgid "Auto-detect"
+msgstr "Detectar automaticamente"
+
+#, fuzzy
+msgid "Channel"
+msgstr "Canal"
+
+#, fuzzy
+msgid "Both Channels"
+msgstr "Ambos os canais"
+
+#, fuzzy
+msgid "Left Channel"
+msgstr "Canal esquerdo"
+
+#, fuzzy
+msgid "Right Channel"
+msgstr "Canal direito"
+
+#, fuzzy
+msgid "Allow Flash BIOS Updates"
+msgstr "Permitir atualizações de BIOS Flash"
+
+msgid "Slot #"
+msgstr "Slot no."
+
+#, fuzzy
+msgid "Parallel Port"
+msgstr "Porta paralela"
+
+#, fuzzy
+msgid "Paper Size"
+msgstr "Tamanho do papel"
+
+#, fuzzy
+msgid "Legal (sideways)"
+msgstr "Ofício (de lado)"
+
+#, fuzzy
+msgid "B4 (sideways)"
+msgstr "B4 (de lado)"
+
+#, fuzzy
+msgid "Quality"
+msgstr "Qualidade"
+
+#, fuzzy
+msgid "Draft"
+msgstr "Rascunho"
+
+#, fuzzy
+msgid "(Near) Letter"
+msgstr "(Próxima a) Carta"
+
+#, fuzzy
+msgid "Auto LF"
+msgstr "Quebra automática de linha"
+
+#, fuzzy
+msgid "Tandy PSSJ Clone"
+msgstr "Clone Tandy PSSJ"
+
+#, fuzzy
+msgid "PC-CM (Color)"
+msgstr "PC-CM (Cor)"
+
+#, fuzzy
+msgid "PC-MM (Monochrome)"
+msgstr "PC-MM (Monocromático)"
+
+#, fuzzy
+msgid "White Monochrome"
+msgstr "Monocromático branco"
+
+#, fuzzy
+msgid "Hardware font"
+msgstr "Fonte de hardware"
+
+#, fuzzy
+msgid "Diagnostic mode"
+msgstr "Modo de diagnóstico"
+
+#, fuzzy
+msgid "CGA monitor"
+msgstr "Monitor CGA"
+
+#, fuzzy
+msgid "MDA monitor"
+msgstr "Monitor MDA"
+
+#, fuzzy
+msgid "Television"
+msgstr "Televisão"
+
+#, fuzzy
+msgid "Invert LCD colors"
+msgstr "Inverter cores do LCD"
+
+#, fuzzy
+msgid "LCD (CGA mode)"
+msgstr "LCD (modo CGA)"
+
+#, fuzzy
+msgid "LCD (MDA mode)"
+msgstr "LCD (modo MDA)"
+
+#, fuzzy
+msgid "Disabled (250h)"
+msgstr "Desativado (250h)"
+
+#, fuzzy
+msgid "Enabled (350h)"
+msgstr "Ativado (350h)"
+
+#, fuzzy
+msgid "Test mode"
+msgstr "Modo de teste"
+
+#, fuzzy
+msgid "32 MB"
+msgstr "32 MB"
+
+#, fuzzy
+msgid "64 MB"
+msgstr "64 MB"
+
+#, fuzzy
+msgid "2048 MB"
+msgstr "2048 MB"
+
+#, fuzzy
+msgid "Refresh rate"
+msgstr "Taxa de atualização"
+
+#, fuzzy
+msgid "US (CP 437)"
+msgstr "Estados Unidos (CP 437)"
+
+#, fuzzy
+msgid "IBM Nordic (CP 437-Nordic)"
+msgstr "Nórdica IBM (CP 437-Nordic)"
+
+#, fuzzy
+msgid "Czech Kamenicky (CP 895) #1"
+msgstr "Checa Kamenicky (CP 895) no. 1"
+
+#, fuzzy
+msgid "Czech Kamenicky (CP 895) #2"
+msgstr "Checa Kamenicky (CP 895) no. 2"
+
+#, fuzzy
+msgid "932 (Japanese)"
+msgstr "932 (Japonês)"
+
+#, fuzzy
+msgid "938 (Traditional Chinese)"
+msgstr "938 (Chinês tradicional)"

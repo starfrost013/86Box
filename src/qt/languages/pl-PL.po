@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-04-07 05:04+0000\n"
+"PO-Revision-Date: 2026-05-28 17:34+0000\n"
 "Last-Translator: Lili Kurek <lili@lili.lgbt>\n"
 "Language-Team: Polish <https://weblate.86box.net/projects/86box/86box/pl/>\n"
 "Language: pl-PL\n"
@@ -769,17 +769,17 @@ msgstr "Podstawowe obrazy sektorów"
 msgid "Surface images"
 msgstr "Obrazy powierzchni"
 
-msgid "Machine \"%hs\" is not available due to missing ROMs in the roms/machines directory. Switching to an available machine."
-msgstr "Maszyna „%hs” nie jest dostępna, ponieważ brakuje ROM-ów w katalogu roms/machines. Przełączanie na dostępną maszynę."
+msgid "Machine \"%s\" is not available due to missing ROMs in the roms/machines directory. Switching to an available machine."
+msgstr "Maszyna „%s” nie jest dostępna, ponieważ brakuje ROM-ów w katalogu roms/machines. Przełączanie na dostępną maszynę."
 
-msgid "Video card \"%hs\" is not available due to missing ROMs in the roms/video directory. Switching to an available video card."
-msgstr "Karta wideo „%hs” nie jest dostępna, ponieważ brakuje ROM-ów w katalogu roms/video. Przełączanie na dostępną kartę graficzną."
+msgid "Video card \"%s\" is not available due to missing ROMs in the roms/video directory. Switching to an available video card."
+msgstr "Karta wideo „%s” nie jest dostępna, ponieważ brakuje ROM-ów w katalogu roms/video. Przełączanie na dostępną kartę graficzną."
 
-msgid "Video card #2 \"%hs\" is not available due to missing ROMs in the roms/video directory. Disabling the second video card."
-msgstr "Karta wideo 2 „%hs” nie jest dostępna, ponieważ brakuje ROM-ów w katalogu roms/video. Wyłączenie drugiej karty graficznej."
+msgid "Video card #2 \"%s\" is not available due to missing ROMs in the roms/video directory. Disabling the second video card."
+msgstr "Karta wideo 2 „%s” nie jest dostępna, ponieważ brakuje ROM-ów w katalogu roms/video. Wyłączenie drugiej karty graficznej."
 
-msgid "Device \"%hs\" is not available due to missing ROMs. Ignoring the device."
-msgstr "Urządzenie „%hs” nie jest dostępne, ponieważ brakuje ROM-ów. Ignorowanie urządzenia."
+msgid "Device \"%s\" is not available due to missing ROMs. Ignoring the device."
+msgstr "Urządzenie „%s” nie jest dostępne, ponieważ brakuje ROM-ów. Ignorowanie urządzenia."
 
 msgid "Machine"
 msgstr "Maszyna"
@@ -1456,11 +1456,37 @@ msgstr "Wybrany plik zostanie nadpisany. Czy na pewno chcesz użyć tego pliku?"
 msgid "Unsupported disk image"
 msgstr "Niewspierany obraz dysku"
 
-msgid "Overwrite"
-msgstr "Nadpisz"
+msgid "Unable to read device"
+msgstr "Nie można odczytać urządzenia"
 
-msgid "Don't overwrite"
-msgstr "Nie nadpisuj"
+msgid "Could not determine block device size. Make sure you have permission to access this device."
+msgstr ""
+"Nie udało się ustalić rozmiaru urządzenia blokowego. Upewnij się, że masz "
+"uprawnienia dostępu do tego urządzenia."
+
+msgid "Device too large"
+msgstr "Urządzenie zbyt duże"
+
+msgid "Block device is too large to be used as a hard disk."
+msgstr "Urządzenie blokowe jest zbyt duże, by użyć jako dysk twardy."
+
+msgid "Block device detected"
+msgstr "Wykryto urządzenie blokowe"
+
+msgid "Detected block device: %1\nSize: %2 MB\nGeometry: %3 cylinders, %4 heads, %5 sectors"
+msgstr ""
+"Wykryte urządzenie blokowe: %1\n"
+"Rozmiar: %2 MB\n"
+"Geometria: cylindry - %3, głowice - %4, sektory - %5"
+
+msgid "Failed to write the disk image."
+msgstr "Nie udało się zapisać obrazu dysku."
+
+msgid "Failed to read the disk image."
+msgstr "Nie udało się odczytać obrazu dysku."
+
+msgid "The disk image has been successfully created."
+msgstr "Obraz dysku został pomyślnie utworzony."
 
 msgid "Raw image"
 msgstr "Surowy obraz"
@@ -2353,20 +2379,47 @@ msgstr "Rozmiar pamięci EMS 2"
 msgid "Enable EMS"
 msgstr "Włącz EMS"
 
-msgid "Enable EMS 1"
-msgstr "Włącz EMS 1"
-
-msgid "Enable EMS 2"
-msgstr "Włącz EMS 2"
-
 msgid "Address for > 2 MB"
 msgstr "Adres dla > 2 MB"
 
 msgid "Frame Address"
 msgstr "Adres ramki"
 
-msgid "USA"
-msgstr "USA"
+msgid "English"
+msgstr "Angielski"
+
+msgid "English (US)"
+msgstr "Angielski (USA)"
+
+msgid "English (UK)"
+msgstr "Angielski (UK)"
+
+msgid "English (Canada)"
+msgstr "Angielski (Kanada)"
+
+msgid "German"
+msgstr "Niemiecki"
+
+msgid "French"
+msgstr "Francuski"
+
+msgid "Spanish"
+msgstr "Hiszpański"
+
+msgid "Swedish"
+msgstr "Szwedzki"
+
+msgid "Italian"
+msgstr "Włoski"
+
+msgid "Portuguese"
+msgstr "Portugalski"
+
+msgid "Norwegian"
+msgstr "Norweski"
+
+msgid "Greek"
+msgstr "Grecki"
 
 msgid "Danish"
 msgstr "Duński"
@@ -2563,9 +2616,6 @@ msgstr "Skala odcieni szarości"
 msgid "Color"
 msgstr "Kolorowy"
 
-msgid "U.S. English"
-msgstr "Angielski (USA)"
-
 msgid "Scandinavian"
 msgstr "Skandynawski"
 
@@ -2651,32 +2701,77 @@ msgstr "Wtyczka loopback"
 msgid "Serial Passthrough"
 msgstr "Urządzenie przelotowe portu szeregowego"
 
-msgid "Passthrough Mode"
-msgstr "Tryb przelotowy"
-
-msgid "Host Serial Device"
+msgid "Host serial device"
 msgstr "Urządzenie szeregowe hosta"
 
-msgid "Name of pipe"
-msgstr "Nazwa potoku"
+msgid "Named Pipe"
+msgstr "Nazwany potok"
 
-msgid "Data bits"
-msgstr "Bity danych"
+msgid "Output file"
+msgstr "Plik wyjściowy"
 
-msgid "Stop bits"
-msgstr "Bity stopu"
+msgid "Append to file if it exists"
+msgstr "Dołącz do pliku jeśli istnieje"
 
-msgid "Baud Rate of Passthrough"
-msgstr "Szybkość transmisji przelotowej"
+msgid "Input file"
+msgstr "Plik wejściowy"
 
-msgid "Named Pipe (Server)"
-msgstr "Nazwany potok (serwer)"
+msgid "Loop input file"
+msgstr "Plik wejściowy pętli"
 
-msgid "Named Pipe (Client)"
-msgstr "Nazwany potok (klient)"
+msgid "Require STROBE signal"
+msgstr "Wymagaj sygnału STROBE"
 
-msgid "Host Serial Passthrough"
-msgstr "Przelot przez port szeregowy hosta"
+msgid "Loopback Type"
+msgstr "Typ pętli zwrotnej"
+
+msgid "Parallel cable"
+msgstr "Kabel równoległy"
+
+msgid "Unidirectional (8-bit) / LapLink (4-bit)"
+msgstr "Jednokierunkowy (8-bitowy) / LapLink (4-bitowy)"
+
+msgid "Bidirectional (8-bit)"
+msgstr "Dwukierunkowy (8-bitowy)"
+
+msgid "Pipe path"
+msgstr "Ścieżka potoku"
+
+msgid "FIFO / terminal"
+msgstr "FIFO / terminal"
+
+msgid "Mode"
+msgstr "Tryb"
+
+msgid "Server"
+msgstr "Serwer"
+
+msgid "Client"
+msgstr "Klient"
+
+msgid "Reconnect automatically"
+msgstr "Podłącz ponownie automatycznie"
+
+msgid "Use standard input/output"
+msgstr "Użyj standardowego wejścia/wyjścia"
+
+msgid "Create pseudoterminal"
+msgstr "Utwórz pseudoterminal"
+
+msgid "Start terminal emulator"
+msgstr "Uruchom emulator terminala"
+
+msgid "Run custom command"
+msgstr "Uruchom własną komendę"
+
+msgid "Custom command"
+msgstr "Własna komenda"
+
+msgid "Run custom command in terminal"
+msgstr "Uruchom własną komendę w terminalu"
+
+msgid "Virtual Console"
+msgstr "Wirtualna konsola"
 
 msgid "E&ject %1"
 msgstr "W&yjmij %1"
@@ -2720,8 +2815,8 @@ msgstr "[generyczny] 1998 (5400 RPM)"
 msgid "[Generic] 2000 (7200 RPM)"
 msgstr "[generyczny] 2000 (7200 RPM)"
 
-msgid "IBM 8514/A clone (ISA)"
-msgstr "Klon IBM 8514/A (ISA)"
+msgid "IBM 8514/A clone"
+msgstr "Klon IBM 8514/A"
 
 msgid "Vendor"
 msgstr "Producent"
@@ -3020,8 +3115,8 @@ msgstr "Eksportuj…"
 msgid "Export EDID"
 msgstr "Eksportuj EDID"
 
-msgid "EDID file \"%ls\" is too large."
-msgstr "Plik EDID „%ls” jest zbyt duży."
+msgid "EDID file \"%s\" is too large."
+msgstr "Plik EDID „%s” jest zbyt duży."
 
 msgid "OpenGL input scale"
 msgstr "Skala wejścia OpenGL"
@@ -3070,3 +3165,160 @@ msgstr "Urządzenie wyjściowe dźwięku:"
 
 msgid "System Default"
 msgstr "Domyślne ustawienie systemowe"
+
+msgid "Unable to open image or folder \"%s\"."
+msgstr "Nie udało się otworzyć obrazu lub folderu „%s”."
+
+msgid "Unable to open cue sheet \"%s\"."
+msgstr "Nie udało się otworzyć arkusza cue „%s”."
+
+msgid "Unable to open MDS file \"%s\"."
+msgstr "Nie udało się otworzyć pliku MDS „%s”."
+
+msgid "Unable to load CD-ROM image \"%s\"."
+msgstr "Nie udało się wczytać obrazu CD-ROM „%s”."
+
+msgid "Unable to load image \"%s\": mdsx.so is missing, which is required for Daemon Tools MDS v2 and MDX image support."
+msgstr ""
+"Nie udało się wczytać obrazu „%s”: brakuje mdsx.so, potrzebnego do obsługi "
+"obrazów Daemon Tools MDS v2 i MDX."
+
+msgid "The DVD image \"%s\" has been inserted into a drive that does not support DVD media and will be ignored."
+msgstr ""
+"Obraz DVD „%s” został włożony do stacji dysków nieobsługującej dysków DVD i "
+"zostanie zignorowany."
+
+msgid "%s: Could not connect to %s: %s"
+msgstr "%s: Nie udało się połączyć do %s: %s"
+
+msgid "%s: Could not create %s: %s"
+msgstr "%s: Nie udało się utworzyć %s: %s"
+
+msgid "%s: Attached to %s"
+msgstr "%s: Podłączona do: %s"
+
+msgid "%s: Virtual console already in use by %s"
+msgstr "%s: Wirtualna konsola jest już w użyciu przez: %s"
+
+msgid "%s: Could not create terminal: %s"
+msgstr "%s: Nie udało się utworzyć terminala %s"
+
+msgid "Auto-detect"
+msgstr "Wykryj automatycznie"
+
+msgid "Channel"
+msgstr "Kanał"
+
+msgid "Both Channels"
+msgstr "Oba kanały"
+
+msgid "Left Channel"
+msgstr "Lewy kanał"
+
+msgid "Right Channel"
+msgstr "Prawy kanał"
+
+msgid "Allow Flash BIOS Updates"
+msgstr "Zezwól na aktualizację flashu BIOS"
+
+msgid "Slot #"
+msgstr "Slot #"
+
+msgid "Parallel Port"
+msgstr "Port równoległy"
+
+msgid "Paper Size"
+msgstr "Rozmiar papieru"
+
+msgid "Legal (sideways)"
+msgstr "Legal (poziomo)"
+
+msgid "B4 (sideways)"
+msgstr "B4 (poziomo)"
+
+msgid "Quality"
+msgstr "Jakość"
+
+msgid "Draft"
+msgstr "Robocza"
+
+msgid "(Near) Letter"
+msgstr "(Niemal) Listowa"
+
+msgid "Auto LF"
+msgstr "Automatyczny LF"
+
+msgid "Tandy PSSJ Clone"
+msgstr "Klon Tandy PSSJ"
+
+msgid "PC-CM (Color)"
+msgstr "PC-CM (kolorowy)"
+
+msgid "PC-MM (Monochrome)"
+msgstr "PC-MM (monochromatyczny)"
+
+msgid "White Monochrome"
+msgstr "Biały monochromatyczny"
+
+msgid "Hardware font"
+msgstr "Font sprzętowy"
+
+msgid "Diagnostic mode"
+msgstr "Tryb diagnostyczny"
+
+msgid "CGA monitor"
+msgstr "Monitor CGA"
+
+msgid "MDA monitor"
+msgstr "Monitor MDA"
+
+msgid "Television"
+msgstr "Telewizor"
+
+msgid "Invert LCD colors"
+msgstr "Odwróć kolory LCD"
+
+msgid "LCD (CGA mode)"
+msgstr "LCD (tryb CGA)"
+
+msgid "LCD (MDA mode)"
+msgstr "LCD (tryb MDA)"
+
+msgid "Disabled (250h)"
+msgstr "Zdjęta (250h)"
+
+msgid "Enabled (350h)"
+msgstr "Założona (350h)"
+
+msgid "Test mode"
+msgstr "Tryb testowy"
+
+msgid "32 MB"
+msgstr "32 MB"
+
+msgid "64 MB"
+msgstr "64 MB"
+
+msgid "2048 MB"
+msgstr "2048 MB"
+
+msgid "Refresh rate"
+msgstr "Częstotliwość odświeżania"
+
+msgid "US (CP 437)"
+msgstr "USA (CP 437)"
+
+msgid "IBM Nordic (CP 437-Nordic)"
+msgstr "IBM Nordic (CP 437-Nordic)"
+
+msgid "Czech Kamenicky (CP 895) #1"
+msgstr "Czeski Kamenický (CP 895) #1"
+
+msgid "Czech Kamenicky (CP 895) #2"
+msgstr "Czeski Kamenický (CP 895) #2"
+
+msgid "932 (Japanese)"
+msgstr "932 (japoński)"
+
+msgid "938 (Traditional Chinese)"
+msgstr "938 (chiński uproszczony)"
