@@ -1296,7 +1296,7 @@ mach64_ext_outb(uint16_t port, uint8_t val, void *priv)
     mach64_t *mach64 = (mach64_t *) priv;
     svga_t *svga = &mach64->svga;
 
-    // Code is written with the assumption that IO_BASE = 2cc. so we can rewrite it for other I/O bases like this
+    // Code is written with the assumption that IO_BASE = 2ec. so we can rewrite it for other I/O bases like this
     if (mach64->io_base == MACH64_IO_BASE_1CC)
         port -= 0x120;
     else if (mach64->io_base == MACH64_IO_BASE_1C8)
