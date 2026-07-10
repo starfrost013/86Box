@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-05-29 19:36+0000\n"
-"Last-Translator: OBattler <oubattler@gmail.com>\n"
+"PO-Revision-Date: 2026-06-07 22:01+0000\n"
+"Last-Translator: Lili Kurek <lili@lili.lgbt>\n"
 "Language-Team: Polish <https://weblate.86box.net/projects/86box/86box/pl/>\n"
 "Language: pl-PL\n"
 "MIME-Version: 1.0\n"
@@ -89,7 +89,7 @@ msgid "&1x"
 msgstr "&1x"
 
 msgid "1.&5x"
-msgstr "1.&5x"
+msgstr "1,&5x"
 
 msgid "&2x"
 msgstr "&2x"
@@ -1722,8 +1722,11 @@ msgstr "Powolny"
 msgid "Fast"
 msgstr "Szybki"
 
-msgid "&Auto-pause on focus loss"
-msgstr "&Automatyczna pauza po utracie fokusu"
+msgid "Auto-pause on focus loss"
+msgstr "Automatyczna pauza po utracie fokusu"
+
+msgid "Auto-pause on dialog boxes"
+msgstr ""
 
 msgid "WinBox is no longer supported"
 msgstr "WinBox nie jest już wspierany"
@@ -2317,7 +2320,7 @@ msgid "Control PC speaker"
 msgstr "Kontroluj PC speaker"
 
 msgid "Control MIDI volume"
-msgstr ""
+msgstr "Kontroluj głośność MIDI"
 
 msgid "Memory size"
 msgstr "Rozmiar pamięci"
@@ -3016,6 +3019,9 @@ msgid "Toggle mute"
 msgstr "Przełącz wyciszenie"
 
 msgid "Toggle on-screen display"
+msgstr "Przełącz menu ekranowe"
+
+msgid "Toggle &on-screen display"
 msgstr ""
 
 msgid "Text files"
@@ -3181,7 +3187,7 @@ msgid "Export EDID"
 msgstr "Eksportuj EDID"
 
 msgid "EDID file \"%s\" is invalid."
-msgstr ""
+msgstr "Nieprawidłowy plik EDID „%s”."
 
 msgid "EDID file \"%s\" is too large."
 msgstr "Plik EDID „%s” jest zbyt duży."
@@ -3395,4 +3401,4 @@ msgid "938 (Traditional Chinese)"
 msgstr "938 (chiński uproszczony)"
 
 msgid "Sample rate:"
-msgstr ""
+msgstr "Częstotliwość próbkowania:"

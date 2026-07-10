@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-06-06 17:20+0000\n"
+"PO-Revision-Date: 2026-06-17 07:28+0000\n"
 "Last-Translator: DimMan88 <dimman88@hotmail.com>\n"
 "Language-Team: Greek <https://weblate.86box.net/projects/86box/86box/el/>\n"
 "Language: el-GR\n"
@@ -1730,8 +1730,11 @@ msgstr "Αργό"
 msgid "Fast"
 msgstr "Γρήγορο"
 
-msgid "&Auto-pause on focus loss"
-msgstr "&Αυτόματο-πάγωμα σε απώλεια εστίασης"
+msgid "Auto-pause on focus loss"
+msgstr "Αυτόματο-πάγωμα σε απώλεια εστίασης"
+
+msgid "Auto-pause on dialog boxes"
+msgstr "Αυτόματη παύση στα παράθυρα διαλόγου"
 
 msgid "WinBox is no longer supported"
 msgstr "Το WinBox δεν υποστηρίζεται πλέον"
@@ -3052,7 +3055,10 @@ msgid "Toggle mute"
 msgstr "Εναλλαγή σίγασης"
 
 msgid "Toggle on-screen display"
-msgstr ""
+msgstr "Ενεργοποίηση απεικόνισης στην οθόνη"
+
+msgid "Toggle &on-screen display"
+msgstr "Ενεργοποίηση &απεικόνισης στην οθόνη"
 
 msgid "Text files"
 msgstr "Αρχεία κειμένου"
@@ -3232,7 +3238,7 @@ msgid "Export EDID"
 msgstr "Εξαγωγή EDID"
 
 msgid "EDID file \"%s\" is invalid."
-msgstr ""
+msgstr "Το αρχείο EDID \"%s\" δεν είναι έγκυρο."
 
 msgid "EDID file \"%s\" is too large."
 msgstr "Το αρχείο EDID \"%s\" είναι πολύ μεγάλο."

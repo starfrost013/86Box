@@ -96,8 +96,8 @@ typedef struct
 
 	int32_t rateratio;
 	int32_t samplecnt;
-	int16_t oldsamples[2];
-	int16_t samples[2];
+	int32_t oldsamples[2];
+	int32_t samples[2];
 
 	uint64_t writebuf_samplecnt;
 	uint32_t writebuf_cur;
@@ -110,6 +110,9 @@ typedef struct {
     cqm_t    cqm;
     int8_t   flags;
 
+    int8_t   is_48k;
+    int8_t   is_cs;
+
     uint16_t port;
     uint8_t  status;
     uint8_t  timer_ctrl;
@@ -119,14 +122,15 @@ typedef struct {
     pc_timer_t timers[2];
 
     int     pos;
-    int32_t buffer[CQMBUFLEN * 2];
+    int32_t buffer[MUSICBUFLEN * 2];
 
     int32_t *(*update)(void *priv);
 } nuked_cqm_drv_t;
 
 enum {
-    FLAG_CYCLES = 0x02,
-    FLAG_OPL3   = 0x01
+    FLAG_CRYSTAL = 0x04,
+    FLAG_CYCLES  = 0x02,
+    FLAG_OPL3    = 0x01
 };
 
 enum {
@@ -148,9 +152,10 @@ enum {
 void CQM_Reset(cqm_t* chip, uint32_t samplerate, uint32_t genrate);
 void CQM_WriteReg(cqm_t* chip, uint16_t reg, uint8_t data);
 void CQM_WriteRegBuffered(cqm_t* chip, uint16_t reg, uint8_t data);
-void CQM_Generate(cqm_t* chip, int16_t* sample);
+void CQM_Generate(cqm_t* chip, int32_t* sample);
 void CQM_GenerateResampled(cqm_t* chip, int32_t* sample);
 void CQM_GenerateStream(cqm_t* chip, int32_t* sndptr, uint32_t numsamples);
+void CQM_GenerateStreamResampled(cqm_t* chip, int32_t* sndptr, uint32_t numsamples);
 
 #ifdef __cplusplus
 }

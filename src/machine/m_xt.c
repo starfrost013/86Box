@@ -37,6 +37,7 @@
 #include <86box/serial.h>
 #include <86box/sio.h>
 #include <86box/ibm_5161.h>
+#include <86box/io.h>
 #include <86box/isartc.h>
 #include <86box/keyboard.h>
 #include <86box/rom.h>
@@ -1045,11 +1046,11 @@ machine_xt_top88_init(const machine_t *model)
 }
 
 static void
-machine_xt_hyundai_common_init(const machine_t *model, int fixed_floppy)
+machine_xt_hyundai_common_init(const machine_t *model)
 {
     device_add(&kbc_xt_hyundai_device);
 
-    machine_xt_common_init(model, fixed_floppy);
+    machine_xt_common_init(model, 1);
 }
 
 int
@@ -1064,7 +1065,7 @@ machine_xt_super16t_init(const machine_t *model)
         return ret;
 
     /* On-board FDC cannot be disabled */
-    machine_xt_hyundai_common_init(model, 1);
+    machine_xt_hyundai_common_init(model);
 
     return ret;
 }
@@ -1081,96 +1082,11 @@ machine_xt_super16te_init(const machine_t *model)
         return ret;
 
     /* On-board FDC cannot be disabled */
-    machine_xt_hyundai_common_init(model, 1);
+    machine_xt_hyundai_common_init(model);
 
     return ret;
 }
 
-static const device_config_t jukopc_config[] = {
-    // clang-format off
-    {
-        .name           = "bios",
-        .description    = "BIOS Version",
-        .type           = CONFIG_BIOS,
-        .default_string = "jukost",
-        .default_int    = 0,
-        .file_filter    = NULL,
-        .spinner        = { 0 },
-        .selection      = { { 0 } },
-        .bios           = {
-            {
-                .name          = "Bios 2.30",
-                .internal_name = "jukost",
-                .bios_type     = BIOS_NORMAL,
-                .files_no      = 1,
-                .local         = 0,
-                .size          = 8192,
-                .files         = { "roms/machines/jukopc/000o001.bin", "" }
-            },
-
-            // GLaBIOS for Juko ST
-            {
-                .name          = "GLaBIOS 0.4.0 (8088)",
-                .internal_name = "glabios_040_8088",
-                .bios_type     = BIOS_NORMAL,
-                .files_no      = 1,
-                .local         = 0,
-                .size          = 8192,
-                .files         = { "roms/machines/glabios/GLABIOS_0.4.0_8S.ROM", "" }
-            },
-            {
-                .name          = "GLaBIOS 0.4.0 (V20)",
-                .internal_name = "glabios_040_v20",
-                .bios_type     = BIOS_NORMAL,
-                .files_no      = 1,
-                .local         = 0,
-                .size          = 8192,
-                .files         = { "roms/machines/glabios/GLABIOS_0.4.0_VS.ROM", "" }
-            },
-
-            { .files_no = 0 }
-        }
-    },
-    { .name = "", .description = "", .type = CONFIG_END }
-    // clang-format on
-};
-
-const device_t jukopc_device = {
-    .name          = "Juko ST",
-    .internal_name = "jukopc",
-    .flags         = 0,
-    .local         = 0,
-    .init          = NULL,
-    .close         = NULL,
-    .reset         = NULL,
-    .available     = NULL,
-    .speed_changed = NULL,
-    .force_redraw  = NULL,
-    .config        = jukopc_config
-};
-
-int
-machine_xt_jukopc_init(const machine_t *model)
-{
-    int         ret = 0;
-    const char *fn;
-
-    /* No ROMs available. */
-    if (!device_available(model->device))
-        return ret;
-
-    device_context(model->device);
-    fn  = device_get_bios_file(model->device, device_get_config_bios("bios"), 0);
-    ret = bios_load_linear(fn, 0x000fe000, 8192, 0);
-    device_context_restore();
-
-    if (bios_only || !ret)
-        return ret;
-
-    machine_xt_clone_init(model, 0);
-
-    return ret;
-}
 
 int
 machine_xt_kaypropc_init(const machine_t *model)
@@ -1951,7 +1867,7 @@ machine_xt_z151_init(const machine_t *model)
     machine_zenith_common_init(model);
 
     if (fdc_current[0] == FDC_INTERNAL)
-        device_add(&fdc_xt_tandy_device);
+        device_add(&fdc_xt_device);
 
     return ret;
 }
@@ -1963,11 +1879,9 @@ machine_xt_z151_init(const machine_t *model)
 int
 machine_xt_z159_init(const machine_t *model)
 {
-    lpt_t *lpt = NULL;
-    int    ret;
-
-    ret = bios_load_linear("roms/machines/zdsz159/z159m v2.9e.10d",
-                           0x000f8000, 32768, 0);
+    lpt_t *   lpt = NULL;
+    const int ret = bios_load_linear("roms/machines/zdsz159/z159m v2.9e.10d",
+                                     0x000f8000, 32768, 0);
 
     if (bios_only || !ret)
         return ret;
@@ -2017,6 +1931,8 @@ machine_xt_z184_init(const machine_t *model)
     serial_set_next_inst(SERIAL_MAX - 1);
 
     device_add(&v6355d_device);
+
+    device_add(&rp5c01a_zenith_device);
 
     return ret;
 }

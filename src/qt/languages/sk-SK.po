@@ -1722,8 +1722,11 @@ msgstr "Pomalý"
 msgid "Fast"
 msgstr "Rýchly"
 
-msgid "&Auto-pause on focus loss"
-msgstr "&Automatická pauza pri strate fokusu okna"
+msgid "Auto-pause on focus loss"
+msgstr "Automatická pauza pri strate fokusu okna"
+
+msgid "Auto-pause on dialog boxes"
+msgstr ""
 
 msgid "WinBox is no longer supported"
 msgstr "WinBox už nie je podporovaný"
@@ -3016,6 +3019,9 @@ msgid "Toggle mute"
 msgstr "Prepnúť stlmenie"
 
 msgid "Toggle on-screen display"
+msgstr ""
+
+msgid "Toggle &on-screen display"
 msgstr ""
 
 msgid "Text files"

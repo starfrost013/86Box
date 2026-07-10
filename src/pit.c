@@ -1224,7 +1224,10 @@ pit_set_clock(uint32_t clock)
             PITCONST  = (uint64_t) (PITCONSTD * (double) (1ULL << 32));
         }
 
-        ISACONST = (1ULL << 32ULL);
+        if (cpuclock == 24000000.0)
+            ISACONST     = (uint64_t) ((cpuclock / 14318184.0) * (double) (1ULL << 32));
+        else
+            ISACONST = (1ULL << 32ULL);
     }
     xt_cpu_multi <<= 32ULL;
 
@@ -1236,7 +1239,7 @@ pit_set_clock(uint32_t clock)
 #else
     MDACONST  = (uint64_t) (cpuclock / (16257000.0 / 9.0) * (double) (1ULL << 32));
 #endif
-    HERCCONST = MDACONST;
+    HERCCONST = (uint64_t) (cpuclock / 16000000.0 * (double) (1ULL << 32));
     VGACONST1 = (uint64_t) (cpuclock / 25175000.0 * (double) (1ULL << 32));
     VGACONST2 = (uint64_t) (cpuclock / 28322000.0 * (double) (1ULL << 32));
     RTCCONST  = (uint64_t) (cpuclock / 32768.0 * (double) (1ULL << 32));

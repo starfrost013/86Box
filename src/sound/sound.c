@@ -27,8 +27,6 @@
 #include <86box/86box.h>
 #include <86box/cdrom.h>
 #include <86box/device.h>
-#include <86box/filters.h>
-#include <86box/machine.h>
 #include <86box/midi.h>
 #include <86box/plat.h>
 #include <86box/thread.h>
@@ -53,7 +51,6 @@ int  sound_pos_global                   = 0;
 static int sound_buf_len                = SOUNDBUFLEN;
 int  music_pos_global                   = 0;
 int  ym2151_pos_global                  = 0;
-int  cqm_pos_global                     = 0;
 int  wavetable_pos_global               = 0;
 int  sound_gain                         = 0;
 char sound_output_device[512]           = { 0 };
@@ -61,16 +58,18 @@ char sound_output_device[512]           = { 0 };
 int  midi_freq                          = 44100;
 int  midi_buf_size                      = 4410;
 
+unsigned long long src_freqs[I_MAX] = {
+    0, MUSIC_FREQ, WT_FREQ, CD_FREQ, 0, 0, YM2151_FREQ, 0
+};
+
 #define NUM_SOUND_HANDLERS 16
 #define NUM_MUSIC_HANDLERS 16
 #define NUM_YM2151_HANDLERS 16
-#define NUM_CQM_HANDLERS 16
 #define NUM_WAVETABLE_HANDLERS 16
 
 static sound_handler_t sound_handlers[NUM_SOUND_HANDLERS];
 static sound_handler_t music_handlers[NUM_MUSIC_HANDLERS];
 static sound_handler_t ym2151_handlers[NUM_YM2151_HANDLERS];
-static sound_handler_t cqm_handlers[NUM_CQM_HANDLERS];
 static sound_handler_t wavetable_handlers[NUM_WAVETABLE_HANDLERS];
 
 static double     cd_audio_volume_lut[256];
@@ -87,25 +86,23 @@ static int16_t   *outbuffer_m_ex_int16;
 static int32_t   *outbuffer_y;
 static float     *outbuffer_y_ex;
 static int16_t   *outbuffer_y_ex_int16;
-static int32_t   *outbuffer_c;
-static float     *outbuffer_c_ex;
-static int16_t   *outbuffer_c_ex_int16;
 static int32_t   *outbuffer_w;
 static float     *outbuffer_w_ex;
 static int16_t   *outbuffer_w_ex_int16;
 static uint8_t    sound_handlers_num;
 static uint8_t    music_handlers_num;
 static uint8_t    ym2151_handlers_num;
-static uint8_t    cqm_handlers_num;
 static uint8_t    wavetable_handlers_num;
+static pc_timer_t cd_poll_timer;
+static uint64_t   cd_poll_latch;
+static pc_timer_t midi_poll_timer;
+static uint64_t   midi_poll_latch;
 static pc_timer_t sound_poll_timer;
 static uint64_t   sound_poll_latch;
 static pc_timer_t music_poll_timer;
 static uint64_t   music_poll_latch;
 static pc_timer_t ym2151_poll_timer;
 static uint64_t   ym2151_poll_latch;
-static pc_timer_t cqm_poll_timer;
-static uint64_t   cqm_poll_latch;
 static pc_timer_t wavetable_poll_timer;
 static uint64_t   wavetable_poll_latch;
 
@@ -114,7 +111,6 @@ static float        cd_out_buffer[CD_BUFLEN * 2];
 static int16_t      cd_out_buffer_int16[CD_BUFLEN * 2];
 static unsigned int cd_vol_l;
 static unsigned int cd_vol_r;
-static int          cd_buf_update    = CD_BUFLEN / SOUNDBUFLEN;
 static volatile int cdaudioon        = 0;
 static int          cd_thread_enable = 0;
 
@@ -189,6 +185,9 @@ static const SOUND_CARD sound_cards[] = {
     { &ess_1688_device              },
     { &ess_ess0102_pnp_device       },
     { &ess_ess0968_pnp_device       },
+    { &ess_1788_device              },
+    { &ess_1868_device              },
+    { &ess_1869_device              },
     { &gus_device                   },
     { &gus_v37_device               },
     { &gus_max_device               },
@@ -205,6 +204,7 @@ static const SOUND_CARD sound_cards[] = {
     { &sb_32_pnp_device             },
     { &sb_awe32_device              },
     { &sb_awe32_pnp_device          },
+    { &sb_awe32_ide_pnp_device      },
     { &sb_awe64_value_device        },
     { &sb_awe64_device              },
     { &sb_awe64_ide_device          },
@@ -331,7 +331,7 @@ sound_cd_clean_buffers(void)
 static void
 sound_cd_thread(UNUSED(void *param))
 {
-    int      temp_buffer[2];
+    int16_t  temp_buffer[2];
     int      channel_select[2];
     double   audio_vol_l;
     double   audio_vol_r;
@@ -419,20 +419,22 @@ sound_cd_thread(UNUSED(void *param))
                         cd_out_buffer[c] += (float) (cd_buffer_temp[0] / 32768.0);
                         cd_out_buffer[c + 1] += (float) (cd_buffer_temp[1] / 32768.0);
                     } else {
-                        temp_buffer[0] = (int) trunc(cd_buffer_temp[0]);
-                        temp_buffer[1] = (int) trunc(cd_buffer_temp[1]);
-
-                        if (temp_buffer[0] > 32767)
+                        if (cd_buffer_temp[0] > 32767.0)
                             temp_buffer[0] = 32767;
-                        if (temp_buffer[0] < -32768)
+                        else if (cd_buffer_temp[0] < -32768.0)
                             temp_buffer[0] = -32768;
-                        if (temp_buffer[1] > 32767)
-                            temp_buffer[1] = 32767;
-                        if (temp_buffer[1] < -32768)
-                            temp_buffer[1] = -32768;
+                        else
+                            temp_buffer[0] = (int16_t) trunc(cd_buffer_temp[0]);
 
-                        cd_out_buffer_int16[c]     += (int16_t) temp_buffer[0];
-                        cd_out_buffer_int16[c + 1] += (int16_t) temp_buffer[1];
+                        if (cd_buffer_temp[1] > 32767.0)
+                            temp_buffer[1] = 32767;
+                        else if (cd_buffer_temp[1] < -32768.0)
+                            temp_buffer[1] = -32768;
+                        else
+                            temp_buffer[1] = (int16_t) trunc(cd_buffer_temp[1]);
+
+                        cd_out_buffer_int16[c]     = (int16_t) (cd_out_buffer_int16[c] + temp_buffer[0]);
+                        cd_out_buffer_int16[c + 1] = (int16_t) (cd_out_buffer_int16[c + 1] + temp_buffer[1]);
                     }
                 }
             }
@@ -448,8 +450,6 @@ sound_cd_thread(UNUSED(void *param))
 static void
 sound_realloc_buffers(void)
 {
-    const int divisor = (sound_sample_rate == 6896) ? 10 : 50;
-
     if (outbuffer_ex != NULL) {
         free(outbuffer_ex);
         outbuffer_ex = NULL;
@@ -460,7 +460,7 @@ sound_realloc_buffers(void)
         outbuffer_ex_int16 = NULL;
     }
 
-    const int buf_len = sound_sample_rate / divisor;
+    const int buf_len = sound_sample_rate / 50;
 
     if (sound_is_float) {
         outbuffer_ex = calloc(buf_len * 2, sizeof(float));
@@ -516,28 +516,6 @@ ym2151_realloc_buffers(void)
 }
 
 static void
-cqm_realloc_buffers(void)
-{
-    if (outbuffer_c_ex != NULL) {
-        free(outbuffer_c_ex);
-        outbuffer_c_ex = NULL;
-    }
-
-    if (outbuffer_c_ex_int16 != NULL) {
-        free(outbuffer_c_ex_int16);
-        outbuffer_c_ex_int16 = NULL;
-    }
-
-    if (sound_is_float) {
-        outbuffer_c_ex = calloc(CQMBUFLEN * 2, sizeof(float));
-        memset(outbuffer_c_ex, 0x00, CQMBUFLEN * 2 * sizeof(float));
-    } else {
-        outbuffer_c_ex_int16 = calloc(CQMBUFLEN * 2, sizeof(int16_t));
-        memset(outbuffer_c_ex_int16, 0x00, CQMBUFLEN * 2 * sizeof(int16_t));
-    }
-}
-
-static void
 wavetable_realloc_buffers(void)
 {
     if (outbuffer_w_ex != NULL) {
@@ -562,8 +540,6 @@ wavetable_realloc_buffers(void)
 void
 sound_init(void)
 {
-    const int divisor = (sound_sample_rate == 6896) ? 10 : 50;
-
     int available_cdrom_drives = 0;
 
     outbuffer_ex       = NULL;
@@ -575,13 +551,10 @@ sound_init(void)
     outbuffer_y_ex       = NULL;
     outbuffer_y_ex_int16 = NULL;
 
-    outbuffer_c_ex       = NULL;
-    outbuffer_c_ex_int16 = NULL;
-
     outbuffer_w_ex       = NULL;
     outbuffer_w_ex_int16 = NULL;
 
-    const int init_buf_len = sound_sample_rate / divisor;
+    const int init_buf_len = sound_sample_rate / 50;
 
     outbuffer = NULL;
     outbuffer = calloc(init_buf_len * 2, sizeof(int32_t));
@@ -594,10 +567,6 @@ sound_init(void)
     outbuffer_y = NULL;
     outbuffer_y = calloc(YM2151BUFLEN * 2, sizeof(int32_t));
     memset(outbuffer_y, 0x00, YM2151BUFLEN * 2 * sizeof(int32_t));
-
-    outbuffer_c = NULL;
-    outbuffer_c = calloc(CQMBUFLEN * 2, sizeof(int32_t));
-    memset(outbuffer_c, 0x00, CQMBUFLEN * 2 * sizeof(int32_t));
 
     outbuffer_w = NULL;
     outbuffer_w = calloc(WTBUFLEN * 2, sizeof(int32_t));
@@ -679,19 +648,6 @@ ym2151_add_handler(void (*get_buffer)(int32_t *buffer, uint16_t len, void *priv)
 }
 
 void
-cqm_add_handler(void (*get_buffer)(int32_t *buffer, uint16_t len, void *priv), void *priv)
-{
-    if (cqm_handlers_num >= NUM_CQM_HANDLERS) {
-        sound_log("cqm_add_handler: handler table full, dropping registration\n");
-        return;
-    }
-
-    cqm_handlers[cqm_handlers_num].get_buffer = get_buffer;
-    cqm_handlers[cqm_handlers_num].priv       = priv;
-    cqm_handlers_num++;
-}
-
-void
 wavetable_add_handler(void (*get_buffer)(int32_t *buffer, uint16_t len, void *priv), void *priv)
 {
     if (wavetable_handlers_num >= NUM_WAVETABLE_HANDLERS) {
@@ -732,13 +688,27 @@ sound_set_midi_filter(void (*filter)(int channel, double *buffer, void *priv), v
 }
 
 void
+cd_poll(UNUSED(void *priv))
+{
+    timer_advance_u64(&cd_poll_timer, cd_poll_latch * CD_BUFLEN);
+
+    thread_set_event(sound_cd_event);
+}
+
+void
+midi_poll_ex(UNUSED(void *priv))
+{
+    timer_advance_u64(&midi_poll_timer, midi_poll_latch * 480);
+
+    midi_poll();
+}
+
+void
 sound_poll(UNUSED(void *priv))
 {
     const uint8_t handler_count = (sound_handlers_num < NUM_SOUND_HANDLERS) ? sound_handlers_num : NUM_SOUND_HANDLERS;
 
     timer_advance_u64(&sound_poll_timer, sound_poll_latch);
-
-    midi_poll();
 
     sound_pos_global++;
     if (sound_pos_global == sound_buf_len) {
@@ -765,15 +735,6 @@ sound_poll(UNUSED(void *priv))
             givealbuffer(outbuffer_ex);
         else
             givealbuffer(outbuffer_ex_int16);
-
-        if (cd_thread_enable) {
-            cd_buf_update--;
-            if (!cd_buf_update) {
-                const int divisor = (sound_sample_rate == 6896) ? 10 : 50;
-                cd_buf_update = divisor / (CD_FREQ / CD_BUFLEN);
-                thread_set_event(sound_cd_event);
-            }
-        }
 
         if (fdd_thread_enable) {
             thread_set_event(sound_fdd_event);
@@ -861,43 +822,6 @@ ym2151_poll(UNUSED(void *priv))
 }
 
 void
-cqm_poll(UNUSED(void *priv))
-{
-    const uint8_t handler_count = (cqm_handlers_num < NUM_CQM_HANDLERS) ? cqm_handlers_num : NUM_CQM_HANDLERS;
-
-    timer_advance_u64(&cqm_poll_timer, cqm_poll_latch);
-
-    cqm_pos_global++;
-    if (cqm_pos_global == CQMBUFLEN) {
-        memset(outbuffer_c, 0x00, CQMBUFLEN * 2 * sizeof(int32_t));
-
-        for (uint8_t c = 0; c < handler_count; c++)
-            if (cqm_handlers[c].get_buffer != NULL)
-                cqm_handlers[c].get_buffer(outbuffer_c, CQMBUFLEN, cqm_handlers[c].priv);
-
-        for (uint32_t c = 0; c < CQMBUFLEN * 2; c++) {
-            if (sound_is_float)
-                outbuffer_c_ex[c] = ((float) outbuffer_c[c]) / (float) 32768.0;
-            else {
-                if (outbuffer_c[c] > 32767)
-                    outbuffer_c[c] = 32767;
-                if (outbuffer_c[c] < -32768)
-                    outbuffer_c[c] = -32768;
-
-                outbuffer_c_ex_int16[c] = (int16_t) outbuffer_c[c];
-            }
-        }
-
-        if (sound_is_float)
-            givealbuffer_cqm(outbuffer_c_ex);
-        else
-            givealbuffer_cqm(outbuffer_c_ex_int16);
-
-        cqm_pos_global = 0;
-    }
-}
-
-void
 wavetable_poll(UNUSED(void *priv))
 {
     const uint8_t handler_count = (wavetable_handlers_num < NUM_WAVETABLE_HANDLERS) ? wavetable_handlers_num : NUM_WAVETABLE_HANDLERS;
@@ -937,17 +861,17 @@ wavetable_poll(UNUSED(void *priv))
 void
 sound_speed_changed(void)
 {
-    const int divisor = (sound_sample_rate == 6896) ? 10 : 50;
+    sound_buf_len = sound_sample_rate / 50;
 
-    sound_buf_len = sound_sample_rate / divisor;
+    cd_poll_latch = (uint64_t) ((double) TIMER_USEC * (1000000.0 / (double) FREQ_44100));
+
+    midi_poll_latch = (uint64_t) ((double) TIMER_USEC * (1000000.0 / (double) FREQ_48000));
 
     sound_poll_latch = (uint64_t) ((double) TIMER_USEC * (1000000.0 / (double) sound_sample_rate));
 
     music_poll_latch = (uint64_t) ((double) TIMER_USEC * (1000000.0 / (double) MUSIC_FREQ));
 
     ym2151_poll_latch = (uint64_t) ((double) TIMER_USEC * (1000000.0 / (double) YM2151_FREQ));
-
-    cqm_poll_latch = (uint64_t) ((double) TIMER_USEC * (1000000.0 / (double) CQM_FREQ));
 
     wavetable_poll_latch = (uint64_t) ((double) TIMER_USEC * (1000000.0 / (double) WT_FREQ));
 }
@@ -961,14 +885,15 @@ sound_reset(void)
 
     ym2151_realloc_buffers();
 
-    cqm_realloc_buffers();
-
     wavetable_realloc_buffers();
 
     midi_out_device_init();
     midi_in_device_init();
 
     inital();
+
+    memset(&midi_poll_timer, 0x00, sizeof(pc_timer_t));
+    timer_add(&midi_poll_timer, midi_poll_ex, NULL, 1);
 
     memset(&sound_poll_timer, 0x00, sizeof(pc_timer_t));
     timer_add(&sound_poll_timer, sound_poll, NULL, 1);
@@ -984,11 +909,6 @@ sound_reset(void)
     timer_add(&ym2151_poll_timer, ym2151_poll, NULL, 1);
     ym2151_handlers_num = 0;
     memset(ym2151_handlers, 0x00, NUM_YM2151_HANDLERS * sizeof(sound_handler_t));
-
-    memset(&cqm_poll_timer, 0x00, sizeof(pc_timer_t));
-    timer_add(&cqm_poll_timer, cqm_poll, NULL, 1);
-    cqm_handlers_num = 0;
-    memset(cqm_handlers, 0x00, NUM_CQM_HANDLERS * sizeof(sound_handler_t));
 
     memset(&wavetable_poll_timer, 0x00, sizeof(pc_timer_t));
     timer_add(&wavetable_poll_timer, wavetable_poll, NULL, 1);
@@ -1013,6 +933,8 @@ sound_reset(void)
 void
 sound_card_reset(void)
 {
+    device_add(&speaker_device);
+
     sound_card_init();
 
     if (mpu401_standalone_enable)
@@ -1070,6 +992,11 @@ sound_cd_thread_reset(void)
         sound_cd_thread_end();
 
     cd_thread_enable = available_cdrom_drives ? 1 : 0;
+
+    if (cd_thread_enable) {
+        memset(&cd_poll_timer, 0x00, sizeof(pc_timer_t));
+        timer_add(&cd_poll_timer, cd_poll, NULL, 1);
+    }
 }
 
 static void
@@ -1194,9 +1121,6 @@ sound_recalc_timers(void)
     if (ym2151_handlers_num == 0)
         timer_disable(&ym2151_poll_timer);
 
-    if (cqm_handlers_num == 0)
-        timer_disable(&cqm_poll_timer);
-
     if (wavetable_handlers_num == 0)
         timer_disable(&wavetable_poll_timer);
 }
@@ -1204,6 +1128,10 @@ sound_recalc_timers(void)
 void
 sound_close(void)
 {
+    timer_disable(&cd_poll_timer);
+
+    timer_disable(&midi_poll_timer);
+
     timer_disable(&sound_poll_timer);
     sound_handlers_num = 0;
     memset(sound_handlers, 0x00, NUM_SOUND_HANDLERS * sizeof(sound_handler_t));
@@ -1215,10 +1143,6 @@ sound_close(void)
     timer_disable(&ym2151_poll_timer);
     ym2151_handlers_num = 0;
     memset(ym2151_handlers, 0x00, NUM_YM2151_HANDLERS * sizeof(sound_handler_t));
-
-    timer_disable(&cqm_poll_timer);
-    cqm_handlers_num = 0;
-    memset(cqm_handlers, 0x00, NUM_CQM_HANDLERS * sizeof(sound_handler_t));
 
     timer_disable(&wavetable_poll_timer);
     wavetable_handlers_num = 0;

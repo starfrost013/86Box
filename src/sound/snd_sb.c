@@ -66,6 +66,8 @@
 #define PNP_ROM_ESS0100          "roms/sound/ess/ESS0100.BIN"
 #define PNP_ROM_ESS0102          "roms/sound/ess/ESS0102.BIN"
 #define PNP_ROM_ESS0968          "roms/sound/ess/ESS0968.BIN"
+#define PNP_ROM_ESS1868          "roms/sound/ess/ESS1868.BIN"
+#define PNP_ROM_ESS1869          "roms/sound/ess/ESS1869.BIN"
 
 enum {
     SB_1 = 0,
@@ -166,6 +168,16 @@ static double ess_att_6bits[64];
 static const uint16_t sb_mcv_addr[8]     = { 0x200, 0x210, 0x220, 0x230, 0x240, 0x250, 0x260, 0x270 };
 static const int      sb_pro_mcv_irqs[4] = { 7, 5, 3, 3 };
 
+/* ES186x PnP key */
+static const uint8_t es186x_pnp_key[] = {
+  0x66, 0xa1, 0xc2, 0xf1, 0xea, 0xe7, 0x71, 0xaa,
+  0xc7, 0x63, 0x33, 0x1b, 0x0d, 0x96, 0xdb, 0x6d,
+  0xa4, 0x50, 0x28, 0x16, 0x9b, 0x4d, 0xb6, 0xc9,
+  0xf4, 0x78, 0x3e, 0x8d, 0xd6, 0xfb, 0x7f, 0x3d
+};
+
+static const uint8_t es1868_header[] = { 0xA5, 0x59, 0xA7, 0xCB, 0x10, 0x53, 0x02, 0x0C };
+
 #ifdef ENABLE_SB_LOG
 int sb_do_log = ENABLE_SB_LOG;
 
@@ -194,22 +206,9 @@ sb_get_buffer_sb2(int32_t *buffer, uint16_t len, void *priv)
 
     sb_dsp_update(&sb->dsp);
 
-    if (sb->cms_enabled)
-        cms_update(&sb->cms);
-
     for (uint16_t c = 0; c < len * 2; c += 2) {
         double out_l = 0.0;
         double out_r = 0.0;
-
-        if (sb->cms_enabled) {
-            out_l += sb->cms.buffer[c];
-            out_r += sb->cms.buffer[c + 1];
-        }
-
-        if (sb->cms_enabled && sb->mixer_enabled) {
-            out_l *= mixer->fm;
-            out_r *= mixer->fm;
-        }
 
         /* TODO: Recording: I assume it has direct mic and line in like SB2.
                  It is unclear from the docs if it has a filter, but it probably does. */
@@ -231,6 +230,39 @@ sb_get_buffer_sb2(int32_t *buffer, uint16_t len, void *priv)
     }
 
     sb->dsp.pos = 0;
+}
+
+static void
+sb_get_cms_buffer_sb2(int32_t *buffer, uint16_t len, void *priv)
+{
+    sb_t                    *sb    = (sb_t *) priv;
+    const sb_ct1335_mixer_t *mixer = &sb->mixer_sb2;
+
+    if (sb->cms_enabled)
+        cms_update(&sb->cms);
+
+    for (uint16_t c = 0; c < len * 2; c += 2) {
+        double out_l = 0.0;
+        double out_r = 0.0;
+
+        if (sb->cms_enabled) {
+            out_l += sb->cms.buffer[c];
+            out_r += sb->cms.buffer[c + 1];
+        }
+
+        if (sb->cms_enabled && sb->mixer_enabled) {
+            out_l *= mixer->fm;
+            out_r *= mixer->fm;
+        }
+
+        if (sb->mixer_enabled) {
+            out_l *= mixer->master;
+            out_r *= mixer->master;
+        }
+
+        buffer[c] += (int32_t) out_l;
+        buffer[c + 1] += (int32_t) out_r;
+    }
 
     if (sb->cms_enabled)
         sb->cms.pos = 0;
@@ -395,8 +427,8 @@ sb_get_buffer_sb16_awe32(int32_t *buffer, uint16_t len, void *priv)
 
         if (mixer->output_filter) {
             /* We divide by 3 to get the volume down to normal. */
-            out_l += (low_fir_sb16(0, 0, (double) sb->dsp.buffer[c]) * mixer->voice_l) / 3.0;
-            out_r += (low_fir_sb16(0, 1, (double) sb->dsp.buffer[c + 1]) * mixer->voice_r) / 3.0;
+            out_l += (low_fir_sb16(0, (double) sb->dsp.buffer[c]) * mixer->voice_l) / 3.0;
+            out_r += (low_fir_sb16(1, (double) sb->dsp.buffer[c + 1]) * mixer->voice_r) / 3.0;
         } else {
             out_l += (((double) sb->dsp.buffer[c]) * mixer->voice_l) / 3.0;
             out_r += (((double) sb->dsp.buffer[c + 1]) * mixer->voice_r) / 3.0;
@@ -551,106 +583,6 @@ sb_get_music_buffer_sb16_awe32(int32_t *buffer, const uint16_t len, void *priv)
 }
 
 static void
-sb_get_cqm_buffer_sb16_awe32(int32_t *buffer, const uint16_t len, void *priv)
-{
-    sb_t                    *sb          = (sb_t *) priv;
-    const sb_ct1745_mixer_t *mixer       = &sb->mixer_sb16;
-    const int                dsp_rec_pos = sb->dsp.record_pos_write;
-    double                   bass_treble;
-    const int32_t           *opl_buf     = NULL;
-
-    if (sb->opl_enabled)
-        opl_buf = sb->opl.update(sb->opl.priv);
-
-    for (int c = 0; c < len * 2; c += 2) {
-        double out_l = 0.0;
-        double out_r = 0.0;
-
-        if (sb->opl_enabled) {
-            out_l = ((double) opl_buf[c]) * mixer->fm_l * 0.7171630859375;
-            out_r = ((double) opl_buf[c + 1]) * mixer->fm_r * 0.7171630859375;
-        }
-
-        /* TODO: Multi-recording mic with agc/+20db, CD, and line in with channel inversion */
-        int32_t in_l = (mixer->input_selector_left & INPUT_MIDI_L) ?
-                       ((int32_t) out_l) : 0 + (mixer->input_selector_left & INPUT_MIDI_R) ? ((int32_t) out_r) : 0;
-        int32_t in_r = (mixer->input_selector_right & INPUT_MIDI_L) ?
-                       ((int32_t) out_l) : 0 + (mixer->input_selector_right & INPUT_MIDI_R) ? ((int32_t) out_r) : 0;
-
-        out_l *= mixer->master_l;
-        out_r *= mixer->master_r;
-
-        /* This is not exactly how one does bass/treble controls, but the end result is like it.
-           A better implementation would reduce the CPU usage. */
-        if (mixer->bass_l != 8) {
-            bass_treble = sb_bass_treble_4bits[mixer->bass_l];
-
-            if (mixer->bass_l > 8)
-                out_l += (low_iir(1, 0, out_l) * bass_treble);
-            else
-                out_l = (out_l *bass_treble + low_cut_iir(1, 0, out_l) * (1.0 - bass_treble));
-        }
-
-        if (mixer->bass_r != 8) {
-            bass_treble = sb_bass_treble_4bits[mixer->bass_r];
-
-            if (mixer->bass_r > 8)
-                out_r += (low_iir(1, 1, out_r) * bass_treble);
-            else
-                out_r = (out_r *bass_treble + low_cut_iir(1, 1, out_r) * (1.0 - bass_treble));
-        }
-
-        if (mixer->treble_l != 8) {
-            bass_treble = sb_bass_treble_4bits[mixer->treble_l];
-
-            if (mixer->treble_l > 8)
-                out_l += (high_iir(1, 0, out_l) * bass_treble);
-            else
-                out_l = (out_l *bass_treble + high_cut_iir(1, 0, out_l) * (1.0 - bass_treble));
-        }
-
-        if (mixer->treble_r != 8) {
-            bass_treble = sb_bass_treble_4bits[mixer->treble_r];
-
-            if (mixer->treble_r > 8)
-                out_r += (high_iir(1, 1, out_r) * bass_treble);
-            else
-                out_r = (out_l *bass_treble + high_cut_iir(1, 1, out_r) * (1.0 - bass_treble));
-        }
-
-        if (sb->dsp.sb_enable_i) {
-            const int c_record = dsp_rec_pos + ((c * sb->dsp.sb_freq) / CQM_FREQ);
-
-            in_l <<= mixer->input_gain_L;
-            in_r <<= mixer->input_gain_R;
-
-            /* Clip signal */
-            if (in_l < -32768)
-                in_l = -32768;
-            else if (in_l > 32767)
-                in_l = 32767;
-
-            if (in_r < -32768)
-                in_r = -32768;
-            else if (in_r > 32767)
-                in_r = 32767;
-
-            sb->dsp.record_buffer[c_record & 0xffff]       = (int16_t) in_l;
-            sb->dsp.record_buffer[(c_record + 1) & 0xffff] = (int16_t) in_r;
-        }
-
-        buffer[c] += (int32_t) (out_l * mixer->output_gain_L);
-        buffer[c + 1] += (int32_t) (out_r * mixer->output_gain_R);
-    }
-
-    sb->dsp.record_pos_write += ((len * sb->dsp.sb_freq) / 24000);
-    sb->dsp.record_pos_write &= 0xffff;
-
-    if (sb->opl_enabled)
-        sb->opl.reset_buffer(sb->opl.priv);
-}
-
-static void
 sb_get_wavetable_buffer_goldfinch(int32_t *buffer, const uint16_t len, void *priv)
 {
     goldfinch_t *goldfinch = (goldfinch_t *) priv;
@@ -668,7 +600,7 @@ sb_get_wavetable_buffer_goldfinch(int32_t *buffer, const uint16_t len, void *pri
         buffer[c + 1] += (int32_t) out_r;
     }
 
-    goldfinch->emu8k.pos = 0;
+    emu8k_reset_buffer(&goldfinch->emu8k);
 }
 
 static void
@@ -732,7 +664,7 @@ sb_get_wavetable_buffer_sb16_awe32(int32_t *buffer, const uint16_t len, void *pr
         buffer[c + 1] += (int32_t) (out_r * mixer->output_gain_R);
     }
 
-    sb->emu8k.pos = 0;
+    emu8k_reset_buffer(&sb->emu8k);
 }
 
 void
@@ -781,14 +713,8 @@ sb16_awe32_filter_pc_speaker(int channel, double *buffer, void *priv)
     const int32_t            bass        = channel ? mixer->bass_r : mixer->bass_l;
     const int32_t            treble      = channel ? mixer->treble_r : mixer->treble_l;
     const double             output_gain = (channel ? mixer->output_gain_R : mixer->output_gain_L);
+    double                   c           = (((*buffer) * spk) / 3.0) * master;
     double                   bass_treble;
-    double                   c;
-
-    if (mixer->output_filter)
-        c = (low_fir_sb16(3, channel, *buffer) * spk) / 3.0;
-    else
-        c = ((*buffer) * spk) / 3.0;
-    c *= master;
 
     /* This is not exactly how one does bass/treble controls, but the end result is like it.
        A better implementation would reduce the CPU usage. */
@@ -865,8 +791,8 @@ sb_get_buffer_ess(int32_t *buffer, uint16_t len, void *priv)
 
         /* TODO: Implement the stereo switch on the mixer instead of on the dsp? */
         if (mixer->output_filter) {
-            out_l += (low_fir_sb16(0, 0, (double) ess->dsp.buffer[c]) * mixer->voice_l) / 3.0;
-            out_r += (low_fir_sb16(0, 1, (double) ess->dsp.buffer[c + 1]) * mixer->voice_r) / 3.0;
+            out_l += (low_fir_sb16(0, (double) ess->dsp.buffer[c]) * mixer->voice_l) / 3.0;
+            out_r += (low_fir_sb16(1, (double) ess->dsp.buffer[c + 1]) * mixer->voice_r) / 3.0;
         } else {
             out_l += (ess->dsp.buffer[c] * mixer->voice_l) / 3.0;
             out_r += (ess->dsp.buffer[c + 1] * mixer->voice_r) / 3.0;
@@ -937,31 +863,24 @@ sb_get_music_buffer_ess(int32_t *buffer, uint16_t len, void *priv)
 void
 ess_filter_cd_audio(int channel, double *buffer, void *priv)
 {
-    const sb_t        *ess   = (sb_t *) priv;
-    const ess_mixer_t *mixer = &ess->mixer_ess;
-    double             c;
-    double             cd     = channel ? mixer->cd_r : mixer->cd_l;
-    double             master = channel ? mixer->master_r : mixer->master_l;
+    const sb_t        *ess    = (sb_t *) priv;
+    const ess_mixer_t *mixer  = &ess->mixer_ess;
+    const double       cd     = channel ? mixer->cd_r : mixer->cd_l;
+    const double       master = channel ? mixer->master_r : mixer->master_l;
+    const double       c      = ((*buffer * cd) / 3.0) * master;
 
     /* TODO: recording from the mixer. */
-    c       = (*buffer * cd) / 3.0;
-    *buffer = c * master;
+    *buffer = c;
 }
 
 void
 ess_filter_pc_speaker(int channel, double *buffer, void *priv)
 {
-    const sb_t        *ess   = (sb_t *) priv;
-    const ess_mixer_t *mixer = &ess->mixer_ess;
-    double             c;
-    double             spk    = mixer->speaker;
-    double             master = channel ? mixer->master_r : mixer->master_l;
-
-    if (mixer->output_filter)
-        c = (low_fir_sb16(3, channel, *buffer) * spk) / 3.0;
-    else
-        c = ((*buffer) * spk) / 3.0;
-    c *= master;
+    const sb_t        *ess    = (sb_t *) priv;
+    const ess_mixer_t *mixer  = &ess->mixer_ess;
+    const double       spk    = mixer->speaker;
+    const double       master = channel ? mixer->master_r : mixer->master_l;
+    const double       c      = (((*buffer) * spk) / 3.0) * master;
 
     *buffer = c;
 }
@@ -969,15 +888,14 @@ ess_filter_pc_speaker(int channel, double *buffer, void *priv)
 void
 ess_filter_midi(int channel, double *buffer, void *priv)
 {
-    const sb_t        *ess   = (sb_t *) priv;
-    const ess_mixer_t *mixer = &ess->mixer_ess;
-    double             c;
-    double             fm     = channel ? mixer->fm_r : mixer->fm_l;
-    double             master = channel ? mixer->master_r : mixer->master_l;
+    const sb_t        *ess    = (sb_t *) priv;
+    const ess_mixer_t *mixer  = &ess->mixer_ess;
+    const double       fm     = channel ? mixer->fm_r : mixer->fm_l;
+    const double       master = channel ? mixer->master_r : mixer->master_l;
+    const double       c      = ((*buffer * fm) / 3.0) * master;
 
     /* TODO: recording from the mixer. */
-    c       = (*buffer * fm) / 3.0;
-    *buffer = c * master;
+    *buffer = c;
 }
 
 void
@@ -1107,8 +1025,6 @@ sb_ct1345_mixer_write(uint16_t addr, uint8_t val, void *priv)
                 case 0x0c:
                 case 0x0e:
                 case 0x2e:
-                    break;
-
                 /* Aztech AZTPR16 mixer */
                 case 0x84:
                 case 0x86:
@@ -1753,6 +1669,8 @@ ess_base_write(uint16_t addr, UNUSED(uint8_t val), void *priv)
     sb_t *ess = (sb_t *) priv;
 
     switch (addr & 0x000f) {
+        default:
+            break;
         case 0x0002:
         case 0x0003:
         case 0x0006:
@@ -1772,6 +1690,8 @@ ess_base_read(uint16_t addr, void *priv)
     sb_t *ess = (sb_t *) priv;
 
     switch (addr & 0x000f) {
+        default:
+            break;
         case 0x0002:
         case 0x0003:
         case 0x0004: /* Undocumented but tested by the LBA 2 ES688 driver. */
@@ -1825,6 +1745,15 @@ ess_dac2_startdma(void *priv)
 {
     sb_t        *ess   = (sb_t *) priv;
 
+    sb_log("Starting ESS DAC2 DMA, channel = %i, rate = %i\n", ess->ess_dac2_dma, ess->ess_dac2_freq);
+    if ((ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1868) || ((ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869) && !(ess->mixer_ess.regs[0x71] & 0x02))) {
+        /* OS/2 Warp driver does not set the samplerate on DAC2 in full-duplex mode
+           and per the ES1868 datasheet DAC2 uses the DAC1 sample rate set in A1h/A2h in this mode */
+        /* ES1869 supports slaving the DAC2 sample rate to DAC1's rate as a configurable mode */
+        if ((ess->ess_dac2_latcho == 0) || ((ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869) && !(ess->mixer_ess.regs[0x71] & 0x02)))
+            ess->ess_dac2_latcho = ess->dsp.sblatcho;
+    }
+
     ess->ess_dac2_enable = 1;
     ess->ess_dac2_suspend = 0;
     ess->ess_dac2_counter = ess->ess_dac2_autolen;
@@ -1848,6 +1777,7 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
     if (!(addr & 1)) {
         mixer->index      = val;
         mixer->regs[0x01] = val;
+        ess->es186x_id_state = 0; /* Reset ES186x ID readout */
     } else {
         if (mixer->index == 0) {
             /* Reset */
@@ -1866,7 +1796,12 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
             mixer->regs[0x3c]                     = 0x05;
             mixer->regs[0x3e]                     = 0x00;
 
-            mixer->regs[0x64]                     = 0x08;
+            if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1868)
+                mixer->regs[0x64]                     = 0x20;
+            else if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869)
+                mixer->regs[0x64]                     = 0x00;
+            else
+                mixer->regs[0x64]                     = 0x08;
 
             /* Initialize ES1788+ Master Volume */
             if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1788)
@@ -1985,9 +1920,12 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
                     break;
 
                 case 0x40:
-                    if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1688) {
+                    if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1868)
+                        break;
+                    else if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1688) {
                         if (((ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1788) || ess->es1688_rsk_enable) && (val & 0x04)) {
                             mixer->regs[0x40] = val & 0xfb;
+                            sb_log("ESS Read-Sequence-Key reset!\n");
                             ess_rsk_reset(ess);
                             break;
                         }
@@ -2065,13 +2003,26 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
                 case 0x70: /* DAC 2 Sample Rate Divider */
                     if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888) {
                         mixer->regs[mixer->index] = val;
-                        if (val & 0x80)
-                            ess->ess_dac2_freq = (int) (795500UL / (256ul - val));
-                        else
-                            ess->ess_dac2_freq = (int) (397700UL / (128ul - val));
+                        if (ess->dsp.sb_subtype <= SB_SUBTYPE_ESS_ES1868) {
+                            if (val & 0x80)
+                                ess->ess_dac2_freq = (int) (795500UL / (256ul - val));
+                            else
+                                ess->ess_dac2_freq = (int) (397700UL / (128ul - val));
+                        } else {
+                            if (val & 0x80)
+                                ess->ess_dac2_freq = (int) (768000UL / (256ul - val));
+                            else
+                                ess->ess_dac2_freq = (int) (793800UL / (128ul - val));
+                        }
                         sb_log("ESS DAC2 Samplerate set to %i\n", ess->ess_dac2_freq);
                         const double temp = 1000000.0 / ess->ess_dac2_freq;
                         ess->ess_dac2_latcho = ((double) TIMER_USEC * temp);
+                    }
+                    break;
+                case 0x71: /* DAC 2 Mode */
+                    if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869) {
+                        sb_log("ESS DAC2 Mode register write: val = %02X\n", val);
+                        ess->dsp.es1869_divider_mode = (val & 0x20) ? 1 : 0;
                     }
                     break;
                 case 0x72: /* DAC 2 Filter Clock Divider */
@@ -2083,7 +2034,7 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
                         mixer->regs[mixer->index] = val;
                         unsigned int c = (unsigned int) (mixer->regs[0x76] << 8U);
                         c |= (unsigned int) val;
-                        ess->ess_dac2_autolen = 0x10000 - c;
+                        ess->ess_dac2_autolen = (int) (0x10000 - c);
                     }
                     break;
                 case 0x76: /* DAC 2 DMA Reload Counter high byte */
@@ -2091,7 +2042,7 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
                         mixer->regs[mixer->index] = val;
                         unsigned int c = (unsigned int) (val << 8U);
                         c |= (unsigned int) mixer->regs[0x74];
-                        ess->ess_dac2_autolen = 0x10000 - c;
+                        ess->ess_dac2_autolen = (int) (0x10000 - c);
                     }
                     break;
                 case 0x78: /* DAC 2 Control 1 */
@@ -2137,11 +2088,15 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
                     }
                     break;
 
-                case 0x7d: /* DAC 2 Configuration */
+                case 0x7d: /* DAC 2 Configuration (ES188x) / Mic preamp/MONO_IN/MONO_OUT (ES1869) */
+                    if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869)
+                        mixer->regs[mixer->index] = val;
                     /* Documented in the ES1887 datasheet but appears to apply to (later?) ES1888s as well based on the
                        register writes performed by the Compaq Presario 224x BIOS */
-                    if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888) {
+                    if ((ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888) && (ess->dsp.sb_subtype <= SB_SUBTYPE_ESS_ES1887)) {
                         switch (val & 0x03) {
+                            default:
+                                break;
                             case 0x00: /* DRQA */
                                 ess->ess_dac2_dma = 0;
                                 break;
@@ -2158,12 +2113,16 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
                         sb_log("ESS DAC2 new DMA = %i\n", ess->ess_dac2_dma);
                     }
                     break;
-                case 0x7f: /* Interrupt Control */
+                case 0x7f: /* Interrupt Control (ES188x) / I2S Interface (ES1869) */
+                    if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869)
+                        mixer->regs[mixer->index] = val;
                     /* Documented in the ES1887 datasheet but appears to apply to (later?) ES1888s as well based on the
                        register writes performed by the Compaq Presario 224x BIOS */
-                    if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888) {
+                    if ((ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888) && (ess->dsp.sb_subtype <= SB_SUBTYPE_ESS_ES1887)) {
                         val &= 0x0f;
                         switch ((val >> 1) & 0x07) {
+                            default:
+                                break;
                             case 0x00: /* ES1888 interrupt mode */
                                 ess->dsp.es188x_irq_mode = 0;
                                 /* Switch sb_irqnum back to what's in ESS DSP register B1h */
@@ -2184,10 +2143,9 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
                                         break;
                                 }
                                 switch ((mixer->regs[0x40] >> 5) & 0x7) { /* Switch MPU401 IRQ back to what's in mixer reg 40h */
-                                    case 0:
-                                        mpu401_setirq(ess->mpu, -1);
+                                    default:
                                         break;
-                                    case 1:
+                                    case 0 ... 1:
                                         mpu401_setirq(ess->mpu, -1);
                                         break;
                                     case 2:
@@ -2267,8 +2225,13 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
             mixer->master_r = mixer->regs[0x62] & 0x40 ? 0 : (ess_att_6bits[mixer->regs[0x62] & 0x3F] / 32767.0);
         }
         if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888) {
-            mixer->dac2_l = sb_att_2dbstep_4bits[(mixer->regs[0x7c] >> 4) & 0x0F] / 32767.0;
-            mixer->dac2_r = sb_att_2dbstep_4bits[mixer->regs[0x7c] & 0x0F] / 32767.0;
+            if (ess->dsp.sb_subtype != SB_SUBTYPE_ESS_ES1868) {
+                mixer->dac2_l = sb_att_2dbstep_4bits[(mixer->regs[0x7c] >> 4) & 0x0F] / 32767.0;
+                mixer->dac2_r = sb_att_2dbstep_4bits[mixer->regs[0x7c] & 0x0F] / 32767.0;
+            } else { /* ES1868 does not have the DAC2 volume register */
+                mixer->dac2_l = mixer->voice_l;
+                mixer->dac2_r = mixer->voice_r;
+            }
         }
     }
 }
@@ -2276,7 +2239,7 @@ ess_mixer_write(uint16_t addr, uint8_t val, void *priv)
 uint8_t
 ess_mixer_read(uint16_t addr, void *priv)
 {
-    const sb_t        *ess   = (sb_t *) priv;
+    sb_t              *ess   = (sb_t *) priv;
     const ess_mixer_t *mixer = &ess->mixer_ess;
     uint8_t            ret   = 0x0a;
 
@@ -2349,7 +2312,29 @@ ess_mixer_read(uint16_t addr, void *priv)
                Real ES1688: Bit 2 always clear.
              */
             case 0x40:
-                if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1788)
+                if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1868) {
+                    switch (ess->es186x_id_state) {
+                        default:
+                            break;
+                        case 0:
+                            ret = 0x18;
+                            ess->es186x_id_state = 1;
+                            break;
+                        case 1:
+                            ret = (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869) ? 0x69 : 0x68;
+                            ess->es186x_id_state = 2;
+                            break;
+                        case 2:
+                            ret = (ess->es186x_ctrl_addr >> 8) & 0x0f;
+                            ess->es186x_id_state = 3;
+                            break;
+                        case 3:
+                            ret = ess->es186x_ctrl_addr & 0xff;
+                            ess->es186x_id_state = 0;
+                            break;
+
+                    }
+                } else if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1788)
                     ret = mixer->regs[mixer->index];
                 else if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1688)
                     ret = mixer->regs[mixer->index] & 0xfb;
@@ -2394,6 +2379,7 @@ ess_mixer_read(uint16_t addr, void *priv)
                 break;
 
             case 0x70:
+            case 0x71:
             case 0x72:
                 if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888)
                     ret = mixer->regs[mixer->index];
@@ -2417,16 +2403,20 @@ ess_mixer_read(uint16_t addr, void *priv)
             case 0x78:
             case 0x7a:
             case 0x7c:
-            case 0x7d:
                 if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888)
                     ret = mixer->regs[mixer->index];
                 break;
+            case 0x7d:
+                if ((ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869) || ((ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888) && (ess->dsp.sb_subtype <= SB_SUBTYPE_ESS_ES1887)))
+                    ret = mixer->regs[mixer->index];
+                break;
             case 0x7f:
-                if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888) {
+                if ((ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1888) && (ess->dsp.sb_subtype <= SB_SUBTYPE_ESS_ES1887)) {
                     uint8_t temp = 0;
                     temp = ((ess->dsp.sb_irq8 || ess->dsp.sb_irq16) ? 0x10: 0) | ((mixer->regs[0x7a] & 0x80) ? 0x20 : 0) | ((ess->dsp.sb_irq401 || ess->mpu->queue_used) ? 0x80 : 0);
                     ret = (mixer->regs[mixer->index] & 0x0f) | (temp & 0xf0);
-                }
+                } else if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869)
+                    ret = mixer->regs[mixer->index];
                 break;
 
             default:
@@ -2511,7 +2501,6 @@ ess_rsk_reset(void *priv)
     }
 
     ess->es188x_readseq_state = 0;
-    sb_log("ESS Read-Sequence-Key reset!\n");
 }
 
 static uint8_t
@@ -2709,6 +2698,7 @@ ess_scr_write(uint16_t addr, uint8_t val, void *priv)
         return;
 
     switch (addr & 0x0001) {
+        default:
         case 0x0000:
             break;
         case 0x0001:
@@ -2754,6 +2744,8 @@ ess_scr_write(uint16_t addr, uint8_t val, void *priv)
             sb_dsp_setaddr(&ess->dsp, 0);
 
             switch (val & 0x03) {
+                default:
+                    break;
                 case 0x00:
                     dspaddr = 0x220;
                     break;
@@ -2769,6 +2761,8 @@ ess_scr_write(uint16_t addr, uint8_t val, void *priv)
             }
             if (ess->dsp.sb_subtype >= SB_SUBTYPE_ESS_ES1887) {
                 switch ((val >> 6) & 0x03) {
+                    default:
+                        break;
                     case 0x00:
                         opladdr = 0x388;
                         break;
@@ -2784,6 +2778,8 @@ ess_scr_write(uint16_t addr, uint8_t val, void *priv)
                 }
                 ess->opl_pnp_addr = opladdr;
                 switch ((val >> 4) & 0x03) {
+                    default:
+                        break;
                     case 0x00:
                         ess->gameport_addr = 0x200;
                         break;
@@ -2843,6 +2839,95 @@ ess_scr_write(uint16_t addr, uint8_t val, void *priv)
     }
 
     sb_log("ESS System Config write! addr = %04X, val = %02X\n", addr, val);
+}
+
+static void ess_186x_pnp_config_changed(uint8_t ld, isapnp_device_config_t *config, void *priv);
+
+static void
+ess_pnp_control_write(uint16_t addr, uint8_t val, void *priv)
+{
+    sb_t *ess = (sb_t *) priv;
+    uint8_t ldn = ess->es186x_ctrl_iregs[7];
+
+    switch (addr & 0x07) {
+        /* Configuration Register address/data are a backdoor method of accessing the
+           ISAPnP Logical Device Registers */
+        case 0: /* Configuration Register Address */
+            ess->es186x_ctrl_regs[0] = val;
+            break;
+        case 1: /* Configuration Register Data */
+            ess->es186x_ctrl_iregs[ess->es186x_ctrl_regs[0]] = val;
+            isapnp_write_reg(ess->pnp_card, ldn, ess->es186x_ctrl_regs[0], val);
+            break;
+        case 2: /* EEPROM data register */
+            break;
+        case 3: /* EEPROM command register */
+            ess->es186x_ctrl_regs[3] = val;
+            break;
+        case 4: /* Reset EEPROM address */
+            ess->es186x_rom_pos = 0;
+            break;
+        case 5: /* Status Register */
+        case 6: /* Interrupt Status Register (RO) */
+            break;
+        case 7: /* Interrupt Mask Register */
+            ess->es186x_ctrl_regs[7] = val;
+            break;
+        default:
+            break;
+    }
+
+    sb_log("ESS Control register write! addr = %04X, val = %02X\n", addr, val);
+}
+
+uint8_t
+ess_pnp_control_read(const uint16_t port, void *priv)
+{
+    sb_t *ess = (sb_t *) priv;
+    uint8_t ret = 0xff;
+    uint8_t ldn = ess->es186x_ctrl_iregs[7];
+
+    switch (port & 0x07) {
+        case 0: /* Configuration Register Address */
+            ret = ess->es186x_ctrl_regs[0];
+            break;
+        case 1: /* Configuration Register Data */
+            if (ess->es186x_ctrl_regs[0] == 0x25)
+                ret = 0x02;
+            else
+                ret = isapnp_read_reg(ess->pnp_card, ldn, ess->es186x_ctrl_regs[0]);
+            break;
+        case 2: /* EEPROM data register */
+            if ((ess->es186x_ctrl_regs[3] & 0x0f) == 0x08) {
+                if (ess->es186x_rom_pos < 8)
+                    ret = es1868_header[ess->es186x_rom_pos];
+                else
+                    ret = ess->pnp_rom[ess->es186x_rom_pos - 8];
+                ess->es186x_rom_pos++;
+                ess->es186x_rom_pos &= 0x1ff;
+            }
+            break;
+        case 3: /* EEPROM command register */
+            ret = ess->es186x_ctrl_regs[3];
+            break;
+        case 4: /* Reset EEPROM address */
+            break;
+        case 5: /* Status Register */
+            ret = 0x02;
+            break;
+        case 6: /* Interrupt Status Register (RO) */
+            ret = ((ess->dsp.sb_irq8 || ess->dsp.sb_irq16) ? 0x01 : 0) | ((ess->mixer_ess.regs[0x7a] & 0x80) ? 0x02 : 0) | ((ess->dsp.sb_irq401 || ess->mpu->queue_used) ? 0x08 : 0);
+            break;
+        case 7: /* Interrupt Mask Register */
+            ret = ess->es186x_ctrl_regs[7];
+            break;
+        default:
+            break;
+    }
+
+    sb_log("ESS Control register read! addr = %04X, ret = %02X\n", port, ret);
+
+    return ret;
 }
 
 uint8_t
@@ -3304,14 +3389,9 @@ goldfinch_pnp_config_changed(const uint8_t ld, isapnp_device_config_t *config, v
 {
     goldfinch_t *goldfinch = (goldfinch_t *) priv;
 
-    switch (ld) {
-        default:
-            break;
-
-        case 0: /* WaveTable */
-            emu8k_change_addr(&goldfinch->emu8k, (config->activate && (config->io[0].base != ISAPNP_IO_DISABLED)) ? config->io[0].base : 0);
-            break;
-    }
+    if (ld == 0)
+        /* WaveTable */
+        emu8k_change_addr(&goldfinch->emu8k, (config->activate && (config->io[0].base != ISAPNP_IO_DISABLED)) ? config->io[0].base : 0);
 }
 
 static void
@@ -3554,6 +3634,182 @@ ess_x688_pnp_config_changed(UNUSED(const uint8_t ld), isapnp_device_config_t *co
                 ide_pnp_config_changed_1addr(0, config, (void *) 3);
             break;
 
+        default:
+            break;
+    }
+}
+
+static void
+ess_186x_pnp_config_changed(const uint8_t ld, isapnp_device_config_t *config, void *priv)
+{
+    sb_t    *ess  = (sb_t *) priv;
+    uint16_t addr = ess->dsp.sb_addr;
+    uint16_t ctrladdr = ess->es186x_ctrl_addr;
+    uint16_t opladdr = ess->opl_pnp_addr;
+    uint16_t mpuaddr = ess->midi_addr;
+    uint8_t  val;
+
+    switch (ld) {
+        case 0: /* Control registers */
+            if (ctrladdr) {
+                io_removehandler(ctrladdr, 0x0008, ess_pnp_control_read, NULL, NULL, ess_pnp_control_write, NULL, NULL, ess);
+                ctrladdr = 0;
+            }
+
+            if (config->activate) {
+                if (config->io[0].base != ISAPNP_IO_DISABLED) {
+                    ctrladdr = config->io[0].base;
+                    ess->es186x_ctrl_addr = ctrladdr;
+                    sb_log("Updating ES186x Control port, addr = %04X\n", ctrladdr);
+                    io_sethandler(ctrladdr, 0x0008, ess_pnp_control_read, NULL, NULL, ess_pnp_control_write, NULL, NULL, ess);
+                }
+            }
+            break;
+        case 1: /* Audio */
+            sb_log("ES186x Audio config change! SB addr = %04X, OPL addr = %04X, MPU addr = %04X\n", addr, opladdr, mpuaddr);
+            if (addr) {
+                io_removehandler(addr, 0x0004,
+                                 ess->opl.read, NULL, NULL,
+                                 ess->opl.write, NULL, NULL,
+                                 ess->opl.priv);
+                io_removehandler(addr + 8, 0x0002,
+                                 ess->opl.read, NULL, NULL,
+                                 ess->opl.write, NULL, NULL,
+                                 ess->opl.priv);
+                io_removehandler(addr + 8, 0x0002,
+                                 ess_fm_midi_read, NULL, NULL,
+                                 ess_fm_midi_write, NULL, NULL,
+                                 ess);
+                io_removehandler(addr + 4, 0x0002,
+                                 ess_mixer_read, NULL, NULL,
+                                 ess_mixer_write, NULL, NULL,
+                                 ess);
+
+                sb_dsp_setaddr(&ess->dsp, 0);
+
+                io_removehandler(addr + 2, 0x0004,
+                                 ess_base_read, NULL, NULL,
+                                 ess_base_write, NULL, NULL,
+                                 ess);
+                io_removehandler(addr + 6, 0x0001,
+                                 ess_base_read, NULL, NULL,
+                                 ess_base_write, NULL, NULL,
+                                 ess);
+                io_removehandler(addr + 0x0a, 0x0006,
+                                 ess_base_read, NULL, NULL,
+                                 ess_base_write, NULL, NULL,
+                                 ess);
+                addr = 0;
+            }
+            if (opladdr) {
+                ess->opl_pnp_addr = 0;
+                io_removehandler(opladdr, 0x0004,
+                                 ess->opl.read, NULL, NULL,
+                                 ess->opl.write, NULL, NULL,
+                                 ess->opl.priv);
+                io_removehandler(opladdr, 0x0004,
+                                 ess_fm_midi_read, NULL, NULL,
+                                 ess_fm_midi_write, NULL, NULL,
+                                 ess);
+            }
+            if (mpuaddr) {
+                ess->midi_addr = 0;
+                if (ess->mpu != NULL)
+                    mpu401_change_addr(ess->mpu, 0);
+                io_removehandler(mpuaddr, 0x0002,
+                                 ess_fm_midi_read, NULL, NULL,
+                                 ess_fm_midi_write, NULL, NULL,
+                                 ess);
+            }
+            if (config->activate) {
+                if (config->io[0].base != ISAPNP_IO_DISABLED) {
+                    addr = config->io[0].base;
+                    io_sethandler(addr, 0x0004,
+                                  ess->opl.read, NULL, NULL,
+                                  ess->opl.write, NULL, NULL,
+                                  ess->opl.priv);
+                    io_sethandler(addr + 8, 0x0002,
+                                  ess->opl.read, NULL, NULL,
+                                  ess->opl.write, NULL, NULL,
+                                  ess->opl.priv);
+                    io_sethandler(addr + 8, 0x0002,
+                                  ess_fm_midi_read, NULL, NULL,
+                                  ess_fm_midi_write, NULL, NULL,
+                                  ess);
+                    io_sethandler(addr + 4, 0x0002,
+                                  ess_mixer_read, NULL, NULL,
+                                  ess_mixer_write, NULL, NULL,
+                                  ess);
+
+                    sb_dsp_setaddr(&ess->dsp, addr);
+                    io_sethandler(addr + 2, 0x0004,
+                                  ess_base_read, NULL, NULL,
+                                  ess_base_write, NULL, NULL,
+                                  ess);
+                    io_sethandler(addr + 6, 0x0001,
+                                  ess_base_read, NULL, NULL,
+                                  ess_base_write, NULL, NULL,
+                                  ess);
+                    io_sethandler(addr + 0x0a, 0x0006,
+                                  ess_base_read, NULL, NULL,
+                                  ess_base_write, NULL, NULL,
+                                  ess);
+                    sb_log("Updating ES186x SB DSP port, addr = %04X\n", addr);
+                }
+                if (config->io[1].base != ISAPNP_IO_DISABLED ) {
+                    ess->opl_pnp_addr = config->io[1].base;
+                    opladdr = ess->opl_pnp_addr;
+                    io_sethandler(opladdr, 0x0004,
+                                  ess->opl.read, NULL, NULL,
+                                  ess->opl.write, NULL, NULL,
+                                  ess->opl.priv);
+                    io_sethandler(opladdr, 0x0004,
+                                  ess_fm_midi_read, NULL, NULL,
+                                  ess_fm_midi_write, NULL, NULL,
+                                  ess);
+                    sb_log("Updating ES186x OPL port, addr = %04X\n", opladdr);
+                }
+                if ((config->io[2].base != ISAPNP_IO_DISABLED) && (config->io[2].base != 0xFFFF)) { /* NT 3.5x driver sets an invalid value when MPU401 is disabled */
+                    ess->midi_addr = config->io[2].base;
+                    mpuaddr = ess->midi_addr;
+                    if (ess->mpu != NULL)
+                        mpu401_change_addr(ess->mpu, mpuaddr);
+                    io_sethandler(mpuaddr, 0x0002,
+                                  ess_fm_midi_read, NULL, NULL,
+                                  ess_fm_midi_write, NULL, NULL,
+                                  ess);
+                    sb_log("Updating ES186x MPU401 port, addr = %04X\n", mpuaddr);
+                }
+                val = config->irq[0].irq;
+                if (val != ISAPNP_IRQ_DISABLED) {
+                    sb_dsp_setirq(&ess->dsp, val);
+                    if ((ess->mpu != NULL))
+                        mpu401_setirq(ess->mpu, val);
+                    ess->dsp.es188x_irq_mode = 1;
+                    ess->ess_dac2_irq = 0;
+                    sb_log("Updating ES186x IRQ, new IRQ is %i\n", val);
+                }
+
+                val = config->dma[0].dma;
+                if (val != ISAPNP_DMA_DISABLED) {
+                    sb_dsp_setdma8(&ess->dsp, val);
+                    sb_dsp_setdma16_8(&ess->dsp, val);
+                    sb_log("Updating ES186x DAC1 DMA, new DMA is %i\n", val);
+                }
+                val = config->dma[1].dma;
+                if (val != ISAPNP_DMA_DISABLED) {
+                    ess->ess_dac2_dma = config->dma[1].dma;
+                    sb_log("Updating ES186x DAC2 DMA, new DMA is %i\n", val);
+                }
+
+            }
+            break;
+        case 2: /* Joystick */
+            gameport_remap(ess->gameport, (config->activate && (config->io[0].base != ISAPNP_IO_DISABLED)) ? config->io[0].base : 0);
+            break;
+        case 3: /* IDE */
+            ide_pnp_config_changed_1addr(0, config, (void *) 3);
+            break;
         default:
             break;
     }
@@ -3893,8 +4149,8 @@ ess_dac2_update(void *priv)
     sb_t *ess = (sb_t *) priv;
 
     for (; ess->ess_dac2_pos < sound_pos_global; ess->ess_dac2_pos++) {
-        ess->ess_dac2_buffer[ess->ess_dac2_pos * 2]     = ess->ess_dac2_datl;
-        ess->ess_dac2_buffer[ess->ess_dac2_pos * 2 + 1] = ess->ess_dac2_datr;
+        ess->ess_dac2_buffer[ess->ess_dac2_pos * 2]     = *(int16_t *) &ess->ess_dac2_datl;
+        ess->ess_dac2_buffer[ess->ess_dac2_pos * 2 + 1] = *(int16_t *) &ess->ess_dac2_datr;
     }
 }
 
@@ -3912,6 +4168,8 @@ ess_dac2_poll(void *priv)
         format |= ess->ess_dac2_16bit ? 0x04 : 0;
         ess_dac2_update(ess);
         switch (format) {
+            default:
+                break;
             case 0x00: /* Unsigned 8-bit mono */
                 data[0] = ess_dac2_dmaread(ess, ess->ess_dac2_dma);
                 if (data[0] == DMA_NODATA)
@@ -4042,6 +4300,42 @@ ess_dac2_poll(void *priv)
     }
 }
 
+static void
+es186x_pnp_write(uint16_t port, uint8_t val, void *priv)
+{
+    sb_t *ess = (sb_t *) priv;
+
+    //sb_log("ES186x PnP config write: port = %04X, val = %02X\n", port, val);
+
+    if (port == 0x279) {
+        if (ess->es186x_bypass) {
+            switch (ess->es186x_bypass_state) {
+                case 0:
+                    ess->es186x_confaddr = val;
+                    ess->es186x_bypass_state = 1;
+                    break;
+                case 1:
+                    ess->es186x_confaddr = (val << 8) | ess->es186x_confaddr;
+                    sb_log("ES186x PnP bypass, new control addr = %04X\n", ess->es186x_confaddr);
+                    ess->es186x_bypass_conf->activate = 1;
+                    ess->es186x_bypass_conf->io[0].base = ess->es186x_confaddr;
+                    ess_186x_pnp_config_changed(0, ess->es186x_bypass_conf, ess);
+                    ess->es186x_bypass_state = 0;
+                    ess->es186x_bypass = 0;
+                    break;
+                default:
+                    break;
+            }
+        } else if (val == es186x_pnp_key[ess->es186x_key_pos]) {
+            ess->es186x_key_pos++;
+            if (!ess->es186x_key_pos) {
+                sb_log("ES186x bypass key used, config unlocked\n");
+                ess->es186x_bypass = 1;
+            }
+        }
+    }
+}
+
 void *
 sb_init(UNUSED(const device_t *info))
 {
@@ -4142,6 +4436,7 @@ sb_init(UNUSED(const device_t *info))
         sb->mixer_enabled = 0;
 
     sound_add_handler(sb_get_buffer_sb2, sb);
+    sound_add_handler(sb_get_cms_buffer_sb2, sb);
     if (sb->opl_enabled)
         music_add_handler(sb_get_music_buffer_sb2, sb);
     sound_set_cd_audio_filter(sb2_filter_cd_audio, sb);
@@ -4348,7 +4643,7 @@ sb_pro_v2_init(UNUSED(const device_t *info))
 
     sb->opl_enabled = device_get_config_int("opl");
     if (sb->opl_enabled)
-        fm_driver_get(FM_YMF262, &sb->opl);
+        fm_driver_get_cs(FM_YMF262, &sb->opl);
 
     sb_dsp_set_real_opl(&sb->dsp, 1);
     sb_dsp_init(&sb->dsp, dspver, SB_SUBTYPE_DEFAULT, sb);
@@ -4404,7 +4699,7 @@ sb_pro_mcv_init(UNUSED(const device_t *info))
     sb_t *sb = calloc(1, sizeof(sb_t));
 
     sb->opl_enabled = 1;
-    fm_driver_get(FM_YMF262, &sb->opl);
+    fm_driver_get_cs(FM_YMF262, &sb->opl);
 
     sb_dsp_set_real_opl(&sb->dsp, 1);
     sb_dsp_init(&sb->dsp, SBPRO_DSP_302, SB_SUBTYPE_DEFAULT, sb);
@@ -4436,7 +4731,11 @@ sb_pro_compat_init(UNUSED(const device_t *info))
 {
     sb_t *sb = calloc(1, sizeof(sb_t));
 
-    fm_driver_get(FM_YMF262, &sb->opl);
+    /*
+       Force Crystal counter behavior - following the typo
+       (255 instead of 256) in the English YM262 datasheet.
+     */
+    fm_driver_get_cs(FM_YMF262, &sb->opl);
 
     sb_dsp_set_real_opl(&sb->dsp, 1);
     sb_dsp_init(&sb->dsp, SBPRO_DSP_302, SB_SUBTYPE_DEFAULT, sb);
@@ -4463,7 +4762,7 @@ sb_16_init(UNUSED(const device_t *info))
     const uint8_t  dspver = device_get_config_int("dspver");
     sb->opl_enabled = device_get_config_int("opl");
     if (sb->opl_enabled)
-        fm_driver_get((int) (intptr_t) info->local, &sb->opl);
+        fm_driver_get_cs((int) (intptr_t) info->local, &sb->opl);
 
     sb_dsp_set_real_opl(&sb->dsp, 1);
 
@@ -4535,7 +4834,7 @@ sb_16_reply_mca_init(UNUSED(const device_t *info))
     sb_t *sb = calloc(1, sizeof(sb_t));
 
     sb->opl_enabled = 1;
-    fm_driver_get(FM_YMF262, &sb->opl);
+    fm_driver_get_cs(FM_YMF262, &sb->opl);
 
     sb_dsp_set_real_opl(&sb->dsp, 1);
     sb_dsp_init(&sb->dsp, SB16_DSP_405, SB_SUBTYPE_DEFAULT, sb);
@@ -4594,9 +4893,9 @@ sb_16_pnp_init(UNUSED(const device_t *info))
     sb->pnp = 1;
 
     sb->opl_enabled = 1;
-    fm_driver_get((int) (intptr_t) FM_CQM, &sb->opl);
+    fm_driver_get_cs((int) (intptr_t) FM_CQM, &sb->opl);
 
-    sb_dsp_set_cqm(&sb->dsp, 1);
+    sb_dsp_set_real_opl(&sb->dsp, 1);
     sb_dsp_init(&sb->dsp, dspver, SB_SUBTYPE_DEFAULT, sb);
     sb_dsp_setdma16_supported(&sb->dsp, 1);
     sb_ct1745_mixer_reset(sb);
@@ -4604,7 +4903,7 @@ sb_16_pnp_init(UNUSED(const device_t *info))
     sb->mixer_enabled            = 1;
     sb->mixer_sb16.output_filter = 1;
     sound_add_handler(sb_get_buffer_sb16_awe32, sb);
-    cqm_add_handler(sb_get_cqm_buffer_sb16_awe32, sb);
+    music_add_handler(sb_get_music_buffer_sb16_awe32, sb);
     sound_set_cd_audio_filter(sb16_awe32_filter_cd_audio, sb);
     if (device_get_config_int("control_pc_speaker"))
         sound_set_pc_speaker_filter(sb16_awe32_filter_pc_speaker, sb);
@@ -4699,9 +4998,9 @@ sb_vibra16_pnp_init(UNUSED(const device_t *info))
     sb->pnp = 1;
 
     sb->opl_enabled = 1;
-    fm_driver_get(FM_CQM, &sb->opl);
+    fm_driver_get_cs(FM_CQM, &sb->opl);
 
-    sb_dsp_set_cqm(&sb->dsp, 1);
+    sb_dsp_set_real_opl(&sb->dsp, 1);
     sb_dsp_init(&sb->dsp, (info->local == SB_VIBRA16XV) ? SBAWE64_DSP_416 : SBAWE32_DSP_413, SB_SUBTYPE_DEFAULT, sb);
     /* The ViBRA 16XV does 16-bit DMA through 8-bit DMA. */
     sb_dsp_setdma16_supported(&sb->dsp, info->local != SB_VIBRA16XV);
@@ -4710,7 +5009,7 @@ sb_vibra16_pnp_init(UNUSED(const device_t *info))
     sb->mixer_enabled            = 1;
     sb->mixer_sb16.output_filter = 1;
     sound_add_handler(sb_get_buffer_sb16_awe32, sb);
-    cqm_add_handler(sb_get_cqm_buffer_sb16_awe32, sb);
+    music_add_handler(sb_get_music_buffer_sb16_awe32, sb);
     sound_set_cd_audio_filter(sb16_awe32_filter_cd_audio, sb);
     if (device_get_config_int("control_pc_speaker"))
         sound_set_pc_speaker_filter(sb16_awe32_filter_pc_speaker, sb);
@@ -4797,7 +5096,7 @@ sb_16_compat_init(const device_t *info)
 {
     sb_t *sb = calloc(1, sizeof(sb_t));
 
-    fm_driver_get(FM_YMF262, &sb->opl);
+    fm_driver_get_cs(FM_YMF262, &sb->opl);
 
     sb_dsp_set_real_opl(&sb->dsp, 1);
     sb_dsp_init(&sb->dsp, SB16_DSP_405, SB_SUBTYPE_DEFAULT, sb);
@@ -4880,7 +5179,7 @@ sb_awe32_init(UNUSED(const device_t *info))
 
     sb->opl_enabled = device_get_config_int("opl");
     if (sb->opl_enabled)
-        fm_driver_get(FM_YMF262, &sb->opl);
+        fm_driver_get_cs(FM_YMF262, &sb->opl);
 
     sb_dsp_set_real_opl(&sb->dsp, 1);
     sb_dsp_init(&sb->dsp, SBAWE32_DSP_412, SB_SUBTYPE_DEFAULT, sb);
@@ -4998,24 +5297,18 @@ sb_awe32_pnp_init(const device_t *info)
     sb->pnp = 1;
 
     sb->opl_enabled = 1;
-    fm_driver_get(cqm ? FM_CQM : FM_YMF262, &sb->opl);
+    fm_driver_get_cs(cqm ? FM_CQM : FM_YMF262, &sb->opl);
 
     sb_dsp_init(&sb->dsp, (info->local >= SB_AWE64_VALUE) ?
                 SBAWE64_DSP_416 : SBAWE32_DSP_413, SB_SUBTYPE_DEFAULT, sb);
     sb_dsp_setdma16_supported(&sb->dsp, 1);
     sb_ct1745_mixer_reset(sb);
 
-    if (cqm)
-        sb_dsp_set_cqm(&sb->dsp, 1);
-    else
-        sb_dsp_set_real_opl(&sb->dsp, 1);
+    sb_dsp_set_real_opl(&sb->dsp, 1);
     sb->mixer_enabled            = 1;
     sb->mixer_sb16.output_filter = 1;
     sound_add_handler(sb_get_buffer_sb16_awe32, sb);
-    if (cqm)
-        cqm_add_handler(sb_get_cqm_buffer_sb16_awe32, sb);
-    else
-        music_add_handler(sb_get_music_buffer_sb16_awe32, sb);
+    music_add_handler(sb_get_music_buffer_sb16_awe32, sb);
     wavetable_add_handler(sb_get_wavetable_buffer_sb16_awe32, sb);
     sound_set_cd_audio_filter(sb16_awe32_filter_cd_audio, sb);
     if (device_get_config_int("control_pc_speaker"))
@@ -5052,6 +5345,10 @@ sb_awe32_pnp_init(const device_t *info)
             pnp_rom_file = PNP_ROM_SB_AWE32_PNP;
             break;
 
+        case SB_AWE32_IDE_PNP:
+            pnp_rom_file = PNP_ROM_SB_AWE32_IDE_PNP;
+            break;
+
         case SB_AWE64_VALUE:
             pnp_rom_file = PNP_ROM_SB_AWE64_VALUE;
             break;
@@ -5085,6 +5382,7 @@ sb_awe32_pnp_init(const device_t *info)
 
     switch (info->local) {
         case SB_32_PNP:
+        case SB_AWE32_IDE_PNP:
             isapnp_add_card(pnp_rom, sizeof(sb->pnp_rom), sb_16_pnp_config_changed,
                             NULL, NULL, NULL, sb);
             break;
@@ -5138,9 +5436,8 @@ ess_x688_init(UNUSED(const device_t *info))
     const uint16_t ide_base = ide_ctrl & 0x0fff;
     const uint16_t ide_side = ide_base + 0x0206;
     const uint16_t ide_irq  = ide_ctrl >> 12;
-    const uint8_t  is_compaq = (info->local >> 4);
 
-    fm_driver_get(info->local ? FM_ESFM : FM_YMF262, &ess->opl);
+    fm_driver_get_cs(info->local ? FM_ESFM : FM_YMF262, &ess->opl);
 
     sb_dsp_set_real_opl(&ess->dsp, 1);
     sb_dsp_init(&ess->dsp, SBPRO_DSP_301, info->local ? SB_SUBTYPE_ESS_ES1688 : SB_SUBTYPE_ESS_ES688, ess);
@@ -5152,49 +5449,46 @@ ess_x688_init(UNUSED(const device_t *info))
     ess_mixer_reset(ess);
 
     /* DSP I/O handler is activated in sb_dsp_setaddr */
-    if (!is_compaq) {
-        io_sethandler(addr, 0x0004,
-                      ess->opl.read, NULL, NULL,
-                      ess->opl.write, NULL, NULL,
-                      ess->opl.priv);
-        io_sethandler(addr + 8, 0x0002,
-                      ess->opl.read, NULL, NULL,
-                      ess->opl.write, NULL, NULL,
-                      ess->opl.priv);
-        io_sethandler(addr + 8, 0x0002,
-                      ess_fm_midi_read, NULL, NULL,
-                      ess_fm_midi_write, NULL, NULL,
-                      ess);
-        io_sethandler(0x0388, 0x0004,
-                      ess->opl.read, NULL, NULL,
-                      ess->opl.write, NULL, NULL,
-                      ess->opl.priv);
-        io_sethandler(0x0388, 0x0004,
-                      ess_fm_midi_read, NULL, NULL,
-                      ess_fm_midi_write, NULL, NULL,
-                      ess);
+    io_sethandler(addr, 0x0004,
+                  ess->opl.read, NULL, NULL,
+                  ess->opl.write, NULL, NULL,
+                  ess->opl.priv);
+    io_sethandler(addr + 8, 0x0002,
+                  ess->opl.read, NULL, NULL,
+                  ess->opl.write, NULL, NULL,
+                  ess->opl.priv);
+    io_sethandler(addr + 8, 0x0002,
+                  ess_fm_midi_read, NULL, NULL,
+                  ess_fm_midi_write, NULL, NULL,
+                  ess);
+    io_sethandler(0x0388, 0x0004,
+                  ess->opl.read, NULL, NULL,
+                  ess->opl.write, NULL, NULL,
+                  ess->opl.priv);
+    io_sethandler(0x0388, 0x0004,
+                  ess_fm_midi_read, NULL, NULL,
+                  ess_fm_midi_write, NULL, NULL,
+                  ess);
 
-        io_sethandler(addr + 2, 0x0004,
-                      ess_base_read, NULL, NULL,
-                      ess_base_write, NULL, NULL,
-                      ess);
-        io_sethandler(addr + 6, 0x0001,
-                      ess_base_read, NULL, NULL,
-                      ess_base_write, NULL, NULL,
-                      ess);
-        io_sethandler(addr + 0x0a, 0x0006,
-                      ess_base_read, NULL, NULL,
-                      ess_base_write, NULL, NULL,
-                      ess);
-    }
+    io_sethandler(addr + 2, 0x0004,
+                  ess_base_read, NULL, NULL,
+                  ess_base_write, NULL, NULL,
+                  ess);
+    io_sethandler(addr + 6, 0x0001,
+                  ess_base_read, NULL, NULL,
+                  ess_base_write, NULL, NULL,
+                  ess);
+    io_sethandler(addr + 0x0a, 0x0006,
+                  ess_base_read, NULL, NULL,
+                  ess_base_write, NULL, NULL,
+                  ess);
 
     ess->mixer_enabled = 1;
     ess->mixer_ess.regs[0x40] = 0x0a;
-    if (!is_compaq)
-        io_sethandler(addr + 4, 0x0002,
-                      ess_mixer_read, NULL, NULL,
-                      ess_mixer_write, NULL, NULL,
-                      ess);
+    io_sethandler(addr + 4, 0x0002,
+                  ess_mixer_read, NULL, NULL,
+                  ess_mixer_write, NULL, NULL,
+                  ess);
     sound_add_handler(sb_get_buffer_ess, ess);
     music_add_handler(sb_get_music_buffer_ess, ess);
     sound_set_cd_audio_filter(ess_filter_cd_audio, ess);
@@ -5229,22 +5523,6 @@ ess_x688_init(UNUSED(const device_t *info))
         ess->has_ide = 1;
     }
 
-    if (is_compaq) { /* Enable Read-Sequence-Key mode */
-        ess->opl_pnp_addr = 0x388;
-        ess->es188x_readseq_state = 0;
-        ess->es188x_dsp_addr      = 0;
-        ess->es1688_rsk_enable    = 1;
-        sb_dsp_setaddr(&ess->dsp, 0);
-        io_sethandler(0x220, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
-        io_sethandler(0x229, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
-        io_sethandler(0x22b, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
-        io_sethandler(0x22d, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
-        io_sethandler(0x22f, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
-        io_sethandler(0x230, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
-        io_sethandler(0x240, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
-        io_sethandler(0x250, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
-    }
-
     return ess;
 }
 
@@ -5276,7 +5554,7 @@ ess_x688_pnp_init(UNUSED(const device_t *info))
     else
         ess->pnp = 1 + (int) info->local;
 
-    fm_driver_get(info->local ? FM_ESFM : FM_YMF262, &ess->opl);
+    fm_driver_get_cs(info->local ? FM_ESFM : FM_YMF262, &ess->opl);
 
     sb_dsp_set_real_opl(&ess->dsp, 1);
     sb_dsp_init(&ess->dsp, SBPRO_DSP_301, (info->local & 1) ? SB_SUBTYPE_ESS_ES1688 : SB_SUBTYPE_ESS_ES688, ess);
@@ -5365,7 +5643,7 @@ ess_x688_mca_init(UNUSED(const device_t *info))
     sb_t *ess = calloc(1, sizeof(sb_t));
 
     ess->opl_enabled = 1;
-    fm_driver_get(info->local ? FM_ESFM : FM_YMF262, &ess->opl);
+    fm_driver_get_cs(info->local ? FM_ESFM : FM_YMF262, &ess->opl);
 
     sb_dsp_set_real_opl(&ess->dsp, 1);
     sb_dsp_init(&ess->dsp, SBPRO_DSP_301, info->local ? SB_SUBTYPE_ESS_ES1688 : SB_SUBTYPE_ESS_ES688, ess);
@@ -5414,33 +5692,38 @@ ess_x688_mca_init(UNUSED(const device_t *info))
 }
 
 static void *
-ess_1788_init(const device_t *info)
+ess_1x88_onboard_init(const device_t *info)
 {
     sb_t          *ess      = calloc(sizeof(sb_t), 1);
-    const uint16_t addr     = device_get_config_hex16("base");
 
     uint8_t type = (info->local & 0x0f);
     uint8_t is_compaq = (info->local >> 4);
 
-    fm_driver_get(FM_ESFM, &ess->opl);
+    fm_driver_get_cs(FM_ESFM, &ess->opl);
 
     sb_dsp_set_real_opl(&ess->dsp, 1);
     ess->opl_pnp_addr = 0x388;
     switch (type) {
-        case 0: /* ES1788 */
+        default:
+            break;
+        case 0: /* ES1688 */
+            sb_dsp_init(&ess->dsp, SBPRO_DSP_301, SB_SUBTYPE_ESS_ES1688, ess);
+            ess->es1688_rsk_enable = 1;
+            break;
+        case 1: /* ES1788 */
             sb_dsp_init(&ess->dsp, SBPRO_DSP_301, SB_SUBTYPE_ESS_ES1788, ess);
             break;
-        case 1: /* ES1888 */
+        case 2: /* ES1888 */
             sb_dsp_init(&ess->dsp, SBPRO_DSP_301, SB_SUBTYPE_ESS_ES1888, ess);
             break;
-        case 2: /* ES1887 */
+        case 3: /* ES1887 */
             sb_dsp_init(&ess->dsp, SBPRO_DSP_301, SB_SUBTYPE_ESS_ES1887, ess);
             break;
     }
-    sb_dsp_setaddr(&ess->dsp, addr);
-    sb_dsp_setirq(&ess->dsp, device_get_config_int("irq"));
-    sb_dsp_setdma8(&ess->dsp, device_get_config_int("dma"));
-    sb_dsp_setdma16_8(&ess->dsp, device_get_config_int("dma"));
+    sb_dsp_setaddr(&ess->dsp, 0);
+    sb_dsp_setirq(&ess->dsp, 0);
+    sb_dsp_setdma8(&ess->dsp, ISAPNP_DMA_DISABLED);
+    sb_dsp_setdma16_8(&ess->dsp, ISAPNP_DMA_DISABLED);
     sb_dsp_setdma16_supported(&ess->dsp, 0);
     ess_mixer_reset(ess);
 
@@ -5467,15 +5750,13 @@ ess_1788_init(const device_t *info)
     if (device_get_config_int("control_midi"))
         sound_set_midi_filter(ess_filter_midi, ess);
 
-    if (device_get_config_int("gameport")) {
-        if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1887) {
-            ess->gameport      = gameport_add(&gameport_pnp_device);
-            ess->gameport_addr = 0x200;
-            gameport_remap(ess->gameport, ess->gameport_addr);
-        } else {
-            ess->gameport      = gameport_add(&gameport_200_device);
-            ess->gameport_addr = 0x200;
-        }
+    if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1887) {
+        ess->gameport      = gameport_add(&gameport_pnp_device);
+        ess->gameport_addr = 0x200;
+        gameport_remap(ess->gameport, ess->gameport_addr);
+    } else {
+        ess->gameport      = gameport_add(&gameport_200_device);
+        ess->gameport_addr = 0x200;
     }
 
     /* ES1788/188x System Configuration Register ports */
@@ -5487,7 +5768,6 @@ ess_1788_init(const device_t *info)
     /* ES1788/188x Read-Sequence-Key mode */
     ess->es188x_readseq_state = 0;
     ess->es188x_dsp_addr      = 0;
-    sb_dsp_setaddr(&ess->dsp, 0);
     io_sethandler(0x220, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
     io_sethandler(0x229, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
     io_sethandler(0x22b, 0x0001, ess_rsk_read, NULL, NULL, NULL, NULL, NULL, ess);
@@ -5516,6 +5796,127 @@ ess_1788_init(const device_t *info)
         }
         ess->dsp.es188x_irq_mode = 0;
     }
+
+    /* Calculate 6-bit attenuation values for ES1788+ master volume control */
+    uint8_t c;
+    double  attenuation;
+    for (c = 0; c < 64; c++) {
+        attenuation = -47.25;
+        if (c & 0x01)
+            attenuation += 0.75;
+        if (c & 0x02)
+            attenuation += 1.5;
+        if (c & 0x04)
+            attenuation += 3.0;
+        if (c & 0x08)
+            attenuation += 6.0;
+        if (c & 0x10)
+            attenuation += 12.0;
+        if (c & 0x20)
+            attenuation += 24.0;
+
+        attenuation = pow(10, attenuation / 10);
+
+        ess_att_6bits[c] = (attenuation * 65536);
+    }
+
+    return ess;
+}
+
+static void *
+ess_186x_init(const device_t *info)
+{
+    sb_t *ess = calloc(sizeof(sb_t), 1);
+
+    fm_driver_get_cs(FM_ESFM, &ess->opl);
+
+    sb_dsp_set_real_opl(&ess->dsp, 1);
+    if (info->local)
+        sb_dsp_init(&ess->dsp, SBPRO_DSP_301, SB_SUBTYPE_ESS_ES1869, ess);
+    else
+        sb_dsp_init(&ess->dsp, SBPRO_DSP_301, SB_SUBTYPE_ESS_ES1868, ess);
+    sb_dsp_setdma16_supported(&ess->dsp, 0);
+    ess_mixer_reset(ess);
+
+    ess->mixer_enabled = 1;
+    sound_add_handler(sb_get_buffer_ess, ess);
+    music_add_handler(sb_get_music_buffer_ess, ess);
+    sound_set_cd_audio_filter(ess_filter_cd_audio, ess);
+    if (device_get_config_int("control_pc_speaker"))
+        sound_set_pc_speaker_filter(ess_filter_pc_speaker, ess);
+    if (device_get_config_int("control_midi"))
+        sound_set_midi_filter(ess_filter_midi, ess);
+
+    if (device_get_config_int("receive_input"))
+        midi_in_handler(1, sb_dsp_input_msg, sb_dsp_input_sysex, &ess->dsp);
+
+    ess->mpu = (mpu_t *) calloc(1, sizeof(mpu_t));
+    /* NOTE: The MPU is initialized disabled and with no IRQ assigned.
+     * It will be later initialized by the guest OS's drivers. */
+    mpu401_init(ess->mpu, 0, -1, M_UART, device_get_config_int("receive_input401"));
+    sb_dsp_set_mpu(&ess->dsp, ess->mpu);
+
+    ess->gameport = gameport_add(&gameport_pnp_device);
+
+    device_add(&ide_qua_pnp_device);
+    other_ide_present++;
+
+    ess->has_ide = 1;
+
+    const char *pnp_rom_file = NULL;
+    uint16_t    pnp_rom_len  = 512;
+
+    if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1868) {
+        pnp_rom_file = PNP_ROM_ESS1868;
+        pnp_rom_len = 324;
+    } else if (ess->dsp.sb_subtype == SB_SUBTYPE_ESS_ES1869) {
+        pnp_rom_file = PNP_ROM_ESS1869;
+        pnp_rom_len = 397;
+    }
+
+    uint8_t *pnp_rom = NULL;
+    if (pnp_rom_file) {
+        FILE *fp = rom_fopen(pnp_rom_file, "rb");
+        if (fp) {
+            if (fread(ess->pnp_rom, 1, pnp_rom_len, fp) == pnp_rom_len)
+                pnp_rom = ess->pnp_rom;
+            fclose(fp);
+        }
+    }
+
+    ess->pnp_card = isapnp_add_card(pnp_rom, sizeof(ess->pnp_rom), ess_186x_pnp_config_changed,
+                                    NULL, NULL, NULL, ess);
+    io_sethandler(0x0279, 0x0001, NULL, NULL, NULL, es186x_pnp_write, NULL, NULL, ess);
+    ess->es186x_bypass_conf = (isapnp_device_config_t *) calloc(1, sizeof(isapnp_device_config_t));
+
+    sb_dsp_setaddr(&ess->dsp, 0);
+    sb_dsp_setirq(&ess->dsp, 0);
+    sb_dsp_setdma8(&ess->dsp, ISAPNP_DMA_DISABLED);
+    sb_dsp_setdma16_8(&ess->dsp, ISAPNP_DMA_DISABLED);
+
+    mpu401_change_addr(ess->mpu, 0);
+
+    ess->gameport_addr = 0;
+    gameport_remap(ess->gameport, 0);
+
+    ide_remove_handlers(3);
+
+    sound_add_handler(sb_get_buffer_ess_dac2, ess);
+    timer_add(&ess->ess_dac2_timer, ess_dac2_poll, ess, 0);
+    ess->ess_dac2_irq = 0; /* Use shared IRQ */
+    ess->ess_dac2_dma = ISAPNP_DMA_DISABLED;
+    ess->dsp.es188x_irq_mode = 1;
+
+    /* Init read-only control registers */
+    ess->es186x_ctrl_iregs[0x20] = 0x59;
+    ess->es186x_ctrl_iregs[0x21] = 0xA7;
+    ess->es186x_ctrl_iregs[0x22] = 0xCB;
+    ess->es186x_ctrl_iregs[0x23] = 0x10;
+    ess->es186x_ctrl_iregs[0x24] = 0x53;
+    ess->es186x_ctrl_iregs[0x25] = 0x02;
+    ess->es186x_ctrl_iregs[0x26] = 0x0C;
+
+
 
     /* Calculate 6-bit attenuation values for ES1788+ master volume control */
     uint8_t c;
@@ -7447,115 +7848,6 @@ static const device_config_t ess_1688_config[] = {
     { .name = "", .description = "", .type = CONFIG_END }
 };
 
-static const device_config_t ess_1788_config[] = {
-    {
-        .name           = "base",
-        .description    = "Address",
-        .type           = CONFIG_HEX16,
-        .default_string = NULL,
-        .default_int    = 0x220,
-        .file_filter    = NULL,
-        .spinner        = { 0 },
-        .selection      = {
-            { .description = "0x220", .value = 0x220 },
-            { .description = "0x230", .value = 0x230 },
-            { .description = "0x240", .value = 0x240 },
-            { .description = "0x250", .value = 0x250 },
-            { .description = ""                      }
-        },
-        .bios           = { { 0 } }
-    },
-    {
-        .name           = "irq",
-        .description    = "IRQ",
-        .type           = CONFIG_SELECTION,
-        .default_string = NULL,
-        .default_int    = 5,
-        .file_filter    = NULL,
-        .spinner        = { 0 },
-        .selection      = {
-            { .description = "IRQ 2",  .value =  2 },
-            { .description = "IRQ 5",  .value =  5 },
-            { .description = "IRQ 7",  .value =  7 },
-            { .description = "IRQ 10", .value = 10 },
-            { .description = ""                    }
-        },
-        .bios           = { { 0 } }
-    },
-    {
-        .name           = "dma",
-        .description    = "DMA",
-        .type           = CONFIG_SELECTION,
-        .default_string = NULL,
-        .default_int    = 1,
-        .file_filter    = NULL,
-        .spinner        = { 0 },
-        .selection      = {
-            { .description = "DMA 0", .value = 0 },
-            { .description = "DMA 1", .value = 1 },
-            { .description = "DMA 3", .value = 3 },
-            { .description = ""                  }
-        },
-        .bios           = { { 0 } }
-    },
-    {
-        .name           = "gameport",
-        .description    = "Enable Game port",
-        .type           = CONFIG_BINARY,
-        .default_string = NULL,
-        .default_int    = 0,
-        .file_filter    = NULL,
-        .spinner        = { 0 },
-        .selection      = { { 0 } },
-        .bios           = { { 0 } }
-    },
-    {
-        .name           = "control_pc_speaker",
-        .description    = "Control PC speaker",
-        .type           = CONFIG_BINARY,
-        .default_string = NULL,
-        .default_int    = 0,
-        .file_filter    = NULL,
-        .spinner        = { 0 },
-        .selection      = { { 0 } },
-        .bios           = { { 0 } }
-    },
-    {
-        .name           = "control_midi",
-        .description    = "Control MIDI volume",
-        .type           = CONFIG_BINARY,
-        .default_string = NULL,
-        .default_int    = 0,
-        .file_filter    = NULL,
-        .spinner        = { 0 },
-        .selection      = { { 0 } },
-        .bios           = { { 0 } }
-    },
-    {
-        .name           = "receive_input",
-        .description    = "Receive MIDI input",
-        .type           = CONFIG_BINARY,
-        .default_string = NULL,
-        .default_int    = 1,
-        .file_filter    = NULL,
-        .spinner        = { 0 },
-        .selection      = { { 0 } },
-        .bios           = { { 0 } }
-    },
-    {
-        .name           = "receive_input401",
-        .description    = "Receive MIDI input (MPU-401)",
-        .type           = CONFIG_BINARY,
-        .default_string = NULL,
-        .default_int    = 0,
-        .file_filter    = NULL,
-        .spinner        = { 0 },
-        .selection      = { { 0 } },
-        .bios           = { { 0 } }
-    },
-    { .name = "", .description = "", .type = CONFIG_END }
-};
-
 static const device_config_t ess_688_pnp_config[] = {
     {
         .name           = "receive_input",
@@ -8026,7 +8318,7 @@ const device_t sb_awe32_pnp_device = {
 
 const device_t sb_awe32_ide_pnp_device = {
     .name          = "Sound Blaster AWE32 IDE PnP",
-    .internal_name = "sbawe32_pnp",
+    .internal_name = "sbawe32_ide_pnp",
     .flags         = DEVICE_ISA16,
     .local         = SB_AWE32_IDE_PNP,
     .init          = sb_awe32_pnp_init,
@@ -8141,14 +8433,14 @@ const device_t ess_1688_compaq_device = {
     .name          = "ESS AudioDrive ES1688 (Compaq)",
     .internal_name = "ess_es1688_compaq",
     .flags         = DEVICE_ISA16,
-    .local         = 0x11,
-    .init          = ess_x688_init,
+    .local         = 0,
+    .init          = ess_1x88_onboard_init,
     .close         = sb_close,
     .reset         = NULL,
     .available     = NULL,
     .speed_changed = sb_speed_changed,
     .force_redraw  = NULL,
-    .config        = ess_1688_config
+    .config        = ess_1688_pnp_config
 };
 
 const device_t ess_ess0102_pnp_device = {
@@ -8236,57 +8528,85 @@ const device_t ess_chipchat_16_mca_device = {
 };
 
 const device_t ess_1788_device = {
-    .name          = "ESS AudioDrive ES1788",
+    .name          = "ESS AudioDrive ES1788/ES1698", /* ES1698 is a rebadged ES1788 */
     .internal_name = "ess_es1788",
     .flags         = DEVICE_ISA16,
-    .local         = 0,
-    .init          = ess_1788_init,
+    .local         = 1,
+    .init          = ess_1x88_onboard_init,
     .close         = sb_close,
     .reset         = NULL,
     .available     = NULL,
     .speed_changed = sb_speed_changed,
     .force_redraw  = NULL,
-    .config        = ess_1788_config
+    .config        = ess_1688_pnp_config
 };
 
 const device_t ess_1888_device = {
     .name          = "ESS AudioDrive ES1888",
     .internal_name = "ess_es1888",
     .flags         = DEVICE_ISA16,
-    .local         = 1,
-    .init          = ess_1788_init,
+    .local         = 2,
+    .init          = ess_1x88_onboard_init,
     .close         = sb_close,
     .reset         = NULL,
     .available     = NULL,
     .speed_changed = sb_speed_changed,
     .force_redraw  = NULL,
-    .config        = ess_1788_config
+    .config        = ess_1688_pnp_config
 };
 
 const device_t ess_1888_compaq_device = {
     .name          = "ESS AudioDrive ES1888 (Compaq)",
     .internal_name = "ess_es1888_compaq",
     .flags         = DEVICE_ISA16,
-    .local         = 0x11,
-    .init          = ess_1788_init,
+    .local         = 0x12,
+    .init          = ess_1x88_onboard_init,
     .close         = sb_close,
     .reset         = NULL,
     .available     = NULL,
     .speed_changed = sb_speed_changed,
     .force_redraw  = NULL,
-    .config        = ess_1788_config
+    .config        = ess_1688_pnp_config
 };
 
 const device_t ess_1887_device = {
     .name          = "ESS AudioDrive ES1887",
     .internal_name = "ess_es1887",
     .flags         = DEVICE_ISA16,
-    .local         = 2,
-    .init          = ess_1788_init,
+    .local         = 3,
+    .init          = ess_1x88_onboard_init,
     .close         = sb_close,
     .reset         = NULL,
     .available     = NULL,
     .speed_changed = sb_speed_changed,
     .force_redraw  = NULL,
-    .config        = ess_1788_config
+    .config        = ess_1688_pnp_config
+};
+
+const device_t ess_1868_device = {
+    .name          = "ESS AudioDrive ES1868",
+    .internal_name = "ess_es1868",
+    .flags         = DEVICE_ISA16,
+    .local         = 0,
+    .init          = ess_186x_init,
+    .close         = sb_close,
+    .reset         = NULL,
+    .available     = NULL,
+    .speed_changed = sb_speed_changed,
+    .force_redraw  = NULL,
+    .config        = ess_1688_pnp_config
+};
+
+const device_t ess_1869_device = {
+    .name          = "ESS AudioDrive ES1869",
+    .internal_name = "ess_es1869",
+    .flags         = DEVICE_ISA16,
+    .local         = 1,
+    .init          = ess_186x_init,
+    .close         = sb_close,
+    .reset         = NULL,
+    .available     = NULL,
+    .speed_changed = sb_speed_changed,
+    .force_redraw  = NULL,
+    .config        = ess_1688_pnp_config
 };

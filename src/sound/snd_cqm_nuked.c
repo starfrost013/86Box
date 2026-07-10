@@ -48,6 +48,7 @@
 #include "cpu.h"
 #include <86box/timer.h>
 #include <86box/device.h>
+#include <86box/video.h>
 #include <86box/snd_opl.h>
 #include <86box/snd_cqm_nuked.h>
 
@@ -192,7 +193,7 @@ static inline int doshifter(int x, int shift)
 #   define doshifter(x, shift) (shift > 12 ? (x << (shift - 12)) : (x >> (12 - shift)))
 #endif
 
-void CQM_Generate(cqm_t* chip, int16_t* sample)
+void CQM_Generate(cqm_t* chip, int32_t* sample)
 {
     int idx;
     int multi_l = 0;
@@ -907,19 +908,10 @@ void CQM_Generate(cqm_t* chip, int16_t* sample)
     }
 
     accum[0] >>= 1;
-    if (accum[0] < -32768)
-        accum[0] = -32768;
-    else if (accum[0] > 32767)
-        accum[0] = 32767;
-
     accum[1] >>= 1;
-    if (accum[1] < -32768)
-        accum[1] = -32768;
-    else if (accum[1] > 32767)
-        accum[1] = 32767;
 
-    sample[0] = (int16_t)accum[0];
-    sample[1] = (int16_t)accum[1];
+    sample[0] = accum[0];
+    sample[1] = accum[1];
     
     {
         cqm_writebuf* writebuf;
@@ -1068,8 +1060,58 @@ void CQM_GenerateStream(cqm_t* chip, int32_t* sndptr, uint32_t numsamples)
 
     for (i = 0; i < numsamples; i++)
     {
+        CQM_Generate(chip, sndptr);
+        sndptr += 2;
+    }
+}
+
+void CQM_GenerateStreamResampled(cqm_t* chip, int32_t* sndptr, uint32_t numsamples)
+{
+    uint_fast32_t i;
+
+    for (i = 0; i < numsamples; i++)
+    {
         CQM_GenerateResampled(chip, sndptr);
         sndptr += 2;
+    }
+}
+
+#define CQM_CLOCK     46615120.0
+#define CQM_UCLOCK    46615120ULL
+#define CQM_OPERATORS       48.0
+#define CQM_PRESCALE        20.0
+
+static void    nuked_cqm_timer_tick(nuked_cqm_drv_t *dev, int tmr);
+
+static void
+nuked_cqm_timer_advance(nuked_cqm_drv_t *dev, int tmr, int start)
+{
+    if (dev->is_cs && start)
+        nuked_cqm_timer_tick(dev, tmr);
+    else {
+        const double clock_us = (1000000.0 / CQM_CLOCK) * CQM_OPERATORS * CQM_PRESCALE;
+        double       period;
+
+        if (tmr == 1) {
+            if (start) {
+                /*
+                   This emulates the behavior found on everything but the Crystal OPL
+                   clone - the information in the YM262 (OPL3) datasheet is a typo,
+                   and YMFM explains what actually goes on.
+
+                   TSC = Currently elapsed CPU cycles, (cpu speed in Hz) cycles per second,
+                   What we need is elapsed OPL clocks, (opl speed in Hz) cycles per second,
+                   so we divide the TSC by (cpu speed in Hz) to get the time, then multiply
+                   it by (opl speed in Hz).
+                   */
+                uint64_t total_clocks = ((tsc * CQM_UCLOCK) / (uint64_t) cpuclock);
+                period = clock_us * (16.0 - (double) (total_clocks & 15));
+            } else
+                period = clock_us * 16.0;
+        } else
+            period = clock_us * 4.0;
+
+        timer_on_auto(&dev->timers[tmr], period);
     }
 }
 
@@ -1087,7 +1129,7 @@ nuked_cqm_timer_tick(nuked_cqm_drv_t *dev, int tmr)
         nuked_cqm_log("Count wrapped around to zero, reloading timer %i (%02X), status = %02X...\n", tmr, (STAT_TMR1_OVER >> tmr), dev->status);
     }
 
-    timer_on_auto(&dev->timers[tmr], (tmr == 1) ? 320.0 : 80.0);
+    nuked_cqm_timer_advance(dev, tmr, 0);
 }
 
 static void
@@ -1098,7 +1140,8 @@ nuked_cqm_timer_control(nuked_cqm_drv_t *dev, int tmr, int start)
     if (start) {
         nuked_cqm_log("Loading timer %i count: %02X = %02X\n", tmr, dev->timer_cur_count[tmr], dev->timer_count[tmr]);
         dev->timer_cur_count[tmr] = dev->timer_count[tmr];
-        nuked_cqm_timer_tick(dev, tmr); // Per the YMF 262 datasheet, OPL3 starts counting immediately, unlike OPL2.
+
+        nuked_cqm_timer_advance(dev, tmr, 1);
     } else {
         nuked_cqm_log("Timer %i stopped\n", tmr);
         if (tmr == 1) {
@@ -1140,14 +1183,14 @@ nuked_cqm_drv_update(void *priv)
 {
     nuked_cqm_drv_t *dev = (nuked_cqm_drv_t *) priv;
 
-    if (dev->pos >= cqm_pos_global)
+    if (dev->pos >= music_pos_global)
         return dev->buffer;
 
     CQM_GenerateStream(&dev->cqm,
                        &dev->buffer[dev->pos * 2],
-             cqm_pos_global - dev->pos);
+             music_pos_global - dev->pos);
 
-    for (; dev->pos < cqm_pos_global; dev->pos++) {
+    for (; dev->pos < music_pos_global; dev->pos++) {
         dev->buffer[dev->pos * 2] /= 2;
         dev->buffer[(dev->pos * 2) + 1] /= 2;
     }
@@ -1163,9 +1206,9 @@ nuked_cqm_drv_update_48k(void *priv)
     if (dev->pos >= sound_pos_global)
         return dev->buffer;
 
-    CQM_GenerateStream(&dev->cqm,
-                       &dev->buffer[dev->pos * 2],
-             sound_pos_global - dev->pos);
+    CQM_GenerateStreamResampled(&dev->cqm,
+                                &dev->buffer[dev->pos * 2],
+                      sound_pos_global - dev->pos);
 
     for (; dev->pos < sound_pos_global; dev->pos++) {
         dev->buffer[dev->pos * 2] /= 2;
@@ -1231,10 +1274,6 @@ nuked_cqm_drv_write(uint16_t port, uint8_t val, void *priv)
                 }
                 break;
 
-            case 0x105:
-                dev->cqm.newm = val & 0x01;
-                break;
-
             default:
                 break;
         }
@@ -1264,13 +1303,17 @@ nuked_cqm_drv_init(const device_t *info)
     nuked_cqm_drv_t *dev = (nuked_cqm_drv_t *) calloc(1, sizeof(nuked_cqm_drv_t));
     dev->flags       = FLAG_CYCLES;
 
-    // Initialize the NukedCQM object.
-    dev->update      = nuked_cqm_drv_update;
+    dev->is_48k      = !!(info->local & FM_FORCE_48K);
+    dev->is_cs       = !!(info->local & FM_CRYSTAL);
 
-    if (info->local & FM_FORCE_48K)
-        CQM_Reset(&dev->cqm, FREQ_48000, FREQ_48558);
-    else
-        CQM_Reset(&dev->cqm, FREQ_48558, FREQ_48558);
+    // Initialize the NukedCQM object.
+    if (dev->is_48k) {
+        dev->update      = nuked_cqm_drv_update_48k;
+        CQM_Reset(&dev->cqm, FREQ_48000, FREQ_49716);
+    } else {
+        dev->update      = nuked_cqm_drv_update;
+        CQM_Reset(&dev->cqm, FREQ_49716, FREQ_49716);
+    }
 
     timer_add(&dev->timers[0], nuked_cqm_timer_1, dev, 0);
     timer_add(&dev->timers[1], nuked_cqm_timer_2, dev, 0);

@@ -117,6 +117,13 @@ SettingsDisplay::changed()
 
     has_changed  |= strcmp(monitor_edid_path, ui->lineEditCustomEDID->fileName().toUtf8().data());
 
+    for (uint8_t i = 0; i < GFXCARD_MAX; i++)
+        has_changed  |= gfxcard_cfg_changed[i];
+    has_changed  |= voodoo_cfg_changed;
+    has_changed  |= ibm8514_cfg_changed;
+    has_changed  |= xga_cfg_changed;
+    has_changed  |= ps55da2_cfg_changed;
+
     soft_changed |= (video_grayscale                != ui->comboBoxScreenType->currentData().toInt());
     soft_changed |= (video_graytype                 != ui->comboBoxConversionType->currentData().toInt());
 
@@ -240,9 +247,11 @@ SettingsDisplay::on_pushButtonConfigureVideo_clicked()
 {
     int   videoCard = ui->comboBoxVideo->currentData().toInt();
     auto *device    = video_card_getdevice(videoCard);
-    if (videoCard == VID_INTERNAL)
+    if (videoCard == VID_INTERNAL) {
         device = machine_get_vid_device(machineId);
-    gfxcard_cfg_changed[0] |= DeviceConfig::ConfigureDevice(device);
+        gfxcard_cfg_changed[0] |= DeviceConfig::ConfigureDevice(device);
+    } else
+        gfxcard_cfg_changed[0] |= DeviceConfig::ConfigureDevice(device, 1);
 }
 
 void
@@ -418,7 +427,7 @@ void
 SettingsDisplay::on_pushButtonConfigureVideoSecondary_clicked()
 {
     auto *device = video_card_getdevice(ui->comboBoxVideoSecondary->currentData().toInt());
-    gfxcard_cfg_changed[1] |= DeviceConfig::ConfigureDevice(device);
+    gfxcard_cfg_changed[1] |= DeviceConfig::ConfigureDevice(device, 2);
 }
 
 void
