@@ -31,11 +31,6 @@
 #include <86box/plat_unused.h>
 #include <86box/plat_cdrom_ioctl.h>
 
-/* The addresses sent from the guest are absolute, ie. a LBA of 0 corresponds to a MSF of 00:00:00. Otherwise, the counter displayed by the guest is wrong:
-   there is a seeming 2 seconds in which audio plays but counter does not move, while a data track before audio jumps to 2 seconds before the actual start
-   of the audio while audio still plays. With an absolute conversion, the counter is fine. */
-#define MSFtoLBA(m, s, f) ((((m * 60) + s) * 75) + f)
-
 typedef struct ioctl_t {
     cdrom_t                *dev;
     void                   *log;
@@ -142,6 +137,12 @@ ioctl_has_audio(UNUSED(const void *local))
 }
 
 static int
+ioctl_has_data(UNUSED(const void *local))
+{
+    return 0;
+}
+
+static int
 ioctl_is_empty(const void *local)
 {
     return 1;
@@ -197,6 +198,7 @@ static const cdrom_ops_t ioctl_ops = {
     ioctl_read_dvd_structure,
     ioctl_is_dvd,
     ioctl_has_audio,
+    ioctl_has_data,
     ioctl_is_empty,
     ioctl_close,
     ioctl_load

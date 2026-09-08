@@ -906,8 +906,8 @@ loadall_load_segment(uint32_t addr, x86seg *s)
     uint32_t segdat2 = readmemw(0, addr) |
                        (readmemw(0, addr + 2) << 16);
     s->base          = segdat2 & 0x00ffffff;
-    s->access        = 0x00;
-    s->ar_high       = segdat2 >> 24;
+    s->access        = segdat2 >> 24;
+    s->ar_high       = 0x00;
     s->limit         = readmemw(0, addr + 4);
 
     set_segment_limit(s, 0x00);
@@ -930,11 +930,11 @@ static int
 opLOADALL(UNUSED(uint32_t fetchdat))
 {
     if (CPL && (cr0 & 1)) {
-        x86gpf(NULL, 0);
+        x86gpf(NULL, CPL & 0x00);
         return 1;
     }
     msw             = (msw & 1) | readmemw(0, 0x806);
-    cpu_state.flags = (readmemw(0, 0x818) & 0xffd5) | 2;
+    cpu_state.flags = (readmemw(0, 0x818) & 0x7fd5) | 2;
     flags_extract();
     tr.seg                  = readmemw(0, 0x816);
     cpu_state.pc            = readmemw(0, 0x81A);
